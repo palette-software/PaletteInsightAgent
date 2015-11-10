@@ -26,9 +26,9 @@ namespace TabMon.LogPoller
         //)
         public static DataTable makeServerLogsTable()
         {
-            var table = new DataTable("ServerLogs");
+            var table = new DataTable("serverlogs");
 
-            addColumn(table, "id", "System.Int32", true, true);
+            //addColumn(table, "id", "System.Int32", true, true);
             addColumn(table, "filename");
             addColumn(table, "host_name");
             addColumn(table, "ts", "System.DateTime");
@@ -42,7 +42,7 @@ namespace TabMon.LogPoller
             addColumn(table, "k");
             addColumn(table, "v");
 
-            setPrimaryKey(table, "id");
+            //setPrimaryKey(table, "id");
 
             return table;
         }
@@ -68,7 +68,7 @@ namespace TabMon.LogPoller
 
             var table = new DataTable("filter_state_audit");
 
-            addColumn(table, "id", "System.Int32", true, true);
+            //addColumn(table, "id", "System.Int32", true, true);
             addColumn(table, "ts", "System.DateTime");
             addColumn(table, "pid", "System.Int32");
             addColumn(table, "tid", "System.Int32");
@@ -83,7 +83,7 @@ namespace TabMon.LogPoller
             addColumn(table, "view");
             addColumn(table, "hostname");
 
-            setPrimaryKey(table, "id");
+            //setPrimaryKey(table, "id");
             return table;
         }
 

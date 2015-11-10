@@ -18,6 +18,13 @@ namespace TabMon
         private static TabMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
 
+        #region LogPoller config settings
+
+        public string FolderToWatch { get; set; }
+        public string DirectoryFilter { get; set; }
+
+        #endregion LogPoller config settings
+
         #region Singleton Constructor/Accessor
 
         private TabMonOptions()

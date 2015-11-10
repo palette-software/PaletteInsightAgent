@@ -66,6 +66,7 @@ namespace TabMon.LogPoller
         public void watchChangeCycle(ChangeDelegate changeDelegate)
         {
             string[] fileEntries = Directory.GetFiles(watchedFolderPath, filter, SearchOption.AllDirectories);
+            Log.Info("Watch cycle in progress - have " + fileEntries.Length.ToString()  + " files");
             foreach (string fileName in fileEntries)
             {
                 try

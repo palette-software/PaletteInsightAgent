@@ -46,12 +46,34 @@ namespace TabMon.LogPoller
             var serverLogsTable = LogTables.makeServerLogsTable();
             var filterStateTable = LogTables.makeFilterStateAuditTable();
 
-            addServerLogs(filename, jsonStringLines, serverLogsTable, filterStateTable);
+            try
+            {
+                addServerLogs(filename, jsonStringLines, serverLogsTable, filterStateTable);
+            }
+            catch (Exception e)
+            {
+                Log.Fatal("Error while adding to server logs:" + e.StackTrace);
+                throw;
+            }
 
+            //Log.Info("Writing to database.");
+            //ShowRows(serverLogsTable);
+            //ShowRows(filterStateTable);
             writer.Write(filterStateTable);
             writer.Write(serverLogsTable);
 
         }
+
+        //private void ShowRows(DataTable table)
+        //{
+        //    // Print the number of rows in the collection.
+        //    Console.WriteLine(table.Rows.Count);
+        //    // Print the value of columns 1 in each row
+        //    foreach (DataRow row in table.Rows)
+        //    {
+        //        Console.WriteLine(row[1]);
+        //    }
+        //}
 
         private void addServerLogs(string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
@@ -91,7 +113,7 @@ namespace TabMon.LogPoller
                         insertToFilterState(cacheKeyValue, filterStateTable, jsonraw);
                         insertAllFilters(cacheKeyValue, filterStateTable, jsonraw);
 
-                        Log.Info("Parsed into filter_state table: " + filterStateTable.ToString());
+                        Log.Info("Parsed into filter_state table: " + filterStateTable.Rows.ToString());
                     }
 
                 }
@@ -100,7 +122,7 @@ namespace TabMon.LogPoller
                 insertIntoServerLogsTable(filename, serverLogsTable, jsonraw);
             }
 
-            Log.Info("Parsed into server logs table: " + serverLogsTable.ToString());
+            Log.Info("Parsed into server logs table: " + serverLogsTable.Rows.ToString());
         }
 
         private void insertIntoServerLogsTable(string filename, DataTable serverLogsTable, dynamic jsonraw)
@@ -108,11 +130,13 @@ namespace TabMon.LogPoller
             // Add the new row to the table
             var row = serverLogsTable.NewRow();
 
+            //row["id"] = 1;
             row["filename"] = filename;
             row["host_name"] = HostName;
             row["ts"] = jsonraw.ts;
             row["pid"] = (int)jsonraw.pid;
-            row["tid"] = Convert.ToInt32(jsonraw.tid, 16);
+
+            row["tid"] = Convert.ToInt32((jsonraw.tid as string), 16);
             row["sev"] = jsonraw.sev;
             row["req"] = jsonraw.req;
             row["sess"] = jsonraw.sess;
@@ -120,6 +144,9 @@ namespace TabMon.LogPoller
             row["username"] = jsonraw.user;
             row["k"] = jsonraw.k;
             row["v"] = jsonraw.v;
+
+
+            serverLogsTable.Rows.Add(row);
         }
 
         /// <summary>
@@ -143,7 +170,7 @@ namespace TabMon.LogPoller
 
                 row["ts"] = jsonraw.ts;
                 row["pid"] = (int)jsonraw.pid;
-                row["tid"] = Convert.ToInt32(jsonraw.tid, 16);
+                row["tid"] = Convert.ToInt32((jsonraw.tid as string), 16);
                 row["req"] = jsonraw.req;
                 row["sess"] = jsonraw.sess;
                 row["site"] = jsonraw.site;
@@ -153,6 +180,7 @@ namespace TabMon.LogPoller
                 row["workbook"] = "";
                 row["view"] = "";
                 row["hostname"] = HostName;
+                filterStateTable.Rows.Add(row);
             }
 
         }
@@ -179,7 +207,7 @@ namespace TabMon.LogPoller
                 //var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
                 row["ts"] = jsonraw.ts;
                 row["pid"] = (int)jsonraw.pid;
-                row["tid"] = Convert.ToInt32(jsonraw.tid, 16);
+                row["tid"] = Convert.ToInt32((jsonraw.tid as string), 16);
                 row["req"] = jsonraw.req;
                 row["sess"] = jsonraw.sess;
                 row["site"] = jsonraw.site;
@@ -189,6 +217,7 @@ namespace TabMon.LogPoller
                 row["workbook"] = "";
                 row["view"] = "";
                 row["hostname"] = HostName;
+                filterStateTable.Rows.Add(row);
 
                 //insert_cmd.Parameters.AddWithValue("@ts", NpgsqlTypes.NpgsqlDbType.Timestamp, jsonraw.ts);
                 //insert_cmd.Parameters.AddWithValue("@pid", NpgsqlTypes.NpgsqlDbType.Integer, (int)jsonraw.pid);

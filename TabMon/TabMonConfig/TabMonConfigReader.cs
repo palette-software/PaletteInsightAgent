@@ -77,6 +77,12 @@ namespace TabMon.Config
                         options.Hosts.Add(new Helpers.Host(resolvedHostname, clusterName));
                     }
                 }
+
+
+                var pollerConfig = config.LogPoller;
+                options.FolderToWatch = pollerConfig.Directory;
+                options.DirectoryFilter = pollerConfig.Filter;
+
             }
             catch (ConfigurationErrorsException ex)
             {

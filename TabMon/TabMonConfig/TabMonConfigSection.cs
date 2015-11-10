@@ -112,6 +112,34 @@ namespace TabMon.Config
 
         #endregion Database Property
 
+        #region LogPoller Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Database"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string LogPollerPropertyName = "LogPoller";
+
+        /// <summary>
+        /// Gets or sets contains configuration information for the results database.  Only required if OutputMode is "DB".
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Log Poller Properties")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.Config.TabMonConfig.LogPollerPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::TabMon.LogPoller.LogPollerConfigElement LogPoller
+        {
+            get
+            {
+                return ((global::TabMon.LogPoller.LogPollerConfigElement)(base[global::TabMon.Config.TabMonConfig.LogPollerPropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.Config.TabMonConfig.LogPollerPropertyName] = value;
+            }
+        }
+
+        #endregion LogPoller Property
+
         #region Clusters Property
 
         /// <summary>

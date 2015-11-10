@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace TabMon.LogPoller
 {
-    class LogPollerConfigurationSection : ConfigurationSection
+    public class LogPollerConfigurationSection : ConfigurationSection
     {
 
         public LogPollerConfigurationSection()
@@ -50,6 +50,135 @@ namespace TabMon.LogPoller
         //}
     }
 
+
+    public partial class LogPollerConfigElement : global::System.Configuration.ConfigurationElement
+    {
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+
+        #region Name Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Directory"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string DirectoryPropertyName = "Directory";
+
+        /// <summary>
+        /// Gets or sets the name of the instantiated database.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("The name of the instantiated database.")]
+        [global::System.Configuration.StringValidatorAttribute(InvalidCharacters = "", MaxLength = 2147483647, MinLength = 1)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.LogPoller.LogPollerConfigElement.DirectoryPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = "TabMon")]
+        public virtual string Directory
+        {
+            get
+            {
+                return ((string)(base[global::TabMon.LogPoller.LogPollerConfigElement.DirectoryPropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.LogPoller.LogPollerConfigElement.DirectoryPropertyName] = value;
+            }
+        }
+
+        #endregion Name Property
+
+        #region Server Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Filter"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string FilterPropertyName = "Filter";
+
+        /// <summary>
+        /// Gets or sets contains information about the database server location.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Contains information about the database server location.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.LogPoller.LogPollerConfigElement.FilterPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual string Filter
+        {
+            get
+            {
+                return ((string)(base[global::TabMon.LogPoller.LogPollerConfigElement.FilterPropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.LogPoller.LogPollerConfigElement.FilterPropertyName] = value;
+            }
+        }
+
+        #endregion Server Property
+
+        //#region User Property
+
+        ///// <summary>
+        ///// The XML name of the <see cref="User"/> property.
+        ///// </summary>
+        //[global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        //internal const string UserPropertyName = "User";
+
+        ///// <summary>
+        ///// Gets or sets contains information about the database user.
+        ///// </summary>
+        //[global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        //[global::System.ComponentModel.DescriptionAttribute("Contains information about the database user.")]
+        //[global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.LogPoller.LogPollerConfigElement.UserPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        //public virtual global::TabMon.LogPoller.User User
+        //{
+        //    get
+        //    {
+        //        return ((global::TabMon.LogPoller.User)(base[global::TabMon.LogPoller.LogPollerConfigElement.UserPropertyName]));
+        //    }
+        //    set
+        //    {
+        //        base[global::TabMon.LogPoller.LogPollerConfigElement.UserPropertyName] = value;
+        //    }
+        //}
+
+        //#endregion User Property
+
+        //#region Table Property
+
+        ///// <summary>
+        ///// The XML name of the <see cref="Table"/> property.
+        ///// </summary>
+        //[global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        //internal const string TablePropertyName = "Table";
+
+        ///// <summary>
+        ///// Gets or sets contains information about the results table.
+        ///// </summary>
+        //[global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        //[global::System.ComponentModel.DescriptionAttribute("Contains information about the results table.")]
+        //[global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.LogPoller.LogPollerConfigElement.TablePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        //public virtual global::TabMon.LogPoller.Table Table
+        //{
+        //    get
+        //    {
+        //        return ((global::TabMon.LogPoller.Table)(base[global::TabMon.LogPoller.LogPollerConfigElement.TablePropertyName]));
+        //    }
+        //    set
+        //    {
+        //        base[global::TabMon.LogPoller.LogPollerConfigElement.TablePropertyName] = value;
+        //    }
+        //}
+
+        //#endregion Table Property
+    }
 
     class LogPollerConfigurationLoader
     {

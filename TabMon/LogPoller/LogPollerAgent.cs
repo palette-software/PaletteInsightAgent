@@ -54,6 +54,7 @@ namespace TabMon.LogPoller
         {
             watcher.watchChangeCycle((string filename, string[] lines) =>
             {
+                Log.Info("Got new " + lines.Length + " lines from " + filename );
                 logsToDbConverter.processServerLogLines(writer, filename, lines);
             });
         }

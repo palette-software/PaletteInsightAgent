@@ -118,16 +118,6 @@
         <xs:documentation>The name of the database table to write results to.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="serverlogs" use="required" type="xs:string">
-      <xs:annotation>
-        <xs:documentation>The name of the database table to write server logs (JSON deserialized).</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="auditlogs" use="required" type="xs:string">
-      <xs:annotation>
-        <xs:documentation>The name of the database table to write filter audit logs.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="TabMon.Config.PollIntervalCT">
     <xs:attribute name="value" use="required" type="xs:int">

@@ -49,10 +49,12 @@ namespace TabMon
                 TabMonConfigReader.LoadOptions();
             }
 
+            Log.Info("Setting up LogPoller agent.");
 
+            
             // Load the log poller config & start the agent
-            var logPollerConfig = LogPollerConfigurationLoader.load();
-            logPollerAgent = new LogPollerAgent(logPollerConfig.Directory, logPollerConfig.Filter);
+            //var logPollerConfig = LogPollerConfigurationLoader.load();
+            logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter);
         }
 
         ~TabMonAgent()
@@ -166,6 +168,7 @@ namespace TabMon
         /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
+            Log.Info("Polling logs...");
             logPollerAgent.pollLogs(options.Writer);
         }
 
