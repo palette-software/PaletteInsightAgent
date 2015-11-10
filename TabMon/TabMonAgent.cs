@@ -49,8 +49,10 @@ namespace TabMon
                 TabMonConfigReader.LoadOptions();
             }
 
-            // TODO: initialize this in the correct place
-            logPollerAgent = new LogPollerAgent();
+
+            // Load the log poller config & start the agent
+            var logPollerConfig = LogPollerConfigurationLoader.load();
+            logPollerAgent = new LogPollerAgent(logPollerConfig.Directory, logPollerConfig.Filter);
         }
 
         ~TabMonAgent()
@@ -94,6 +96,9 @@ namespace TabMon
             // Kick off the polling timer.
             Log.Info("TabMon initialized!  Starting performance counter polling..");
             timer = new Timer(callback: Poll, state: null, dueTime: 0, period: options.PollInterval * 1000);
+
+            // Start the log poller agent
+            logPollerAgent.start();
             logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.PollInterval * 1000);
         }
 
@@ -117,6 +122,14 @@ namespace TabMon
             {
                 timer.Dispose();
             }
+
+            // Stop the log poller agent
+            if (logPollTimer != null)
+            {
+                logPollTimer.Dispose();
+            }
+            logPollerAgent.stop();
+
             Log.Info("TabMon stopped.");
         }
 
@@ -147,11 +160,13 @@ namespace TabMon
         }
 
 
+        /// <summary>
+        /// Polls the logs from tableau and iniserts in into the database
+        /// </summary>
+        /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
-            var pollResults = logPollerAgent.pollLogs();
-            // TODO: put this shit into the DB
-            Console.WriteLine("Poll results are:" + pollResults.ToString());
+            logPollerAgent.pollLogs(options.Writer);
         }
 
         #endregion Private Methods

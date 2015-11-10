@@ -54,6 +54,7 @@ namespace TabMon.Config
                 {
                     options.Writer = LoadDbWriterFromConfig(config);
                     options.TableName = config.Database.Table.Name;
+
                 }
                 else if (outputMode.Equals("CSV", StringComparison.InvariantCultureIgnoreCase))
                 {

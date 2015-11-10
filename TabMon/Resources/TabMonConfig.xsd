@@ -31,6 +31,11 @@
           <xs:documentation>Contains information about the result output mode.</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="1" name="LogPoller" type="tns:TabMon.Config.LogPollerCT">
+        <xs:annotation>
+          <xs:documentation>The configuration for the log poller.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
     </xs:choice>
   </xs:complexType>
   <xs:complexType name="TabMon.Config.ClusterCT">
@@ -113,6 +118,16 @@
         <xs:documentation>The name of the database table to write results to.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="serverlogs" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The name of the database table to write server logs (JSON deserialized).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="auditlogs" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The name of the database table to write filter audit logs.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="TabMon.Config.PollIntervalCT">
     <xs:attribute name="value" use="required" type="xs:int">
@@ -136,5 +151,18 @@
         </xs:annotation>
       </xs:element>
     </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="TabMon.Config.LogPollerCT">
+    <xs:attribute name="directory" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The directory to poll for log files</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="filter" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The file filter to narrow down the scope of the log file watcher.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 </xs:schema>
