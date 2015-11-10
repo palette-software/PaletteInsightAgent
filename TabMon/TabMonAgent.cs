@@ -11,6 +11,8 @@ using TabMon.CounterConfig;
 using TabMon.Counters;
 using TabMon.Sampler;
 
+using TabMon.LogPoller;
+
 [assembly: CLSCompliant(true)]
 
 namespace TabMon
@@ -21,6 +23,8 @@ namespace TabMon
     public class TabMonAgent : IDisposable
     {
         private Timer timer;
+        private Timer logPollTimer;
+        private LogPollerAgent logPollerAgent;
         private CounterSampler sampler;
         private readonly TabMonOptions options;
         private bool disposed;
@@ -44,6 +48,9 @@ namespace TabMon
             {
                 TabMonConfigReader.LoadOptions();
             }
+
+            // TODO: initialize this in the correct place
+            logPollerAgent = new LogPollerAgent();
         }
 
         ~TabMonAgent()
@@ -87,6 +94,7 @@ namespace TabMon
             // Kick off the polling timer.
             Log.Info("TabMon initialized!  Starting performance counter polling..");
             timer = new Timer(callback: Poll, state: null, dueTime: 0, period: options.PollInterval * 1000);
+            logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.PollInterval * 1000);
         }
 
         /// <summary>
@@ -136,6 +144,14 @@ namespace TabMon
             {
                 options.Writer.Write(sampleResults);
             }
+        }
+
+
+        private void PollLogs(object stateInfo)
+        {
+            var pollResults = logPollerAgent.pollLogs();
+            // TODO: put this shit into the DB
+            Console.WriteLine("Poll results are:" + pollResults.ToString());
         }
 
         #endregion Private Methods
