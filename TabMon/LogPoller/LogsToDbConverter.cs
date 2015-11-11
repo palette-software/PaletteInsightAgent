@@ -40,7 +40,7 @@ namespace TabMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(IDataTableWriter writer, String filename, String[] jsonStringLines)
+        public void processServerLogLines(IDataTableWriter writer, object writeLock, String filename, String[] jsonStringLines)
         {
             // Create the datatable
             var serverLogsTable = LogTables.makeServerLogsTable();
@@ -49,15 +49,27 @@ namespace TabMon.LogPoller
             try
             {
                 addServerLogs(filename, jsonStringLines, serverLogsTable, filterStateTable);
+
+                var filterStateCount = filterStateTable.Rows.Count;
+                var serverLogsTableCount = serverLogsTable.Rows.Count;
+
+                Log.Info("Writing "
+                    + filterStateCount + " filter " + "row".Pluralize(filterStateCount)
+                    + " and "
+                    + serverLogsTableCount + " server log " + "row".Pluralize(serverLogsTableCount));
+
+                lock(writeLock)
+                {
+                    if (filterStateCount > 0) writer.Write(filterStateTable);
+                    if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
+                }
             }
             catch (Exception e)
             {
-                Log.Fatal("Error while adding to server logs:" + e.StackTrace);
+                Log.Fatal("Error while adding to server logs:", e);
                 throw;
             }
 
-            writer.Write(filterStateTable);
-            writer.Write(serverLogsTable);
 
         }
 
@@ -75,7 +87,7 @@ namespace TabMon.LogPoller
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Json parse exception occured. " + e.StackTrace);
+                    Log.Error("Json parse exception occured in string: '" + jsonString + "'", e);
                     // skip this line
                     continue;
                 }
@@ -99,7 +111,7 @@ namespace TabMon.LogPoller
                         insertToFilterState(cacheKeyValue, filterStateTable, jsonraw);
                         insertAllFilters(cacheKeyValue, filterStateTable, jsonraw);
 
-                        Log.Info("Parsed into filter_state table: " + filterStateTable.Rows.ToString());
+                        //Log.Info("Parsed into filter_state table: " + filterStateTable.Rows.ToString());
                     }
 
                 }
@@ -108,7 +120,7 @@ namespace TabMon.LogPoller
                 insertIntoServerLogsTable(filename, serverLogsTable, jsonraw);
             }
 
-            Log.Info("Parsed into server logs table: " + serverLogsTable.Rows.ToString());
+            //Log.Info("Parsed into server logs table: " + serverLogsTable.Rows.ToString());
         }
 
         private void insertIntoServerLogsTable(string filename, DataTable serverLogsTable, dynamic jsonraw)

@@ -50,12 +50,12 @@ namespace TabMon.LogPoller
         /// Actual function to poll from the logs
         /// </summary>
         /// <returns></returns>
-        public void pollLogs(IDataTableWriter writer)
+        public void pollLogs(IDataTableWriter writer, object writeLock)
         {
             watcher.watchChangeCycle((string filename, string[] lines) =>
             {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
-                logsToDbConverter.processServerLogLines(writer, filename, lines);
+                logsToDbConverter.processServerLogLines(writer, writeLock, filename, lines);
             });
         }
     }

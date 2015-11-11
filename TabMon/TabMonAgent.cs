@@ -129,6 +129,7 @@ namespace TabMon
             if (logPollTimer != null)
             {
                 logPollTimer.Dispose();
+                Log.Info("Stopping logPollTimer.");
             }
             logPollerAgent.stop();
 
@@ -168,8 +169,7 @@ namespace TabMon
         /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
-            Log.Info("Polling logs...");
-            logPollerAgent.pollLogs(options.Writer);
+            logPollerAgent.pollLogs(options.Writer, WriteLock);
         }
 
         #endregion Private Methods
