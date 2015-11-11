@@ -56,24 +56,10 @@ namespace TabMon.LogPoller
                 throw;
             }
 
-            //Log.Info("Writing to database.");
-            //ShowRows(serverLogsTable);
-            //ShowRows(filterStateTable);
             writer.Write(filterStateTable);
             writer.Write(serverLogsTable);
 
         }
-
-        //private void ShowRows(DataTable table)
-        //{
-        //    // Print the number of rows in the collection.
-        //    Console.WriteLine(table.Rows.Count);
-        //    // Print the value of columns 1 in each row
-        //    foreach (DataRow row in table.Rows)
-        //    {
-        //        Console.WriteLine(row[1]);
-        //    }
-        //}
 
         private void addServerLogs(string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
@@ -218,43 +204,8 @@ namespace TabMon.LogPoller
                 row["view"] = "";
                 row["hostname"] = HostName;
                 filterStateTable.Rows.Add(row);
-
-                //insert_cmd.Parameters.AddWithValue("@ts", NpgsqlTypes.NpgsqlDbType.Timestamp, jsonraw.ts);
-                //insert_cmd.Parameters.AddWithValue("@pid", NpgsqlTypes.NpgsqlDbType.Integer, (int)jsonraw.pid);
-                //insert_cmd.Parameters.AddWithValue("@tid", NpgsqlTypes.NpgsqlDbType.Integer, Convert.ToInt32(tid, 16));
-                //insert_cmd.Parameters.AddWithValue("@req", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.req);
-                //insert_cmd.Parameters.AddWithValue("@sess", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.sess);
-                //insert_cmd.Parameters.AddWithValue("@site", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.site);
-                //insert_cmd.Parameters.AddWithValue("@username", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.user);
-                //insert_cmd.Parameters.AddWithValue("@filter_name", NpgsqlTypes.NpgsqlDbType.Text, level);
-                //insert_cmd.Parameters.AddWithValue("@filter_vals", NpgsqlTypes.NpgsqlDbType.Text, member);
-                //insert_cmd.Parameters.AddWithValue("@workbook", NpgsqlTypes.NpgsqlDbType.Text, "");
-                //insert_cmd.Parameters.AddWithValue("@view", NpgsqlTypes.NpgsqlDbType.Text, "");
-                //insert_cmd.Parameters.AddWithValue("@hostname", NpgsqlTypes.NpgsqlDbType.Text, Program.strHostName);
-                //insert_cmd.ExecuteNonQuery();
             }
         }
-
-
-        ///// <summary>
-        ///// Not in actual used!!!
-        ///// 
-        ///// </summary>
-        //void findLevelAndMember(string xmlString, out string level, out string member)
-        //{
-        //    level = "";
-        //    member = "";
-        //    string pattern1 = @"<groupfilter function='member' level='(.*?)' member='(.*?)'.*?/>";
-
-        //    MatchCollection mc = Regex.Matches(xmlString, pattern1);
-        //    foreach (Match m in mc)
-        //    {
-        //        level = m.Groups[1].ToString();
-        //        member = m.Groups[2].ToString();
-        //    }
-        //}
-
-
 
     }
 }
