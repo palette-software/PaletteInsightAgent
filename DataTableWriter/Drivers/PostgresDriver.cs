@@ -56,6 +56,8 @@ namespace DataTableWriter.Drivers
 
         #region Public Methods
 
+
+        public string QueryParamName(string base_param_name) { return "@" + base_param_name;  }
         /// <summary>
         /// Builds a Postgres connection object for the given remote Postgres server.
         /// </summary>
@@ -104,7 +106,7 @@ namespace DataTableWriter.Drivers
         /// <param name="systemType">The name of the System type.</param>
         /// <param name="allowDbNull">Flag indicating whether the input type is nullable.</param>
         /// <returns>Postgres type that correlates to the given System type.</returns>
-        public string MapToDbType(string systemType, bool allowDbNull)
+        public string MapToDbType(string columnName, string systemType, bool allowDbNull)
         {
             string pgType;
             if (!systemToPostgresTypeMap.ContainsKey(systemType))
@@ -189,7 +191,7 @@ namespace DataTableWriter.Drivers
                 defaultClause = GetDefaultValueClause(column.DefaultValue);
             }
 
-            return String.Format(@"ALTER TABLE ""{0}"" ADD COLUMN {1} {2};", tableName, GetStandardColumnSpecification(column.ColumnName, MapToDbType(column.DataType.ToString(), column.AllowDBNull)), defaultClause);
+            return String.Format(@"ALTER TABLE ""{0}"" ADD COLUMN {1} {2};", tableName, GetStandardColumnSpecification(column.ColumnName, MapToDbType(column.ColumnName, column.DataType.ToString(), column.AllowDBNull)), defaultClause);
         }
 
         /// <summary>

@@ -48,6 +48,10 @@
       <HintPath>..\packages\Npgsql.2.2.7\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\packages\Oracle.ManagedDataAccess.12.1.2400\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -56,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Drivers\DbDriverFactory.cs" />
+    <Compile Include="Drivers\OracleDriver.cs" />
     <Compile Include="Drivers\PostgresDriver.cs" />
     <Compile Include="DbTableInitializationOptions.cs" />
     <Compile Include="DbTableManager.cs" />
@@ -73,6 +78,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

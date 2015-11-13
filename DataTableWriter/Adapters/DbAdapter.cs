@@ -81,7 +81,7 @@ namespace DataTableWriter.Adapters
             }
             for (var i = 0; i < schema.Columns.Count; i++)
             {
-                var dbType = Driver.MapToDbType(schema.Columns[i].DataType.ToString(), schema.Columns[i].AllowDBNull);
+                var dbType = Driver.MapToDbType(schema.Columns[i].ColumnName, schema.Columns[i].DataType.ToString(), schema.Columns[i].AllowDBNull);
                 columns.Add(Driver.GetStandardColumnSpecification(schema.Columns[i].ColumnName, dbType));
             }
 
@@ -150,7 +150,7 @@ namespace DataTableWriter.Adapters
 
                 if (!column.AllowDBNull)
                 {
-                    throw new ArgumentException("Cannot add non-nullable columns to an existing database table!", "column");
+                    throw new ArgumentException("Cannot add non-nullable columns to an existing database table! column:" + column.ColumnName + " table: " + tableName, "column");
                 }
 
                 var newColumn = new DataColumn(column.ColumnName)
@@ -172,6 +172,13 @@ namespace DataTableWriter.Adapters
             {
                 Log.Debug(String.Format("All columns in schema are present in database table '{0}'.", tableName));
             }
+        }
+
+        private static bool parseBool(string boolishVal)
+        {
+            if (boolishVal == "N") return false;
+            if (boolishVal == "Y") return true;
+            return Boolean.Parse(boolishVal);
         }
 
         /// <summary>
@@ -198,7 +205,7 @@ namespace DataTableWriter.Adapters
                         {
                             ColumnName = reader["name"].ToString(),
                             DataType = Driver.MapToSystemType(reader["type"].ToString()),
-                            AllowDBNull = Boolean.Parse(reader["nullable"].ToString())
+                            AllowDBNull = parseBool(reader["nullable"].ToString())
                         };
                         table.Columns.Add(column);
                     }
@@ -267,7 +274,7 @@ namespace DataTableWriter.Adapters
                 {
                     columnList.Add(String.Format("\"{0}\"", row.Table.Columns[i].ColumnName));
                     var parameter = command.CreateParameter();
-                    parameter.ParameterName = "@param" + i;
+                    parameter.ParameterName = Driver.QueryParamName("param" + i);
                     parameter.Value = row[i];
                     command.Parameters.Add(parameter);
                 }
@@ -282,7 +289,7 @@ namespace DataTableWriter.Adapters
                 }
                 catch (DbException ex)
                 {
-                    Log.Error(String.Format("Could not insert row into database table '{0}': {1}", dbTableName, ex.Message));
+                    Log.Error(String.Format("Could not insert row into database table '{0}': {1}", dbTableName, ex.Message), ex);
                     throw;
                 }
             }

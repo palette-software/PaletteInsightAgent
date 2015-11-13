@@ -6,6 +6,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace DataTableWriter.Writers
 {
@@ -16,13 +17,17 @@ namespace DataTableWriter.Writers
     {
         protected IDbAdapter Adapter { get; set; }
         protected DbTableInitializationOptions tableInitializationOptions;
-        protected bool isInitialized;
+        /// <summary>
+        /// Keep track of tables already initialized
+        /// </summary>
+        protected HashSet<string> isTableInitialized;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private bool disposed;
 
         public DataTableDbWriter(DbDriverType driverType, IDbConnectionInfo connectionInfo, DbTableInitializationOptions tableInitializationOptions = default(DbTableInitializationOptions))
         {
             Adapter = new DbAdapter(driverType, connectionInfo);
+            isTableInitialized = new HashSet<string>();
             this.tableInitializationOptions = tableInitializationOptions;
         }
 
@@ -47,10 +52,11 @@ namespace DataTableWriter.Writers
             }
 
             // Manage dynamic table creation/management, if requested.
+            var isInitialized = isTableInitialized.Contains(table.TableName);
             if (!isInitialized)
             {
                 DbTableManager.InitializeTable(Adapter, table, tableInitializationOptions);
-                isInitialized = true;
+                isTableInitialized.Add(table.TableName);
             }
 
             // Write all rows in table.
