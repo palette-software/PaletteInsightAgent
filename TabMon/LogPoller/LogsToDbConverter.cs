@@ -60,8 +60,9 @@ namespace TabMon.LogPoller
 
                 lock(writeLock)
                 {
-                    if (filterStateCount > 0) writer.Write(filterStateTable);
+                    // Server logs need to be inserted first for the triggers to work.
                     if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
+                    if (filterStateCount > 0) writer.Write(filterStateTable);
                 }
             }
             catch (Exception e)
