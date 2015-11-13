@@ -176,8 +176,8 @@ namespace TabMon.LogPoller
                 row["username"] = jsonraw.user;
                 row["filter_name"] = level;
                 row["filter_vals"] = member;
-                row["workbook"] = "";
-                row["view"] = "";
+                row["workbook"] = "<WORKBOOK>";
+                row["view"] = "<VIEW>";
                 row["hostname"] = HostName;
                 filterStateTable.Rows.Add(row);
             }
