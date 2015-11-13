@@ -165,10 +165,11 @@ namespace TabMon.LogPoller
                 member = member.Replace("&quot;", "");
 
                 var row = filterStateTable.NewRow();
+                string tid = jsonraw.tid;
 
                 row["ts"] = jsonraw.ts;
                 row["pid"] = (int)jsonraw.pid;
-                row["tid"] = Convert.ToInt32((jsonraw.tid as string), 16);
+                row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;
                 row["sess"] = jsonraw.sess;
                 row["site"] = jsonraw.site;
@@ -188,7 +189,8 @@ namespace TabMon.LogPoller
         {
 
             //insert all filters
-            string pattern2 = @"<groupfilter function='level-members' level='(.*?)' user:ui-enumeration='(.*?)'.*?/>";
+            //string pattern2 = @"<groupfilter function='level-members' level='(.*?)' user:ui-enumeration='(.*?)'.*?/>";
+            string pattern2 = @"<groupfilter function='level-members' level='([^']*?)' user:ui-enumeration='all'.*?/>";
             MatchCollection mc2 = Regex.Matches(cache_key_Value, pattern2);
             foreach (Match m in mc2)
             {
@@ -201,11 +203,12 @@ namespace TabMon.LogPoller
                 member = member.Replace("&quot;", "");
 
                 var row = filterStateTable.NewRow();
+                string tid = jsonraw.tid;
 
                 //var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
                 row["ts"] = jsonraw.ts;
                 row["pid"] = (int)jsonraw.pid;
-                row["tid"] = Convert.ToInt32((jsonraw.tid as string), 16);
+                row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;
                 row["sess"] = jsonraw.sess;
                 row["site"] = jsonraw.site;
