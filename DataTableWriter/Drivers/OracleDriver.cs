@@ -79,7 +79,7 @@ namespace DataTableWriter.Drivers
 
             var connectionString = String.Format("Data Source=(DESCRIPTION="
                 + "(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))"
-                + "(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=ORCL)));"
+                + "(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={4})));"
                 + "User Id={2};Password={3};",
                     connectionInfo.Server,
                     connectionInfo.Port.Value,
@@ -88,7 +88,7 @@ namespace DataTableWriter.Drivers
                     connectionInfo.DatabaseName
                 );
 
-            Log.Info("Connecting to oracle: " + connectionInfo.Server);
+            Log.Info("Connecting to oracle: " + connectionInfo.Server + " service: " + connectionInfo.DatabaseName);
             
 
             return new OracleConnection(connectionString);
