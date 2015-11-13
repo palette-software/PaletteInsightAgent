@@ -199,8 +199,9 @@ namespace TabMon.LogPoller
                 if (level.Contains("Calculation_"))
                     continue;
 
-                var member = m.Groups[2].ToString();
-                member = member.Replace("&quot;", "");
+                //var member = m.Groups[2].ToString();
+                //member = member.Replace("&quot;", "");
+                var member = "all";
 
                 var row = filterStateTable.NewRow();
                 string tid = jsonraw.tid;
@@ -215,8 +216,8 @@ namespace TabMon.LogPoller
                 row["username"] = jsonraw.user;
                 row["filter_name"] = level;
                 row["filter_vals"] = member;
-                row["workbook"] = "";
-                row["view"] = "";
+                row["workbook"] = "<WORKBOOK>";
+                row["view"] = "<VIEW>";
                 row["hostname"] = HostName;
                 filterStateTable.Rows.Add(row);
             }
