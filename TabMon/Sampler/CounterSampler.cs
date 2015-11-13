@@ -107,7 +107,7 @@ namespace TabMon.Sampler
                 return null;
             }
 
-            var column = new DataColumn(columnName.ToSnakeCase(), type)
+            var column = new DataColumn(toOracleColumnName( columnName.ToSnakeCase()), type)
                 {
                     AllowDBNull = isNullable
                 };
@@ -135,13 +135,25 @@ namespace TabMon.Sampler
             row["counter_type"] = counter.CounterType;
             row["source"] = counter.Source;
             row["category"] = counter.Category;
-            row[counter.Counter.ToSnakeCase()] = sample.SampleValue;
+            // Oracle has a 30 char limimt for columnNames.
+            row[toOracleColumnName(counter.Counter.ToSnakeCase())] = sample.SampleValue;
             row["instance"] = counter.Instance;
             row["unit"] = counter.Unit;
 
             return row;
         }
 
+
+        private static string toOracleColumnName( string value )
+        {
+            return Truncate(value, 30);
+        }
+
+        private static string Truncate(string value, int maxLength)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            return value.Length <= maxLength ? value : value.Substring(value.Length - maxLength);
+        }
         #endregion Private Methods
     }
 }
