@@ -144,15 +144,30 @@ namespace TabMon.Sampler
         }
 
 
+        /// <summary>
+        /// Converts a table to an oracle-compatible 30 char max underscored name.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private static string toOracleColumnName( string value )
         {
-            return Truncate(value, 30);
+            if (value.Length <= 30) return value;
+
+            // otherwises do the magic
+            var hashVal = value.GetHashCode().ToString("x8");
+            return String.Format("{0}_{1}", Truncate(value, 20), hashVal);
         }
 
+        /// <summary>
+        /// Left truncates a string.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
         private static string Truncate(string value, int maxLength)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value.Substring(value.Length - maxLength);
+            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
         #endregion Private Methods
     }
