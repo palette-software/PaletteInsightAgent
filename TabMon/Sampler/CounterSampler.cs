@@ -78,7 +78,8 @@ namespace TabMon.Sampler
             generatedSchema.Columns.Add(BuildColumnMetadata("category", "System.String", false, 64));
             foreach (var counter in counters)
             {
-                if (!generatedSchema.Columns.Contains(counter.Counter.ToSnakeCase()))
+                var colName = toOracleColumnName(counter.Counter.ToSnakeCase());
+                if (!generatedSchema.Columns.Contains(colName))
                 {
                     generatedSchema.Columns.Add(BuildColumnMetadata(counter.Counter, "System.Double", true));
                 }
