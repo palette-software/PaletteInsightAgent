@@ -37,6 +37,12 @@ namespace TabMon
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public TabMonAgent(bool loadOptionsFromConfig = true)
         {
+            // "license check"
+            if (DateTime.Now.Year > 2015)
+            {
+                Log.Fatal("License expired!");
+                Environment.Exit(-1);
+            }
             // Initialize log4net settings.
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
