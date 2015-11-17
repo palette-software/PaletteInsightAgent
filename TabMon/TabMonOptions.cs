@@ -25,6 +25,16 @@ namespace TabMon
 
         #endregion LogPoller config settings
 
+        #region Repo properties
+
+        public string RepoHost { get; set; }
+        public Int32 RepoPort { get; set; }
+        public string RepoUser { get; set; }
+        public string RepoPass { get; set; }
+        public string RepoDb { get; set; }
+
+        #endregion Repo properties
+
         #region Singleton Constructor/Accessor
 
         private TabMonOptions()

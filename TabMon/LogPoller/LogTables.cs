@@ -82,6 +82,7 @@ namespace TabMon.LogPoller
             addColumn(table, "workbook");
             addColumn(table, "view");
             addColumn(table, "hostname");
+            addColumn(table, "user_ip");
 
             //setPrimaryKey(table, "id");
             return table;

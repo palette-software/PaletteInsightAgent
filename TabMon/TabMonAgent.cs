@@ -54,7 +54,8 @@ namespace TabMon
             
             // Load the log poller config & start the agent
             //var logPollerConfig = LogPollerConfigurationLoader.load();
-            logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter);
+            logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
+                options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
         }
 
         ~TabMonAgent()

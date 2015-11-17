@@ -140,6 +140,34 @@ namespace TabMon.Config
 
         #endregion LogPoller Property
 
+        #region TableauRepo Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Database"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string TableauRepoPropertyName = "TableauRepo";
+
+        /// <summary>
+        /// Gets or sets contains configuration information for the results database.  Only required if OutputMode is "DB".
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Tableau Repo Properties")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.Config.TabMonConfig.TableauRepoPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::TabMon.LogPoller.TableauRepoConfigElement TableauRepo
+        {
+            get
+            {
+                return ((global::TabMon.LogPoller.TableauRepoConfigElement)(base[global::TabMon.Config.TabMonConfig.TableauRepoPropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.Config.TabMonConfig.TableauRepoPropertyName] = value;
+            }
+        }
+
+        #endregion TableauRepo Property
+
         #region Clusters Property
 
         /// <summary>

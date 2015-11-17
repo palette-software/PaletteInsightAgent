@@ -40,7 +40,7 @@ namespace TabMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(IDataTableWriter writer, object writeLock, String filename, String[] jsonStringLines)
+        public void processServerLogLines(IDataTableWriter writer, object writeLock, ITableauRepoConn repo, String filename, String[] jsonStringLines)
         {
             // Create the datatable
             var serverLogsTable = LogTables.makeServerLogsTable();
@@ -48,14 +48,14 @@ namespace TabMon.LogPoller
 
             try
             {
-                addServerLogs(filename, jsonStringLines, serverLogsTable, filterStateTable);
+                addServerLogs(repo, filename, jsonStringLines, serverLogsTable, filterStateTable);
 
                 var filterStateCount = filterStateTable.Rows.Count;
                 var serverLogsTableCount = serverLogsTable.Rows.Count;
 
                 Log.Info("Writing "
                     + filterStateCount + " filter " + "row".Pluralize(filterStateCount)
-                    + " and "
+                    + " and " 
                     + serverLogsTableCount + " server log " + "row".Pluralize(serverLogsTableCount));
 
                 lock(writeLock)
@@ -74,7 +74,7 @@ namespace TabMon.LogPoller
 
         }
 
-        private void addServerLogs(string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
+        private void addServerLogs(ITableauRepoConn repo, string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
             Log.Info("Trying to parse " + jsonStringLines.Length + " rows of new log data.");
             foreach (var jsonString in jsonStringLines)
@@ -109,8 +109,8 @@ namespace TabMon.LogPoller
                     }
                     else
                     {
-                        insertToFilterState(cacheKeyValue, filterStateTable, jsonraw);
-                        insertAllFilters(cacheKeyValue, filterStateTable, jsonraw);
+                        insertToFilterState(repo, cacheKeyValue, filterStateTable, jsonraw);
+                        insertAllFilters(repo, cacheKeyValue, filterStateTable, jsonraw);
                     }
 
                 }
@@ -154,11 +154,14 @@ namespace TabMon.LogPoller
         /// 
         /// </summary>
         /// <param name="jsonraw">The deserialized JSON object.</param>
-        void insertToFilterState(string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
+        void insertToFilterState(ITableauRepoConn repo, string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
         {
             var mc = Regex.Matches(cache_key_Value, GROUP_FILTER_RX);
             foreach (Match m in mc)
             {
+
+                // get the session id and the timestamp
+                //ViewPath viewPath = GetViewPath(repo, jsonraw);
 
                 var level = m.Groups[1].ToString();
                 var member = m.Groups[2].ToString();
@@ -176,16 +179,18 @@ namespace TabMon.LogPoller
                 row["username"] = jsonraw.user;
                 row["filter_name"] = level;
                 row["filter_vals"] = member;
-                row["workbook"] = "<WORKBOOK>";
-                row["view"] = "<VIEW>";
+                //row["workbook"] = viewPath.workbook;
+                //row["view"] = viewPath.view;
                 row["hostname"] = HostName;
+                //row["user_ip"] = viewPath.ip;
+
+                UpdateViewPath(repo, jsonraw, row);
                 filterStateTable.Rows.Add(row);
             }
 
         }
 
-
-        void insertAllFilters(string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
+        void insertAllFilters(ITableauRepoConn repo, string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
         {
 
             //insert all filters
@@ -203,6 +208,8 @@ namespace TabMon.LogPoller
                 //member = member.Replace("&quot;", "");
                 var member = "all";
 
+                //ViewPath viewPath = GetViewPath(repo, jsonraw);
+
                 var row = filterStateTable.NewRow();
                 string tid = jsonraw.tid;
 
@@ -216,12 +223,55 @@ namespace TabMon.LogPoller
                 row["username"] = jsonraw.user;
                 row["filter_name"] = level;
                 row["filter_vals"] = member;
-                row["workbook"] = "<WORKBOOK>";
-                row["view"] = "<VIEW>";
+                //row["workbook"] = viewPath.workbook;
+                //row["view"] = viewPath.view;
                 row["hostname"] = HostName;
+                //row["user_ip"] = viewPath.ip;
+
+                UpdateViewPath(repo, jsonraw, row);
                 filterStateTable.Rows.Add(row);
             }
         }
 
+        private static ViewPath GetViewPath(ITableauRepoConn repo, string vizqlSessionId, string ts)
+        {
+            DateTime timestamp = DateTime.Parse(ts);
+
+            //Log.Info("parsed datetime:" + timestamp);
+
+            var viewPath = repo.getViewPathForVizQLSessionId(vizqlSessionId, timestamp);
+            if (viewPath.isEmpty())
+            {
+                Log.Fatal("Cannot find view path for session!");
+                viewPath.workbook = "<WORKBOOK>";
+                viewPath.view = "<VIEW>";
+                viewPath.ip = "0.0.0.0";
+            }
+
+            return viewPath;
+        }
+
+        private static ViewPath GetViewPath(ITableauRepoConn repo, dynamic jsonraw)
+        {
+            string vizqlSessionId = jsonraw.sess;
+            string ts = jsonraw.ts;
+            ViewPath viewPath = GetViewPath(repo, vizqlSessionId, ts);
+            return viewPath;
+        }
+
+        /// <summary>
+        /// Helper to update the view's workbook and user ip address from a wizql session
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="jsonraw"></param>
+        /// <param name="row"></param>
+        private static void UpdateViewPath(ITableauRepoConn repo, dynamic jsonraw, DataRow row)
+        {
+
+            var viewPath = GetViewPath(repo, jsonraw);
+            row["workbook"] = viewPath.workbook;
+            row["view"] = viewPath.view;
+            row["user_ip"] = viewPath.ip;
+        }
     }
 }

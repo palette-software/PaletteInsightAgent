@@ -83,6 +83,13 @@ namespace TabMon.Config
                 options.FolderToWatch = pollerConfig.Directory;
                 options.DirectoryFilter = pollerConfig.Filter;
 
+                var repoProps = config.TableauRepo;
+                options.RepoHost = repoProps.Host;
+                options.RepoPort = Convert.ToInt32(repoProps.Port);
+                options.RepoUser = repoProps.Username;
+                options.RepoPass = repoProps.Password;
+                options.RepoDb = repoProps.Db;
+
             }
             catch (ConfigurationErrorsException ex)
             {
@@ -138,11 +145,11 @@ namespace TabMon.Config
             }
 
             var tableInitializationOptions = new DbTableInitializationOptions()
-                {
-                    CreateTableDynamically = true,
-                    UpdateDbTableToMatchSchema = true,
-                    UpdateSchemaToMatchDbTable = true
-                };
+            {
+                CreateTableDynamically = true,
+                UpdateDbTableToMatchSchema = true,
+                UpdateSchemaToMatchDbTable = true
+            };
 
             Log.Info("Connecting to results database..");
             try
