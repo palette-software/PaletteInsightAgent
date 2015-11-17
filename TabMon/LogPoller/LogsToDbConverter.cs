@@ -111,8 +111,6 @@ namespace TabMon.LogPoller
                     {
                         insertToFilterState(cacheKeyValue, filterStateTable, jsonraw);
                         insertAllFilters(cacheKeyValue, filterStateTable, jsonraw);
-
-                        //Log.Info("Parsed into filter_state table: " + filterStateTable.Rows.ToString());
                     }
 
                 }
@@ -128,6 +126,7 @@ namespace TabMon.LogPoller
         {
             // Add the new row to the table
             var row = serverLogsTable.NewRow();
+            string tid = jsonraw.tid;
 
             //row["id"] = 1;
             row["filename"] = filename;
@@ -135,7 +134,7 @@ namespace TabMon.LogPoller
             row["ts"] = jsonraw.ts;
             row["pid"] = (int)jsonraw.pid;
 
-            row["tid"] = Convert.ToInt32((jsonraw.tid as string), 16);
+            row["tid"] = Convert.ToInt32(tid, 16);
             row["sev"] = jsonraw.sev;
             row["req"] = jsonraw.req;
             row["sess"] = jsonraw.sess;
