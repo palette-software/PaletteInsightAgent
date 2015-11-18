@@ -176,9 +176,18 @@ namespace DataTableWriter.Adapters
 
         private static bool parseBool(string boolishVal)
         {
-            if (boolishVal == "N") return false;
-            if (boolishVal == "Y") return true;
-            return Boolean.Parse(boolishVal);
+            if (boolishVal == "N" || boolishVal == "NO") return false;
+            if (boolishVal == "Y" || boolishVal == "YES") return true;
+            try
+            {
+                return Boolean.Parse(boolishVal);
+            }
+            catch (Exception e)
+            {
+                Log.Fatal("Cannot convert to boolean:" + boolishVal);
+                throw;
+            }
+            
         }
 
         /// <summary>
@@ -198,17 +207,20 @@ namespace DataTableWriter.Adapters
 
                 try
                 {
-                    var reader = command.ExecuteReader();
-                    while (reader.Read())
+                    using (var reader = command.ExecuteReader())
                     {
-                        var column = new DataColumn
+                        while (reader.Read())
                         {
-                            ColumnName = reader["name"].ToString(),
-                            DataType = Driver.MapToSystemType(reader["type"].ToString()),
-                            AllowDBNull = parseBool(reader["nullable"].ToString())
-                        };
-                        table.Columns.Add(column);
+                            var column = new DataColumn
+                            {
+                                ColumnName = reader["name"].ToString(),
+                                DataType = Driver.MapToSystemType(reader["type"].ToString()),
+                                AllowDBNull = parseBool(reader["nullable"].ToString())
+                            };
+                            table.Columns.Add(column);
+                        }
                     }
+
                 }
                 catch (DbException ex)
                 {
