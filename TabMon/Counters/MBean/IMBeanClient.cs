@@ -18,6 +18,6 @@ namespace TabMon.Counters.MBean
         object GetAttributeValue(ObjectName objectName, string attributeName);
         MBeanInfo GetMBeanInfo(ObjectName objectName);
         ICollection<MBeanOperationInfo> GetOperations(ObjectName objectName);
-        object InvokeMethod(ObjectName objectName, string methodname);
+        object InvokeMethod(ObjectName objectName, string methodname, object[] args = null, string[] signature = null);
     }
 }
