@@ -100,6 +100,14 @@ namespace TabMon.LogPoller
             return connection.State == ConnectionState.Open;
         }
 
+        IDbConnection reconnectIfNeeded()
+        {
+            if (IsConnectionOpen()) return connection;
+            connection.Close();
+            OpenConnection();
+            return connection;
+        }
+
 
         public ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp)
         {
@@ -108,6 +116,7 @@ namespace TabMon.LogPoller
             lock (readLock)
             {
 
+                reconnectIfNeeded();
 
                 using (var cmd = connection.CreateCommand())
                 {
