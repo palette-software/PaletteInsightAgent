@@ -48,6 +48,7 @@ namespace TabMon.LogPoller
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private NpgsqlConnection connection;
+        private object readLock = new object();
 
         public Tableau9RepoConn(string host, int port, string username, string password, string database)
         {
@@ -104,42 +105,46 @@ namespace TabMon.LogPoller
         {
             if (String.IsNullOrWhiteSpace(vizQLSessionId)) return ViewPath.Empty;
 
-
-            using (var cmd = connection.CreateCommand())
+            lock (readLock)
             {
 
-                cmd.Connection = connection;
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "SELECT * FROM http_requests WHERE vizql_session=@vizql_session_id AND created_at < @timestamp ORDER BY created_at ASC LIMIT 1";
 
-                var sessionIdParam = cmd.CreateParameter();
-                sessionIdParam.ParameterName = "@vizql_session_id";
-                sessionIdParam.Value = vizQLSessionId;
-                cmd.Parameters.Add(sessionIdParam);
-
-
-                var timestampParam = cmd.CreateParameter();
-                timestampParam.ParameterName = "@timestamp";
-                timestampParam.Value = timestamp;
-                cmd.Parameters.Add(timestampParam);
-
-                try
+                using (var cmd = connection.CreateCommand())
                 {
-                    using (var reader = cmd.ExecuteReader())
+
+                    cmd.Connection = connection;
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = "SELECT * FROM http_requests WHERE vizql_session=@vizql_session_id AND created_at < @timestamp ORDER BY created_at ASC LIMIT 1";
+
+                    var sessionIdParam = cmd.CreateParameter();
+                    sessionIdParam.ParameterName = "@vizql_session_id";
+                    sessionIdParam.Value = vizQLSessionId;
+                    cmd.Parameters.Add(sessionIdParam);
+
+
+                    var timestampParam = cmd.CreateParameter();
+                    timestampParam.ParameterName = "@timestamp";
+                    timestampParam.Value = timestamp;
+                    cmd.Parameters.Add(timestampParam);
+
+                    try
                     {
-                        while (reader.Read())
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            var sheet = reader["currentsheet"].ToString().Split(new char[] { '/' }, 2);
-                            var ip = reader["user_ip"].ToString();
-                            return ViewPath.make(sheet[0], sheet[1], ip);
+                            while (reader.Read())
+                            {
+                                var sheet = reader["currentsheet"].ToString().Split(new char[] { '/' }, 2);
+                                var ip = reader["user_ip"].ToString();
+                                return ViewPath.make(sheet[0], sheet[1], ip);
+                            }
                         }
+                        return ViewPath.Empty;
                     }
-                    return ViewPath.Empty;
-                }
-                catch (DbException ex)
-                {
-                    Log.Error(String.Format("Error getting the vizql information for session id={0}", vizQLSessionId), ex);
-                    throw;
+                    catch (DbException ex)
+                    {
+                        Log.Error(String.Format("Error getting the vizql information for session id={0}", vizQLSessionId), ex);
+                        throw;
+                    }
                 }
             }
 
