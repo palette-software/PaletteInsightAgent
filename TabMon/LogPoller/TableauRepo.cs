@@ -114,7 +114,7 @@ namespace TabMon.LogPoller
 
                     cmd.Connection = connection;
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = "SELECT * FROM http_requests WHERE vizql_session=@vizql_session_id AND created_at < @timestamp ORDER BY created_at ASC LIMIT 1";
+                    cmd.CommandText = "SELECT * FROM http_requests WHERE vizql_session=@vizql_session_id AND created_at < @timestamp ORDER BY created_at DESC LIMIT 1";
 
                     var sessionIdParam = cmd.CreateParameter();
                     sessionIdParam.ParameterName = "@vizql_session_id";
