@@ -53,17 +53,22 @@ namespace TabMon.LogPoller
                 var filterStateCount = filterStateTable.Rows.Count;
                 var serverLogsTableCount = serverLogsTable.Rows.Count;
 
-                Log.Info("Writing "
-                    + filterStateCount + " filter " + "row".Pluralize(filterStateCount)
-                    + " and " 
-                    + serverLogsTableCount + " server log " + "row".Pluralize(serverLogsTableCount));
+                var statusLine = String.Format("{0} filter {1} and {2} server log {3}",
+                    filterStateCount, "row".Pluralize(filterStateCount),
+                     serverLogsTableCount, "row".Pluralize(serverLogsTableCount));
 
-                lock(writeLock)
+
+                Log.Info("Inserting " + statusLine);
+
+
+                lock (writeLock)
                 {
                     // Server logs need to be inserted first for the triggers to work.
                     if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
                     if (filterStateCount > 0) writer.Write(filterStateTable);
                 }
+
+                Log.Info("Inserted " + statusLine);
             }
             catch (Exception e)
             {
