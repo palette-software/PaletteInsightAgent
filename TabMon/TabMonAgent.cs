@@ -12,6 +12,7 @@ using TabMon.Counters;
 using TabMon.Sampler;
 
 using TabMon.LogPoller;
+using TabMon.JMXThreadInfoPoller;
 
 [assembly: CLSCompliant(true)]
 
@@ -24,7 +25,9 @@ namespace TabMon
     {
         private Timer timer;
         private Timer logPollTimer;
+        private Timer jmxThreadInfoTimer;
         private LogPollerAgent logPollerAgent;
+        private JMXThreadInfoAgent jmxThreadInfoAgent;
         private CounterSampler sampler;
         private readonly TabMonOptions options;
         private bool disposed;
@@ -62,6 +65,9 @@ namespace TabMon
             //var logPollerConfig = LogPollerConfigurationLoader.load();
             logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
                 options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
+
+            // start the thread info agent
+            jmxThreadInfoAgent = new JMXThreadInfoAgent();
         }
 
         ~TabMonAgent()
@@ -109,6 +115,9 @@ namespace TabMon
             // Start the log poller agent
             logPollerAgent.start();
             logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.PollInterval * 1000);
+
+            // Kick off the thread polling timer
+            jmxThreadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.PollInterval * 1000);
         }
 
         /// <summary>
@@ -139,6 +148,12 @@ namespace TabMon
                 Log.Info("Stopping logPollTimer.");
             }
             logPollerAgent.stop();
+
+            // Stop the thread info timer
+            if (jmxThreadInfoTimer != null)
+            {
+                jmxThreadInfoTimer.Dispose();
+            }
 
             Log.Info("TabMon stopped.");
         }
@@ -171,12 +186,28 @@ namespace TabMon
 
 
         /// <summary>
-        /// Polls the logs from tableau and iniserts in into the database
+        /// Polls the logs from tableau and inserts them into the database
         /// </summary>
         /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
             logPollerAgent.pollLogs(options.Writer, WriteLock);
+        }
+
+        /// <summary>
+        /// Reads thread information from jmx and inserts them to the database 
+        /// </summary>
+        /// <param name="stateInfo"></param>
+        private void PollThreadInfo(object stateInfo)
+        {
+            foreach (var counter in sampler.getCounters())
+            {
+                if (jmxThreadInfoAgent.isJMXCounter(counter))
+                {
+                    // We should poll every mbeanclient once. Currently they are polled as many time as many counters there are for each.
+                    jmxThreadInfoAgent.poll(counter, options.Writer, WriteLock); 
+                }
+            }
         }
 
         #endregion Private Methods
