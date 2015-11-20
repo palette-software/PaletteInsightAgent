@@ -200,14 +200,7 @@ namespace TabMon
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
         {
-            foreach (var counter in sampler.getCounters())
-            {
-                if (jmxThreadInfoAgent.isJMXCounter(counter))
-                {
-                    // We should poll every mbeanclient once. Currently they are polled as many time as many counters there are for each.
-                    jmxThreadInfoAgent.poll(counter, options.Writer, WriteLock); 
-                }
-            }
+            jmxThreadInfoAgent.poll(sampler.getCounters(), options.Writer, WriteLock);
         }
 
         #endregion Private Methods

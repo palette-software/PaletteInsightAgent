@@ -22,7 +22,7 @@ namespace TabMon.Counters.MBean
         public string Counter { get; private set; }
         public string Instance { get; private set; }
         public string Unit { get; private set; }
-        protected IMBeanClient MBeanClient { get; set; }
+        public IMBeanClient MBeanClient { get; protected set; }
         protected string JmxDomain { get; set; }
         protected string Path { get; set; }
 

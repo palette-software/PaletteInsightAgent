@@ -16,12 +16,30 @@ namespace TabMon.JMXThreadInfoPoller
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public bool isJMXCounter(ICounter counter)
+        public void poll(ICollection<ICounter> counters, IDataTableWriter writer, object WriteLock)
+        {
+            HashSet<IMBeanClient> polledClients = new HashSet<IMBeanClient>();
+            foreach (var counter in counters)
+            {
+                if (isJMXCounter(counter))
+                {
+                    var mbeanCounter = (AbstractMBeanCounter)counter;
+                    // We poll every mbeanclient once as multiple counters may share the same client 
+                    if (!polledClients.Contains(mbeanCounter.MBeanClient))
+                    {
+                        pollThreadsOfCounter(counter,  writer, WriteLock);
+                        polledClients.Add(mbeanCounter.MBeanClient);
+                    }
+                }
+            }
+        }
+
+        protected bool isJMXCounter(ICounter counter)
         {
             return counter is TabMon.Counters.MBean.AbstractMBeanCounter;
         }
 
-        public void poll(ICounter genericCounter, IDataTableWriter writer, object WriteLock)
+        protected void pollThreadsOfCounter(ICounter genericCounter, IDataTableWriter writer, object WriteLock)
         {
             AbstractMBeanCounter counter = (AbstractMBeanCounter)genericCounter;
             Log.Info(String.Format(@"Should get thread info for counter: {0}", counter));
