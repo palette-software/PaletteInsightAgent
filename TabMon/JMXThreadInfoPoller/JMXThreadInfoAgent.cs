@@ -2,6 +2,7 @@
 using log4net;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -12,12 +13,25 @@ using JavaLong = java.lang.Long;
 
 namespace TabMon.JMXThreadInfoPoller
 {
+    struct ThreadInfo
+    {
+        public string host;
+        public string instance;
+        public long threadId;
+        public long cpuTime;
+        public long userTime;
+        public long allocatedBytes;
+        public DateTime pollTimeStamp;
+    }
+
     class JMXThreadInfoAgent
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public void poll(ICollection<ICounter> counters, IDataTableWriter writer, object WriteLock)
         {
+            long serverLogsTableCount = 0;
+            var serverLogsTable = JMXThreadTables.makeJMXThreadInfoTable();
             HashSet<IMBeanClient> polledClients = new HashSet<IMBeanClient>();
             foreach (var counter in counters)
             {
@@ -27,10 +41,14 @@ namespace TabMon.JMXThreadInfoPoller
                     // We poll every mbeanclient once as multiple counters may share the same client 
                     if (!polledClients.Contains(mbeanCounter.MBeanClient))
                     {
-                        pollThreadsOfCounter(counter,  writer, WriteLock);
+                        pollThreadsOfCounter(counter,  serverLogsTable, ref serverLogsTableCount);
                         polledClients.Add(mbeanCounter.MBeanClient);
                     }
                 }
+            }
+            lock (WriteLock)
+            {
+                if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
             }
         }
 
@@ -39,18 +57,24 @@ namespace TabMon.JMXThreadInfoPoller
             return counter is TabMon.Counters.MBean.AbstractMBeanCounter;
         }
 
-        protected void pollThreadsOfCounter(ICounter genericCounter, IDataTableWriter writer, object WriteLock)
+        protected void pollThreadsOfCounter(ICounter genericCounter, DataTable table, ref long serverLogsTableCount)
         {
             AbstractMBeanCounter counter = (AbstractMBeanCounter)genericCounter;
             Log.Info(String.Format(@"Should get thread info for counter: {0}", counter));
             long[] threadIds = (long[])counter.GetAttributeValue("AllThreadIds", "java.lang", "type=Threading");
             foreach (long threadId in threadIds)
             {
+                ThreadInfo threadInfo = new ThreadInfo();
+                threadInfo.threadId = threadId;
                 JavaLong javaThreadId = new JavaLong(threadId);
-                var cpuTime = counter.InvokeMethod("getThreadCpuTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading");
-                var userTime = counter.InvokeMethod("getThreadUserTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading");
-                var allocatedBytes = counter.InvokeMethod("getThreadAllocatedBytes", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading");
-                Log.Info(String.Format(@"Found thread ({0}) with CPU time: {1}, User time: {2}, Allocated bytes: {3}", threadId, cpuTime, userTime, allocatedBytes));
+                threadInfo.cpuTime = ((JavaLong)(counter.InvokeMethod("getThreadCpuTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
+                threadInfo.userTime = ((JavaLong)(counter.InvokeMethod("getThreadUserTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
+                threadInfo.allocatedBytes = ((JavaLong)(counter.InvokeMethod("getThreadAllocatedBytes", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
+                threadInfo.pollTimeStamp = DateTime.Now;
+                threadInfo.host = counter.Host.ToString();
+                threadInfo.instance = counter.Instance;
+                JMXThreadTables.addToTable(table, threadInfo);
+                serverLogsTableCount++;
             }
         }
     }
