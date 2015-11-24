@@ -1,5 +1,5 @@
 ----------------------------------------------
-		   TabMon Developer Notes
+		   BlackBoxRecorder Developer Notes
 ----------------------------------------------
 
 * Building using the "Release" configuration will also build the installers.  The primary generated installer of interest is the "InstallTabMon.exe" file which is built in the TabMonServiceInstallerBootstrapper project.  This deploys the main application and also bundles in Postgres and manages dependencies.
