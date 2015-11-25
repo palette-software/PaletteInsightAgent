@@ -9,7 +9,7 @@ using DataTableWriter.Connection;
 
 namespace DataTableWriter.Drivers
 {
-    public class MsSQLDriver : IDbDriver
+    class MsSQLDriver : IDbDriver
     {
         public string Name
         {
