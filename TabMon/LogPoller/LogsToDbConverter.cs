@@ -242,17 +242,26 @@ namespace TabMon.LogPoller
         {
             DateTime timestamp = DateTime.Parse(ts);
 
-            //Log.Info("parsed datetime:" + timestamp);
+            // If the repo is null we just return nada.
+            if (repo == null) return MakeEmptyViewPath();
 
+            // Otherwise look up from the repo
             var viewPath = repo.getViewPathForVizQLSessionId(vizqlSessionId, timestamp);
             if (viewPath.isEmpty())
             {
                 Log.Fatal("Cannot find view path for session!");
-                viewPath.workbook = "<WORKBOOK>";
-                viewPath.view = "<VIEW>";
-                viewPath.ip = "0.0.0.0";
+                viewPath = MakeEmptyViewPath();
             }
 
+            return viewPath;
+        }
+
+        private static ViewPath MakeEmptyViewPath()
+        {
+            ViewPath viewPath;
+            viewPath.workbook = "<WORKBOOK>";
+            viewPath.view = "<VIEW>";
+            viewPath.ip = "0.0.0.0";
             return viewPath;
         }
 
