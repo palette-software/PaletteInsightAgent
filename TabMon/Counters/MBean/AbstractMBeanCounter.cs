@@ -73,6 +73,12 @@ namespace TabMon.Counters.MBean
         /// <returns>A generic object containing the sampled value for the given attribute.</returns>
         public abstract object GetAttributeValue(string attribute, string domain = null, string path = null);
 
+        public object GetMBeanAttributeValue(string attribute, string domain, string path)
+        {
+            var obj = getMBeanObjectName(domain, path);
+            return MBeanClient.GetAttributeValue(obj, attribute);
+        }
+
         public object InvokeMethod(string methodname, object[] args = null, string[] signature = null, string domain = null, string path = null)
         {
             var obj = getMBeanObjectName(domain, path);

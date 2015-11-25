@@ -61,7 +61,7 @@ namespace TabMon.JMXThreadInfoPoller
         {
             AbstractMBeanCounter counter = (AbstractMBeanCounter)genericCounter;
             Log.Info(String.Format(@"Should get thread info for counter: {0}", counter));
-            long[] threadIds = (long[])counter.GetAttributeValue("AllThreadIds", "java.lang", "type=Threading");
+            long[] threadIds = (long[])counter.GetMBeanAttributeValue("AllThreadIds", "java.lang", "type=Threading");
             foreach (long threadId in threadIds)
             {
                 ThreadInfo threadInfo = new ThreadInfo();

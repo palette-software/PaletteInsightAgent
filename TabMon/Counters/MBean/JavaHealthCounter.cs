@@ -16,7 +16,6 @@ namespace TabMon.Counters.MBean
 
         public override object GetAttributeValue(string attribute, string domain = null, string path = null)
         {
-            var obj = getMBeanObjectName(domain, path);
             object result;
 
             // The Java Health counters may be nested as CompositeData objects, so we need to be prepared to handle this.
@@ -25,15 +24,14 @@ namespace TabMon.Counters.MBean
                 var pathSegments = attribute.Split('\\');
                 var parent = pathSegments[0];
                 var child = pathSegments[1];
-                var compositeData = MBeanClient.GetAttributeValue(obj, parent) as CompositeData;
+                var compositeData = GetMBeanAttributeValue(parent, domain, path) as CompositeData;
                 result = compositeData.get(child);
             }
             else
             {
-                result = MBeanClient.GetAttributeValue(obj, attribute);
+                result = GetMBeanAttributeValue(attribute, domain, path);
             }
 
-            // Wonky parsing to convert result from Java lang object into C# float.
             return result;
         }
 
