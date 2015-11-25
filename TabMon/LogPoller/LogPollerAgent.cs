@@ -30,7 +30,17 @@ namespace TabMon.LogPoller
             this.folderToWatch = folderToWatch;
             filter = filterString;
             logsToDbConverter = new LogsToDbConverter();
-            tableauRepo = new Tableau9RepoConn( repoHost, repoPort, repoUser, repoPass, repoDb );
+            // 
+            tableauRepo = null;
+            if (ShouldUseRepo(repoHost))
+            {
+                tableauRepo = new Tableau9RepoConn(repoHost, repoPort, repoUser, repoPass, repoDb);
+            }
+        }
+
+        private static bool ShouldUseRepo(string repoHost)
+        {
+            return !String.IsNullOrEmpty(repoHost);
         }
 
 
