@@ -9,7 +9,7 @@ using DataTableWriter.Connection;
 
 namespace DataTableWriter.Drivers
 {
-    class MsSQLDriver : IDbDriver
+    public class MsSQLDriver : IDbDriver
     {
         public string Name
         {
@@ -127,7 +127,7 @@ namespace DataTableWriter.Drivers
                 defaultClause = GetDefaultValueClause(column.DefaultValue);
             }
 
-            return String.Format(@"ALTER TABLE ""{0}"" ADD COLUMN {1} {2};", tableName, GetStandardColumnSpecification(column.ColumnName, MapToDbType(column.ColumnName, column.DataType.ToString(), column.AllowDBNull)), defaultClause);
+            return String.Format(@"ALTER TABLE ""{0}"" ADD {1} {2};", tableName, GetStandardColumnSpecification(column.ColumnName, MapToDbType(column.ColumnName, column.DataType.ToString(), column.AllowDBNull)), defaultClause);
 
         }
 
