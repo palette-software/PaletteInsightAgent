@@ -15,27 +15,15 @@ namespace TabMon.Counters.MBean
         public TableauHealthCounter(IMBeanClient mbeanClient, Host host, string sourceName, string path, string categoryName, string counterName, string instanceName, string unit)
             : base(mbeanClient: mbeanClient, counterType: TableauHealthCounterType, jmxDomain: TableauHealthJmxDomain, host: host, source: sourceName, filter: path, category: categoryName, counter: counterName, instance: instanceName, unit: unit) { }
 
-        #region Protected Methods
-
-        protected override object GetAttributeValue(string attribute)
+        public override object GetAttributeValue(string attribute, string domain = null, string path = null)
         {
-            // Find MBean object.
-            var objectNames = MBeanClient.QueryObjects(JmxDomain, Path);
-
-            // Validated MBean object was found.
-            if (objectNames.Count < 1)
-            {
-                throw new ArgumentException("Unable to query MBean.");
-            }
-
+            var obj = getMBeanObjectName(domain, path);
             // Grab associated attributes.
-            var attributes = MBeanClient.InvokeMethod(objectNames[0], "getPerformanceMetrics") as CompositeData;
+            var attributes = MBeanClient.InvokeMethod(obj, "getPerformanceMetrics") as CompositeData;
 
             // Look up the attribute we care about & do some wonky parsing to convert it from Java CompositeData into C# float.
-            var result = attributes.get(attribute).ToString();
-            return float.Parse(result);
+            return attributes.get(attribute);
         }
 
-        #endregion
     }
 }

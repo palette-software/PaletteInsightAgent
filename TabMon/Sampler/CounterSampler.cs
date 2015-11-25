@@ -57,6 +57,11 @@ namespace TabMon.Sampler
             return dataTable;
         }
 
+        public ICollection<ICounter> getCounters()
+        {
+            return counters;
+        }
+
         #endregion Public Methods
 
         #region Private Methods

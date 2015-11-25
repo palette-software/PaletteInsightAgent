@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TabMon.Helpers;
 
 namespace TabMon.LogPoller
 {
@@ -28,19 +29,19 @@ namespace TabMon.LogPoller
         {
             var table = new DataTable("serverlogs");
 
-            //addColumn(table, "id", "System.Int32", true, true);
-            addColumn(table, "filename");
-            addColumn(table, "host_name");
-            addColumn(table, "ts", "System.DateTime");
-            addColumn(table, "pid", "System.Int32");
-            addColumn(table, "tid", "System.Int32");
-            addColumn(table, "sev");
-            addColumn(table, "req");
-            addColumn(table, "sess");
-            addColumn(table, "site");
-            addColumn(table, "username");
-            addColumn(table, "k");
-            addColumn(table, "v");
+            //TableHelper.addColumn(table, "id", "System.Int32", true, true);
+            TableHelper.addColumn(table, "filename");
+            TableHelper.addColumn(table, "host_name");
+            TableHelper.addColumn(table, "ts", "System.DateTime");
+            TableHelper.addColumn(table, "pid", "System.Int32");
+            TableHelper.addColumn(table, "tid", "System.Int32");
+            TableHelper.addColumn(table, "sev");
+            TableHelper.addColumn(table, "req");
+            TableHelper.addColumn(table, "sess");
+            TableHelper.addColumn(table, "site");
+            TableHelper.addColumn(table, "username");
+            TableHelper.addColumn(table, "k");
+            TableHelper.addColumn(table, "v");
 
             //setPrimaryKey(table, "id");
 
@@ -68,21 +69,21 @@ namespace TabMon.LogPoller
 
             var table = new DataTable("filter_state_audit");
 
-            //addColumn(table, "id", "System.Int32", true, true);
-            addColumn(table, "ts", "System.DateTime");
-            addColumn(table, "pid", "System.Int32");
-            addColumn(table, "tid", "System.Int32");
-            addColumn(table, "req");
-            addColumn(table, "sess");
-            addColumn(table, "site");
-            addColumn(table, "username");
+            //TableHelper.addColumn(table, "id", "System.Int32", true, true);
+            TableHelper.addColumn(table, "ts", "System.DateTime");
+            TableHelper.addColumn(table, "pid", "System.Int32");
+            TableHelper.addColumn(table, "tid", "System.Int32");
+            TableHelper.addColumn(table, "req");
+            TableHelper.addColumn(table, "sess");
+            TableHelper.addColumn(table, "site");
+            TableHelper.addColumn(table, "username");
 
-            addColumn(table, "filter_name");
-            addColumn(table, "filter_vals");
-            addColumn(table, "workbook");
-            addColumn(table, "view");
-            addColumn(table, "hostname");
-            addColumn(table, "user_ip");
+            TableHelper.addColumn(table, "filter_name");
+            TableHelper.addColumn(table, "filter_vals");
+            TableHelper.addColumn(table, "workbook");
+            TableHelper.addColumn(table, "view");
+            TableHelper.addColumn(table, "hostname");
+            TableHelper.addColumn(table, "user_ip");
 
             //setPrimaryKey(table, "id");
             return table;
@@ -95,18 +96,5 @@ namespace TabMon.LogPoller
             table.PrimaryKey = PrimaryKeyColumns;
         }
 
-        private static DataColumn addColumn(DataTable table, string colName, string dataType="System.String", bool unique = false, bool readOnly = false)
-        {
-            // Create new DataColumn, set DataType, 
-            // ColumnName and add to DataTable.    
-            DataColumn column = new DataColumn();
-            column.DataType = System.Type.GetType(dataType);
-            column.ColumnName = colName;
-            column.ReadOnly = readOnly;
-            column.Unique = unique;
-            // Add the Column to the DataColumnCollection.
-            table.Columns.Add(column);
-            return column;
-        }
     };
 }

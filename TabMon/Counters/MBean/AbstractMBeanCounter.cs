@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using javax.management;
+using log4net;
 using System;
 using System.Reflection;
 using TabMon.Helpers;
@@ -21,7 +22,7 @@ namespace TabMon.Counters.MBean
         public string Counter { get; private set; }
         public string Instance { get; private set; }
         public string Unit { get; private set; }
-        protected IMBeanClient MBeanClient { get; set; }
+        public IMBeanClient MBeanClient { get; protected set; }
         protected string JmxDomain { get; set; }
         protected string Path { get; set; }
 
@@ -50,7 +51,7 @@ namespace TabMon.Counters.MBean
         {
             try
             {
-                var value = GetAttributeValue(Counter);
+                var value = float.Parse(GetAttributeValue(Counter).ToString());
                 return new CounterSample(this, value);
             }
             catch (Exception ex)
@@ -65,16 +66,52 @@ namespace TabMon.Counters.MBean
             return String.Format(@"{0}\{1}\{2}:{3}\{4}\{5}", Host, Source, JmxDomain, Path, Counter, Instance);
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         /// <summary>
         /// Retrieve the value of the attribute with the given name for this counter.
         /// </summary>
         /// <param name="attribute">Name of the attribute to sample.</param>
         /// <returns>A generic object containing the sampled value for the given attribute.</returns>
-        protected abstract object GetAttributeValue(string attribute);
+        public abstract object GetAttributeValue(string attribute, string domain = null, string path = null);
+
+        public object GetMBeanAttributeValue(string attribute, string domain, string path)
+        {
+            var obj = getMBeanObjectName(domain, path);
+            return MBeanClient.GetAttributeValue(obj, attribute);
+        }
+
+        public object InvokeMethod(string methodname, object[] args = null, string[] signature = null, string domain = null, string path = null)
+        {
+            var obj = getMBeanObjectName(domain, path);
+            return MBeanClient.InvokeMethod(obj, methodname, args, signature);
+        }
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected ObjectName getMBeanObjectName(string domain = null, string path = null)
+        {
+            // Let's allow to use mbean objects outside the scope of the counter
+            if (domain == null)
+            {
+                domain = JmxDomain;
+            }
+
+            if (path == null)
+            {
+                path = Path;
+            }
+
+            // Find MBean object.
+            var objectNames = MBeanClient.QueryObjects(domain, path);
+
+            // Validated MBean object was found.
+            if (objectNames.Count < 1)
+            {
+                throw new ArgumentException("Unable to query MBean.");
+            }
+
+            return objectNames[0];
+        }
 
         #endregion Protected Methods
     }

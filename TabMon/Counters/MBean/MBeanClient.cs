@@ -94,10 +94,10 @@ namespace TabMon.Counters.MBean
         /// <param name="objectName">The object name containing the method to execute.</param>
         /// <param name="methodname">The name of the method to execute.</param>
         /// <returns></returns>
-        public object InvokeMethod(ObjectName objectName, string methodname)
+        public object InvokeMethod(ObjectName objectName, string methodname, object[] args = null, string[] signature = null)
         {
             var serverConnection = Connector.GetConnection();
-            return serverConnection.invoke(objectName, methodname, null, null);
+            return serverConnection.invoke(objectName, methodname, args, signature);
         }
 
         #endregion Public Methods

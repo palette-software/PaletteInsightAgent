@@ -1,5 +1,4 @@
 ﻿using javax.management.openmbean;
-using System;
 using TabMon.Helpers;
 
 namespace TabMon.Counters.MBean
@@ -15,21 +14,9 @@ namespace TabMon.Counters.MBean
         public JavaHealthCounter(IMBeanClient mbeanClient, Host host, string sourceName, string path, string categoryName, string counterName, string instanceName, string unit)
             : base(mbeanClient: mbeanClient, counterType: JavaHealthCounterType, jmxDomain: JavaHealthJmxDomain, host: host, source: sourceName, filter: path, category: categoryName, counter: counterName, instance: instanceName, unit: unit) { }
 
-        #region Protected Methods
-
-        protected override object GetAttributeValue(string attribute)
+        public override object GetAttributeValue(string attribute, string domain = null, string path = null)
         {
-            // Find MBean object.
-            var objectNames = MBeanClient.QueryObjects(JmxDomain, Path);
-
-            // Validated MBean object was found.
-            if (objectNames.Count < 1)
-            {
-                throw new ArgumentException("Unable to query MBean.");
-            }
-
             object result;
-            var obj = objectNames[0];
 
             // The Java Health counters may be nested as CompositeData objects, so we need to be prepared to handle this.
             if (attribute.Contains(@"\"))
@@ -37,18 +24,16 @@ namespace TabMon.Counters.MBean
                 var pathSegments = attribute.Split('\\');
                 var parent = pathSegments[0];
                 var child = pathSegments[1];
-                var compositeData = MBeanClient.GetAttributeValue(obj, parent) as CompositeData;
+                var compositeData = GetMBeanAttributeValue(parent, domain, path) as CompositeData;
                 result = compositeData.get(child);
             }
             else
             {
-                result = MBeanClient.GetAttributeValue(obj, attribute);
+                result = GetMBeanAttributeValue(attribute, domain, path);
             }
 
-            // Wonky parsing to convert result from Java lang object into C# float.
-            return float.Parse(result.ToString());
+            return result;
         }
 
-        #endregion
     }
 }
