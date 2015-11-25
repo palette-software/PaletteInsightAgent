@@ -149,7 +149,6 @@ namespace DataTableWriter.Drivers
         /// <returns>MS SQL query that will retrieve the names and types of all columns in the designated table.</returns>
         public string BuildQueryColumnNamesAndTypes(string tableName, bool excludeIdentityColumn = true)
         {
-            //TODO: check this!
             var excludeIdentityColumnClause = excludeIdentityColumn ? "AND upper(COLUMN_NAME) != 'ID'" : "";
             return String.Format(" SELECT COLUMN_NAME AS name, DATA_TYPE AS type, IS_NULLABLE AS nullable FROM INFORMATION_SCHEMA.COLUMNS "
                 + "WHERE upper(table_name) = '{0}' {1}", tableName.ToUpper(), excludeIdentityColumnClause);
