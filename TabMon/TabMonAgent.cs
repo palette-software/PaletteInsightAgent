@@ -114,10 +114,10 @@ namespace TabMon
 
             // Start the log poller agent
             logPollerAgent.start();
-            logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.PollInterval * 1000);
+            logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.LogPollInterval * 1000);
 
             // Kick off the thread polling timer
-            jmxThreadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.PollInterval * 1000);
+            jmxThreadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
         }
 
         /// <summary>

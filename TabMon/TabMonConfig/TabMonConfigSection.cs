@@ -224,6 +224,62 @@ namespace TabMon.Config
 
         #endregion PollInterval Property
 
+        #region LogPollInterval Property
+
+        /// <summary>
+        /// The XML name of the <see cref="LogPollInterval"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string LogPollIntervalPropertyName = "LogPollInterval";
+
+        /// <summary>
+        /// Gets or sets contains information about the polling frequency.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Contains information about the polling frequency.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.Config.TabMonConfig.LogPollIntervalPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::TabMon.Config.LogPollInterval LogPollInterval
+        {
+            get
+            {
+                return ((global::TabMon.Config.LogPollInterval)(base[global::TabMon.Config.TabMonConfig.LogPollIntervalPropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.Config.TabMonConfig.LogPollIntervalPropertyName] = value;
+            }
+        }
+
+        #endregion LogPollInterval Property
+
+        #region ThreadInfoPollInterval Property
+
+        /// <summary>
+        /// The XML name of the <see cref="ThreadInfoPollInterval"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string ThreadInfoPollIntervalPropertyName = "ThreadInfoPollInterval";
+
+        /// <summary>
+        /// Gets or sets contains information about the polling frequency.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Contains information about the polling frequency.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.Config.TabMonConfig.ThreadInfoPollIntervalPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::TabMon.Config.ThreadInfoPollInterval ThreadInfoPollInterval
+        {
+            get
+            {
+                return ((global::TabMon.Config.ThreadInfoPollInterval)(base[global::TabMon.Config.TabMonConfig.ThreadInfoPollIntervalPropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.Config.TabMonConfig.ThreadInfoPollIntervalPropertyName] = value;
+            }
+        }
+
+        #endregion ThreadInfoPollInterval Property
+
         #region OutputMode Property
 
         /// <summary>
@@ -887,6 +943,108 @@ namespace TabMon.Config
         }
 
         #endregion Name Property
+    }
+}
+
+namespace TabMon.Config
+{
+    /// <summary>
+    /// Contains information about the polling frequency of the Tableau logs.
+    /// </summary>
+    public partial class LogPollInterval : global::System.Configuration.ConfigurationElement
+    {
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+
+        #region Value Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Value"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string ValuePropertyName = "value";
+
+        /// <summary>
+        /// Gets or sets the interval between polling cycles, in seconds.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("The interval between polling cycles of log files, in seconds.")]
+        [global::System.Configuration.IntegerValidatorAttribute(ExcludeRange = false, MaxValue = 2147483647, MinValue = 1)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.Config.LogPollInterval.ValuePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = 30)]
+        public virtual int Value
+        {
+            get
+            {
+                return ((int)(base[global::TabMon.Config.LogPollInterval.ValuePropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.Config.LogPollInterval.ValuePropertyName] = value;
+            }
+        }
+
+        #endregion Value Property
+    }
+}
+
+namespace TabMon.Config
+{
+    /// <summary>
+    /// Contains information about the polling frequency of the Tableau thread information.
+    /// </summary>
+    public partial class ThreadInfoPollInterval : global::System.Configuration.ConfigurationElement
+    {
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+
+        #region Value Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Value"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string ValuePropertyName = "value";
+
+        /// <summary>
+        /// Gets or sets the interval between polling cycles, in seconds.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("The interval between polling cycles of log files, in seconds.")]
+        [global::System.Configuration.IntegerValidatorAttribute(ExcludeRange = false, MaxValue = 2147483647, MinValue = 1)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::TabMon.Config.ThreadInfoPollInterval.ValuePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = 30)]
+        public virtual int Value
+        {
+            get
+            {
+                return ((int)(base[global::TabMon.Config.ThreadInfoPollInterval.ValuePropertyName]));
+            }
+            set
+            {
+                base[global::TabMon.Config.ThreadInfoPollInterval.ValuePropertyName] = value;
+            }
+        }
+
+        #endregion Value Property
     }
 }
 
