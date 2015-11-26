@@ -51,6 +51,9 @@ namespace TabMon.Config
                 // Load LogPollInterval.
                 options.LogPollInterval = config.LogPollInterval.Value;
 
+                // Load ThreadInfoPollInterval.
+                options.ThreadInfoPollInterval = config.ThreadInfoPollInterval.Value;
+
                 // Load OutputMode.
                 var outputMode = config.OutputMode.Value;
                 if (outputMode.Equals("DB", StringComparison.InvariantCultureIgnoreCase))
