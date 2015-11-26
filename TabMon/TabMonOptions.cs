@@ -14,6 +14,7 @@ namespace TabMon
         public IDataTableWriter Writer { get; set; }
         public ICollection<Host> Hosts { get; set; }
         public int PollInterval { get; set; }
+        public int LogPollInterval { get; set; }
         public string TableName { get; set; }
         private static TabMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
@@ -57,7 +58,7 @@ namespace TabMon
         /// <returns>True if current options are all valid.</returns>
         public bool Valid()
         {
-            return Hosts.Count > 0 && Writer != null && PollInterval >= MinPollInterval && TableName != null;
+            return Hosts.Count > 0 && Writer != null && PollInterval >= MinPollInterval && LogPollInterval >= MinPollInterval && TableName != null;
         }
 
         public override string ToString()
@@ -68,8 +69,8 @@ namespace TabMon
                 writerName = Writer.Name;
             }
 
-            return String.Format("[{0}='{1}', Writer='{2}', PollInterval='{3}', TableName='{4}']",
-                                   "Host".Pluralize(Hosts.Count), String.Join(",", Hosts), writerName, PollInterval, TableName);
+            return String.Format("[{0}='{1}', Writer='{2}', PollInterval='{3}', LogPollInterval='{4}', TableName='{5}']",
+                                   "Host".Pluralize(Hosts.Count), String.Join(",", Hosts), writerName, PollInterval, LogPollInterval, TableName);
         }
 
         #endregion
