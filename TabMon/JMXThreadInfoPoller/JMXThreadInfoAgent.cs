@@ -60,21 +60,29 @@ namespace TabMon.JMXThreadInfoPoller
         protected void pollThreadsOfCounter(ICounter genericCounter, DataTable table, ref long serverLogsTableCount)
         {
             AbstractMBeanCounter counter = (AbstractMBeanCounter)genericCounter;
-            Log.Info(String.Format(@"Should get thread info for counter: {0}", counter));
-            long[] threadIds = (long[])counter.GetMBeanAttributeValue("AllThreadIds", "java.lang", "type=Threading");
-            foreach (long threadId in threadIds)
+            Log.Debug(String.Format(@"Getting thread info for counter: {0}", counter));
+
+            try
             {
-                ThreadInfo threadInfo = new ThreadInfo();
-                threadInfo.threadId = threadId;
-                JavaLong javaThreadId = new JavaLong(threadId);
-                threadInfo.cpuTime = ((JavaLong)(counter.InvokeMethod("getThreadCpuTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
-                threadInfo.userTime = ((JavaLong)(counter.InvokeMethod("getThreadUserTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
-                threadInfo.allocatedBytes = ((JavaLong)(counter.InvokeMethod("getThreadAllocatedBytes", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
-                threadInfo.pollTimeStamp = DateTime.Now;
-                threadInfo.host = counter.Host.ToString();
-                threadInfo.instance = counter.Instance;
-                JMXThreadTables.addToTable(table, threadInfo);
-                serverLogsTableCount++;
+                long[] threadIds = (long[])counter.GetMBeanAttributeValue("AllThreadIds", "java.lang", "type=Threading");
+                foreach (long threadId in threadIds)
+                {
+                    ThreadInfo threadInfo = new ThreadInfo();
+                    threadInfo.threadId = threadId;
+                    JavaLong javaThreadId = new JavaLong(threadId);
+                    threadInfo.cpuTime = ((JavaLong)(counter.InvokeMethod("getThreadCpuTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
+                    threadInfo.userTime = ((JavaLong)(counter.InvokeMethod("getThreadUserTime", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
+                    threadInfo.allocatedBytes = ((JavaLong)(counter.InvokeMethod("getThreadAllocatedBytes", new object[] { javaThreadId }, new string[] { "long" }, "java.lang", "type=Threading"))).longValue();
+                    threadInfo.pollTimeStamp = DateTime.Now;
+                    threadInfo.host = counter.Host.ToString();
+                    threadInfo.instance = counter.Instance;
+                    JMXThreadTables.addToTable(table, threadInfo);
+                    serverLogsTableCount++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn(String.Format(@"Failed to poll thread info for counter {0}. Exception message: {1}", genericCounter, ex.Message));
             }
         }
     }
