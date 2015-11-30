@@ -136,7 +136,7 @@ namespace TabMon.LogPoller
             //row["id"] = 1;
             row["filename"] = filename;
             row["host_name"] = HostName;
-            row["ts"] = jsonraw.ts;
+            row["ts"] = new DateTimeOffset(DateTime.Parse(jsonraw.ts));
             row["pid"] = (int)jsonraw.pid;
 
             row["tid"] = Convert.ToInt32(tid, 16);
@@ -175,7 +175,7 @@ namespace TabMon.LogPoller
                 var row = filterStateTable.NewRow();
                 string tid = jsonraw.tid;
 
-                row["ts"] = jsonraw.ts;
+                row["ts"] = new DateTimeOffset(DateTime.Parse(jsonraw.ts));
                 row["pid"] = (int)jsonraw.pid;
                 row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;
@@ -219,7 +219,7 @@ namespace TabMon.LogPoller
                 string tid = jsonraw.tid;
 
                 //var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
-                row["ts"] = jsonraw.ts;
+                row["ts"] = new DateTimeOffset(DateTime.Parse(jsonraw.ts));
                 row["pid"] = (int)jsonraw.pid;
                 row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;

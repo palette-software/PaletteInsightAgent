@@ -26,6 +26,7 @@ namespace DataTableWriter.Drivers
                 { "smallint", "System.Int16" },
                 { "smallserial", "System.Int16" },
                 { "text", "System.String" },
+                { "timestamp with time zone", "System.DateTimeOffset" },
                 { "timestamp", "System.DateTime" }
             };
 
@@ -37,6 +38,7 @@ namespace DataTableWriter.Drivers
                 { "System.Byte", "smallint" },
                 { "System.Char", "character(1)" },
                 { "System.DateTime", "timestamp" },
+                { "System.DateTimeOffset", "timestamp with time zone" },
                 { "System.Decimal", "numeric" },
                 { "System.Double", "double precision" },
                 { "System.Int16", "smallint" },

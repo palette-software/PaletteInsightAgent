@@ -48,7 +48,8 @@ namespace DataTableWriter.Drivers
                 { "CLOB", "System.String" },
                 { "TIMESTAMP", "System.DateTime" },
                 { "TIMESTAMP(9)", "System.DateTime" },
-                { "TIMESTAMP(6)", "System.DateTime" }
+                { "TIMESTAMP(6)", "System.DateTime" },
+                { "TIMESTAMP WITH TIME ZONE", "System.DateTimeOffset" }
             };
 
         // Map of System types -> Postgres types.
@@ -59,6 +60,7 @@ namespace DataTableWriter.Drivers
                 { "System.Byte", "smallint" },
                 { "System.Char", "char(1)" },
                 { "System.DateTime", "timestamp" },
+                { "System.DateTimeOffset", "timestamp with time zone" },
                 //{ "System.Decimal", "number(22,7)" },
                 { "System.Decimal", "integer" },
                 { "System.Double", "binary_double" },
