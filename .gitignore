@@ -1,3 +1,4 @@
+.vs
 /packages/
 !packages/repositories.config
 DataTableWriter/bin/

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <StartArguments>Postgres "Server=127.0.0.1%3bPort=5432%3bDatabase=TabMon%3bUser Id=postgres%3bPassword=abc123def"</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartArguments>Postgres "Server=127.0.0.1%3bPort=5432%3bDatabase=TabMon%3bUser Id=postgres%3bPassword=abc123def"</StartArguments>
+  </PropertyGroup>
+</Project>
