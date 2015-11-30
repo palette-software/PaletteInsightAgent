@@ -76,8 +76,9 @@ namespace TabMon.LogPoller
             {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
                 logsToDbConverter.processServerLogLines(writer, writeLock, filename, lines);
-                viewPathUpdater.updateViewPaths(tableauRepo);
             });
+            Log.Info("Startin view path update....");
+            viewPathUpdater.updateViewPaths(tableauRepo);
         }
     }
 }

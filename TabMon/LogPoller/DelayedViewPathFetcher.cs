@@ -26,42 +26,68 @@ namespace TabMon.LogPoller
             this.connectionString = connectionString;
         }
 
+        private struct TmpData
+        {
+            public long id;
+            public string session;
+            public DateTime ts;
+        }
 
         public void updateViewPaths(ITableauRepoConn repo)
         {
             // Skip any work if the repo provided is disabled.
             if (repo == null) return;
 
+
             // Connect to the DB
             using (var conn = new NpgsqlConnection(connectionString))
             {
+                conn.Open();
+                var updatedCount = 0;
                 // Skip if no updates needed.
-                while(HasViewpathsToUpdate(conn))
+                while (HasViewpathsToUpdate(conn))
                 {
+                    var updateList = new List<TmpData>();
+
                     // get a batch and update it.
                     using (var cmd = new NpgsqlCommand())
                     {
-                        PrepareSqlCommand(conn, cmd, @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook_name = '<WORKBOOK>' AND view_name = '<VIEW>' LIMIT 100");
-                        var res = cmd.ExecuteReader();
+                        Log.Info("View path update batch start...");
 
-                        while(res.Read())
+                        PrepareSqlCommand(conn, cmd, @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view= '<VIEW>' LIMIT 100");
+                        using (var res = cmd.ExecuteReader())
                         {
-                            string sess = (string)res["sess"];
-                            DateTime ts = (DateTime)res["ts"];
-                            var viewPath = repo.getViewPathForVizQLSessionId(sess, ts);
-
-                            // log the fact that we may not be able to find the view path.
-                            if (viewPath.isEmpty())
+                            while (res.Read())
                             {
-                                Log.Error(String.Format("==> Cannot find view path for vizQL session='{0}' and timestamp={1}", sess, ts));
-                                continue;
+                                updateList.Add(new TmpData {
+                                    id = Convert.ToInt64(res["id"]),
+                                    session = (string)res["sess"],
+                                    ts = (DateTime)res["ts"]
+                                });
                             }
-
-                            // Update the table
-                            UpdateViewPathInRow(conn, cmd, ts, res["id"], viewPath.workbook, viewPath.view);
                         }
+
                     }
+
+                    // Update the rows in a separate loop
+                    foreach (var row in updateList)
+                    {
+                        var viewPath = repo.getViewPathForVizQLSessionId(row.session, row.ts);
+                        if (viewPath.isEmpty())
+                        {
+                            Log.Error(String.Format("==> Cannot find view path for vizQL session='{0}' and timestamp={1}", row.session, row.ts));
+                            continue;
+                        }
+                        // increment the count of updated rows
+                        updatedCount++;
+                        // Update the table
+                        UpdateViewPathInRow(conn, row.ts, row.id, viewPath.workbook, viewPath.view, viewPath.ip);
+                    }
+
+                    // Log some info about this batch
+                    Log.Info(String.Format("Updated view paths for {0} rows", updatedCount));
                 }
+
             }
         }
 
@@ -74,20 +100,21 @@ namespace TabMon.LogPoller
         /// <param name="id"></param>
         /// <param name="workbook"></param>
         /// <param name="view"></param>
-        private static void UpdateViewPathInRow(NpgsqlConnection conn, NpgsqlCommand cmd, DateTime ts, object id, string workbook, string view)
+        private static void UpdateViewPathInRow(NpgsqlConnection conn, DateTime ts, object id, string workbook, string view, string userIp)
         {
             // Do the update after we are sure we can update it with valid data
             using (var updateCmd = new NpgsqlCommand())
             {
-                PrepareSqlCommand(conn, cmd, @"UPDATE filter_state_audit SET workbook_name= @workbook, view_name = @view WHERE id = @id;");
+                PrepareSqlCommand(conn, updateCmd, @"UPDATE filter_state_audit SET workbook= @workbook, view= @view, user_ip = user_ip WHERE id = @id;");
 
                 object val = ts;
-                AddSqlParameter(cmd, "@workbook", workbook);
-                AddSqlParameter(cmd, "@view", view);
-                AddSqlParameter(cmd, "@id", id);
+                AddSqlParameter(updateCmd, "@workbook", workbook);
+                AddSqlParameter(updateCmd, "@view", view);
+                AddSqlParameter(updateCmd, "@user_ip", userIp);
+                AddSqlParameter(updateCmd, "@id", id);
 
                 // run it.
-                cmd.ExecuteNonQuery();
+                updateCmd.ExecuteNonQuery();
             }
         }
 
@@ -115,8 +142,9 @@ namespace TabMon.LogPoller
             // Query if we have anything to update
             using (var cmd = new NpgsqlCommand())
             {
-                PrepareSqlCommand(conn, cmd, @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook_name = '<WORKBOOK>' AND view_name = '<VIEW>'");
-                return ((int)cmd.ExecuteScalar()) > 0;
+                PrepareSqlCommand(conn, cmd, @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>'");
+                var res = cmd.ExecuteScalar();
+                return ((long)res) > 0;
             }
         }
 
