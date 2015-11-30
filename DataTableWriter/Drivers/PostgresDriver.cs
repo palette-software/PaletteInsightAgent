@@ -80,7 +80,21 @@ namespace DataTableWriter.Drivers
                     Database = connectionInfo.DatabaseName
                 };
 
+            // store the connection string
+            this.connectionString = connectionString.ConnectionString;
+
             return new NpgsqlConnection(connectionString);
+        }
+
+
+        private string connectionString;
+
+        public string ConnectionString
+        {
+            get
+            {
+                return this.connectionString;
+            }
         }
 
         /// <summary>

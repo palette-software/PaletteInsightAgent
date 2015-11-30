@@ -29,5 +29,10 @@ namespace DataTableWriter.Drivers
         /// <param name="base_param_name"></param>
         /// <returns></returns>
         string QueryParamName(string base_param_name);
+
+        /// <summary>
+        /// The ADO.NET connection string of the DB
+        /// </summary>
+        string ConnectionString { get; }
     }
 }

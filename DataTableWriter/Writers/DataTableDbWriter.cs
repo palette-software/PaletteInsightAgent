@@ -15,7 +15,7 @@ namespace DataTableWriter.Writers
     /// </summary>
     public class DataTableDbWriter : IDataTableWriter
     {
-        protected IDbAdapter Adapter { get; set; }
+        public IDbAdapter Adapter { get; set; }
         protected DbTableInitializationOptions tableInitializationOptions;
         /// <summary>
         /// Keep track of tables already initialized

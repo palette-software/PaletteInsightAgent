@@ -20,6 +20,10 @@ namespace TabMon
         private static TabMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
 
+        #region Shared DB config
+        public string DbConnectionString { get; set; }
+        #endregion
+
         #region LogPoller config settings
 
         public string FolderToWatch { get; set; }
