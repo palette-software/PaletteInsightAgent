@@ -7,12 +7,15 @@ using System.Text.RegularExpressions;
 using System.Net;
 
 using DataTableWriter.Writers;
+using System.Globalization;
 
 namespace TabMon.LogPoller
 {
     class LogsToDbConverter
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly CultureInfo FormatProviderInvariant = CultureInfo.InvariantCulture;
+        private static readonly String JsonDateFormat = "{yyyy. MM. dd. HH:mm:ss}";
 
         public string HostName { get; set; }
 
@@ -136,7 +139,7 @@ namespace TabMon.LogPoller
             //row["id"] = 1;
             row["filename"] = filename;
             row["host_name"] = HostName;
-            row["ts"] = new DateTimeOffset(DateTime.Parse(jsonraw.ts));
+            row["ts"] = new DateTimeOffset(DateTime.ParseExact(jsonraw.ts, JsonDateFormat, FormatProviderInvariant));
             row["pid"] = (int)jsonraw.pid;
 
             row["tid"] = Convert.ToInt32(tid, 16);
@@ -175,7 +178,7 @@ namespace TabMon.LogPoller
                 var row = filterStateTable.NewRow();
                 string tid = jsonraw.tid;
 
-                row["ts"] = new DateTimeOffset(DateTime.Parse(jsonraw.ts));
+                row["ts"] = new DateTimeOffset(DateTime.ParseExact(jsonraw.ts, JsonDateFormat, FormatProviderInvariant));
                 row["pid"] = (int)jsonraw.pid;
                 row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;
@@ -219,7 +222,7 @@ namespace TabMon.LogPoller
                 string tid = jsonraw.tid;
 
                 //var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
-                row["ts"] = new DateTimeOffset(DateTime.Parse(jsonraw.ts));
+                row["ts"] = new DateTimeOffset(DateTime.ParseExact(jsonraw.ts, JsonDateFormat, FormatProviderInvariant));
                 row["pid"] = (int)jsonraw.pid;
                 row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;
