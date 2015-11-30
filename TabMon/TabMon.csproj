@@ -145,8 +145,8 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\Host.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
-    <Compile Include="JMXThreadInfoPoller\JMXThreadInfoAgent.cs" />
-    <Compile Include="JMXThreadInfoPoller\JMXThreadTables.cs" />
+    <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
+    <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
     <Compile Include="LogPoller\LogFileWatcher.cs" />
     <Compile Include="LogPoller\LogPollerAgent.cs" />
     <Compile Include="LogPoller\LogPollerConfiguration.cs" />

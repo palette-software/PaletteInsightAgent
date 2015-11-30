@@ -12,7 +12,7 @@ using TabMon.Counters;
 using TabMon.Sampler;
 
 using TabMon.LogPoller;
-using TabMon.JMXThreadInfoPoller;
+using TabMon.ThreadInfoPoller;
 
 [assembly: CLSCompliant(true)]
 
@@ -25,9 +25,9 @@ namespace TabMon
     {
         private Timer timer;
         private Timer logPollTimer;
-        private Timer jmxThreadInfoTimer;
+        private Timer threadInfoTimer;
         private LogPollerAgent logPollerAgent;
-        private JMXThreadInfoAgent jmxThreadInfoAgent;
+        private ThreadInfoAgent threadInfoAgent;
         private CounterSampler sampler;
         private readonly TabMonOptions options;
         private bool disposed;
@@ -67,7 +67,7 @@ namespace TabMon
                 options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
 
             // start the thread info agent
-            jmxThreadInfoAgent = new JMXThreadInfoAgent();
+            threadInfoAgent = new ThreadInfoAgent();
         }
 
         ~TabMonAgent()
@@ -117,7 +117,7 @@ namespace TabMon
             logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.LogPollInterval * 1000);
 
             // Kick off the thread polling timer
-            jmxThreadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
+            threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
         }
 
         /// <summary>
@@ -150,9 +150,9 @@ namespace TabMon
             logPollerAgent.stop();
 
             // Stop the thread info timer
-            if (jmxThreadInfoTimer != null)
+            if (threadInfoTimer != null)
             {
-                jmxThreadInfoTimer.Dispose();
+                threadInfoTimer.Dispose();
             }
 
             Log.Info("TabMon stopped.");
@@ -200,7 +200,7 @@ namespace TabMon
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
         {
-            jmxThreadInfoAgent.poll(sampler.getCounters(), options.Writer, WriteLock);
+            threadInfoAgent.poll(options.Writer, WriteLock);
         }
 
         #endregion Private Methods
