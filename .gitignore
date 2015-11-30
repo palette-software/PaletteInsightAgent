@@ -17,3 +17,6 @@ TabMonServiceInstallerBootstrapper/obj/
 TabMonServiceInstallerBootstrapper/Installers/TabMon.msi
 TabMonServiceInstallerBootstrapper/Installers/TabMonServiceInstallerDBInitializer.msi
 TabMon.v12.suo
+
+BBR-ChargebackModel-CLI/bin/
+BBR-ChargebackModel-CLI/obj/

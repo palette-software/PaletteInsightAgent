@@ -39,9 +39,11 @@ namespace BBR_ChargebackModel_CLI.db
                             effective_from,
                             effective_to,
                             timezone_for_chargeback,
-                            unit_price_currency
+                            unit_price_currency,
+                            storage_unit_price,
+                            storage_bytes_per_unit
                         )
-                        VALUES (@created_at, @effective_from, @effective_to, @timezone_for_chargeback, @unit_price_currency)
+                        VALUES (@created_at, @effective_from, @effective_to, @timezone_for_chargeback, @unit_price_currency, @storage_unit_price, @storage_bytes_per_unit)
                         RETURNING id";
 
                 AddParamToQuery(cmd, "created_at", DateTime.UtcNow);
@@ -50,6 +52,8 @@ namespace BBR_ChargebackModel_CLI.db
                 AddParamToQuery(cmd, "timezone_for_chargeback", model.TimezoneForChargeback);
                 AddParamToQuery(cmd, "unit_price_currency", model.UnitPriceCurrency);
 
+                AddParamToQuery(cmd, "storage_unit_price", model.StorageUnitPrice);
+                AddParamToQuery(cmd, "storage_bytes_per_unit", model.StoregeBytesPerUnit);
                 // Run it!
                 //cmd.ExecuteNonQuery();
                 return Convert.ToInt64(cmd.ExecuteScalar());

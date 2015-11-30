@@ -25,7 +25,10 @@ namespace BBR_ChargebackModel_CLI.migrations
                 new Column("effective_from", DbType.DateTime, 100),
                 new Column("effective_to", DbType.DateTime, 100),
                 new Column("timezone_for_chargeback", DbType.String, 32),
-                new Column("unit_price_currency", DbType.String, 16)
+                new Column("unit_price_currency", DbType.String, 16),
+
+                new Column("storage_unit_price", DbType.Currency),
+                new Column("storage_bytes_per_unit", DbType.String, 16)
             );
 
             //CREATE TABLE chargeback_values(
@@ -48,28 +51,12 @@ namespace BBR_ChargebackModel_CLI.migrations
             );
             Database.AddForeignKey("FK_chargeback_value_model", "chargeback_values", "model_id", "chargeback_models", "id");
 
-            //CREATE TABLE chargeback_storage(
-            //    id serial PRIMARY KEY,
-            //    chargeback_model_id integer REFERENCES chargeback_models(id),
-            //    unit_price numeric,
-            //    unit_size_in_bytes integer
-            //);
-            Database.AddTable("chargeback_storage",
-                new Column("id", DbType.Int64, ColumnProperty.PrimaryKeyWithIdentity),
-                new Column("model_id", DbType.Int64),
-                new Column("unit_price", DbType.Currency),
-                new Column("unit_size_in_bytes", DbType.Int32)
-            );
-            Database.AddForeignKey("FK_chargeback_storage_model", "chargeback_storage", "model_id", "chargeback_models", "id");
         }
 
         public override void Down()
         {
-            Database.RemoveTable("chargeback_storage");
             Database.RemoveTable("chargeback_values");
             Database.RemoveTable("chargeback_models");
-
-            //Database.ExecuteNonQuery("DROP SCHEMA chargeback;");
         }
     }
 }

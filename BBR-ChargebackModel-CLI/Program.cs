@@ -17,6 +17,9 @@ namespace BBR_ChargebackModel_CLI
     {
         public string DbType { get; set; }
         public string ConnectionString { get; set; }
+
+        public string ModelFile { get; set; }
+        public string ValuesFile { get; set; }
     }
 
     class Program
@@ -25,19 +28,13 @@ namespace BBR_ChargebackModel_CLI
         {
             var opts = GetCLIOptions(args);
 
+            // Uncomment this to roll back the DB to its initial state on each run
             migrator.DbMigrator.MigrateToEmptyDb(opts.DbType, opts.ConnectionString);
             migrator.DbMigrator.MigrateToLatestDbVersion(opts.DbType, opts.ConnectionString);
 
-
-            var modelFile = @"c:\Users\Miles\Documents\Visual Studio 2015\Projects\BBR-ChargebackModel-CLI\BBR-ChargebackModel-CLI\chargeback_model.csv";
-
-            var valuesFile = @"c:\Users\Miles\Documents\Visual Studio 2015\Projects\BBR-ChargebackModel-CLI\BBR-ChargebackModel-CLI\chargeback_values.csv";
-
             importData(opts.DbType, opts.ConnectionString,
-                ChargebackModel.FromFile(modelFile),
-                ChargebackValue.FromFile(valuesFile));
-
-            Console.ReadLine();
+                ChargebackModel.FromFile(opts.ModelFile),
+                ChargebackValue.FromFile(opts.ValuesFile));
         }
         /// <summary>
         /// Exits the program if the command line options arent OK, returns the pre-set options otherwise
@@ -45,15 +42,18 @@ namespace BBR_ChargebackModel_CLI
         /// <param name="args">The list of command line args.</param>
         private static CLIConfig GetCLIOptions(string[] args)
         {
-            if (args.Length < 2)
+            if (args.Length < 4)
             {
-                Console.Out.WriteLine("Usage: BBR-ChargebackModel-CLI <dbtype> <connection_string> <file>");
-                Console.Out.WriteLine("\n  dbtype : the database type. Can be 'Postgres' or 'SqlServer' or 'Oracle'");
+                Console.Out.WriteLine("Usage: BBR-ChargebackModel-CLI <dbtype> <connection_string> <model_file> <values_file>\n\n");
+                Console.Out.WriteLine("  dbtype            : the database type. Can be 'Postgres' or 'SqlServer' or 'Oracle'");
+                Console.Out.WriteLine("  connection_string : The C# ADO connection string for the database");
+                Console.Out.WriteLine("  model_file        : The CSV file containing the chargeback model.");
+                Console.Out.WriteLine("  values_file       : The CSV file containing the hour-by-hour chargeback values.");
 
                 Environment.Exit(-1);
             }
 
-            return new CLIConfig { DbType = args[0], ConnectionString = args[1]};
+            return new CLIConfig { DbType = args[0], ConnectionString = args[1], ModelFile = args[2], ValuesFile = args[3]};
         }
 
 

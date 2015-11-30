@@ -22,6 +22,16 @@ namespace BBR_ChargebackModel_CLI
         public string TimezoneForChargeback;
         public string UnitPriceCurrency;
 
+        /// <summary>
+        /// The cost of a single unit of storage.
+        /// </summary>
+        public decimal StorageUnitPrice;
+
+        /// <summary>
+        /// The amount of bytes in a single storage unit for chargeback.
+        /// </summary>
+        public Int64 StoregeBytesPerUnit;
+
         #endregion
 
         public override string ToString()

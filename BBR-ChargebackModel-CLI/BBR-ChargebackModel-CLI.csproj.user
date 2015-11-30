@@ -4,6 +4,6 @@
     <StartArguments>Postgres "Server=127.0.0.1%3bPort=5432%3bDatabase=TabMon%3bUser Id=postgres%3bPassword=abc123def"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>Postgres "Server=127.0.0.1%3bPort=5432%3bDatabase=TabMon%3bUser Id=postgres%3bPassword=abc123def"</StartArguments>
+    <StartArguments>Postgres "Server=127.0.0.1%3bPort=5432%3bDatabase=TabMon%3bUser Id=postgres%3bPassword=abc123def" "..\..\Samples\chargeback_model.csv" "..\..\Samples\chargeback_values.csv"</StartArguments>
   </PropertyGroup>
 </Project>
