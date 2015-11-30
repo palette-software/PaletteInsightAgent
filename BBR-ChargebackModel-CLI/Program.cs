@@ -29,7 +29,7 @@ namespace BBR_ChargebackModel_CLI
             var opts = GetCLIOptions(args);
 
             // Uncomment this to roll back the DB to its initial state on each run
-            migrator.DbMigrator.MigrateToEmptyDb(opts.DbType, opts.ConnectionString);
+            //migrator.DbMigrator.MigrateToEmptyDb(opts.DbType, opts.ConnectionString);
             migrator.DbMigrator.MigrateToLatestDbVersion(opts.DbType, opts.ConnectionString);
 
             importData(opts.DbType, opts.ConnectionString,
