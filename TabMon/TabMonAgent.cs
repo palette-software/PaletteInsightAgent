@@ -26,9 +26,12 @@ namespace TabMon
         private Timer timer;
         private Timer logPollTimer;
         private Timer threadInfoTimer;
+        private Timer viewPathUpdateTimer;
         private LogPollerAgent logPollerAgent;
         private ThreadInfoAgent threadInfoAgent;
         private CounterSampler sampler;
+        private ViewPathUpdaterAgent viewPathUpdater;
+        private ITableauRepoConn tableauRepo;
         private readonly TabMonOptions options;
         private bool disposed;
         private const string PathToCountersConfig = @"Config\Counters.config";
@@ -60,15 +63,23 @@ namespace TabMon
 
             Log.Info("Setting up LogPoller agent.");
 
-            
+
             // Load the log poller config & start the agent
             //var logPollerConfig = LogPollerConfigurationLoader.load();
             logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
-                options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb,
                 options.DbConnectionString);
 
             // start the thread info agent
             threadInfoAgent = new ThreadInfoAgent();
+
+            // The tableau postgres repository
+            if (ShouldUseRepo(options.RepoHost))
+            {
+                tableauRepo = new Tableau9RepoConn(options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
+            }
+
+            // The view path updater agent
+            viewPathUpdater = new ViewPathUpdaterAgent(options.DbConnectionString);
         }
 
         ~TabMonAgent()
@@ -119,6 +130,9 @@ namespace TabMon
 
             // Kick off the thread polling timer
             threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
+
+            // Start the view path updater timer
+            viewPathUpdateTimer = new Timer(callback: UpdateViewPaths, state: null, dueTime: 0, period: options.LogPollInterval * 1000);
         }
 
         /// <summary>
@@ -145,15 +159,22 @@ namespace TabMon
             // Stop the log poller agent
             if (logPollTimer != null)
             {
+                Log.Info("Stopping logPollTimer...");
                 logPollTimer.Dispose();
-                Log.Info("Stopping logPollTimer.");
             }
             logPollerAgent.stop();
 
             // Stop the thread info timer
             if (threadInfoTimer != null)
             {
+                Log.Info("Stopping thread info loop...");
                 threadInfoTimer.Dispose();
+            }
+
+            if (viewPathUpdateTimer != null)
+            {
+                Log.Info("Stopping view path updater...");
+                viewPathUpdateTimer.Dispose();
             }
 
             Log.Info("TabMon stopped.");
@@ -202,6 +223,17 @@ namespace TabMon
         private void PollThreadInfo(object stateInfo)
         {
             threadInfoAgent.poll(options.Writer, WriteLock);
+        }
+
+
+        private void UpdateViewPaths(object stateInfo)
+        {
+            viewPathUpdater.updateViewPath(tableauRepo);
+        }
+
+        private static bool ShouldUseRepo(string repoHost)
+        {
+            return !String.IsNullOrEmpty(repoHost);
         }
 
         #endregion Private Methods

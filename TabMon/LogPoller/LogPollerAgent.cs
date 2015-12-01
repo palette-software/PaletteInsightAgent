@@ -17,37 +17,15 @@ namespace TabMon.LogPoller
         private LogFileWatcher watcher;
         private LogsToDbConverter logsToDbConverter;
 
-        private ITableauRepoConn tableauRepo;
-
-        /// <summary>
-        /// The delayed updater for the view paths.
-        /// </summary>
-        private IViewPathUpdater viewPathUpdater;
-
         private string folderToWatch;
         private string filter;
 
-
-
-        public LogPollerAgent(string folderToWatch, string filterString, string repoHost, int repoPort, string repoUser, string repoPass, string repoDb, string dbConnectionString)
+        public LogPollerAgent(string folderToWatch, string filterString, string dbConnectionString)
         {
             Log.Info("Initializing LogPollerAgent with folder:" + folderToWatch + " and filter: " + filter);
             this.folderToWatch = folderToWatch;
             filter = filterString;
             logsToDbConverter = new LogsToDbConverter();
-            // create the repo 
-            tableauRepo = null;
-            if (ShouldUseRepo(repoHost))
-            {
-                tableauRepo = new Tableau9RepoConn(repoHost, repoPort, repoUser, repoPass, repoDb);
-            }
-            // Create the view path updater
-            viewPathUpdater = new PostgresViewPathUpdater(dbConnectionString);
-        }
-
-        private static bool ShouldUseRepo(string repoHost)
-        {
-            return !String.IsNullOrEmpty(repoHost);
         }
 
 
@@ -77,8 +55,7 @@ namespace TabMon.LogPoller
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
                 logsToDbConverter.processServerLogLines(writer, writeLock, filename, lines);
             });
-            Log.Info("Startin view path update....");
-            viewPathUpdater.updateViewPaths(tableauRepo);
+
         }
     }
 }
