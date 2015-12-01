@@ -21,10 +21,15 @@ namespace TabMon.LogPoller
         private string connectionString;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        /// <summary>
+        /// We only care about looking up view paths older then this.
+        /// </summary>
+        private const int DELAY_IN_MINUTES = 10;
+
         // Our query goes from the oldest to the newest unknown entries
-        private const string SELECT_FSA_TO_UPDATE_SQL = @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view='<VIEW>' ORDER BY ts asc LIMIT 100";
+        private const string SELECT_FSA_TO_UPDATE_SQL = @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view='<VIEW>' AND ts < @ts ORDER BY ts asc LIMIT 100";
         private const string UPDATE_FSA_SQL = @"UPDATE filter_state_audit SET workbook=@workbook, view=@view, user_ip=@user_ip WHERE id = @id";
-        private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>'";
+        private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>' AND ts < @ts";
 
         //private const 
 
@@ -64,6 +69,8 @@ namespace TabMon.LogPoller
                         Log.Info("View path update batch start...");
 
                         PrepareSqlCommand(conn, cmd, SELECT_FSA_TO_UPDATE_SQL);
+                        AddMostRecentTimestampToCommand(cmd);
+
                         using (var res = cmd.ExecuteReader())
                         {
                             while (res.Read())
@@ -155,9 +162,22 @@ namespace TabMon.LogPoller
             using (var cmd = new NpgsqlCommand())
             {
                 PrepareSqlCommand(conn, cmd, HAS_FSA_TO_UPDATE_SQL);
+                AddMostRecentTimestampToCommand(cmd);
                 var res = cmd.ExecuteScalar();
                 return ((long)res) > 0;
             }
+        }
+
+        /// <summary>
+        /// Add an extra @ts parameter to an SQL query with the latest timestamp to look for
+        /// </summary>
+        /// <param name="cmd"></param>
+        private static void AddMostRecentTimestampToCommand(NpgsqlCommand cmd)
+        {
+            // Only handle events at least 10 minutes old
+            // TODO: is the timestamp in UTC or some local time?
+            var mostRecentTs = DateTime.UtcNow.AddMinutes(-1 * DELAY_IN_MINUTES);
+            AddSqlParameter(cmd, "@ts", mostRecentTs);
         }
 
         private static void PrepareSqlCommand(NpgsqlConnection conn, NpgsqlCommand cmd, string cmdText)
@@ -166,6 +186,7 @@ namespace TabMon.LogPoller
             cmd.Connection = conn;
             cmd.CommandType = System.Data.CommandType.Text;
         }
+
     }
 
 }
