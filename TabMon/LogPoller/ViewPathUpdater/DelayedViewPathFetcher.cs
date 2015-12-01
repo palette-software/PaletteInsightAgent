@@ -75,7 +75,8 @@ namespace TabMon.LogPoller
                         {
                             while (res.Read())
                             {
-                                updateList.Add(new TmpData {
+                                updateList.Add(new TmpData
+                                {
                                     id = Convert.ToInt64(res["id"]),
                                     session = (string)res["sess"],
                                     ts = (DateTime)res["ts"]
@@ -92,13 +93,14 @@ namespace TabMon.LogPoller
                         if (viewPath.isEmpty())
                         {
                             Log.Error(String.Format("==> Cannot find view path for vizQL session='{0}' and timestamp={1}", row.session, row.ts));
-
-                            // Mark this row as a row we already tried to process...
-                            UpdateViewPathInRow(conn, row.ts, row.id, "<UNKNOWN>", "<UNKNOWN>", "<UNKNOWN>");
-                            continue;
+                            // update with "<UNKNOWN>"
+                            viewPath = ViewPath.Unknown;
                         }
-                        // increment the count of updated rows
-                        updatedCount++;
+                        else
+                        {
+                            // increment the count of updated rows
+                            updatedCount++;
+                        }
                         // Update the table
                         UpdateViewPathInRow(conn, row.ts, row.id, viewPath.workbook, viewPath.view, viewPath.ip);
                     }
