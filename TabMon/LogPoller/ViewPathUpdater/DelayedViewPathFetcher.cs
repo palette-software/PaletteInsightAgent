@@ -21,9 +21,9 @@ namespace TabMon.LogPoller
         private string connectionString;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private const string SELECT_FSA_TO_UPDATE_SQL = @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view= '<VIEW>' LIMIT 100";
-        private const string UPDATE_FSA_SQL = @"UPDATE filter_state_audit SET workbook=@workbook, view=@view, user_ip=@user_ip WHERE id = @id";
-        private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>'";
+        private const string SELECT_FSA_TO_UPDATE_SQL = @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view='<VIEW>' AND workbook_resolved=FALSE LIMIT 100";
+        private const string UPDATE_FSA_SQL = @"UPDATE filter_state_audit SET workbook=@workbook, view=@view, user_ip=@user_ip, workbook_resolved=TRUE WHERE id = @id";
+        private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>' AND workbook_resolved=FALSE";
 
         //private const 
 

@@ -237,11 +237,11 @@ namespace TabMon.LogPoller
         /// <param name="row"></param>
         private static void UpdateViewPath( dynamic jsonraw, DataRow row)
         {
-
             var viewPath = MakeEmptyViewPath();
             row["workbook"] = viewPath.workbook;
             row["view"] = viewPath.view;
             row["user_ip"] = viewPath.ip;
+            row["workbook_resolved"] = false;
         }
     }
 }
