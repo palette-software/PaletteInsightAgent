@@ -85,7 +85,6 @@ namespace TabMon.LogPoller
             TableHelper.addColumn(table, "hostname");
             TableHelper.addColumn(table, "user_ip");
 
-            TableHelper.addColumn(table, "workbook_resolved", "System.Boolean");
             //setPrimaryKey(table, "id");
             return table;
         }

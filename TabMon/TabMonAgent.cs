@@ -37,6 +37,7 @@ namespace TabMon
         private const string PathToCountersConfig = @"Config\Counters.config";
         private const int WriteLockAcquisitionTimeout = 10; // In seconds.
         private static readonly object WriteLock = new object();
+        private static readonly object ViewPathUpdaterLock = new object();
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         public static readonly string Log4NetConfigKey = "log4net-config-file";
 
@@ -228,7 +229,11 @@ namespace TabMon
 
         private void UpdateViewPaths(object stateInfo)
         {
-            viewPathUpdater.updateViewPath(tableauRepo);
+            // wrap this in a lock so there is no re-enterance
+            lock(ViewPathUpdaterLock)
+            {
+                viewPathUpdater.updateViewPath(tableauRepo);
+            }
         }
 
         private static bool ShouldUseRepo(string repoHost)
