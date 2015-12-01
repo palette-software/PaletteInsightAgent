@@ -16,7 +16,7 @@ namespace TabMon.ThreadInfoPoller
 
             TableHelper.addColumn(table, "host_name");
             TableHelper.addColumn(table, "instance");
-            TableHelper.addColumn(table, "ts", "System.DateTime");
+            TableHelper.addColumn(table, "ts", "System.DateTimeOffset");
             TableHelper.addColumn(table, "pid", "System.Int32");
             TableHelper.addColumn(table, "tid", "System.Int32");
             TableHelper.addColumn(table, "cpu_time", "System.Int64");
