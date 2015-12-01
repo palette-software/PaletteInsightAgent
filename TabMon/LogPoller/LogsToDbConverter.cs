@@ -7,15 +7,12 @@ using System.Text.RegularExpressions;
 using System.Net;
 
 using DataTableWriter.Writers;
-using System.Globalization;
 
 namespace TabMon.LogPoller
 {
     class LogsToDbConverter
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private static readonly CultureInfo FormatProviderInvariant = CultureInfo.InvariantCulture;
-        private static readonly String JsonDateFormat = "{yyyy. MM. dd. HH:mm:ss}";
 
         public string HostName { get; set; }
 
@@ -298,8 +295,8 @@ namespace TabMon.LogPoller
         /// <returns>DateTimeOffset (UTC time)</returns>
         private static DateTimeOffset parseJsonTimestamp(dynamic jsonTimeStamp)
         {
-            // Unfortunately we need to convert the JSON time stamp (currently of which type is
-            // Newtonsoft.Json.Linq.JValue) to DateTime as there is no direct conversion from 
+            // Unfortunately first we need to convert the JSON time stamp (currently of which type
+            // is Newtonsoft.Json.Linq.JValue) to DateTime as there is no direct conversion from 
             // JSON time stamp to DateTimeOffset.
             // The DateTimeOffset conversion will be implicitly executed at return.
             return (DateTime)jsonTimeStamp;
