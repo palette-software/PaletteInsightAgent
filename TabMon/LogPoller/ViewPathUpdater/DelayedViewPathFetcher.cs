@@ -21,6 +21,14 @@ namespace TabMon.LogPoller
         private string connectionString;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        private const string SELECT_FSA_TO_UPDATE_SQL = @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view= '<VIEW>' LIMIT 100";
+        private const string UPDATE_FSA_SQL = @"UPDATE filter_state_audit SET workbook=@workbook, view=@view, user_ip=@user_ip WHERE id = @id";
+        private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>'";
+
+        //private const 
+
+        //private const string 
+
         public PostgresViewPathUpdater(string connectionString)
         {
             this.connectionString = connectionString;
@@ -54,7 +62,7 @@ namespace TabMon.LogPoller
                     {
                         Log.Info("View path update batch start...");
 
-                        PrepareSqlCommand(conn, cmd, @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view= '<VIEW>' LIMIT 100");
+                        PrepareSqlCommand(conn, cmd, SELECT_FSA_TO_UPDATE_SQL);
                         using (var res = cmd.ExecuteReader())
                         {
                             while (res.Read())
@@ -105,7 +113,7 @@ namespace TabMon.LogPoller
             // Do the update after we are sure we can update it with valid data
             using (var updateCmd = new NpgsqlCommand())
             {
-                PrepareSqlCommand(conn, updateCmd, @"UPDATE filter_state_audit SET workbook= @workbook, view= @view, user_ip = user_ip WHERE id = @id;");
+                PrepareSqlCommand(conn, updateCmd, UPDATE_FSA_SQL);
 
                 object val = ts;
                 AddSqlParameter(updateCmd, "@workbook", workbook);
@@ -142,7 +150,7 @@ namespace TabMon.LogPoller
             // Query if we have anything to update
             using (var cmd = new NpgsqlCommand())
             {
-                PrepareSqlCommand(conn, cmd, @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>'");
+                PrepareSqlCommand(conn, cmd, HAS_FSA_TO_UPDATE_SQL);
                 var res = cmd.ExecuteScalar();
                 return ((long)res) > 0;
             }
