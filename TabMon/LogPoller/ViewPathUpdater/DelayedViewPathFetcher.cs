@@ -36,16 +36,12 @@ namespace TabMon.LogPoller
         private const string UPDATE_FSA_SQL = @"UPDATE filter_state_audit SET workbook=@workbook, view=@view, user_ip=@user_ip WHERE id = @id";
         private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>' AND ts < @ts AND ts > @min_ts";
 
-        //private const 
-
-        //private const string 
-
         public PostgresViewPathUpdater(string connectionString)
         {
             this.connectionString = connectionString;
         }
 
-        private struct TmpData
+        private struct ViewPathLookupEntry
         {
             public long id;
             public string session;
@@ -66,55 +62,82 @@ namespace TabMon.LogPoller
                 // Skip if no updates needed.
                 while (HasViewpathsToUpdate(conn))
                 {
-                    var updateList = new List<TmpData>();
+                    var updateList = MakeUpdateList(conn);
+                    updatedCount += UpdateViewPaths(repo, conn, updatedCount, updateList);
+                }
+                // Log some info about this batch
+                Log.Info(String.Format("Updated view paths for {0} rows", updatedCount));
 
-                    // get a batch and update it.
-                    using (var cmd = new NpgsqlCommand())
+            }
+        }
+
+        /// <summary>
+        /// Do the actual update of the view paths.
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="conn"></param>
+        /// <param name="updatedCount"></param>
+        /// <param name="updateList"></param>
+        /// <returns></returns>
+        private static int UpdateViewPaths(ITableauRepoConn repo, NpgsqlConnection conn, int updatedCount, List<ViewPathLookupEntry> updateList)
+        {
+            var updatedInThisBatchCount = 0;
+
+            // Update the rows in a separate loop
+            foreach (var row in updateList)
+            {
+                var viewPath = repo.getViewPathForVizQLSessionId(row.session, row.ts);
+                if (viewPath.isEmpty())
+                {
+                    Log.Error(String.Format("==> Cannot find view path for vizQL session='{0}' and timestamp={1}", row.session, row.ts));
+                    // update with "<UNKNOWN>"
+                    viewPath = ViewPath.Unknown;
+                }
+                else
+                {
+                    // increment the count of updated rows
+                    updatedInThisBatchCount++;
+                }
+                // Update the table
+                UpdateViewPathInRow(conn, row.ts, row.id, viewPath.workbook, viewPath.view, viewPath.ip);
+            }
+
+            return updatedInThisBatchCount;
+
+        }
+
+        /// <summary>
+        /// Create a list of entries we need to update
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        private static List<ViewPathLookupEntry> MakeUpdateList(NpgsqlConnection conn)
+        {
+            var updateList = new List<ViewPathLookupEntry>();
+
+            // get a batch and update it.
+            using (var cmd = MakeSqlCommand(conn, SELECT_FSA_TO_UPDATE_SQL))
+            {
+                Log.Info("View path update batch start...");
+
+                AddMostRecentTimestampToCommand(cmd);
+
+                using (var res = cmd.ExecuteReader())
+                {
+                    while (res.Read())
                     {
-                        Log.Info("View path update batch start...");
-
-                        PrepareSqlCommand(conn, cmd, SELECT_FSA_TO_UPDATE_SQL);
-                        AddMostRecentTimestampToCommand(cmd);
-
-                        using (var res = cmd.ExecuteReader())
+                        updateList.Add(new ViewPathLookupEntry
                         {
-                            while (res.Read())
-                            {
-                                updateList.Add(new TmpData
-                                {
-                                    id = Convert.ToInt64(res["id"]),
-                                    session = (string)res["sess"],
-                                    ts = (DateTime)res["ts"]
-                                });
-                            }
-                        }
-
+                            id = Convert.ToInt64(res["id"]),
+                            session = (string)res["sess"],
+                            ts = (DateTime)res["ts"]
+                        });
                     }
-
-                    // Update the rows in a separate loop
-                    foreach (var row in updateList)
-                    {
-                        var viewPath = repo.getViewPathForVizQLSessionId(row.session, row.ts);
-                        if (viewPath.isEmpty())
-                        {
-                            Log.Error(String.Format("==> Cannot find view path for vizQL session='{0}' and timestamp={1}", row.session, row.ts));
-                            // update with "<UNKNOWN>"
-                            viewPath = ViewPath.Unknown;
-                        }
-                        else
-                        {
-                            // increment the count of updated rows
-                            updatedCount++;
-                        }
-                        // Update the table
-                        UpdateViewPathInRow(conn, row.ts, row.id, viewPath.workbook, viewPath.view, viewPath.ip);
-                    }
-
-                    // Log some info about this batch
-                    Log.Info(String.Format("Updated view paths for {0} rows", updatedCount));
                 }
 
             }
+
+            return updateList;
         }
 
         /// <summary>
@@ -129,10 +152,8 @@ namespace TabMon.LogPoller
         private static void UpdateViewPathInRow(NpgsqlConnection conn, DateTime ts, object id, string workbook, string view, string userIp)
         {
             // Do the update after we are sure we can update it with valid data
-            using (var updateCmd = new NpgsqlCommand())
+            using (var updateCmd = MakeSqlCommand(conn, UPDATE_FSA_SQL))
             {
-                PrepareSqlCommand(conn, updateCmd, UPDATE_FSA_SQL);
-
                 object val = ts;
                 AddSqlParameter(updateCmd, "@workbook", workbook);
                 AddSqlParameter(updateCmd, "@view", view);
@@ -145,20 +166,6 @@ namespace TabMon.LogPoller
         }
 
         /// <summary>
-        /// Add a parameter to an SQL command.
-        /// </summary>
-        /// <param name="cmd"></param>
-        /// <param name="name"></param>
-        /// <param name="val"></param>
-        private static void AddSqlParameter(NpgsqlCommand cmd, string name, object val)
-        {
-            var timestampParam = cmd.CreateParameter();
-            timestampParam.ParameterName = name;
-            timestampParam.Value = val;
-            cmd.Parameters.Add(timestampParam);
-        }
-
-        /// <summary>
         /// Helper that returns the number of view paths to update
         /// </summary>
         /// <param name="conn">The connection to use.</param>
@@ -166,9 +173,8 @@ namespace TabMon.LogPoller
         private static bool HasViewpathsToUpdate(NpgsqlConnection conn)
         {
             // Query if we have anything to update
-            using (var cmd = new NpgsqlCommand())
+            using (var cmd = MakeSqlCommand(conn, HAS_FSA_TO_UPDATE_SQL))
             {
-                PrepareSqlCommand(conn, cmd, HAS_FSA_TO_UPDATE_SQL);
                 AddMostRecentTimestampToCommand(cmd);
                 var res = cmd.ExecuteScalar();
                 Log.Info(String.Format("Found {0} rows without workbook/view path.", res));
@@ -190,12 +196,45 @@ namespace TabMon.LogPoller
             AddSqlParameter(cmd, "@min_ts", maxAgeTs);
         }
 
-        private static void PrepareSqlCommand(NpgsqlConnection conn, NpgsqlCommand cmd, string cmdText)
+        /// <summary>
+        /// Create a new SQL command from an SQL statement.
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="cmdText"></param>
+        /// <returns></returns>
+        private static NpgsqlCommand MakeSqlCommand(NpgsqlConnection conn, string cmdText)
         {
-            cmd.CommandText = cmdText;
-            cmd.Connection = conn;
-            cmd.CommandType = System.Data.CommandType.Text;
+            NpgsqlCommand cmd = null;
+            try
+            {
+                cmd = new NpgsqlCommand();
+                cmd.CommandType = System.Data.CommandType.Text;
+                cmd.Connection = conn;
+                cmd.CommandText = cmdText;
+                return cmd;
+
+            }
+            catch (Exception e)
+            {
+                if (cmd != null) cmd.Dispose();
+                throw;
+            }
         }
+
+        /// <summary>
+        /// Add a parameter to an SQL command.
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="name"></param>
+        /// <param name="val"></param>
+        private static void AddSqlParameter(NpgsqlCommand cmd, string name, object val)
+        {
+            var timestampParam = cmd.CreateParameter();
+            timestampParam.ParameterName = name;
+            timestampParam.Value = val;
+            cmd.Parameters.Add(timestampParam);
+        }
+
 
     }
 
