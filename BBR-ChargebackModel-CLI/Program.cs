@@ -30,7 +30,7 @@ namespace BBR_ChargebackModel_CLI
         {
             var opts = GetCLIOptions(args);
 
-            // If we need to re-migrate, rever the db to its original state
+            // If we need to re-migrate, revert the db to its original state
             if (opts.Revert)
             {
                 migrator.DbMigrator.MigrateToEmptyDb(opts.DbType, opts.ConnectionString);
