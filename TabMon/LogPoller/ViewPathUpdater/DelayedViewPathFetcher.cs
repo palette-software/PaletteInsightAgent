@@ -26,10 +26,15 @@ namespace TabMon.LogPoller
         /// </summary>
         private const int DELAY_IN_MINUTES = 10;
 
+        /// <summary>
+        /// The max age of an entry to look up.
+        /// </summary>
+        private const int MAX_AGE_IN_HOURS = 48;
+
         // Our query goes from the oldest to the newest unknown entries
-        private const string SELECT_FSA_TO_UPDATE_SQL = @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view='<VIEW>' AND ts < @ts ORDER BY ts asc LIMIT 100";
+        private const string SELECT_FSA_TO_UPDATE_SQL = @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view='<VIEW>' AND ts < @ts AND ts > @min_ts ORDER BY ts asc LIMIT 100";
         private const string UPDATE_FSA_SQL = @"UPDATE filter_state_audit SET workbook=@workbook, view=@view, user_ip=@user_ip WHERE id = @id";
-        private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>' AND ts < @ts";
+        private const string HAS_FSA_TO_UPDATE_SQL = @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>' AND ts < @ts AND ts > @min_ts";
 
         //private const 
 
@@ -166,6 +171,7 @@ namespace TabMon.LogPoller
                 PrepareSqlCommand(conn, cmd, HAS_FSA_TO_UPDATE_SQL);
                 AddMostRecentTimestampToCommand(cmd);
                 var res = cmd.ExecuteScalar();
+                Log.Info(String.Format("Found {0} rows without workbook/view path.", res));
                 return ((long)res) > 0;
             }
         }
@@ -180,6 +186,8 @@ namespace TabMon.LogPoller
             // TODO: is the timestamp in UTC or some local time?
             var mostRecentTs = DateTime.UtcNow.AddMinutes(-1 * DELAY_IN_MINUTES);
             AddSqlParameter(cmd, "@ts", mostRecentTs);
+            var maxAgeTs = DateTime.UtcNow.AddHours(-1 * MAX_AGE_IN_HOURS);
+            AddSqlParameter(cmd, "@min_ts", maxAgeTs);
         }
 
         private static void PrepareSqlCommand(NpgsqlConnection conn, NpgsqlCommand cmd, string cmdText)
