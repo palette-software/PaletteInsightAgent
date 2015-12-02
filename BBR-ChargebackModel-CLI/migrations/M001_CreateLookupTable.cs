@@ -14,12 +14,12 @@ namespace BBR_ChargebackModel_CLI.migrations
         public override void Up()
         {
             Database.AddTable("chargeback_lookup",
-                new Column("id", DbType.Int64, ColumnProperty.PrimaryKeyWithIdentity),
+                //new Column("id", DbType.Int64, ColumnProperty.PrimaryKeyWithIdentity),
 
-                new Column("datetime_key", DbType.DateTime),
+                new Column("datetime_key", DbType.DateTime, ColumnProperty.PrimaryKey),
 
                 new Column("model_id", DbType.Int64),
-                new Column("usage_type", DbType.Int32),
+                new Column("usage_type", DbType.Int32, ColumnProperty.PrimaryKey),
                 new Column("unit_price", DbType.Currency),
                 new Column("rate_category", DbType.String, 32),
 

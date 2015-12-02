@@ -9,19 +9,16 @@ namespace BBR_ChargebackModel_CLI
 {
     public class NoChargebackConfigured : Exception
     {
-        public NoChargebackConfigured(int dow, int hod)
+        public NoChargebackConfigured(int dow, int hod, int usageType)
+            : base(BuildMessage(dow, hod, usageType))
         {
-            DayOfWeek = dow;
-            HourOfDay = hod;
         }
 
-        public int DayOfWeek;
-        public int HourOfDay;
-
-        public override string ToString()
+        private static string BuildMessage(int dow, int hod, int usageType)
         {
-            return String.Format("Cannot find chargeback setup for day_of_the_week={0}, hour_of_day={1}", DayOfWeek, HourOfDay);
+            return String.Format("Cannot find chargeback setup for day_of_the_week={0}, hour_of_day={1}, usage_type={2}", dow, hod, usageType);
         }
+
     }
 
     /// <summary>
@@ -40,6 +37,7 @@ namespace BBR_ChargebackModel_CLI
 
     class ChargebackLookupCreator
     {
+        private const int USAGE_TYPE_COUNT = 2;
         /// <summary>
         /// Creates the chargeback lookup table.
         /// </summary>
@@ -49,10 +47,10 @@ namespace BBR_ChargebackModel_CLI
         /// <returns></returns>
         public static LookupRow[] CreateChargebackLookup(ChargebackModel model, ChargebackValue[] values)
         {
-            LookupEntry[,] chargebackLookup = CreateLookupEntries(values);
+            LookupEntry[,,] chargebackLookup = CreateLookupEntries(values);
 
             // Figure out the timezone used
-            var tz = TimeZoneInfo.FindSystemTimeZoneById(model.TimezoneForChargeback);
+            var timezoneUsed = TimeZoneInfo.FindSystemTimeZoneById(model.TimezoneForChargeback);
 
             var startDate = model.EffectiveFrom;
             var endDate = model.EffectiveTo;
@@ -67,25 +65,24 @@ namespace BBR_ChargebackModel_CLI
                 var dow = (int)currentDate.DayOfWeek;
                 var hod = currentDate.Hour;
 
-                var lookup = chargebackLookup[dow, hod];
-
-                // Double-check....
-                // TODO: remove this if sure
-                if (lookup == null)
-                    throw new NoChargebackConfigured(dow, hod);
-
-                // Set up the effective range
-                var effectiveFrom = TimeZoneInfo.ConvertTimeToUtc(currentDate, tz);
-
-                outputList.Add(new LookupRow
+                // Handle all usage types
+                for (var usageType = 0; usageType < USAGE_TYPE_COUNT; ++usageType)
                 {
-                    DatetimeKey = effectiveFrom,
-                    ModelId = 0,
-                    UsageType = lookup.UsageType,
-                    UnitPrice = lookup.UnitPrice,
-                    RateCategory = lookup.RateCategory,
-                    UnitPriceCurrency = model.UnitPriceCurrency
-                });
+                    var lookup = chargebackLookup[dow, hod, usageType];
+
+                    // Set up the effective range
+                    var effectiveFrom = TimeZoneInfo.ConvertTimeToUtc(currentDate, timezoneUsed);
+
+                    outputList.Add(new LookupRow
+                    {
+                        DatetimeKey = effectiveFrom,
+                        ModelId = 0,
+                        UsageType = lookup.UsageType,
+                        UnitPrice = lookup.UnitPrice,
+                        RateCategory = lookup.RateCategory,
+                        UnitPriceCurrency = model.UnitPriceCurrency
+                    });
+                }
 
                 // advance to the next hour
                 currentDate = currentDate.AddHours(1);
@@ -94,23 +91,24 @@ namespace BBR_ChargebackModel_CLI
             return outputList.ToArray();
         }
 
-        private static void ValidateLookupEntries(LookupEntry[,] chargebackLookup)
+        private static void ValidateLookupEntries(LookupEntry[,,] chargebackLookup)
         {
             // Check if all slots are filled
             for (var i = 0; i < 7; ++i)
                 for (var j = 0; j < 24; ++j)
-                    // This check disallows defining LookupEntry as a struct.
-                    if (chargebackLookup[i, j] == null)
-                        throw new NoChargebackConfigured(i, j);
+                    for (var usageType = 0; usageType < USAGE_TYPE_COUNT; ++usageType)
+                        // This check disallows defining LookupEntry as a struct.
+                        if (chargebackLookup[i, j, usageType] == null)
+                            throw new NoChargebackConfigured(i, j, usageType);
         }
 
-        private static LookupEntry[,] CreateLookupEntries(ChargebackValue[] values)
+        private static LookupEntry[,,] CreateLookupEntries(ChargebackValue[] values)
         {
-            // Create a 2 dimensional lookup array.
-            var chargebackLookup = new LookupEntry[7, 24];
+            // Create a 3 dimensional lookup array: day-of-the-week, hour-of-day, usage-type
+            var chargebackLookup = new LookupEntry[7, 24, USAGE_TYPE_COUNT];
             foreach (var val in values)
             {
-                chargebackLookup[val.DayOfWeek, val.HourOfDay] = new LookupEntry
+                chargebackLookup[val.DayOfWeek, val.HourOfDay, (int)val.UsageType] = new LookupEntry
                 {
                     UsageType = val.UsageType,
                     UnitPrice = val.UnitPrice,

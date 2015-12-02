@@ -29,12 +29,23 @@ namespace BBR_ChargebackModel_CLI
             var opts = GetCLIOptions(args);
 
             // Uncomment this to roll back the DB to its initial state on each run
-            //migrator.DbMigrator.MigrateToEmptyDb(opts.DbType, opts.ConnectionString);
+            migrator.DbMigrator.MigrateToEmptyDb(opts.DbType, opts.ConnectionString);
             migrator.DbMigrator.MigrateToLatestDbVersion(opts.DbType, opts.ConnectionString);
 
-            importData(opts.DbType, opts.ConnectionString,
-                ChargebackModel.FromFile(opts.ModelFile),
-                ChargebackValue.FromFile(opts.ValuesFile));
+            try
+            {
+                importData(opts.DbType, opts.ConnectionString,
+                    ChargebackModel.FromFile(opts.ModelFile),
+                    ChargebackValue.FromFile(opts.ValuesFile));
+            }
+            catch (NoChargebackConfigured e)
+            {
+                Console.Error.WriteLine("Cannot fill chargeback lookup table: at least a day/hour/usage-type combination is left blank:");
+                Console.Error.WriteLine(e.Message);
+                Console.Error.WriteLine(e.StackTrace);
+                // Signal that things arent OK
+                Environment.Exit(-1);
+            }
         }
         /// <summary>
         /// Exits the program if the command line options arent OK, returns the pre-set options otherwise
