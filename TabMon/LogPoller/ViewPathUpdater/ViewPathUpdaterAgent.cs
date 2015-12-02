@@ -12,7 +12,7 @@ namespace TabMon.LogPoller
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private string connectionString;
-        private IViewPathUpdater viewPathUpdater;
+        private ViewPathUpdater viewPathUpdater;
 
         /// <summary>
         /// Creates a new instance of the view path updater
@@ -21,8 +21,9 @@ namespace TabMon.LogPoller
         public ViewPathUpdaterAgent(string connectionString)
         {
             this.connectionString = connectionString;
-
-            viewPathUpdater = new PostgresViewPathUpdater(connectionString);
+            //  hardcode postgres until other helpers are ready
+            var dbHelper = Db.DbHelperFactory.MakeDbHelper("Postgres");
+            viewPathUpdater = new ViewPathUpdater(connectionString, dbHelper);
         }
 
 
