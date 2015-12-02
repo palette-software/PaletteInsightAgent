@@ -93,8 +93,20 @@ namespace BBR_ChargebackModel_CLI.db
 
         public static void InsertLookupEntries(long modelId, NpgsqlConnection conn, LookupRow[] rows)
         {
-            foreach(var row in rows)
+            Console.WriteLine(String.Format("Creating chargeback lookup data - {0} rows", rows.Length));
+            foreach (var row in rows)
             {
+                // Remove any existing row for this time
+                using (var cmd = new NpgsqlCommand())
+                {
+                    cmd.Connection = conn;
+                    cmd.CommandType = System.Data.CommandType.Text;
+                    cmd.CommandText = @"DELETE FROM chargeback_lookup WHERE datetime_key=@datetime_key;";
+                    AddParamToQuery(cmd, "datetime_key", row.DatetimeKey);
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Add the new row
                 using (var cmd = new NpgsqlCommand())
                 {
                     cmd.Connection = conn;
