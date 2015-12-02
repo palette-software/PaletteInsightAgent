@@ -50,7 +50,7 @@ namespace BBR_ChargebackModel_CLI
             LookupEntry[,,] chargebackLookup = CreateLookupEntries(values);
 
             // Figure out the timezone used
-            var tz = TimeZoneInfo.FindSystemTimeZoneById(model.TimezoneForChargeback);
+            var timezoneUsed = TimeZoneInfo.FindSystemTimeZoneById(model.TimezoneForChargeback);
 
             var startDate = model.EffectiveFrom;
             var endDate = model.EffectiveTo;
@@ -71,7 +71,7 @@ namespace BBR_ChargebackModel_CLI
                     var lookup = chargebackLookup[dow, hod, usageType];
 
                     // Set up the effective range
-                    var effectiveFrom = TimeZoneInfo.ConvertTimeToUtc(currentDate, tz);
+                    var effectiveFrom = TimeZoneInfo.ConvertTimeToUtc(currentDate, timezoneUsed);
 
                     outputList.Add(new LookupRow
                     {
