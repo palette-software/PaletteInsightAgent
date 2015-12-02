@@ -19,7 +19,7 @@ namespace BBR_ChargebackModel_CLI.migrations
                 new Column("datetime_key", DbType.DateTime, ColumnProperty.PrimaryKey),
 
                 new Column("model_id", DbType.Int64),
-                new Column("usage_type", DbType.Int32),
+                new Column("usage_type", DbType.Int32, ColumnProperty.PrimaryKey),
                 new Column("unit_price", DbType.Currency),
                 new Column("rate_category", DbType.String, 32),
 
