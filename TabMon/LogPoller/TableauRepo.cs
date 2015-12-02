@@ -9,6 +9,7 @@ using Npgsql;
 using log4net;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.IO;
 
 namespace TabMon.LogPoller
 {
@@ -50,11 +51,12 @@ namespace TabMon.LogPoller
 
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private NpgsqlConnection connection;
+        private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();
 
         public Tableau9RepoConn(string host, int port, string username, string password, string database)
         {
-            var connectionString =
+            connectionStringBuilder =
                 new NpgsqlConnectionStringBuilder()
                 {
                     Host = host,
@@ -65,7 +67,6 @@ namespace TabMon.LogPoller
                 };
 
             Log.Info("Connecting to Tableau Repo PostgreSQL:" + host);
-            connection = new NpgsqlConnection(connectionString);
             OpenConnection();
             Log.Info("Connected to Tableau Repo...");
 
@@ -76,7 +77,17 @@ namespace TabMon.LogPoller
         /// </summary>
         void OpenConnection()
         {
-            connection.Open();
+            try
+            {
+                connection = new NpgsqlConnection(connectionStringBuilder);
+                connection.Open();
+            }
+            catch (Exception ex)
+            {
+                Log.Warn(String.Format("Failed to open database connection! Exception message: {0}", ex.Message));
+                connection = null;
+                return;
+            }
 
             if (!IsConnectionOpen())
             {
@@ -99,15 +110,26 @@ namespace TabMon.LogPoller
         /// <returns></returns>
         bool IsConnectionOpen()
         {
-            return connection.State == ConnectionState.Open;
+            return connection != null && 
+                   connection.State == ConnectionState.Open;
         }
 
-        IDbConnection reconnectIfNeeded()
+
+        void reconnect()
         {
-            if (IsConnectionOpen()) return connection;
-            connection.Close();
+            try
+            {
+                if (connection != null)
+                {
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(String.Format("Failed to close Tableau database connection! Exception message: {0}", ex.Message));
+            }
+
             OpenConnection();
-            return connection;
         }
 
 
@@ -118,7 +140,10 @@ namespace TabMon.LogPoller
             lock (readLock)
             {
 
-                reconnectIfNeeded();
+                if (!IsConnectionOpen())
+                {
+                    reconnect();
+                }
 
                 using (var cmd = connection.CreateCommand())
                 {
@@ -156,9 +181,27 @@ namespace TabMon.LogPoller
                         Log.Error(String.Format("Error getting the vizql information for session id={0}", vizQLSessionId), ex);
                         throw;
                     }
+                    catch (IOException ioe)
+                    {
+                        Log.Error(String.Format("IO Exception caught while getting view path for vizql session: {0}. Exception message: {1}", vizQLSessionId, ioe.Message));
+                        try
+                        {
+                            connection.Close();
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(String.Format("Exception caught while closing crippled connection for vizql session: {0}. Exception message: {1}", vizQLSessionId, e.Message));
+                        }
+                        finally
+                        {
+                            connection = null;
+                        }
+                    }
                 }
             }
 
+            // Fallback to empty view path
+            return ViewPath.Empty;
         }
 
         #region IDisposable Support

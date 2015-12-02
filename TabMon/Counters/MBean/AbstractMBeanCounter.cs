@@ -49,14 +49,21 @@ namespace TabMon.Counters.MBean
         /// <returns>ICounterSample containing the sampled attribute value of this counter.</returns>
         public ICounterSample Sample()
         {
+            String counterStr = "";
             try
             {
-                var value = float.Parse(GetAttributeValue(Counter).ToString());
+                counterStr = GetAttributeValue(Counter).ToString();
+                var value = float.Parse(counterStr);
                 return new CounterSample(this, value);
+            }
+            catch (FormatException)
+            {
+                Log.Warn(String.Format(@"Failed to parse counter {0} from value {1}", this, counterStr));
+                return null;
             }
             catch (Exception ex)
             {
-                Log.Debug(String.Format(@"Error sampling counter {0}: {1}", this, ex.Message));
+                Log.Warn(String.Format(@"Error sampling counter {0}. Exception message: {1}", this, ex.Message));
                 return null;
             }
         }

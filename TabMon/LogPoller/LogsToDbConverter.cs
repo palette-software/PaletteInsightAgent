@@ -134,7 +134,7 @@ namespace TabMon.LogPoller
             //row["id"] = 1;
             row["filename"] = filename;
             row["host_name"] = HostName;
-            row["ts"] = jsonraw.ts;
+            row["ts"] = parseJsonTimestamp(jsonraw.ts);
             row["pid"] = (int)jsonraw.pid;
 
             row["tid"] = Convert.ToInt32(tid, 16);
@@ -169,7 +169,7 @@ namespace TabMon.LogPoller
                 var row = filterStateTable.NewRow();
                 string tid = jsonraw.tid;
 
-                row["ts"] = jsonraw.ts;
+                row["ts"] = parseJsonTimestamp(jsonraw.ts);
                 row["pid"] = (int)jsonraw.pid;
                 row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;
@@ -204,7 +204,8 @@ namespace TabMon.LogPoller
                 var row = filterStateTable.NewRow();
                 string tid = jsonraw.tid;
 
-                row["ts"] = jsonraw.ts;
+                //var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
+                row["ts"] = parseJsonTimestamp(jsonraw.ts);
                 row["pid"] = (int)jsonraw.pid;
                 row["tid"] = Convert.ToInt32(tid, 16);
                 row["req"] = jsonraw.req;
@@ -242,6 +243,20 @@ namespace TabMon.LogPoller
             row["view"] = viewPath.view;
             row["user_ip"] = viewPath.ip;
             row["workbook_resolved"] = false;
+        }
+
+        /// <summary>
+        /// Creates a DateTimeOffset (UTC time) from a date value retrieved from a JSON.
+        /// </summary>
+        /// <param name="jsonTimeStamp"></param>
+        /// <returns>DateTimeOffset (UTC time)</returns>
+        private static DateTimeOffset parseJsonTimestamp(dynamic jsonTimeStamp)
+        {
+            // Unfortunately first we need to convert the JSON time stamp (currently of which type
+            // is Newtonsoft.Json.Linq.JValue) to DateTime as there is no direct conversion from 
+            // JSON time stamp to DateTimeOffset.
+            // The DateTimeOffset conversion will be implicitly executed at return.
+            return (DateTime)jsonTimeStamp;
         }
     }
 }

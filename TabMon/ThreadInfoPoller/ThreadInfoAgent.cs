@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Net;
 using System.Reflection;
 using TabMon.Counters;
 
@@ -16,12 +17,13 @@ namespace TabMon.ThreadInfoPoller
         public long processId;
         public long threadId;
         public long cpuTime;
-        public DateTime pollTimeStamp;
+        public DateTimeOffset pollTimeStamp;
     }
 
     class ThreadInfoAgent
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly string HostName = Dns.GetHostName();
 
         public void poll(IDataTableWriter writer, object WriteLock)
         {
@@ -49,8 +51,8 @@ namespace TabMon.ThreadInfoPoller
                     threadInfo.processId = process.Id;
                     threadInfo.threadId = thread.Id;
                     threadInfo.cpuTime = thread.TotalProcessorTime.Ticks;
-                    threadInfo.pollTimeStamp = DateTime.Now;
-                    threadInfo.host = process.MachineName;
+                    threadInfo.pollTimeStamp = DateTimeOffset.Now;
+                    threadInfo.host = HostName;
                     threadInfo.instance = process.ProcessName;
                     ThreadTables.addToTable(table, threadInfo);
                     serverLogsTableCount++;
