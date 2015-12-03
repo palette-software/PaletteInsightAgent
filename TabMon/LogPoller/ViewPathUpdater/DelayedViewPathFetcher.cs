@@ -168,7 +168,8 @@ namespace TabMon.LogPoller
                 {
                     Log.Info(String.Format("Found {0} rows without workbook/view path.", res));
                     count = (long)res;
-                });
+                })
+                .RunScalar();
 
             return count > 0;
         }

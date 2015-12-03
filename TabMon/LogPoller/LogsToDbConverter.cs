@@ -242,7 +242,6 @@ namespace TabMon.LogPoller
             row["workbook"] = viewPath.workbook;
             row["view"] = viewPath.view;
             row["user_ip"] = viewPath.ip;
-            row["workbook_resolved"] = false;
         }
 
         /// <summary>
