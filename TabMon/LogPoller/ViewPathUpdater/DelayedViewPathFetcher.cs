@@ -109,14 +109,11 @@ namespace TabMon.LogPoller
         {
             var updateList = new List<ViewPathLookupEntry>();
 
-            // get a batch and update it.
-            using (var cmd = dbHelper.MakeSqlCommand(conn, dbHelper.SELECT_FSA_TO_UPDATE_SQL))
-            {
-                Log.Info("View path update batch start...");
-
-                AddMostRecentTimestampToCommand(dbHelper, cmd);
-
-                using (var res = cmd.ExecuteReader())
+            //// get a batch and update it.
+            new SqlQuery(conn, dbHelper)
+                .Query(dbHelper.Queries.SELECT_FSA_TO_UPDATE_SQL)
+                .Params(MostRecentTimestamps())
+                .OnResults(res =>
                 {
                     while (res.Read())
                     {
@@ -127,9 +124,8 @@ namespace TabMon.LogPoller
                             ts = (DateTime)res["ts"]
                         });
                     }
-                }
-
-            }
+                })
+                .RunQuery();
 
             return updateList;
         }
@@ -146,17 +142,26 @@ namespace TabMon.LogPoller
         private static void UpdateViewPathInRow(IDbHelper dbHelper, IDbConnection conn, DateTime ts, object id, string workbook, string view, string userIp)
         {
             // Do the update after we are sure we can update it with valid data
-            using (var updateCmd = dbHelper.MakeSqlCommand(conn, dbHelper.UPDATE_FSA_SQL))
-            {
-                object val = ts;
-                dbHelper.AddSqlParameter(updateCmd, "@workbook", workbook);
-                dbHelper.AddSqlParameter(updateCmd, "@view", view);
-                dbHelper.AddSqlParameter(updateCmd, "@user_ip", userIp);
-                dbHelper.AddSqlParameter(updateCmd, "@id", id);
+            new SqlQuery(conn, dbHelper)
+                .Query(dbHelper.Queries.UPDATE_FSA_SQL)
+                .Param("workbook", workbook)
+                .Param("view", view)
+                .Param("user_ip", userIp)
+                .Param("id", id)
+                .RunStatement();
 
-                // run it.
-                updateCmd.ExecuteNonQuery();
-            }
+            //// Do the update after we are sure we can update it with valid data
+            //using (var updateCmd = dbHelper.MakeSqlCommand(conn, dbHelper.Queries.UPDATE_FSA_SQL))
+            //{
+            //    object val = ts;
+            //    dbHelper.AddSqlParameter(updateCmd, "workbook", workbook);
+            //    dbHelper.AddSqlParameter(updateCmd, "view", view);
+            //    dbHelper.AddSqlParameter(updateCmd, "user_ip", userIp);
+            //    dbHelper.AddSqlParameter(updateCmd, "id", id);
+
+            //    // run it.
+            //    updateCmd.ExecuteNonQuery();
+            //}
         }
 
         /// <summary>
@@ -166,28 +171,29 @@ namespace TabMon.LogPoller
         /// <returns></returns>
         private static bool HasViewpathsToUpdate(IDbHelper dbHelper, IDbConnection conn)
         {
-            // Query if we have anything to update
-            using (var cmd = dbHelper.MakeSqlCommand(conn, dbHelper.HAS_FSA_TO_UPDATE_SQL))
-            {
-                AddMostRecentTimestampToCommand(dbHelper, cmd);
-                var res = cmd.ExecuteScalar();
-                Log.Info(String.Format("Found {0} rows without workbook/view path.", res));
-                return ((long)res) > 0;
-            }
+            // we need this local var because we are using delegates in the query
+            long count = 0;
+
+            new SqlQuery(conn, dbHelper)
+                .Query(dbHelper.Queries.HAS_FSA_TO_UPDATE_SQL)
+                .Params(MostRecentTimestamps())
+                .OnScalar(res =>
+                {
+                    Log.Info(String.Format("Found {0} rows without workbook/view path.", res));
+                    count = (long)res;
+                });
+
+            return count > 0;
         }
 
-        /// <summary>
-        /// Add an extra @ts parameter to an SQL query with the latest timestamp to look for
-        /// </summary>
-        /// <param name="cmd"></param>
-        private static void AddMostRecentTimestampToCommand(IDbHelper dbHelper, IDbCommand cmd)
+
+        private static Dictionary<string,object> MostRecentTimestamps()
         {
-            // Only handle events at least 10 minutes old
-            // TODO: is the timestamp in UTC or some local time?
-            var mostRecentTs = DateTime.UtcNow.AddMinutes(-1 * DELAY_IN_MINUTES);
-            dbHelper.AddSqlParameter(cmd, "@ts", mostRecentTs);
-            var maxAgeTs = DateTime.UtcNow.AddHours(-1 * MAX_AGE_IN_HOURS);
-            dbHelper.AddSqlParameter(cmd, "@min_ts", maxAgeTs);
+            return new Dictionary<string, object>
+            {
+                ["ts"] = DateTime.UtcNow.AddMinutes(-1 * DELAY_IN_MINUTES),
+                ["min_ts"] = DateTime.UtcNow.AddHours(-1 * MAX_AGE_IN_HOURS)
+            };
         }
 
     }

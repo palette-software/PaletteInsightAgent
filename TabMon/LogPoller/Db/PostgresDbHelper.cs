@@ -8,16 +8,23 @@ using System.Threading.Tasks;
 
 namespace TabMon.LogPoller.Db
 {
-    public class PostgresDbHelper : IDbHelper
+    public class PostgresDbQueries : IDbQueries
     {
-        public PostgresDbHelper() { }
-
         // Our query goes from the oldest to the newest unknown entries
         public string SELECT_FSA_TO_UPDATE_SQL { get { return @"SELECT id, sess, ts FROM filter_state_audit WHERE workbook= '<WORKBOOK>' AND view='<VIEW>' AND ts < @ts AND ts > @min_ts ORDER BY ts asc LIMIT 100"; } }
 
         public string UPDATE_FSA_SQL { get { return @"UPDATE filter_state_audit SET workbook=@workbook, view=@view, user_ip=@user_ip WHERE id = @id"; } }
 
         public string HAS_FSA_TO_UPDATE_SQL { get { return @"SELECT COUNT(1) FROM filter_state_audit WHERE workbook = '<WORKBOOK>' AND view = '<VIEW>' AND ts < @ts AND ts > @min_ts"; } }
+
+    }
+
+    public class PostgresDbHelper : IDbHelper
+    {
+        public PostgresDbHelper() { }
+
+        private static PostgresDbQueries queries = new PostgresDbQueries();
+        public IDbQueries Queries { get { return queries; } }
 
 
         public IDbConnection ConnectTo(string connectionString)
@@ -59,7 +66,7 @@ namespace TabMon.LogPoller.Db
         public void AddSqlParameter(IDbCommand cmd, string name, object val)
         {
             var timestampParam = cmd.CreateParameter();
-            timestampParam.ParameterName = name;
+            timestampParam.ParameterName = "@" + name;
             timestampParam.Value = val;
             cmd.Parameters.Add(timestampParam);
         }
