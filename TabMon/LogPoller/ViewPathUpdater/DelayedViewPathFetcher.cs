@@ -184,8 +184,8 @@ namespace TabMon.LogPoller
         {
             return new Dictionary<string, object>
             {
-                ["ts"] = DateTime.UtcNow.AddMinutes(-1 * DELAY_IN_MINUTES),
-                ["min_ts"] = DateTime.UtcNow.AddHours(-1 * MAX_AGE_IN_HOURS)
+                {"ts", DateTime.UtcNow.AddMinutes(-1 * DELAY_IN_MINUTES)},
+                {"min_ts", DateTime.UtcNow.AddHours(-1 * MAX_AGE_IN_HOURS)}
             };
         }
 
