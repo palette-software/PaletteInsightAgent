@@ -149,19 +149,6 @@ namespace TabMon.LogPoller
                 .Param("user_ip", userIp)
                 .Param("id", id)
                 .RunStatement();
-
-            //// Do the update after we are sure we can update it with valid data
-            //using (var updateCmd = dbHelper.MakeSqlCommand(conn, dbHelper.Queries.UPDATE_FSA_SQL))
-            //{
-            //    object val = ts;
-            //    dbHelper.AddSqlParameter(updateCmd, "workbook", workbook);
-            //    dbHelper.AddSqlParameter(updateCmd, "view", view);
-            //    dbHelper.AddSqlParameter(updateCmd, "user_ip", userIp);
-            //    dbHelper.AddSqlParameter(updateCmd, "id", id);
-
-            //    // run it.
-            //    updateCmd.ExecuteNonQuery();
-            //}
         }
 
         /// <summary>
@@ -187,6 +174,11 @@ namespace TabMon.LogPoller
         }
 
 
+        /// <summary>
+        /// Returns a dictionnary with "ts" and "min_ts" keys covering the interval
+        /// of the timestamps we are interested in.
+        /// </summary>
+        /// <returns></returns>
         private static Dictionary<string,object> MostRecentTimestamps()
         {
             return new Dictionary<string, object>
