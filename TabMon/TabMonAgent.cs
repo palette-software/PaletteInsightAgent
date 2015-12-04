@@ -80,7 +80,7 @@ namespace TabMon
             }
 
             // The view path updater agent
-            viewPathUpdater = new ViewPathUpdaterAgent(options.DbConnectionString);
+            viewPathUpdater = new ViewPathUpdaterAgent(options.DbType, options.DbConnectionString);
         }
 
         ~TabMonAgent()

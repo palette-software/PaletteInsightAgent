@@ -7,23 +7,12 @@ using System.Threading.Tasks;
 
 namespace TabMon.LogPoller.Db
 {
-    /// <summary>
-    /// Wrapper interface for SQL queries related to a DB
-    /// </summary>
-    public interface IDbQueries
-    {
-        string SELECT_FSA_TO_UPDATE_SQL { get; }
-        string UPDATE_FSA_SQL { get; }
-        string HAS_FSA_TO_UPDATE_SQL { get; }
-    }
 
     /// <summary>
     /// Generic interface for DB query building.
     /// </summary>
     public interface IDbHelper
     {
-        IDbQueries Queries { get; }
-
         /// <summary>
         /// Connect to the database.
         /// </summary>

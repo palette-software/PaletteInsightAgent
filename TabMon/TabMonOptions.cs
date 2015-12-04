@@ -21,6 +21,7 @@ namespace TabMon
         private const int MinPollInterval = 1; // In seconds.
 
         #region Shared DB config
+        public string DbType { get; set; }
         public string DbConnectionString { get; set; }
         #endregion
 

@@ -18,5 +18,17 @@ namespace TabMon.LogPoller.Db
 
             throw new ArgumentException(String.Format("Unknown database type for IDbHelper: '{0}'", dbType ));
         }
+
+
+        public static IDbQueries MakeDbQueries(string dbType)
+        {
+            switch (dbType)
+            {
+                case "Postgres":
+                    return new PostgresDbQueries();
+            }
+
+            throw new ArgumentException(String.Format("Unknown database type for IDbQueries: '{0}'", dbType ));
+        }
     }
 }

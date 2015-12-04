@@ -18,12 +18,13 @@ namespace TabMon.LogPoller
         /// Creates a new instance of the view path updater
         /// </summary>
         /// <param name="connectionString"></param>
-        public ViewPathUpdaterAgent(string connectionString)
+        public ViewPathUpdaterAgent(string dbType, string connectionString)
         {
             this.connectionString = connectionString;
             //  hardcode postgres until other helpers are ready
-            var dbHelper = Db.DbHelperFactory.MakeDbHelper("Postgres");
-            viewPathUpdater = new ViewPathUpdater(connectionString, dbHelper);
+            var dbHelper = Db.DbHelperFactory.MakeDbHelper(dbType);
+            var dbQueries = Db.DbHelperFactory.MakeDbQueries(dbType);
+            viewPathUpdater = new ViewPathUpdater(connectionString, dbHelper, dbQueries);
         }
 
 

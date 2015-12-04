@@ -9,6 +9,58 @@ using System.Threading.Tasks;
 
 namespace TabMon.LogPoller.Db
 {
+    class SqlConnection
+    {
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private IDbHelper helper;
+        private IDbConnection connection;
+
+        private SqlConnection(IDbHelper h, IDbConnection conn)
+        {
+            helper = h;
+            connection = conn;
+        }
+
+        #region Public API
+
+        /// <summary>
+        /// Run a query on this connection.
+        /// </summary>
+        /// <param name="queryString"></param>
+        /// <returns></returns>
+        public SqlQuery query(string queryString)
+        {
+            return new SqlQuery(connection, helper, queryString);
+        }
+
+
+        /// <summary>
+        /// Public API to connect to a database in a safe manner
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="whatToDo"></param>
+        public static void WithConnection(IDbHelper helper, string connectionString, Action<SqlConnection> whatToDo)
+        {
+            using (var conn = helper.ConnectTo(connectionString))
+            {
+                conn.Open();
+                var sqlConnection = new SqlConnection(helper, conn);
+                try
+                {
+                    whatToDo(sqlConnection);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(String.Format("Exception during sql connection to: {0}", connectionString), e);
+                }
+            }
+
+        }
+
+        #endregion
+    }
+
     /// <summary>
     /// Helper class to build SQL queries and run them in an exception-catching manner.
     /// </summary>
