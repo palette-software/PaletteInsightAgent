@@ -22,8 +22,7 @@ The current development requirements are:
 2. Visual Studio 2013 or later.
 3. WiX Toolset Visual Studio Extension - Required to build the installer projects.
   * Available at http://www.wixtoolset.org
-4. Configuration Section Designer Visual Studio Extension - Required to modify & regenerate the "TabMonConfig" custom config section class.
-  * Available at http://csd.codeplex.com
+4. Java SE Development Kit 8
 
 See [Developer Notes.txt](https://github.com/tableau/TabMon/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
 
