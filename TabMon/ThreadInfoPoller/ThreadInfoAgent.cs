@@ -29,15 +29,25 @@ namespace TabMon.ThreadInfoPoller
         {
             const string processName = "vizqlserver";
             var processList = Process.GetProcessesByName(processName);
-            long serverLogsTableCount = 0;
-            var serverLogsTable = ThreadTables.makeThreadInfoTable();
+            long threadInfoTableCount = 0;
+            var threadInfoTable = ThreadTables.makeThreadInfoTable();
             foreach (var process in processList)
             {
-                pollThreadsOfCounter(process,  serverLogsTable, ref serverLogsTableCount);
+                pollThreadsOfCounter(process,  threadInfoTable, ref threadInfoTableCount);
             }
             lock (WriteLock)
             {
-                if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
+                if (threadInfoTableCount > 0)
+                {
+                    try
+                    {
+                        writer.Write(threadInfoTable);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message));
+                    }
+                }
             }
         }
 
@@ -60,7 +70,7 @@ namespace TabMon.ThreadInfoPoller
             }
             catch (Exception ex)
             {
-                Log.Warn(String.Format(@"Failed to poll thread info for process {0}. Exception message: {1}", process.ProcessName, ex.Message));
+                Log.Warn(String.Format(@"Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message));
             }
         }
     }
