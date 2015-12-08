@@ -22,7 +22,7 @@ The current development requirements are:
 2. Visual Studio 2013 or later.
 3. WiX Toolset Visual Studio Extension - Required to build the installer projects.
   * Available at http://www.wixtoolset.org
-4. [Java SE Development Kit 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+4. [Java SE Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 See [Developer Notes.txt](https://github.com/tableau/TabMon/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
 
