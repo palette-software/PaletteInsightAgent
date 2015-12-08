@@ -13,7 +13,6 @@ using System.IO;
 
 namespace TabMon.LogPoller
 {
-
     public struct ViewPath
     {
         public string workbook;
@@ -30,9 +29,12 @@ namespace TabMon.LogPoller
             return p;
         }
 
+        private const string UNKNOWN_STR = "<UNKNOWN>";
+
         public bool isEmpty() { return workbook == null && view == null; }
 
         public static ViewPath Empty = make(null, null, null);
+        public static ViewPath Unknown = make(UNKNOWN_STR, UNKNOWN_STR, UNKNOWN_STR);
     }
 
     /// <summary>

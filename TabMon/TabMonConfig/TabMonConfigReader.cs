@@ -58,14 +58,18 @@ namespace TabMon.Config
                 var outputMode = config.OutputMode.Value;
                 if (outputMode.Equals("DB", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    options.Writer = LoadDbWriterFromConfig(config);
+                    var writer = LoadDbWriterFromConfig(config);
+                    options.Writer = writer;
                     options.TableName = config.Database.Table.Name;
-
+                    // get the connection string from the driver (ugly...)
+                    options.DbType = config.Database.Type;
+                    options.DbConnectionString = writer.Adapter.Driver.ConnectionString;
                 }
                 else if (outputMode.Equals("CSV", StringComparison.InvariantCultureIgnoreCase))
                 {
                     options.Writer = LoadCsvWriter();
                     options.TableName = "countersamples";
+                    options.DbConnectionString = "CSV";
                 }
                 else
                 {

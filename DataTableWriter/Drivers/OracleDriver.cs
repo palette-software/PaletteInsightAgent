@@ -90,12 +90,25 @@ namespace DataTableWriter.Drivers
                     connectionInfo.DatabaseName
                 );
 
+            // store the connection string
+            this.connectionString = connectionString;
+
             Log.Info("Connecting to oracle: " + connectionInfo.Server + " service: " + connectionInfo.DatabaseName);
             
 
             return new OracleConnection(connectionString);
         }
 
+
+        private string connectionString;
+
+        public string ConnectionString
+        {
+            get
+            {
+                return this.connectionString;
+            }
+        }
 
 
         /// <summary>

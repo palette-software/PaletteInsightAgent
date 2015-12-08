@@ -17,30 +17,15 @@ namespace TabMon.LogPoller
         private LogFileWatcher watcher;
         private LogsToDbConverter logsToDbConverter;
 
-        private ITableauRepoConn tableauRepo;
-
         private string folderToWatch;
         private string filter;
 
-
-
-        public LogPollerAgent(string folderToWatch, string filterString, string repoHost, int repoPort, string repoUser, string repoPass, string repoDb)
+        public LogPollerAgent(string folderToWatch, string filterString, string dbConnectionString)
         {
             Log.Info("Initializing LogPollerAgent with folder:" + folderToWatch + " and filter: " + filter);
             this.folderToWatch = folderToWatch;
             filter = filterString;
             logsToDbConverter = new LogsToDbConverter();
-            // 
-            tableauRepo = null;
-            if (ShouldUseRepo(repoHost))
-            {
-                tableauRepo = new Tableau9RepoConn(repoHost, repoPort, repoUser, repoPass, repoDb);
-            }
-        }
-
-        private static bool ShouldUseRepo(string repoHost)
-        {
-            return !String.IsNullOrEmpty(repoHost);
         }
 
 
@@ -68,8 +53,9 @@ namespace TabMon.LogPoller
             watcher.watchChangeCycle((string filename, string[] lines) =>
             {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
-                logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
+                logsToDbConverter.processServerLogLines(writer, writeLock, filename, lines);
             });
+
         }
     }
 }

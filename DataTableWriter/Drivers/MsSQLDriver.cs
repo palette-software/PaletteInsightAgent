@@ -109,8 +109,19 @@ namespace DataTableWriter.Drivers
             builder.Password = connectionInfo.Password;
             
             builder.IntegratedSecurity = true;
+            this.connectionString = builder.ConnectionString;
                                   
             return new SqlConnection(builder.ConnectionString);
+        }
+
+        private string connectionString;
+
+        public string ConnectionString
+        {
+            get
+            {
+                return this.connectionString;
+            }
         }
 
         /// <summary>

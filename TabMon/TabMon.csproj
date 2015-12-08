@@ -145,6 +145,14 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\Host.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
+    <Compile Include="LogPoller\Db\DbHelperFactory.cs" />
+    <Compile Include="LogPoller\Db\IDbHelper.cs" />
+    <Compile Include="LogPoller\Db\IDbQueries.cs" />
+    <Compile Include="LogPoller\Db\PostgresDbHelper.cs" />
+    <Compile Include="LogPoller\Db\PostgresDbQueries.cs" />
+    <Compile Include="LogPoller\Db\SqlQueryBuilder.cs" />
+    <Compile Include="LogPoller\ViewPathUpdater\DelayedViewPathFetcher.cs" />
+    <Compile Include="LogPoller\ViewPathUpdater\ViewPathUpdaterAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
     <Compile Include="LogPoller\LogFileWatcher.cs" />
