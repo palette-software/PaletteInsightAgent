@@ -1,0 +1,8 @@
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstaller\bin\Release\PalMon.msi
+obj\Release\CustomExitDialog.wixobj
+obj\Release\CustomInstallDir.wixobj
+obj\Release\CustomInstallDirDlg.wixobj
+obj\Release\Product.wixobj
+obj\Release\PalMonServiceInstaller.wixproj.BindContentsFileListnull.txt
+obj\Release\PalMonServiceInstaller.wixproj.BindOutputsFileListnull.txt
+obj\Release\PalMonServiceInstaller.wixproj.BindBuiltOutputsFileListnull.txt

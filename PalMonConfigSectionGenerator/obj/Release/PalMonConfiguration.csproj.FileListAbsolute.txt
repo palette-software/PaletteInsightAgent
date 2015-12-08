@@ -1,0 +1,10 @@
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\bin\Release\ConfigurationSection.csd.cs
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\bin\Release\ConfigurationSection.csd
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\bin\Release\ConfigurationSection.csd.config
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\bin\Release\ConfigurationSection.csd.diagram
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\bin\Release\ConfigurationSection.csd.xsd
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\bin\Release\PalMonConfiguration.dll
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\bin\Release\PalMonConfiguration.pdb
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\obj\Release\PalMonConfiguration.csprojResolveAssemblyReference.cache
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\obj\Release\PalMonConfiguration.dll
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonConfigSectionGenerator\obj\Release\PalMonConfiguration.pdb

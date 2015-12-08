@@ -1,0 +1,6 @@
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerDBInitializer\bin\Release\PalMonServiceInstallerDBInitializer.msi
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerDBInitializer\bin\Release\PalMonServiceInstallerDBInitializer.wixpdb
+obj\Release\Product.wixobj
+obj\Release\PalMonServiceInstallerDBInitializer.wixproj.BindContentsFileListnull.txt
+obj\Release\PalMonServiceInstallerDBInitializer.wixproj.BindOutputsFileListnull.txt
+obj\Release\PalMonServiceInstallerDBInitializer.wixproj.BindBuiltOutputsFileListnull.txt
