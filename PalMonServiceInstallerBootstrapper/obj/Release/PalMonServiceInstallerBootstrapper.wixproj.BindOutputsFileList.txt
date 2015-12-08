@@ -1,0 +1,2 @@
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\bin\Release\InstallPalMon.exe
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\bin\Release\InstallPalMon.wixpdb

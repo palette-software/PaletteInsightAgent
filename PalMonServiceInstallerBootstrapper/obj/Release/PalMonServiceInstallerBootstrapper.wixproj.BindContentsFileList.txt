@@ -1,0 +1,6 @@
+
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\Resources\LogoSide.png
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\Resources\Logo.png
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\Installers\postgresql.exe
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\Installers\PalMon.msi
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\Installers\PalMonServiceInstallerDBInitializer.msi

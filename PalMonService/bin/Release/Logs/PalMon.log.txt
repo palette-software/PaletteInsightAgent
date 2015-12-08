@@ -1,0 +1,30 @@
+2015-12-08 15:01:11,889 [1] INFO PalMon.Config.PalMonConfigReader - Loading PalMon user configuration..
+2015-12-08 15:01:11,918 [1] INFO PalMon.Config.PalMonConfigReader - Connecting to results database..
+2015-12-08 15:01:12,024 [1] FATAL PalMon.Config.PalMonConfigReader - Could not initialize writer: FATAL: 28P01: password authentication failed for user "PalMon"
+2015-12-08 15:01:12,043 [1] FATAL PalMon.Config.PalMonConfigReader - Invalid options in configuration: [Host='Primary\Zsombor-PC', Writer='null', PollInterval='30', LogPollInterval='300', ThreadInfoPollInterval='15', TableName='countersamples']
+2015-12-08 15:01:12,043 [1] INFO PalMon.PalMonAgent - Setting up LogPoller agent.
+2015-12-08 15:01:12,044 [1] INFO PalMon.LogPoller.LogPollerAgent - Initializing LogPollerAgent with folder:c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\ and filter: 
+2015-12-08 15:01:12,047 [1] INFO PalMon.LogPoller.Tableau9RepoConn - Connecting to Tableau Repo PostgreSQL:localhost
+2015-12-08 15:01:14,116 [1] WARN PalMon.LogPoller.Tableau9RepoConn - Failed to open database connection! Exception message: Failed to establish a connection to 'localhost'.
+2015-12-08 15:01:14,116 [1] INFO PalMon.LogPoller.Tableau9RepoConn - Connected to Tableau Repo...
+2015-12-08 15:01:14,118 [1] INFO PalMon.PalMonAgent - Initializing PalMon..
+2015-12-08 15:01:14,118 [1] FATAL PalMon.PalMonAgent - Invalid PalMon options specified!
+Aborting..
+2015-12-08 15:01:14,118 [1] ERROR Topshelf.Hosts.ConsoleRunHost - An exception occurred
+Topshelf.TopshelfException: The service failed to start (return false).
+   at Topshelf.Hosts.ConsoleRunHost.Run()
+2015-12-08 15:11:40,814 [1] INFO PalMon.Config.PalMonConfigReader - Loading PalMon user configuration..
+2015-12-08 15:11:40,844 [1] INFO PalMon.Config.PalMonConfigReader - Connecting to results database..
+2015-12-08 15:11:40,938 [1] FATAL PalMon.Config.PalMonConfigReader - Could not initialize writer: FATAL: 28P01: password authentication failed for user "PalMon"
+2015-12-08 15:11:40,944 [1] FATAL PalMon.Config.PalMonConfigReader - Invalid options in configuration: [Host='Primary\Zsombor-PC', Writer='null', PollInterval='30', LogPollInterval='300', ThreadInfoPollInterval='15', TableName='countersamples']
+2015-12-08 15:11:40,944 [1] INFO PalMon.PalMonAgent - Setting up LogPoller agent.
+2015-12-08 15:11:40,945 [1] INFO PalMon.LogPoller.LogPollerAgent - Initializing LogPollerAgent with folder:c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\ and filter: 
+2015-12-08 15:11:40,948 [1] INFO PalMon.LogPoller.Tableau9RepoConn - Connecting to Tableau Repo PostgreSQL:localhost
+2015-12-08 15:11:42,995 [1] WARN PalMon.LogPoller.Tableau9RepoConn - Failed to open database connection! Exception message: Failed to establish a connection to 'localhost'.
+2015-12-08 15:11:42,995 [1] INFO PalMon.LogPoller.Tableau9RepoConn - Connected to Tableau Repo...
+2015-12-08 15:11:42,997 [1] INFO PalMon.PalMonAgent - Initializing PalMon..
+2015-12-08 15:11:42,997 [1] FATAL PalMon.PalMonAgent - Invalid PalMon options specified!
+Aborting..
+2015-12-08 15:11:42,998 [1] ERROR Topshelf.Hosts.ConsoleRunHost - An exception occurred
+Topshelf.TopshelfException: The service failed to start (return false).
+   at Topshelf.Hosts.ConsoleRunHost.Run()

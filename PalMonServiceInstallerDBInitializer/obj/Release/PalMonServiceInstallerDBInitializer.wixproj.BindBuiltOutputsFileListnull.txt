@@ -1,0 +1,2 @@
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerDBInitializer\bin\Release\PalMonServiceInstallerDBInitializer.msi
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerDBInitializer\bin\Release\PalMonServiceInstallerDBInitializer.wixpdb

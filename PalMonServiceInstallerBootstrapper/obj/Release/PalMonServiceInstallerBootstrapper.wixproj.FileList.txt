@@ -1,0 +1,6 @@
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\bin\Release\InstallPalMon.exe
+C:\Users\Zsombor\Documents\git\BBR\BBR-39\BlackBoxRecorder\PalMonServiceInstallerBootstrapper\bin\Release\InstallPalMon.wixpdb
+obj\Release\Bundle.wixobj
+obj\Release\PalMonServiceInstallerBootstrapper.wixproj.BindContentsFileList.txt
+obj\Release\PalMonServiceInstallerBootstrapper.wixproj.BindOutputsFileList.txt
+obj\Release\PalMonServiceInstallerBootstrapper.wixproj.BindBuiltOutputsFileList.txt
