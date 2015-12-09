@@ -8,7 +8,7 @@ PalMon can be run as both a console app and a Windows service.
 
 ## How do I set up PalMon?
 
-PalMon is deployed via a custom installer, which manages dependencies and also bundles Postgres for ease of setup for new users.  To get up and running, follow the instructions in the [installation guide](https://github.com/palette-software/BlackBoxRecorder/blob/master/TabMonService/Documentation/UserGuide.pdf).
+PalMon is deployed via a custom installer, which manages dependencies and also bundles Postgres for ease of setup for new users.  To get up and running, follow the instructions in the [installation guide](https://github.com/palette-software/BlackBoxRecorder/blob/master/PalMonService/Documentation/UserGuide.pdf).
 
 ## How do I analyze results from PalMon?
 
