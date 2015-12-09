@@ -17,6 +17,9 @@ EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PalMonServiceInstallerDBInitializer", "PalMonServiceInstallerDBInitializer\PalMonServiceInstallerDBInitializer.wixproj", "{07F8BAE6-17E9-4EAD-AEFE-A941E36476D3}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PalMonServiceInstallerBootstrapper", "PalMonServiceInstallerBootstrapper\PalMonServiceInstallerBootstrapper.wixproj", "{AAB8DF0B-9DC2-4DD7-9275-AF5A551BB707}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1E8BB102-CDCF-4AA7-8D0B-7F9792964708} = {1E8BB102-CDCF-4AA7-8D0B-7F9792964708}
+	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PalMonServiceInstaller", "PalMonServiceInstaller\PalMonServiceInstaller.wixproj", "{8E6DCAAB-3E2F-4008-BEC9-3C7A755B6E5D}"
 EndProject
