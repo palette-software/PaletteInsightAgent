@@ -84,7 +84,9 @@ namespace TabMon.LogPoller
             {
                 Log.Warn(String.Format("Failed to open database connection! Exception message: {0}", ex.Message));
                 connection = null;
-                return;
+                // Throw the exception here to make the startup of the service fail if the configured Tableau
+                // Repository is unavailable (invalid or off the network)
+                throw new DbConnectionException("Could not open connection to Tableau PostgreSQL repository.");
             }
 
             if (!IsConnectionOpen())
