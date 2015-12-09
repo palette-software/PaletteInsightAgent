@@ -121,7 +121,7 @@
     </configurationElement>
     <configurationElement name="User" namespace="PalMon.Config" documentation="Contains information about the database user.">
       <attributeProperties>
-        <attributeProperty name="Login" isRequired="true" isKey="false" isDefaultCollection="false" xmlName="login" isReadOnly="false" documentation="The login for the database user." defaultValue="&quot;PalMon&quot;">
+        <attributeProperty name="Login" isRequired="true" isKey="false" isDefaultCollection="false" xmlName="login" isReadOnly="false" documentation="The login for the database user." defaultValue="&quot;palmon&quot;">
           <validator>
             <stringValidatorMoniker name="/d0ed9acb-0435-4532-afdd-b5115bc4d562/NonEmptyString" />
           </validator>

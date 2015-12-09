@@ -2,11 +2,11 @@
 param(
 	[string]$LogDir = ".",
 	[string]$InstallDir = "C:\Postgres",
-	[string]$SuperUser = "PalMonsuperuser",
+	[string]$SuperUser = "palmonsuperuser",
 	[string]$Port = "5432",
 	[string]$DBName = "PalMon",
 	[string]$ServiceName = "PalMon-Postgres",
-	[string]$Username = "PalMonuser",
+	[string]$Username = "palmonuser",
 	[string]$Password = "password"
 )
 # Creates the log file for this script and changes the directory to the Postgres bin folder.

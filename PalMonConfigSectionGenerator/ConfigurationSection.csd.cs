@@ -738,7 +738,7 @@ namespace PalMon.Config
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
         [global::System.ComponentModel.DescriptionAttribute("The login for the database user.")]
         [global::System.Configuration.StringValidatorAttribute(InvalidCharacters = "", MaxLength = 2147483647, MinLength = 1)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.User.LoginPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = "PalMon")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.User.LoginPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = "palmon")]
         public virtual string Login
         {
             get

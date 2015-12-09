@@ -25,7 +25,7 @@
       </column>
     </datasource>
     <datasource caption='PalMon' inline='true' name='alpodev (TabZap) (copy)' version='9.0'>
-      <connection class='postgres' dbname='PalMon' odbc-native-protocol='yes' port='5432' server='localhost' server-oauth='' username='PalMon' workgroup-auth-mode='prompt'>
+      <connection class='postgres' dbname='PalMon' odbc-native-protocol='yes' port='5432' server='localhost' server-oauth='' username='palmon' workgroup-auth-mode='prompt'>
         <relation name='countersamples' table='[public].[countersamples]' type='table' />
         <metadata-records>
           <metadata-record class='column'>

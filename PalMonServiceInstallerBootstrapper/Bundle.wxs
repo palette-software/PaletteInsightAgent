@@ -12,7 +12,7 @@
 <?define PostgresPackageFile = "Installers\postgresql.exe"?>
 <?define PostgresInitializer = "Installers\PalMonServiceInstallerDBInitializer.msi"?>
 <?define PostgresServiceName = "PalMon-Postgres"?>
-<?define PostgresUser = "PalMon"?>
+<?define PostgresUser = "palmon"?>
 <?define PostgresPassword = "password"?>
 <?define PostgresPortNumber = "5432"?>
 
