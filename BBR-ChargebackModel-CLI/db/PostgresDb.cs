@@ -76,7 +76,7 @@ namespace BBR_ChargebackModel_CLI.db
                     cmd.CommandText = @"INSERT INTO chargeback_values( usage_type, model_id, day_of_week, hour_of_day, unit_price, rate_category )
                         VALUES ( @usage_type, @model_id, @day_of_week, @hour_of_day, @unit_price, @rate_category )";
 
-                    AddParamToQuery(cmd, "usage_type", (int)value.UsageType);
+                    AddParamToQuery(cmd, "usage_type", value.UsageType.ToString());
                     AddParamToQuery(cmd, "model_id", modelId);
                     AddParamToQuery(cmd, "day_of_week", value.DayOfWeek);
                     AddParamToQuery(cmd, "hour_of_day", value.HourOfDay);
@@ -103,7 +103,7 @@ namespace BBR_ChargebackModel_CLI.db
                     cmd.CommandType = System.Data.CommandType.Text;
                     cmd.CommandText = @"DELETE FROM chargeback_lookup WHERE datetime_key=@datetime_key AND usage_type=@usage_type;";
                     AddParamToQuery(cmd, "datetime_key", row.DatetimeKey);
-                    AddParamToQuery(cmd, "usage_type", (int)row.UsageType);
+                    AddParamToQuery(cmd, "usage_type", row.UsageType.ToString());
                     cmd.ExecuteNonQuery();
                 }
 
@@ -117,7 +117,7 @@ namespace BBR_ChargebackModel_CLI.db
 
                     AddParamToQuery(cmd, "datetime_key", row.DatetimeKey);
                     AddParamToQuery(cmd, "model_id", modelId);
-                    AddParamToQuery(cmd, "usage_type", (int)row.UsageType);
+                    AddParamToQuery(cmd, "usage_type", row.UsageType.ToString());
                     AddParamToQuery(cmd, "unit_price", row.UnitPrice);
                     AddParamToQuery(cmd, "rate_category", row.RateCategory);
                     AddParamToQuery(cmd, "unit_price_currency", row.UnitPriceCurrency);

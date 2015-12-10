@@ -68,6 +68,7 @@
     <Compile Include="db\PostgresDb.cs" />
     <Compile Include="migrations\M000_CreateTables.cs" />
     <Compile Include="migrations\M001_CreateLookupTable.cs" />
+    <Compile Include="migrations\M002_ChangeUsageTypeToString.cs" />
     <Compile Include="migrations\MigrationsAssemblyHookType.cs" />
     <Compile Include="migrator\DbMigrator.cs" />
     <Compile Include="Program.cs" />
