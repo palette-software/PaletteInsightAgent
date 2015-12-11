@@ -26,7 +26,8 @@ namespace DataTableWriter.Writers
 
         public DataTableDbWriter(DbDriverType driverType, IDbConnectionInfo connectionInfo, DbTableInitializationOptions tableInitializationOptions = default(DbTableInitializationOptions))
         {
-            Adapter = new DbAdapter(driverType, connectionInfo);
+            IDbDriver driver = DbDriverFactory.GetInstance(driverType);
+            Adapter = new DbAdapter(driver, connectionInfo);
             isTableInitialized = new HashSet<string>();
             this.tableInitializationOptions = tableInitializationOptions;
         }
