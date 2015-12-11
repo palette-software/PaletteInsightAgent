@@ -5,6 +5,8 @@ DataTableWriter/bin/
 DataTableWriter/obj/
 /PalMon/bin/
 /PalMon/obj/
+PalMon.UnitTests/bin/
+PalMon.UnitTests/obj/
 PalMonConfigSectionGenerator/obj/
 PalMonService/bin/
 PalMonService/obj/
@@ -17,6 +19,7 @@ PalMonServiceInstallerBootstrapper/obj/
 PalMonServiceInstallerBootstrapper/Installers/PalMon.msi
 PalMonServiceInstallerBootstrapper/Installers/PalMonServiceInstallerDBInitializer.msi
 PalMon.v12.suo
+*.csproj.FileListAbsolute.txt
 
 BBR-ChargebackModel-CLI/bin/
 BBR-ChargebackModel-CLI/obj/
