@@ -1,0 +1,9 @@
+Typemock.dll
+Typemock.ArrangeActAssert.dll
+TypeMock.Interceptors.dll
+Armadillo.Sandbox.dll
+Microsoft.VisualStudio
+Microsoft.Deployment
+Microsoft.Pex
+Microsoft.ExtendedReflection
+WcfTestClient.exe
