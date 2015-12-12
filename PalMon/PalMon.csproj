@@ -124,12 +124,6 @@
       <HintPath>..\packages\Npgsql.2.2.7\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Remotion">
-      <HintPath>..\..\..\..\..\Progik\Remix_1.15.13.0\net-4.5\bin\release\Remotion.dll</HintPath>
-    </Reference>
-    <Reference Include="Remotion.Mixins">
-      <HintPath>..\..\..\..\..\Progik\Remix_1.15.13.0\net-4.5\bin\release\Remotion.Mixins.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="Microsoft.CSharp" />
