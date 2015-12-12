@@ -16,17 +16,18 @@ namespace DataTableWriter.UnitTests.Adapters
     public class DbAdapterTest
     {
 
-        [TestMethod]
-        public void TestConstructorShouldCallOpen()
-        {
-            var driverSub = Substitute.For<IDbDriver>();
-            var connectionInfoStub = Substitute.For<IDbConnectionInfo>();
-            var connectionStub = Substitute.For<IDbConnection>();
+        //[TestMethod]
+        //public void TestConstructorShouldCallOpen()
+        //{
+        //    var driverSub = Substitute.For<IDbDriver>();
+        //    var connectionInfoStub = Substitute.For<IDbConnectionInfo>();
+        //    var connectionStub = Substitute.For<IDbConnection>();
 
-            driverSub.BuildConnection(connectionInfoStub).Returns(connectionStub);
-            var adapter = new DbAdapter(driverSub, connectionInfoStub);
-            connectionStub.Received().Open();
-        }
+        //    driverSub.BuildConnection(connectionInfoStub).Returns(connectionStub);
+        //    var adapter = new DbAdapter(driverSub, connectionInfoStub);
+        //    connectionStub.Received().Open();
+        //}
+
         [TestMethod]
         public void TestIsConnectionOpenConnectionIsClosed()
         {
