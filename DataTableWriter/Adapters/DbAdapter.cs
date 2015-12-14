@@ -295,8 +295,6 @@ namespace DataTableWriter.Adapters
                         value = Driver.ToDateTimeType((DateTimeOffset) value );
                     }
 
-                    System.Console.WriteLine(String.Format("Trying to set column: {0} to {1}", row.Table.Columns[i].ColumnName, row[i].ToString()));
-
                     parameter.Value = value;
                     command.Parameters.Add(parameter);
                 }
