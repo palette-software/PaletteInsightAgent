@@ -266,6 +266,15 @@ namespace DataTableWriter.Drivers
         {
             // We only take the first word of the postgres type into consideration, in order to simplify our mapping.
             var pgFirstTermOfType = pgType.Split(' ')[0].ToUpper();
+
+            // HACK-HACK: The line above is nonsense, but now we don't know what is the real cause of taking only
+            // the first word into consideration, so the safe thing is to do here is to add exceptions, like
+            // timestamp with time zone.
+            if (pgFirstTermOfType == "timestamp")
+            {
+                pgFirstTermOfType = pgType;
+            }
+
             if (!postgresToSystemTypeMap.ContainsKey(pgFirstTermOfType))
             {
                 return Type.GetType("System.String");
