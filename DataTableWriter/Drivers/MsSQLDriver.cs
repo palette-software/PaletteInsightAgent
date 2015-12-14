@@ -255,5 +255,8 @@ namespace DataTableWriter.Drivers
         {
             return "@" + base_param_name;
         }
+
+
+        public object ToDateTimeType(DateTimeOffset dateTimeIn) { return dateTimeIn; }
     }
 }

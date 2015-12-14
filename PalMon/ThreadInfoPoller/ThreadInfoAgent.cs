@@ -45,7 +45,7 @@ namespace PalMon.ThreadInfoPoller
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message));
+                        Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message), ex);
                     }
                 }
             }
