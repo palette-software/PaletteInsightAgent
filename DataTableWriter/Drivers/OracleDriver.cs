@@ -18,6 +18,8 @@ namespace DataTableWriter.Drivers
 
 
         public string QueryParamName(string base_param_name) { return ":" + base_param_name;  }
+        public object ToDateTimeType(DateTimeOffset dateTimeIn) { return dateTimeIn.UtcDateTime; }
+
         public string Name
         {
             get
@@ -30,25 +32,16 @@ namespace DataTableWriter.Drivers
         protected readonly IReadOnlyDictionary<string, string> postgresToSystemTypeMap
             = new Dictionary<string, string>()
             {
-                { "BIGINT", "System.Int64" },
                 { "INTEGER", "System.Int32" },
                 { "SMALLINT", "System.Int16" },
                 { "BINARY_DOUBLE", "System.Double" },
                 { "BINARY_FLOAT", "System.Single" },
-
-                //{ "bigserial", "System.Int64" },
-                //{ "boolean", "System.Boolean" },
                 { "CHAR", "System.Boolean" },
-
-
-                //{ "NUMBER", "System.Decimal" },
-                { "NUMBER", "System.Int32" },
-                //{ "smallserial", "System.Int16" },
-                //{ "text", "System.String" },
+                { "NUMBER", "System.Int64" },
                 { "CLOB", "System.String" },
-                { "TIMESTAMP", "System.DateTime" },
-                { "TIMESTAMP(9)", "System.DateTime" },
-                { "TIMESTAMP(6)", "System.DateTime" },
+                { "TIMESTAMP", "System.DateTimeOffset" },
+                { "TIMESTAMP(9)", "System.DateTimeOffset" },
+                { "TIMESTAMP(6)", "System.DateTimeOffset" },
                 { "TIMESTAMP WITH TIME ZONE", "System.DateTimeOffset" }
             };
 
@@ -59,14 +52,13 @@ namespace DataTableWriter.Drivers
                 { "System.Boolean", "char" },
                 { "System.Byte", "smallint" },
                 { "System.Char", "char(1)" },
-                { "System.DateTime", "timestamp" },
-                { "System.DateTimeOffset", "timestamp with time zone" },
-                //{ "System.Decimal", "number(22,7)" },
+                { "System.DateTime", "timestamp(9)" },
+                { "System.DateTimeOffset", "timestamp(9) with time zone" },
                 { "System.Decimal", "integer" },
                 { "System.Double", "binary_double" },
                 { "System.Int16", "smallint" },
                 { "System.Int32", "integer" },
-                { "System.Int64", "bigint" },
+                { "System.Int64", "number" },
                 { "System.Single", "binary_float" },
                 { "System.String", "varchar2(255)" },
             };
@@ -181,11 +173,7 @@ namespace DataTableWriter.Drivers
         /// <returns>Oracle DDL for creation of a table with the given name & columns.</returns>
         public string BuildQueryCreateTable(string tableName, ICollection<string> columns)
         {
-            //var triggerDef = generatePkTrigger(tableName);
-            //var sequenceDef = generatePKSequence(tableName);
-            //var pkAlterTableDef = generatePkAlterTable(tableName);
             var tableCreateDef = String.Format(@"CREATE TABLE {0} ({1})", tableName, String.Join(",\n", columns));
-            //var createStatement = tableCreateDef + pkAlterTableDef + sequenceDef + triggerDef;
             return tableCreateDef;
         }
 
@@ -270,7 +258,7 @@ namespace DataTableWriter.Drivers
             // HACK-HACK: The line above is nonsense, but now we don't know what is the real cause of taking only
             // the first word into consideration, so the safe thing is to do here is to add exceptions, like
             // timestamp with time zone.
-            if (pgFirstTermOfType == "timestamp")
+            if (pgFirstTermOfType == "TIMESTAMP")
             {
                 pgFirstTermOfType = pgType;
             }
