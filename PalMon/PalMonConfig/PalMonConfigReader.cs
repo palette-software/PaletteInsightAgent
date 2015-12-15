@@ -4,6 +4,7 @@ using System;
 using System.Configuration;
 using System.IO;
 using System.Reflection;
+using DataTableWriter.Adapters;
 using DataTableWriter.Connection;
 using DataTableWriter.Drivers;
 using DataTableWriter.Writers;
@@ -160,7 +161,8 @@ namespace PalMon.Config
             Log.Info("Connecting to results database..");
             try
             {
-                return new DataTableDbWriter(dbDriverType, dbConnInfo, tableInitializationOptions);
+                var adapter = DbAdapterFactory.GetInstance(dbDriverType, dbConnInfo);
+                return new DataTableDbWriter(adapter, tableInitializationOptions);
             }
             catch (Exception ex)
             {

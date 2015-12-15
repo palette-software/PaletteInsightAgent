@@ -56,6 +56,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Adapters\DbAdapterFactoryTest.cs" />
     <Compile Include="Adapters\DbAdapterTest.cs" />
     <Compile Include="Connection\DbConnectionInfoTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
