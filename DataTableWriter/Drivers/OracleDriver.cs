@@ -39,9 +39,9 @@ namespace DataTableWriter.Drivers
                 { "CHAR", "System.Boolean" },
                 { "NUMBER", "System.Int64" },
                 { "CLOB", "System.String" },
-                { "TIMESTAMP", "System.DateTimeOffset" },
-                { "TIMESTAMP(9)", "System.DateTimeOffset" },
-                { "TIMESTAMP(6)", "System.DateTimeOffset" },
+                { "TIMESTAMP", "System.DateTime" },
+                { "TIMESTAMP(9)", "System.DateTime" },
+                { "TIMESTAMP(6)", "System.DateTime" },
                 { "TIMESTAMP WITH TIME ZONE", "System.DateTimeOffset" }
             };
 

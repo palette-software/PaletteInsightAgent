@@ -31,7 +31,7 @@ namespace PalMon.Sampler
         public DataTable SampleAll()
         {
             Log.Info("Polling..");
-            var pollTimestamp = DateTime.Now;
+            var pollTimestamp = DateTimeOffset.Now.UtcDateTime;
 
             // Create a new empty table to store results of this sampling, using our existing column schema.
             var dataTable = schema.Clone();
