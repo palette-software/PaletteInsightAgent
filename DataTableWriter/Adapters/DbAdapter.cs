@@ -26,7 +26,6 @@ namespace DataTableWriter.Adapters
             Driver = driver;
             ConnectionInfo = connectionInfo;
             Connection = Driver.BuildConnection(ConnectionInfo);
-            OpenConnection();
         }
 
         ~DbAdapter()

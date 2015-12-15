@@ -63,7 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Drivers\DbDriverFactory.cs" />
+    <Compile Include="Adapters\DbAdapterFactory.cs" />
     <Compile Include="Drivers\MsSQLDriver.cs" />
     <Compile Include="Drivers\OracleDriver.cs" />
     <Compile Include="Drivers\PostgresDriver.cs" />
