@@ -299,7 +299,11 @@ namespace PalMon.LogPoller
             // is Newtonsoft.Json.Linq.JValue) to DateTime as there is no direct conversion from 
             // JSON time stamp to DateTimeOffset.
             // The DateTimeOffset conversion will be implicitly executed at return.
-            return (DateTime)jsonTimeStamp;
+            //return (DateTime)jsonTimeStamp;
+
+            DateTime dt = (DateTime)jsonTimeStamp;
+            dt = DateTime.SpecifyKind(dt, DateTimeKind.Local);
+            return dt;
         }
     }
 }
