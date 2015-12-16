@@ -61,6 +61,8 @@ namespace DataTableWriter.Drivers
 
 
         public string QueryParamName(string base_param_name) { return "@" + base_param_name;  }
+
+        public object ToDateTimeType(DateTimeOffset dateTimeIn) { return dateTimeIn; }
         /// <summary>
         /// Builds a Postgres connection object for the given remote Postgres server.
         /// </summary>

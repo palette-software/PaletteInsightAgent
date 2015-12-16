@@ -89,12 +89,12 @@ namespace DataTableWriter
                 {
                     if (!existingTableSchema.Columns.Contains(column.ColumnName))
                     {
-                        Log.Error(String.Format("Cannot update local schema to match database table; column '{0}' exists in the schema, but not the database table.", column.ColumnName));
+                        Log.Error(String.Format("Cannot update local schema to match database table; column '{1}'/'{0}' exists in the schema, but not the database table.", column.ColumnName, schema.TableName));
                         return false;
                     }
                     if (existingTableSchema.Columns[column.ColumnName].DataType != column.DataType)
                     {
-                        Log.Error(String.Format("Cannot update local schema to match database table for column {2}; data types are inconsistent. [Schema='{0}', DbTable='{1}']", column.DataType, existingTableSchema.Columns[column.ColumnName].DataType,  column.ColumnName));
+                        Log.Error(String.Format("Cannot update local schema to match database table for column '{3}'/'{2}'; data types are inconsistent. [Schema='{0}', DbTable='{1}']", column.DataType, existingTableSchema.Columns[column.ColumnName].DataType,  column.ColumnName, schema.TableName));
                         return false;
                     }
                     if (existingTableSchema.Columns[column.ColumnName].AllowDBNull != column.AllowDBNull)
