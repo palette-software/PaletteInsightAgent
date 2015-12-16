@@ -40,7 +40,7 @@ namespace PalMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(IDataTableWriter writer, object writeLock, ITableauRepoConn repo, String filename, String[] jsonStringLines)
+        public void processServerLogLines(IDataTableWriter writer, ITableauRepoConn repo, String filename, String[] jsonStringLines)
         {
             // Create the datatable
             var serverLogsTable = LogTables.makeServerLogsTable();
@@ -61,12 +61,11 @@ namespace PalMon.LogPoller
                 Log.Info("Inserting " + statusLine);
 
 
-                lock (writeLock)
-                {
-                    // Server logs need to be inserted first for the triggers to work.
-                    if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
-                    if (filterStateCount > 0) writer.Write(filterStateTable);
-                }
+                // Server logs need to be inserted first for the triggers to work.
+                // TODO: From now on it is not guaranteed that server logs are inserted
+                //       first, as the rows may be inserted in a meshed way.
+                if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
+                if (filterStateCount > 0) writer.Write(filterStateTable);
 
                 Log.Info("Inserted " + statusLine);
             }

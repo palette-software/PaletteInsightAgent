@@ -63,12 +63,12 @@ namespace PalMon.LogPoller
         /// Actual function to poll from the logs
         /// </summary>
         /// <returns></returns>
-        public void pollLogs(IDataTableWriter writer, object writeLock)
+        public void pollLogs(IDataTableWriter writer)
         {
             watcher.watchChangeCycle((string filename, string[] lines) =>
             {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
-                logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
+                logsToDbConverter.processServerLogLines(writer, tableauRepo, filename, lines);
             });
         }
     }

@@ -7,6 +7,7 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace DataTableWriter.Writers
 {
@@ -22,6 +23,7 @@ namespace DataTableWriter.Writers
         /// </summary>
         protected HashSet<string> isTableInitialized;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly object DbWriteLock = new object();
         private bool disposed;
 
         public DataTableDbWriter(DbDriverType driverType, IDbConnectionInfo connectionInfo, DbTableInitializationOptions tableInitializationOptions = default(DbTableInitializationOptions))
@@ -65,12 +67,27 @@ namespace DataTableWriter.Writers
             {
                 try
                 {
-                    Adapter.InsertRow(table.TableName, row);
-                    numRecordsWritten++;
+                    lock (DbWriteLock)
+                    {
+                        Adapter.InsertRow(table.TableName, row);
+                        numRecordsWritten++;
+                    }
                 }
                 catch (DbException) { }
             }
             Log.Debug(String.Format("Finished writing {0} {1}!", numRecordsWritten, "record".Pluralize(numRecordsWritten)));
+        }
+
+        public bool WaitForWriteFinish(int waitTimeout)
+        {
+            if (!Monitor.TryEnter(DbWriteLock, waitTimeout))
+            {
+                Log.Error("Could not acquire write lock; forcing exit..");
+                return false;
+            }
+
+            Log.Debug("Acquired write lock gracefully..");
+            return true;
         }
 
         public void Dispose()

@@ -33,7 +33,6 @@ namespace PalMon
         private bool disposed;
         private const string PathToCountersConfig = @"Config\Counters.config";
         private const int WriteLockAcquisitionTimeout = 10; // In seconds.
-        private static readonly object WriteLock = new object();
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         public static readonly string Log4NetConfigKey = "log4net-config-file";
 
@@ -127,13 +126,13 @@ namespace PalMon
         {
             Log.Info("Shutting down PalMon..");
             // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
-            if (!Monitor.TryEnter(WriteLock, WriteLockAcquisitionTimeout * 1000))
+            if (!options.Writer.WaitForWriteFinish(WriteLockAcquisitionTimeout * 1000))
             {
-                Log.Error("Could not acquire write lock; forcing exit..");
+                Log.Error("Waiting for DB writer to finish timed out; forcing exit..");
             }
             else
             {
-                Log.Debug("Acquired write lock gracefully..");
+                Log.Debug("DB writer finished gracefully..");
             }
 
             if (timer != null)
@@ -178,10 +177,7 @@ namespace PalMon
         private void Poll(object stateInfo)
         {
             var sampleResults = sampler.SampleAll();
-            lock (WriteLock)
-            {
-                options.Writer.Write(sampleResults);
-            }
+            options.Writer.Write(sampleResults);
         }
 
 
@@ -191,7 +187,7 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
-            logPollerAgent.pollLogs(options.Writer, WriteLock);
+            logPollerAgent.pollLogs(options.Writer);
         }
 
         /// <summary>
@@ -200,7 +196,7 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
         {
-            threadInfoAgent.poll(options.Writer, WriteLock);
+            threadInfoAgent.poll(options.Writer);
         }
 
         #endregion Private Methods
