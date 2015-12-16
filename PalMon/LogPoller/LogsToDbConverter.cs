@@ -63,7 +63,7 @@ namespace PalMon.LogPoller
 
                 lock (writeLock)
                 {
-                    // Server logs need to be inserted first for the triggers to work.
+                    // Server logs used to be inserted first for the triggers to work. But it is not required anymore.
                     if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
                     if (filterStateCount > 0) writer.Write(filterStateTable);
                 }

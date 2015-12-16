@@ -22,6 +22,7 @@ namespace PalMon.ThreadInfoPoller
 
     class ThreadInfoAgent
     {
+        public static readonly object InProgressLock = new object();
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static readonly string HostName = Dns.GetHostName();
 
