@@ -17,7 +17,7 @@ namespace PalMon.ThreadInfoPoller
         public long processId;
         public long threadId;
         public long cpuTime;
-        public DateTimeOffset pollTimeStamp;
+        public DateTime pollTimeStamp;
     }
 
     class ThreadInfoAgent
@@ -45,7 +45,7 @@ namespace PalMon.ThreadInfoPoller
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message));
+                        Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message), ex);
                     }
                 }
             }
@@ -61,7 +61,7 @@ namespace PalMon.ThreadInfoPoller
                     threadInfo.processId = process.Id;
                     threadInfo.threadId = thread.Id;
                     threadInfo.cpuTime = thread.TotalProcessorTime.Ticks;
-                    threadInfo.pollTimeStamp = DateTimeOffset.Now;
+                    threadInfo.pollTimeStamp = DateTimeOffset.Now.UtcDateTime;
                     threadInfo.host = HostName;
                     threadInfo.instance = process.ProcessName;
                     ThreadTables.addToTable(table, threadInfo);

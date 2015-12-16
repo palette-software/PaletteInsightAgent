@@ -287,7 +287,15 @@ namespace DataTableWriter.Adapters
                     columnList.Add(String.Format("\"{0}\"", row.Table.Columns[i].ColumnName));
                     var parameter = command.CreateParameter();
                     parameter.ParameterName = Driver.QueryParamName("param" + i);
-                    parameter.Value = row[i];
+
+                    var value = row[i];
+                    // If the value is a datetime type, do our own conversion
+                    if (row.Table.Columns[i].DataType == typeof(DateTimeOffset))
+                    {
+                        value = Driver.ToDateTimeType((DateTimeOffset) value );
+                    }
+
+                    parameter.Value = value;
                     command.Parameters.Add(parameter);
                 }
 

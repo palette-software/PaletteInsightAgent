@@ -289,17 +289,17 @@ namespace PalMon.LogPoller
         }
 
         /// <summary>
-        /// Creates a DateTimeOffset (UTC time) from a date value retrieved from a JSON.
+        /// Creates a DateTime (UTC time) from a date value retrieved from a JSON.
         /// </summary>
         /// <param name="jsonTimeStamp"></param>
-        /// <returns>DateTimeOffset (UTC time)</returns>
-        private static DateTimeOffset parseJsonTimestamp(dynamic jsonTimeStamp)
+        /// <returns>DateTime (UTC time)</returns>
+        private static DateTime parseJsonTimestamp(dynamic jsonTimeStamp)
         {
             // Unfortunately first we need to convert the JSON time stamp (currently of which type
-            // is Newtonsoft.Json.Linq.JValue) to DateTime as there is no direct conversion from 
-            // JSON time stamp to DateTimeOffset.
-            // The DateTimeOffset conversion will be implicitly executed at return.
-            return (DateTime)jsonTimeStamp;
+            // is Newtonsoft.Json.Linq.JValue) to DateTime and set the DateTimeKind.
+            DateTime dt = (DateTime)jsonTimeStamp;
+            dt = DateTime.SpecifyKind(dt, DateTimeKind.Local).ToUniversalTime();
+            return dt;
         }
     }
 }
