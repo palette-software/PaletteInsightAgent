@@ -12,6 +12,8 @@ namespace PalMon.Sampler
     /// </summary>
     internal sealed class CounterSampler
     {
+        public static readonly object InProgressLock = new object();
+
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

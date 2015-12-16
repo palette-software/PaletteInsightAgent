@@ -61,9 +61,8 @@ namespace PalMon.LogPoller
                 Log.Info("Inserting " + statusLine);
 
 
-                // Server logs need to be inserted first for the triggers to work.
-                // TODO: From now on it is not guaranteed that server logs are inserted
-                //       first, as the rows may be inserted in a meshed way.
+                // Insert server logs and filter state records. The order doesn't
+                // matter anymore.
                 if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
                 if (filterStateCount > 0) writer.Write(filterStateTable);
 
