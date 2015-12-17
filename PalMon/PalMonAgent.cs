@@ -214,20 +214,18 @@ namespace PalMon
         /// Checks whether polling is in progress at the moment for a given poll method.
         /// If not, it executes the poll.
         /// </summary>
-        private bool tryStartIndividualPoll(object pollTypeLock, int timeout, Action pollDelegate)
+        private void tryStartIndividualPoll(object pollTypeLock, int timeout, Action pollDelegate)
         {
             if (!Monitor.TryEnter(pollTypeLock, timeout))
             {
                 // Do not execute the poll delegate as it is already being executed.
-                return false;
+                return;
             }
 
             lock (pollTypeLock)
             {
                 pollDelegate();
             }
-          
-            return true;
         }
 
         #endregion Private Methods
