@@ -72,7 +72,7 @@ namespace DataTableWriter.Writers
             while (remainingRecords > 0)
             {
                 var rowsToInsertCount = Math.Min(remainingRecords, BATCH_SIZE);
-                Log.Info(String.Format("[Batch insert] {0} rows into {1}, this+remaining:{2}", table.TableName, rowsToInsertCount, remainingRecords));
+                Log.Debug(String.Format("[Batch insert] {0} rows into {1}, this+remaining:{2}", table.TableName, rowsToInsertCount, remainingRecords));
                 lock (DbWriteLock)
                 {
                     for (var i = 0; i < rowsToInsertCount; ++i)
@@ -94,24 +94,10 @@ namespace DataTableWriter.Writers
                     // decrement the remaining rows
                     remainingRecords -= rowsToInsertCount;
                 }
-                Log.Info(String.Format("[Batch insert] Done for {0} total remaining:{1} total written:{2}", table.TableName, remainingRecords, numRecordsWritten ));
+                Log.Debug(String.Format("[Batch insert] Done for {0} total remaining:{1} total written:{2}", table.TableName, remainingRecords, numRecordsWritten ));
             }
 
-            Log.Info(String.Format("[Batch insert] done for: {0} - total inserted: {1}", table.TableName, numRecordsWritten));
-            //// Write all rows in table.
-            //int numRecordsWritten = 0;
-            //foreach (DataRow row in table.Rows)
-            //{
-            //    try
-            //    {
-            //        lock (DbWriteLock)
-            //        {
-            //            Adapter.InsertRow(table.TableName, row);
-            //            numRecordsWritten++;
-            //        }
-            //    }
-            //    catch (DbException) { }
-            //}
+            Log.Debug(String.Format("[Batch insert] done for: {0} - total inserted: {1}", table.TableName, numRecordsWritten));
             Log.Debug(String.Format("Finished writing {0} {1}!", numRecordsWritten, "record".Pluralize(numRecordsWritten)));
         }
 
