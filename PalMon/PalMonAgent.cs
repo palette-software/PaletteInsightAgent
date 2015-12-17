@@ -18,8 +18,6 @@ using PalMon.ThreadInfoPoller;
 
 namespace PalMon
 {
-    using PollDelegate = Action;
-
     /// <summary>
     /// A timer-based performance monitoring agent.  Loads a set of counters from a config file and polls them periodically, passing the results to a writer object.
     /// </summary>
@@ -216,7 +214,7 @@ namespace PalMon
         /// Checks whether polling is in progress at the moment for a given poll method.
         /// If not, it executes the poll.
         /// </summary>
-        private bool tryStartIndividualPoll(object pollTypeLock, int timeout, PollDelegate pollDelegate)
+        private bool tryStartIndividualPoll(object pollTypeLock, int timeout, Action pollDelegate)
         {
             if (!Monitor.TryEnter(pollTypeLock, timeout))
             {
