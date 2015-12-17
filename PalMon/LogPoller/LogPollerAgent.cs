@@ -8,7 +8,7 @@ namespace PalMon.LogPoller
     class LogPollerAgent
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        public static readonly object InProgressLock = new object();
+        public static readonly string InProgressLock = "Log Poller";
 
         private LogFileWatcher watcher;
         private LogsToDbConverter logsToDbConverter;

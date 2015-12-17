@@ -12,7 +12,7 @@ namespace PalMon.Sampler
     /// </summary>
     internal sealed class CounterSampler
     {
-        public static readonly object InProgressLock = new object();
+        public static readonly string InProgressLock = "Counter Sampler";
 
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;
