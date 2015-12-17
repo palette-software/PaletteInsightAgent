@@ -76,7 +76,7 @@ namespace DataTableWriter.Writers
                 {
                     for (var i = 0; i < rowsToInsertCount; ++i)
                     {
-                        Adapter.InsertRow(table.TableName, table.Rows[i]);
+                        Adapter.InsertRow(table.TableName, table.Rows[remainingRecords + i]);
                         numRecordsWritten++;
                     }
                     // decrement the remaining rows
