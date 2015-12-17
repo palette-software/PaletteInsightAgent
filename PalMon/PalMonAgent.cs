@@ -217,7 +217,7 @@ namespace PalMon
             if (!Monitor.TryEnter(pollTypeLock, timeout))
             {
                 // Do not execute the poll delegate as it is already being executed.
-                Log.Warn("Skipping poll as it is already in progress: " + pollTypeLock.ToString());
+                Log.Debug("Skipping poll as it is already in progress: " + pollTypeLock.ToString());
                 return;
             }
 
