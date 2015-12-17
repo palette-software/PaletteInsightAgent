@@ -18,6 +18,8 @@ using PalMon.ThreadInfoPoller;
 
 namespace PalMon
 {
+    using PollDelegate = Action;
+
     /// <summary>
     /// A timer-based performance monitoring agent.  Loads a set of counters from a config file and polls them periodically, passing the results to a writer object.
     /// </summary>
@@ -176,16 +178,11 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void Poll(object stateInfo)
         {
-            if (!tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout))
-            {
-                return;
-            }
-
-            lock (CounterSampler.InProgressLock)
+            tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
                 options.Writer.Write(sampleResults);
-            }
+            });
         }
 
 
@@ -195,15 +192,10 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
-            if (!tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout))
-            {
-                return;
-            }
-
-            lock (LogPollerAgent.InProgressLock)
+            tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
             {
                 logPollerAgent.pollLogs(options.Writer);
-            }
+            });
         }
 
         /// <summary>
@@ -212,28 +204,29 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
         {
-            if (!tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout))
-            {
-                return;
-            }
-
-            lock (ThreadInfoAgent.InProgressLock)
+            tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
             {
                 threadInfoAgent.poll(options.Writer);
-            }
+            });
         }
 
         /// <summary>
-        /// Checks whether polling is in progress at the moment for a given poll method
+        /// Checks whether polling is in progress at the moment for a given poll method.
+        /// If not, it executes the poll.
         /// </summary>
-        private bool tryStartIndividualPoll(object pollType, int timeout)
+        private bool tryStartIndividualPoll(object pollTypeLock, int timeout, PollDelegate pollDelegate)
         {
-            if (!Monitor.TryEnter(pollType, timeout))
+            if (!Monitor.TryEnter(pollTypeLock, timeout))
             {
+                // Do not execute the poll delegate as it is already being executed.
                 return false;
             }
 
-            // TODO: accept a poll delegate as a parameter and execute it here!
+            lock (pollTypeLock)
+            {
+                pollDelegate();
+            }
+          
             return true;
         }
 
