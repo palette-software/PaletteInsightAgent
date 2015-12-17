@@ -222,9 +222,14 @@ namespace PalMon
                 return;
             }
 
-            lock (pollTypeLock)
+            try
             {
                 pollDelegate();
+            }
+            finally
+            {
+                // Ensure that the lock is released.
+                Monitor.Exit(pollTypeLock);
             }
         }
 
