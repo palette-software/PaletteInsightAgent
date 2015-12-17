@@ -66,6 +66,7 @@ namespace DataTableWriter.Writers
 
             int remainingRecords = table.Rows.Count;
             int numRecordsWritten = 0;
+            int rowIndex = 0;
 
             // While we can batch
             while (remainingRecords > 0)
@@ -76,8 +77,19 @@ namespace DataTableWriter.Writers
                 {
                     for (var i = 0; i < rowsToInsertCount; ++i)
                     {
-                        Adapter.InsertRow(table.TableName, table.Rows[remainingRecords + i]);
-                        numRecordsWritten++;
+                        // Try the insert
+                        try
+                        {
+                            Adapter.InsertRow(table.TableName, table.Rows[rowIndex]);
+                            numRecordsWritten++;
+                        }
+                        // Log any errors
+                        catch (DbException e)
+                        {
+                            Log.Error("[Batch insert] error while inserting row:", e);
+                        }
+                        // Increment the row index
+                        rowIndex++;
                     }
                     // decrement the remaining rows
                     remainingRecords -= rowsToInsertCount;
