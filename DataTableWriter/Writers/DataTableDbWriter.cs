@@ -43,6 +43,8 @@ namespace DataTableWriter.Writers
             get { return String.Format("Database Writer ({0})", Adapter.Driver.Name); }
         }
 
+        private const int BATCH_SIZE = 1000;
+
         public void Write(DataTable table)
         {
             Log.Debug(String.Format("Writing {0} {1} to database..", table.Rows.Count, "record".Pluralize(table.Rows.Count)));
@@ -61,20 +63,43 @@ namespace DataTableWriter.Writers
                 isTableInitialized.Add(table.TableName);
             }
 
-            // Write all rows in table.
+
+            int remainingRecords = table.Rows.Count;
             int numRecordsWritten = 0;
-            foreach (DataRow row in table.Rows)
+
+            // While we can batch
+            while (remainingRecords > 0)
             {
-                try
+                var rowsToInsertCount = Math.Min(remainingRecords, BATCH_SIZE);
+                Log.Info(String.Format("[Batch insert] {0} rows into {1}, this+remaining:{2}", table.TableName, rowsToInsertCount, remainingRecords));
+                lock (DbWriteLock)
                 {
-                    lock (DbWriteLock)
+                    for (var i = 0; i < rowsToInsertCount; ++i)
                     {
-                        Adapter.InsertRow(table.TableName, row);
+                        Adapter.InsertRow(table.TableName, table.Rows[i]);
                         numRecordsWritten++;
                     }
+                    // decrement the remaining rows
+                    remainingRecords -= rowsToInsertCount;
                 }
-                catch (DbException) { }
+                Log.Info(String.Format("[Batch insert] Done for {0} total remaining:{1} total written:{2}", table.TableName, remainingRecords, numRecordsWritten ));
             }
+
+            Log.Info(String.Format("[Batch insert] done for: {0} - total inserted: {1}", table.TableName, numRecordsWritten));
+            //// Write all rows in table.
+            //int numRecordsWritten = 0;
+            //foreach (DataRow row in table.Rows)
+            //{
+            //    try
+            //    {
+            //        lock (DbWriteLock)
+            //        {
+            //            Adapter.InsertRow(table.TableName, row);
+            //            numRecordsWritten++;
+            //        }
+            //    }
+            //    catch (DbException) { }
+            //}
             Log.Debug(String.Format("Finished writing {0} {1}!", numRecordsWritten, "record".Pluralize(numRecordsWritten)));
         }
 
