@@ -9,29 +9,159 @@ using System.Data;
 
 namespace DataTableWriter.UnitTests.Adapters
 {
-    /// <summary>
-    /// Summary description for DbAdapterTest
-    /// </summary>
     [TestClass]
     public class DbAdapterTest
     {
+        [TestClass]
+        public class MethodAddColumn
+        {
+            [TestMethod]
+            public void ShouldAddColumn()
+            {
+                Assert.Fail();
+            }
 
-        //[TestMethod]
-        //public void TestConstructorShouldCallOpen()
-        //{
-        //    var driverSub = Substitute.For<IDbDriver>();
-        //    var connectionInfoStub = Substitute.For<IDbConnectionInfo>();
-        //    var connectionStub = Substitute.For<IDbConnection>();
+            [TestMethod]
+            public void ShouldThrowExceptionWhenErrorHappened()
+            {
+                Assert.Fail();
+            }
+        }
 
-        //    driverSub.BuildConnection(connectionInfoStub).Returns(connectionStub);
-        //    var adapter = new DbAdapter(driverSub, connectionInfoStub);
-        //    connectionStub.Received().Open();
-        //}
-
-        [TestMethod]
-        public void TestIsConnectionOpenConnectionIsClosed()
+        [TestClass]
+        public class MethodAddColumnsToTableToMatchSchema
         {
 
+            [TestMethod]
+            public void ShouldAddNonExistingColumns()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldThrowExceptionWhenTryingToAddNonNullableColumn()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldNotAddColumnsIfSchemaAlreadyContainsThem()
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestClass]
+        public class MethodCloseConnection
+        {
+
+            [TestMethod]
+            public void ShouldCallConnectionClose()
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestClass]
+        public class MethodCreateTable
+        {
+
+            [TestMethod]
+            public void ShouldCallDriverFunctionsWhenGenerateIdentityFalse()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldCallDriverFunctionsWhenGenerateIdentityTrue()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod] public void ShouldThrowExceptionWhenCouldntExecuteNonQuery()
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestClass]
+        public class MethodExistsTable
+        {
+
+            [TestMethod]
+            public void ShouldReturnFalseWhenTableDoesNotExist()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldReturnTrueWhenTableDoesExist()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldThrowExceptionWhenCouldntExecuteNonQuery()
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestClass]
+        public class MethodGetSchema
+        {
+
+            [TestMethod]
+            public void ShouldReturnTheTable()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldReturnTrueWhenTableDoesExist()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldThrowExceptionWhenCouldntGetTable()
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestClass]
+        public class MethodIsConnectionOpen
+        {
+
+            [TestMethod]
+            public void ShouldReturnFalseWhenConnectionIsNotOpen()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldReturnTrueWhenConnectionOpen()
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestClass]
+        public class MethodOpenConnection
+        {
+
+            [TestMethod]
+            public void ShouldCallConnectionOpen()
+            {
+                Assert.Fail();
+            }
+
+            [TestMethod]
+            public void ShouldThrowExceptionIfCouldntOpenConnection()
+            {
+                Assert.Fail();
+            }
         }
     }
 }
