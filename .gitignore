@@ -15,3 +15,10 @@ PalMon.v12.suo
 
 BBR-ChargebackModel-CLI/bin/
 BBR-ChargebackModel-CLI/obj/
+*.ncrunchsolution
+*.ncrunchproject
+
+DataTableWriter.UnitTests/bin/
+DataTableWriter.UnitTests/obj/
+
+
