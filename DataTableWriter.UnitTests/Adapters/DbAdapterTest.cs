@@ -6,25 +6,56 @@ using DataTableWriter.Drivers;
 using DataTableWriter.Adapters;
 using DataTableWriter.Connection;
 using System.Data;
+using System.Data.Common;
 
 namespace DataTableWriter.UnitTests.Adapters
 {
     [TestClass]
     public class DbAdapterTest
     {
+        public class FakeDbException : DbException { }
+
         [TestClass]
         public class MethodAddColumn
         {
             [TestMethod]
             public void ShouldAddColumn()
             {
-                Assert.Fail();
+                const string query = "ADD_COLUMN_QUERY"; 
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                var command = Substitute.For<IDbCommand>();
+                connection.CreateCommand().Returns(command);
+                driver.BuildConnection(connectionInfo).Returns(connection);
+                driver.BuildQueryAddColumnToTable(Arg.Any<string>(), Arg.Any<DataColumn>()).Returns(query);
+
+                var adapter = new DbAdapter(driver, connectionInfo);
+                adapter.AddColumn("TABLE", new DataColumn());
+
+                Assert.AreEqual(connection, command.Connection);
+                Assert.AreEqual(query, command.CommandText);
+                command.Received().ExecuteNonQuery();
             }
 
             [TestMethod]
+            [ExpectedException(typeof(DbException), AllowDerivedTypes = true)]
             public void ShouldThrowExceptionWhenErrorHappened()
             {
-                Assert.Fail();
+                const string query = "ADD_COLUMN_QUERY";
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                var command = Substitute.For<IDbCommand>();
+                command
+                    .When(c => c.ExecuteNonQuery())
+                    .Do(c => { throw new FakeDbException(); });
+                connection.CreateCommand().Returns(command);
+                driver.BuildConnection(connectionInfo).Returns(connection);
+                driver.BuildQueryAddColumnToTable(Arg.Any<string>(), Arg.Any<DataColumn>()).Returns(query);
+
+                var adapter = new DbAdapter(driver, connectionInfo);
+                adapter.AddColumn("TABLE", new DataColumn());
             }
         }
 
