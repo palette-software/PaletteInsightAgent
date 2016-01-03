@@ -369,6 +369,49 @@ namespace DataTableWriter.UnitTests.Adapters
         }
 
         [TestClass]
+        public class MethodExistsColumn
+        {
+            [TestMethod]
+            public void ShouldReturnTrueWhenColumnExists()
+            {
+                var tableName = "TABLE";
+                var table = new DataTable(tableName);
+                table.Columns.Add("col1", typeof(string));
+                table.Columns.Add("col2", typeof(string));
+                table.Columns.Add("col3", typeof(string));
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                driver.BuildConnection(connectionInfo).Returns(connection);
+
+                var adapter = new DbAdapter(driver, connectionInfo);
+                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(table);
+                var col = new DataColumn("col1");
+                Assert.IsTrue(adapter.ExistsColumn(tableName, col));
+            }
+
+            [TestMethod]
+            public void ShouldReturnFalseWhenColumnDoesNotExist()
+            {
+                var tableName = "TABLE";
+                var table = new DataTable(tableName);
+                table.Columns.Add("col1", typeof(string));
+                table.Columns.Add("col2", typeof(string));
+                table.Columns.Add("col3", typeof(string));
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                driver.BuildConnection(connectionInfo).Returns(connection);
+
+                var adapter = new DbAdapter(driver, connectionInfo);
+                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(table);
+                var col = new DataColumn("col1");
+                Assert.IsFalse(adapter.ExistsColumn(tableName, col));
+            }
+        }
+
+
+        [TestClass]
         public class MethodIsConnectionOpen
         {
 
