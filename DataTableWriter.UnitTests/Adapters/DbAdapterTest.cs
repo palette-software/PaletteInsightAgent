@@ -221,22 +221,98 @@ namespace DataTableWriter.UnitTests.Adapters
         [TestClass]
         public class MethodCreateTable
         {
+            private DataTable getSchema(string tableName)
+            {
+                var schema = new DataTable(tableName);
+                schema.Columns.Add(new DataColumn("COL1")
+                {
+                    DataType = typeof(string),
+                    DefaultValue = "VAL1",
+                    AllowDBNull = false
+                });
 
+                schema.Columns.Add(new DataColumn("COL2")
+                {
+                    DataType = typeof(string),
+                    DefaultValue = "VAL2",
+                    AllowDBNull = false
+                });
+
+                schema.Columns.Add(new DataColumn("COL3")
+                {
+                    DataType = typeof(string),
+                    DefaultValue = "VAL3",
+                    AllowDBNull = false
+                });
+                return schema;
+            }
             [TestMethod]
             public void ShouldCallDriverFunctionsWhenGenerateIdentityFalse()
             {
-                Assert.Fail();
+                const string query = "CREATE_TABLE_QUERY";
+                const string tableName = "TABLE";
+                var schema = getSchema(tableName);
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                var command = Substitute.For<IDbCommand>();
+                connection.CreateCommand().Returns(command);
+                driver.BuildConnection(connectionInfo).Returns(connection);
+                driver.BuildQueryCreateTable(Arg.Any<string>(), Arg.Any<System.Collections.Generic.List<string>>())
+                    .Returns(query);
+
+                var adapter = new DbAdapter(driver, connectionInfo);
+                adapter.CreateTable(schema, false);
+
+                driver.Received().BuildQueryCreateTable(tableName, Arg.Any<System.Collections.Generic.List<string>>());
+                command.Received().ExecuteNonQuery();
+                Assert.AreEqual(query, command.CommandText);
+                
             }
 
             [TestMethod]
             public void ShouldCallDriverFunctionsWhenGenerateIdentityTrue()
             {
-                Assert.Fail();
+                const string query = "CREATE_TABLE_QUERY";
+                const string tableName = "TABLE";
+                var schema = getSchema(tableName);
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                var command = Substitute.For<IDbCommand>();
+                connection.CreateCommand().Returns(command);
+                driver.BuildConnection(connectionInfo).Returns(connection);
+                driver.BuildQueryCreateTable(Arg.Any<string>(), Arg.Any<System.Collections.Generic.List<string>>())
+                    .Returns(query);
+
+                var adapter = new DbAdapter(driver, connectionInfo);
+                adapter.CreateTable(schema, true);
+
+                driver.Received().BuildQueryCreateTable(tableName, Arg.Any<System.Collections.Generic.List<string>>());
+                driver.Received().GetIdentityColumnSpecification();
+                command.Received().ExecuteNonQuery();
+                Assert.AreEqual(query, command.CommandText);
             }
 
-            [TestMethod] public void ShouldThrowExceptionWhenCouldntExecuteNonQuery()
+            [TestMethod]
+            [ExpectedException(typeof(DbException), AllowDerivedTypes = true)]
+            public void ShouldThrowExceptionWhenCouldntExecuteNonQuery()
             {
-                Assert.Fail();
+                const string query = "CREATE_TABLE_QUERY";
+                const string tableName = "TABLE";
+                var schema = getSchema(tableName);
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                var command = Substitute.For<IDbCommand>();
+                command
+                    .When(c => c.ExecuteNonQuery())
+                    .Do(c => { throw new FakeDbException(); });
+                connection.CreateCommand().Returns(command);
+                driver.BuildConnection(connectionInfo).Returns(connection);
+
+                var adapter = new DbAdapter(driver, connectionInfo);
+                adapter.CreateTable(schema, true);
             }
         }
 
