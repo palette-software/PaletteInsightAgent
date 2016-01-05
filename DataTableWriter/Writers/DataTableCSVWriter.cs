@@ -4,6 +4,7 @@ using System;
 using System.Data;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 namespace DataTableWriter.Writers
 {
@@ -13,6 +14,7 @@ namespace DataTableWriter.Writers
     public class DataTableCsvWriter : IDataTableWriter
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly object CsvWriteLock = new object();
         private bool disposed;
         protected bool headerHasBeenWritten;
         protected StreamWriter streamWriter;
@@ -39,17 +41,35 @@ namespace DataTableWriter.Writers
         {
             if (!headerHasBeenWritten)
             {
-                Log.Debug("Writing header to CSV..");
-                WriteHeader(table);
-                headerHasBeenWritten = true;
+                lock (CsvWriteLock)
+                {
+                    Log.Debug("Writing header to CSV..");
+                    WriteHeader(table);
+                    headerHasBeenWritten = true;
+                }
             }
 
             Log.Debug(String.Format("Writing {0} {1} to CSV..", table.Rows.Count, "record".Pluralize(table.Rows.Count)));
             foreach (DataRow row in table.Rows)
             {
-                WriteRow(row);
+                lock (CsvWriteLock)
+                {
+                    WriteRow(row);
+                }
             }
             Log.Debug(String.Format("Finished writing {0}!", "record".Pluralize(table.Rows.Count)));
+        }
+
+        public bool WaitForWriteFinish(int waitTimeout)
+        {
+            if (!Monitor.TryEnter(CsvWriteLock, waitTimeout))
+            {
+                Log.Warn("Could not acquire write lock!");
+                return false;
+            }
+
+            Log.Debug("Acquired write lock gracefully..");
+            return true;
         }
 
         #endregion Public Methods

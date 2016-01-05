@@ -32,20 +32,22 @@ namespace PalMon
         private readonly PalMonOptions options;
         private bool disposed;
         private const string PathToCountersConfig = @"Config\Counters.config";
-        private const int WriteLockAcquisitionTimeout = 10; // In seconds.
-        private static readonly object WriteLock = new object();
+        private const int WriteFinishTimeout = 10; // In seconds.
+        private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         public static readonly string Log4NetConfigKey = "log4net-config-file";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
-            // "license check"
-            if (DateTime.Now.Year > 2015)
-            {
-                Log.Fatal("License expired!");
-                Environment.Exit(-1);
-            }
+            //// "license check"
+            //if (DateTime.Now.Year > 2016)
+            //{
+            //    Log.Fatal("License expired!");
+            //    Console.WriteLine("License expired!");
+            //    Environment.Exit(-1);
+            //}
+
             // Initialize log4net settings.
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
@@ -63,8 +65,7 @@ namespace PalMon
             
             // Load the log poller config & start the agent
             //var logPollerConfig = LogPollerConfigurationLoader.load();
-            logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
-                options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
+            logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter);
 
             // start the thread info agent
             threadInfoAgent = new ThreadInfoAgent();
@@ -127,13 +128,13 @@ namespace PalMon
         {
             Log.Info("Shutting down PalMon..");
             // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
-            if (!Monitor.TryEnter(WriteLock, WriteLockAcquisitionTimeout * 1000))
+            if (!options.Writer.WaitForWriteFinish(WriteFinishTimeout * 1000))
             {
-                Log.Error("Could not acquire write lock; forcing exit..");
+                Log.Warn("Waiting for DB writer to finish timed out; forcing exit..");
             }
             else
             {
-                Log.Debug("Acquired write lock gracefully..");
+                Log.Debug("DB writer finished gracefully..");
             }
 
             if (timer != null)
@@ -177,11 +178,11 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void Poll(object stateInfo)
         {
-            var sampleResults = sampler.SampleAll();
-            lock (WriteLock)
+            tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
+                var sampleResults = sampler.SampleAll();
                 options.Writer.Write(sampleResults);
-            }
+            });
         }
 
 
@@ -191,7 +192,10 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
-            logPollerAgent.pollLogs(options.Writer, WriteLock);
+            tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
+            {
+                logPollerAgent.pollLogs(options.Writer);
+            });
         }
 
         /// <summary>
@@ -200,7 +204,34 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
         {
-            threadInfoAgent.poll(options.Writer, WriteLock);
+            tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
+            {
+                threadInfoAgent.poll(options.Writer);
+            });
+        }
+
+        /// <summary>
+        /// Checks whether polling is in progress at the moment for a given poll method.
+        /// If not, it executes the poll.
+        /// </summary>
+        private void tryStartIndividualPoll(object pollTypeLock, int timeout, Action pollDelegate)
+        {
+            if (!Monitor.TryEnter(pollTypeLock, timeout))
+            {
+                // Do not execute the poll delegate as it is already being executed.
+                Log.Debug("Skipping poll as it is already in progress: " + pollTypeLock.ToString());
+                return;
+            }
+
+            try
+            {
+                pollDelegate();
+            }
+            finally
+            {
+                // Ensure that the lock is released.
+                Monitor.Exit(pollTypeLock);
+            }
         }
 
         #endregion Private Methods

@@ -1,12 +1,10 @@
 ﻿using DataTableWriter.Writers;
 using log4net;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
-using PalMon.Counters;
 
 namespace PalMon.ThreadInfoPoller
 {
@@ -22,10 +20,11 @@ namespace PalMon.ThreadInfoPoller
 
     class ThreadInfoAgent
     {
+        public static readonly string InProgressLock = "Thread Info";
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static readonly string HostName = Dns.GetHostName();
 
-        public void poll(IDataTableWriter writer, object WriteLock)
+        public void poll(IDataTableWriter writer)
         {
             const string processName = "vizqlserver";
             var processList = Process.GetProcessesByName(processName);
@@ -35,18 +34,16 @@ namespace PalMon.ThreadInfoPoller
             {
                 pollThreadsOfCounter(process,  threadInfoTable, ref threadInfoTableCount);
             }
-            lock (WriteLock)
+           
+            if (threadInfoTableCount > 0)
             {
-                if (threadInfoTableCount > 0)
+                try
                 {
-                    try
-                    {
-                        writer.Write(threadInfoTable);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message), ex);
-                    }
+                    writer.Write(threadInfoTable);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message), ex);
                 }
             }
         }

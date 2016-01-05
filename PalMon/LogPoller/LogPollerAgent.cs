@@ -1,46 +1,29 @@
 ﻿using log4net;
 using System.Reflection;
 using System;
-using System.Data;
 using DataTableWriter.Writers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PalMon.LogPoller
 {
     class LogPollerAgent
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        public static readonly string InProgressLock = "Log Poller";
 
         private LogFileWatcher watcher;
         private LogsToDbConverter logsToDbConverter;
-
-        private ITableauRepoConn tableauRepo;
 
         private string folderToWatch;
         private string filter;
 
 
 
-        public LogPollerAgent(string folderToWatch, string filterString, string repoHost, int repoPort, string repoUser, string repoPass, string repoDb)
+        public LogPollerAgent(string folderToWatch, string filterString)
         {
             Log.Info("Initializing LogPollerAgent with folder:" + folderToWatch + " and filter: " + filter);
             this.folderToWatch = folderToWatch;
             filter = filterString;
             logsToDbConverter = new LogsToDbConverter();
-            // 
-            tableauRepo = null;
-            if (ShouldUseRepo(repoHost))
-            {
-                tableauRepo = new Tableau9RepoConn(repoHost, repoPort, repoUser, repoPass, repoDb);
-            }
-        }
-
-        private static bool ShouldUseRepo(string repoHost)
-        {
-            return !String.IsNullOrEmpty(repoHost);
         }
 
 
@@ -63,12 +46,12 @@ namespace PalMon.LogPoller
         /// Actual function to poll from the logs
         /// </summary>
         /// <returns></returns>
-        public void pollLogs(IDataTableWriter writer, object writeLock)
+        public void pollLogs(IDataTableWriter writer)
         {
             watcher.watchChangeCycle((string filename, string[] lines) =>
             {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
-                logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
+                logsToDbConverter.processServerLogLines(writer, filename, lines);
             });
         }
     }
