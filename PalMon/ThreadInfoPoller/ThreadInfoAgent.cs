@@ -25,27 +25,29 @@ namespace PalMon.ThreadInfoPoller
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static readonly string HostName = Dns.GetHostName();
 
-        public void poll(IDataTableWriter writer, object WriteLock)
+        public void poll(ICollection<string> processNames, IDataTableWriter writer, object WriteLock)
         {
-            const string processName = "vizqlserver";
-            var processList = Process.GetProcessesByName(processName);
-            long threadInfoTableCount = 0;
-            var threadInfoTable = ThreadTables.makeThreadInfoTable();
-            foreach (var process in processList)
+            foreach (string processName in processNames)
             {
-                pollThreadsOfCounter(process,  threadInfoTable, ref threadInfoTableCount);
-            }
-            lock (WriteLock)
-            {
-                if (threadInfoTableCount > 0)
+                var processList = Process.GetProcessesByName(processName);
+                long threadInfoTableCount = 0;
+                var threadInfoTable = ThreadTables.makeThreadInfoTable();
+                foreach (var process in processList)
                 {
-                    try
+                    pollThreadsOfCounter(process, threadInfoTable, ref threadInfoTableCount);
+                }
+                lock (WriteLock)
+                {
+                    if (threadInfoTableCount > 0)
                     {
-                        writer.Write(threadInfoTable);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message), ex);
+                        try
+                        {
+                            writer.Write(threadInfoTable);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message), ex);
+                        }
                     }
                 }
             }

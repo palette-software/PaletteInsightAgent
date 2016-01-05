@@ -16,6 +16,11 @@
           <xs:documentation>Contains configuration information for the results database.  Only required if OutputMode is "DB".</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="1" name="Processes" type="tns:PalMon.Config.ProcessesCT">
+        <xs:annotation>
+          <xs:documentation>Contains information of which processes to monitor.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element minOccurs="1" name="Clusters" type="tns:PalMon.Config.ClustersCT">
         <xs:annotation>
           <xs:documentation>Contains definitions of which machines to monitor and their logical clustering.</xs:documentation>
@@ -133,6 +138,16 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="PalMon.Config.ProcessesCT">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Process" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Represents a process name.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+
   <xs:complexType name="PalMon.Config.ClustersCT">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element minOccurs="0" maxOccurs="unbounded" name="Cluster" type="tns:PalMon.Config.ClusterCT">

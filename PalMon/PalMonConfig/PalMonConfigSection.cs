@@ -168,6 +168,34 @@ namespace PalMon.Config
 
         #endregion TableauRepo Property
 
+        #region Processes Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Processes"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string ProcessesPropertyName = "Processes";
+
+        /// <summary>
+        /// Gets or sets contains definitions of which processes to monitor
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Contains definitions of which processes to monitor")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.PalMonConfig.ProcessesPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::PalMon.Config.Processes Processes
+        {
+            get
+            {
+                return ((global::PalMon.Config.Processes)(base[global::PalMon.Config.PalMonConfig.ProcessesPropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.PalMonConfig.ProcessesPropertyName] = value;
+            }
+        }
+
+        #endregion Processes Property
+
         #region Clusters Property
 
         /// <summary>
@@ -1051,6 +1079,56 @@ namespace PalMon.Config
 namespace PalMon.Config
 {
     /// <summary>
+    /// Contains information about a process that is being monitored
+    /// </summary>
+    public partial class Process : global::System.Configuration.ConfigurationElement
+    {
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+
+        #region Name Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Name"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string NamePropertyName = "name";
+
+        /// <summary>
+        /// Gets or sets the interval between polling cycles, in seconds.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("The name of the process")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.Process.NamePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual string Name
+        {
+            get
+            {
+                return ((string)(base[global::PalMon.Config.Process.NamePropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.Process.NamePropertyName] = value;
+            }
+        }
+
+        #endregion Name Property
+    }
+}
+
+namespace PalMon.Config
+{
+    /// <summary>
     /// Contains information about the polling frequency.
     /// </summary>
     public partial class PollInterval : global::System.Configuration.ConfigurationElement
@@ -1147,6 +1225,188 @@ namespace PalMon.Config
         }
 
         #endregion Value Property
+    }
+}
+
+namespace PalMon.Config
+{
+    /// <summary>
+    /// Contains definitions of which process names are to be monitored. 
+    /// </summary>
+    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::PalMon.Config.Process), CollectionType = global::System.Configuration.ConfigurationElementCollectionType.BasicMapAlternate, AddItemName = global::PalMon.Config.Processes.ProcessPropertyName)]
+    public partial class Processes : global::System.Configuration.ConfigurationElementCollection
+    {
+        #region Constants
+
+        /// <summary>
+        /// The XML name of the individual <see cref="global::PalMon.Config.Process"/> instances in this collection.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string ProcessPropertyName = "Process";
+
+        #endregion Constants
+
+        #region Overrides
+
+        /// <summary>
+        /// Gets the type of the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <returns>The <see cref="global::System.Configuration.ConfigurationElementCollectionType"/> of this collection.</returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override global::System.Configuration.ConfigurationElementCollectionType CollectionType
+        {
+            get
+            {
+                return global::System.Configuration.ConfigurationElementCollectionType.BasicMapAlternate;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name used to identify this collection of elements
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override string ElementName
+        {
+            get
+            {
+                return global::PalMon.Config.Processes.ProcessPropertyName;
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether the specified <see cref="global::System.Configuration.ConfigurationElement"/> exists in the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <param name="elementName">The name of the element to verify.</param>
+        /// <returns>
+        /// <see langword="true"/> if the element exists in the collection; otherwise, <see langword="false"/>.
+        /// </returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override bool IsElementName(string elementName)
+        {
+            return (elementName == global::PalMon.Config.Processes.ProcessPropertyName);
+        }
+
+        /// <summary>
+        /// Gets the element key for the specified configuration element.
+        /// </summary>
+        /// <param name="element">The <see cref="global::System.Configuration.ConfigurationElement"/> to return the key for.</param>
+        /// <returns>
+        /// An <see cref="object"/> that acts as the key for the specified <see cref="global::System.Configuration.ConfigurationElement"/>.
+        /// </returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override object GetElementKey(global::System.Configuration.ConfigurationElement element)
+        {
+            return ((global::PalMon.Config.Process)(element));
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="global::PalMon.Config.Process"/>.
+        /// </summary>
+        /// <returns>
+        /// A new <see cref="global::PalMon.Config.Process"/>.
+        /// </returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override global::System.Configuration.ConfigurationElement CreateNewElement()
+        {
+            return new global::PalMon.Config.Process();
+        }
+
+        #endregion Overrides
+
+        #region Indexer
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.Process"/> at the specified index.
+        /// </summary>
+        /// <param name="index">The index of the <see cref="global::PalMon.Config.Process"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.Process this[int index]
+        {
+            get
+            {
+                return ((global::PalMon.Config.Process)(base.BaseGet(index)));
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.Process"/> with the specified key.
+        /// </summary>
+        /// <param name="name">The key of the <see cref="global::PalMon.Config.Process"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.Process this[object name]
+        {
+            get
+            {
+                return ((global::PalMon.Config.Process)(base.BaseGet(name)));
+            }
+        }
+
+        #endregion Indexer
+
+        #region Add
+
+        /// <summary>
+        /// Adds the specified <see cref="global::PalMon.Config.Process"/> to the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <param name="Process">The <see cref="global::PalMon.Config.Process"/> to add.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public void Add(global::PalMon.Config.Process Process)
+        {
+            base.BaseAdd(Process);
+        }
+
+        #endregion Add
+
+        #region Remove
+
+        /// <summary>
+        /// Removes the specified <see cref="global::PalMon.Config.Process"/> from the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <param name="Process">The <see cref="global::PalMon.Config.Process"/> to remove.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public void Remove(global::PalMon.Config.Process Process)
+        {
+            base.BaseRemove(this.GetElementKey(Process));
+        }
+
+        #endregion Remove
+
+        #region GetItem
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.Process"/> at the specified index.
+        /// </summary>
+        /// <param name="index">The index of the <see cref="global::PalMon.Config.Process"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.Process GetItemAt(int index)
+        {
+            return ((global::PalMon.Config.Process)(base.BaseGet(index)));
+        }
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.Process"/> with the specified key.
+        /// </summary>
+        /// <param name="name">The key of the <see cref="global::PalMon.Config.Process"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.Process GetItemByKey(string name)
+        {
+            return ((global::PalMon.Config.Process)(base.BaseGet(((object)(name)))));
+        }
+
+        #endregion GetItem
+
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
     }
 }
 
