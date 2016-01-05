@@ -64,7 +64,7 @@ namespace DataTableWriter.Writers
         {
             if (!Monitor.TryEnter(CsvWriteLock, waitTimeout))
             {
-                Log.Error("Could not acquire write lock; forcing exit..");
+                Log.Warn("Could not acquire write lock!");
                 return false;
             }
 

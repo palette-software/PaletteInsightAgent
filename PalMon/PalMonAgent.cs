@@ -40,12 +40,14 @@ namespace PalMon
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
-            // "license check"
-            if (DateTime.Now.Year > 2015)
-            {
-                Log.Fatal("License expired!");
-                Environment.Exit(-1);
-            }
+            //// "license check"
+            //if (DateTime.Now.Year > 2016)
+            //{
+            //    Log.Fatal("License expired!");
+            //    Console.WriteLine("License expired!");
+            //    Environment.Exit(-1);
+            //}
+
             // Initialize log4net settings.
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
@@ -128,7 +130,7 @@ namespace PalMon
             // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
             if (!options.Writer.WaitForWriteFinish(WriteFinishTimeout * 1000))
             {
-                Log.Error("Waiting for DB writer to finish timed out; forcing exit..");
+                Log.Warn("Waiting for DB writer to finish timed out; forcing exit..");
             }
             else
             {
