@@ -41,7 +41,7 @@ namespace PalMon
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
             // "license check"
-            if (DateTime.Now.Year > 2015)
+            if (DateTime.Now > new DateTime(2016, 02, 01))
             {
                 Log.Fatal("License expired!");
                 Environment.Exit(-1);
