@@ -70,21 +70,21 @@ namespace DataTableWriter.UnitTests.Adapters
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL1",
-                    AllowDBNull = false
+                    AllowDBNull = true
                 });
 
                 schema.Columns.Add(new DataColumn("COL2")
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL2",
-                    AllowDBNull = false
+                    AllowDBNull = true
                 });
 
                 schema.Columns.Add(new DataColumn("COL3")
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL3",
-                    AllowDBNull = false
+                    AllowDBNull = true
                 });
 
                 return schema;
@@ -97,21 +97,14 @@ namespace DataTableWriter.UnitTests.Adapters
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL1",
-                    AllowDBNull = false
+                    AllowDBNull = true
                 });
 
                 schema.Columns.Add(new DataColumn("COL2")
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL2",
-                    AllowDBNull = false
-                });
-
-                schema.Columns.Add(new DataColumn("COL3")
-                {
-                    DataType = typeof(string),
-                    DefaultValue = "VAL3",
-                    AllowDBNull = false
+                    AllowDBNull = true
                 });
 
                 return schema;
@@ -124,21 +117,21 @@ namespace DataTableWriter.UnitTests.Adapters
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL1",
-                    AllowDBNull = false
+                    AllowDBNull = true
                 });
 
                 schema.Columns.Add(new DataColumn("COL2")
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL2",
-                    AllowDBNull = false
+                    AllowDBNull = true
                 });
 
                 schema.Columns.Add(new DataColumn("COL4")
                 {
                     DataType = typeof(string),
                     DefaultValue = "VAL4",
-                    AllowDBNull = true
+                    AllowDBNull = false
                 });
 
                 return schema;
@@ -155,15 +148,18 @@ namespace DataTableWriter.UnitTests.Adapters
 
                 var adapter = new DbAdapter(driver, connectionInfo);
                 Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(GetSchema2());
-                Isolate.WhenCalled(() => adapter.AddColumn(null, null)).IgnoreCall();
                 adapter.AddColumnsToTableToMatchSchema("TABLE", GetSchema1());
                 Isolate.Verify.WasCalledWithArguments(() => adapter.AddColumn(null, null)).Matching(
-                    args => (args[0] as string).Equals("TABLE1") &&
-                            (args[1] as DataColumn).ColumnName.Equals("COL3") &&
-                            (args[1] as DataColumn).DataType == typeof(string) &&
-                            (args[1] as DataColumn).DefaultValue.Equals("VAL3") &&
-                            (args[1] as DataColumn).AllowDBNull == false
-                );
+                    args =>
+                    {
+                        var table = args[0] as string;
+                        var column = args[1] as DataColumn;
+                        return table.Equals("TABLE1") &&
+                            column.ColumnName.Equals("COL3") &&
+                            column.DataType == typeof (string) &&
+                            column.DefaultValue.Equals("VAL3") &&
+                            column.AllowDBNull == true;
+                    });
             }
 
             [TestMethod]
@@ -176,9 +172,9 @@ namespace DataTableWriter.UnitTests.Adapters
                 driver.BuildConnection(connectionInfo).Returns(connection);
 
                 var adapter = new DbAdapter(driver, connectionInfo);
-                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(GetSchema3());
+                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(GetSchema1());
                 Isolate.WhenCalled(() => adapter.AddColumn(null, null)).IgnoreCall();
-                adapter.AddColumnsToTableToMatchSchema("TABLE", GetSchema1());
+                adapter.AddColumnsToTableToMatchSchema("TABLE", GetSchema3());
                
             }
 
@@ -445,49 +441,6 @@ namespace DataTableWriter.UnitTests.Adapters
         }
 
         [TestClass]
-        public class MethodExistsColumn
-        {
-            [TestMethod]
-            public void ShouldReturnTrueWhenColumnExists()
-            {
-                var tableName = "TABLE";
-                var table = new DataTable(tableName);
-                table.Columns.Add("col1", typeof(string));
-                table.Columns.Add("col2", typeof(string));
-                table.Columns.Add("col3", typeof(string));
-                var driver = Substitute.For<IDbDriver>();
-                var connectionInfo = Substitute.For<IDbConnectionInfo>();
-                var connection = Substitute.For<IDbConnection>();
-                driver.BuildConnection(connectionInfo).Returns(connection);
-
-                var adapter = new DbAdapter(driver, connectionInfo);
-                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(table);
-                var col = new DataColumn("col1");
-                Assert.IsTrue(adapter.ExistsColumn(tableName, col));
-            }
-
-            [TestMethod]
-            public void ShouldReturnFalseWhenColumnDoesNotExist()
-            {
-                var tableName = "TABLE";
-                var table = new DataTable(tableName);
-                table.Columns.Add("col1", typeof(string));
-                table.Columns.Add("col2", typeof(string));
-                table.Columns.Add("col3", typeof(string));
-                var driver = Substitute.For<IDbDriver>();
-                var connectionInfo = Substitute.For<IDbConnectionInfo>();
-                var connection = Substitute.For<IDbConnection>();
-                driver.BuildConnection(connectionInfo).Returns(connection);
-
-                var adapter = new DbAdapter(driver, connectionInfo);
-                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(table);
-                var col = new DataColumn("col1");
-                Assert.IsFalse(adapter.ExistsColumn(tableName, col));
-            }
-        }
-
-
-        [TestClass]
         public class MethodIsConnectionOpen
         {
 
@@ -549,6 +502,59 @@ namespace DataTableWriter.UnitTests.Adapters
                 var adapter = new DbAdapter(driver, connectionInfo);
                 adapter.OpenConnection();
                 connection.Received().Open();
+            }
+        }
+
+        [TestClass]
+        public class MethodExistsColumn
+        {
+            private DataColumn getColumn()
+            {
+                return new DataColumn("COLUMN", typeof(string));
+            }
+
+            private DataTable getTable(string name)
+            {
+                var table = new DataTable(name);
+                table.Columns.Add("COL1", typeof (string));
+                table.Columns.Add("COL2", typeof (string));
+                return table;
+            }
+
+            [TestMethod]
+            public void ShouldReturnTrueWhenColumnExists()
+            {
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                driver.BuildConnection(connectionInfo).Returns(connection);
+
+                string tableName = "TABLE";
+                var table = getTable(tableName);
+                var columnToTest = getColumn();
+                table.Columns.Add(columnToTest);
+                var adapter = new DbAdapter(driver, connectionInfo);
+                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(table);
+                Assert.IsTrue(adapter.ExistsColumn(tableName, columnToTest));
+            }
+
+            [TestMethod]
+            public void ShouldReturnFalseWhenColumnDoesNotExist()
+            {
+                var driver = Substitute.For<IDbDriver>();
+                var connectionInfo = Substitute.For<IDbConnectionInfo>();
+                var connection = Substitute.For<IDbConnection>();
+                driver.BuildConnection(connectionInfo).Returns(connection);
+
+                string tableName = "TABLE";
+                var table = getTable(tableName);
+                var columnToTest = getColumn();
+                var adapter = new DbAdapter(driver, connectionInfo);
+                Isolate.WhenCalled(() => adapter.GetSchema(null)).WillReturn(table);
+                Assert.IsFalse(adapter.ExistsColumn(tableName, columnToTest));
+            }
+        }
+
             }
         }
     }
