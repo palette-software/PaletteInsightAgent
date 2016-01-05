@@ -38,7 +38,7 @@ namespace DataTableWriter.UnitTests.Adapters
 
         [TestMethod]
         [Isolated]
-        [ExpectedException(typeof(DbException), AllowDerivedTypes = true)]
+        [ExpectedException(typeof(FakeDbException))]
         public void AddColumnShouldThrowExceptionWhenErrorHappened()
         {
             const string query = "ADD_COLUMN_QUERY";
@@ -277,7 +277,7 @@ namespace DataTableWriter.UnitTests.Adapters
 
         [TestMethod]
         [Isolated]
-        [ExpectedException(typeof(DbException), AllowDerivedTypes = true)]
+        [ExpectedException(typeof(FakeDbException))]
         public void CreateTableShouldThrowExceptionWhenCouldntExecuteNonQuery()
         {
             const string query = "CREATE_TABLE_QUERY";
@@ -345,7 +345,7 @@ namespace DataTableWriter.UnitTests.Adapters
 
         [TestMethod]
         [Isolated]
-        [ExpectedException(typeof(DbException), AllowDerivedTypes = true)]
+        [ExpectedException(typeof(FakeDbException))]
         public void ExistsTableShouldThrowExceptionWhenCouldntExecuteNonQuery()
         {
             const string query = "EXIST_TABLE_QUERY";
@@ -400,7 +400,7 @@ namespace DataTableWriter.UnitTests.Adapters
 
         [TestMethod]
         [Isolated]
-        [ExpectedException(typeof(DbException), AllowDerivedTypes = true)]
+        [ExpectedException(typeof(FakeDbException))]
         public void GetSchemaShouldThrowExceptionWhenCouldntGetTable()
         {
             var driver = Substitute.For<IDbDriver>();
