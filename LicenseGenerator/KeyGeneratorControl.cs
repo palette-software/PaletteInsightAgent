@@ -17,7 +17,8 @@ namespace LicenseGenerator
         /// <summary>
         /// The keypair currently used
         /// </summary>
-        public LicenseKeyPair KeyPair {
+        public LicenseKeyPair KeyPair
+        {
             get { return keyPair; }
             set
             {
@@ -88,6 +89,20 @@ namespace LicenseGenerator
                     writer.Write(data);
                 }
             }
+
+            // convert the public key to c# code
+            var keyData = savedKeypair.publicKey
+                .Select((b) => "0x" + b.ToString("X2"))
+                .Join(", ");
+
+            var csharpOut = @"namespace PalMon { public class LicensePublicKey {
+                public static byte[] PUBLIC_KEY = new byte[] { " + keyData + @" }; } } ";
+
+            File.WriteAllText(
+                Path.GetFileNameWithoutExtension(saveFileDialog1.FileName) + ".cs",
+                csharpOut
+                );
+
         }
 
         private void loadKeyPairButton_Click(object sender, EventArgs e)

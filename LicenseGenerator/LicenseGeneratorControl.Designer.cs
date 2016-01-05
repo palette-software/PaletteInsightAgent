@@ -40,7 +40,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.keyGeneratorControl = new LicenseGenerator.KeyGeneratorControl();
             this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
-            this.licenseCheck = new System.Windows.Forms.TextBox();
+            this.saveLicenseButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -120,19 +120,21 @@
             this.keyGeneratorControl.Size = new System.Drawing.Size(571, 187);
             this.keyGeneratorControl.TabIndex = 16;
             // 
-            // licenseCheck
+            // saveLicenseButton
             // 
-            this.licenseCheck.Location = new System.Drawing.Point(251, 161);
-            this.licenseCheck.Multiline = true;
-            this.licenseCheck.Name = "licenseCheck";
-            this.licenseCheck.Size = new System.Drawing.Size(393, 52);
-            this.licenseCheck.TabIndex = 17;
+            this.saveLicenseButton.Location = new System.Drawing.Point(447, 161);
+            this.saveLicenseButton.Name = "saveLicenseButton";
+            this.saveLicenseButton.Size = new System.Drawing.Size(197, 23);
+            this.saveLicenseButton.TabIndex = 17;
+            this.saveLicenseButton.Text = "Save License";
+            this.saveLicenseButton.UseVisualStyleBackColor = true;
+            this.saveLicenseButton.Click += new System.EventHandler(this.saveLicenseButton_Click);
             // 
             // LicenseGeneratorControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.licenseCheck);
+            this.Controls.Add(this.saveLicenseButton);
             this.Controls.Add(this.keyGeneratorControl);
             this.Controls.Add(this.licenseTextBox);
             this.Controls.Add(this.label3);
@@ -162,6 +164,6 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.BindingSource bindingSource1;
         private KeyGeneratorControl keyGeneratorControl;
-        private System.Windows.Forms.TextBox licenseCheck;
+        private System.Windows.Forms.Button saveLicenseButton;
     }
 }

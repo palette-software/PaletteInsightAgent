@@ -40,16 +40,20 @@ namespace PalMon
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
-            // "license check"
-            if (DateTime.Now.Year > 2015)
+            // Initialize log4net settings.
+            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
+            // Load the configuration
+            XmlConfigurator.Configure(new FileInfo(ConfigurationManager.AppSettings[Log4NetConfigKey]));
+
+            // check for license
+            if (!LicenseChecker.LicenseChecker.checkForLicensesIn(".", LicensePublicKey.PUBLIC_KEY))
             {
                 Log.Fatal("License expired!");
                 Environment.Exit(-1);
             }
-            // Initialize log4net settings.
-            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
-            XmlConfigurator.Configure(new FileInfo(ConfigurationManager.AppSettings[Log4NetConfigKey]));
+
+
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
