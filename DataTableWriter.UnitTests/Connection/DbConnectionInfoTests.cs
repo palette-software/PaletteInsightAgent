@@ -7,7 +7,7 @@ namespace DataTableWriter.UnitTests.Connection
     public class DbConnectionInfoTests
     {
         [TestMethod]
-        public void TestValidPortIsNegative()
+        public void ValidPortIsNegative()
         {
             IDbConnectionInfo connection = new DbConnectionInfo
             {
@@ -21,7 +21,7 @@ namespace DataTableWriter.UnitTests.Connection
         }
 
         [TestMethod]
-        public void TestValidPortIsTooLarge()
+        public void ValidPortIsTooLarge()
         {
             IDbConnectionInfo connection = new DbConnectionInfo
             {
@@ -35,7 +35,7 @@ namespace DataTableWriter.UnitTests.Connection
         }
 
         [TestMethod]
-        public void TestValidParametersAreGood()
+        public void ValidParametersAreGood()
         {
             IDbConnectionInfo connection = new DbConnectionInfo
             {
@@ -49,7 +49,7 @@ namespace DataTableWriter.UnitTests.Connection
         }
 
         [TestMethod]
-        public void TestValidDatabaseNameIsWrong()
+        public void ValidDatabaseNameIsWrong()
         {
             IDbConnectionInfo connection = new DbConnectionInfo
             {
@@ -63,7 +63,7 @@ namespace DataTableWriter.UnitTests.Connection
         }
 
         [TestMethod]
-        public void TestValidPasswordIsWrong()
+        public void ValidPasswordIsWrong()
         {
             IDbConnectionInfo connection = new DbConnectionInfo
             {
@@ -77,7 +77,7 @@ namespace DataTableWriter.UnitTests.Connection
         }
 
         [TestMethod]
-        public void TestValidUserIsWrong()
+        public void ValidUserIsWrong()
         {
             IDbConnectionInfo connection = new DbConnectionInfo
             {
@@ -91,7 +91,7 @@ namespace DataTableWriter.UnitTests.Connection
         }
 
         [TestMethod]
-        public void TestValidServerIsWrong()
+        public void ValidServerIsWrong()
         {
             IDbConnectionInfo connection = new DbConnectionInfo
             {

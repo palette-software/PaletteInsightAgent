@@ -9,50 +9,45 @@ namespace DataTableWriter.UnitTests.Adapters
     [TestClass]
     public class DbAdapterFactoryTest
     {
-        [TestClass]
-        public class MethodGetInstance
+        [TestMethod]
+        public void GetInstanceShouldReturnAdapterWithPostgresDriver()
         {
-            [TestMethod]
-            public void ShouldReturnAdapterWithPostgresDriver()
-            {
-                var connInfo = Substitute.For<IDbConnectionInfo>();
-                connInfo.Port = 5000;
-                connInfo.Server = "local";
-                connInfo.Username = "user";
-                connInfo.Password = "pass";
-                connInfo.DatabaseName = "db";
-                var adapter = DbAdapterFactory.GetInstance(DbDriverType.Postgres, connInfo);
-                Assert.IsInstanceOfType(adapter.Driver, typeof(PostgresDriver));
-                Assert.AreEqual(connInfo, adapter.ConnectionInfo);
-            }
+            var connInfo = Substitute.For<IDbConnectionInfo>();
+            connInfo.Port = 5000;
+            connInfo.Server = "local";
+            connInfo.Username = "user";
+            connInfo.Password = "pass";
+            connInfo.DatabaseName = "db";
+            var adapter = DbAdapterFactory.GetInstance(DbDriverType.Postgres, connInfo);
+            Assert.IsInstanceOfType(adapter.Driver, typeof(PostgresDriver));
+            Assert.AreEqual(connInfo, adapter.ConnectionInfo);
+        }
+        [TestMethod]
+        public void GetInstanceSShouldReturnAdapterWithOracleDriver()
+        {
+            var connInfo = Substitute.For<IDbConnectionInfo>();
+            connInfo.Port = 5000;
+            connInfo.Server = "local";
+            connInfo.Username = "user";
+            connInfo.Password = "pass";
+            connInfo.DatabaseName = "db";
+            var adapter = DbAdapterFactory.GetInstance(DbDriverType.Oracle, connInfo);
+            Assert.IsInstanceOfType(adapter.Driver, typeof(OracleDriver));
+            Assert.AreEqual(connInfo, adapter.ConnectionInfo);
+        }
 
-            [TestMethod]
-            public void ShouldReturnAdapterWithOracleDriver()
-            {
-                var connInfo = Substitute.For<IDbConnectionInfo>();
-                connInfo.Port = 5000;
-                connInfo.Server = "local";
-                connInfo.Username = "user";
-                connInfo.Password = "pass";
-                connInfo.DatabaseName = "db";
-                var adapter = DbAdapterFactory.GetInstance(DbDriverType.Oracle, connInfo);
-                Assert.IsInstanceOfType(adapter.Driver, typeof(OracleDriver));
-                Assert.AreEqual(connInfo, adapter.ConnectionInfo);
-            }
-
-            [TestMethod]
-            public void ShouldReturnAdapterWithMsSqlDriver()
-            {
-                var connInfo = Substitute.For<IDbConnectionInfo>();
-                connInfo.Port = 5000;
-                connInfo.Server = "local";
-                connInfo.Username = "user";
-                connInfo.Password = "pass";
-                connInfo.DatabaseName = "db";
-                var adapter = DbAdapterFactory.GetInstance(DbDriverType.MsSQL, connInfo);
-                Assert.IsInstanceOfType(adapter.Driver, typeof(MsSQLDriver));
-                Assert.AreEqual(connInfo, adapter.ConnectionInfo);
-            }
+        [TestMethod]
+        public void GetInstanceSShouldReturnAdapterWithMsSqlDriver()
+        {
+            var connInfo = Substitute.For<IDbConnectionInfo>();
+            connInfo.Port = 5000;
+            connInfo.Server = "local";
+            connInfo.Username = "user";
+            connInfo.Password = "pass";
+            connInfo.DatabaseName = "db";
+            var adapter = DbAdapterFactory.GetInstance(DbDriverType.MsSQL, connInfo);
+            Assert.IsInstanceOfType(adapter.Driver, typeof(MsSQLDriver));
+            Assert.AreEqual(connInfo, adapter.ConnectionInfo);
         }
     }
 }
