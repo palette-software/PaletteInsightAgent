@@ -20,3 +20,6 @@ PalMon.v12.suo
 
 BBR-ChargebackModel-CLI/bin/
 BBR-ChargebackModel-CLI/obj/
+
+*/bin/**
+*/obj/**
