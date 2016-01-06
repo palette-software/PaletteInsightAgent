@@ -21,12 +21,11 @@ namespace DataTableWriter.Adapters
         private bool disposed;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public DbAdapter(DbDriverType driverType, IDbConnectionInfo connectionInfo)
+        public DbAdapter(IDbDriver driver, IDbConnectionInfo connectionInfo)
         {
-            Driver = DbDriverFactory.GetInstance(driverType);
+            Driver = driver;
             ConnectionInfo = connectionInfo;
             Connection = Driver.BuildConnection(ConnectionInfo);
-            OpenConnection();
         }
 
         ~DbAdapter()
@@ -184,7 +183,7 @@ namespace DataTableWriter.Adapters
             }
             catch (Exception e)
             {
-                Log.Fatal("Cannot convert to boolean:" + boolishVal);
+                Log.Fatal("Cannot convert to boolean:" + boolishVal + " Exception message: " + e.Message);
                 throw;
             }
             

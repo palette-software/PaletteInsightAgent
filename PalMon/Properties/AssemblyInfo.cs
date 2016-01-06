@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
@@ -36,3 +37,6 @@ using System.Runtime.InteropServices;
 
 // Required for log4net.
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
+
+// Setting internals visible to the unit test project
+[assembly: InternalsVisibleTo("PalMon.UnitTests")]

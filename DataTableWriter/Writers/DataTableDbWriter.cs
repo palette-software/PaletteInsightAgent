@@ -24,9 +24,9 @@ namespace DataTableWriter.Writers
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private bool disposed;
 
-        public DataTableDbWriter(DbDriverType driverType, IDbConnectionInfo connectionInfo, DbTableInitializationOptions tableInitializationOptions = default(DbTableInitializationOptions))
+        public DataTableDbWriter(IDbAdapter adapter, DbTableInitializationOptions tableInitializationOptions = default(DbTableInitializationOptions))
         {
-            Adapter = new DbAdapter(driverType, connectionInfo);
+            Adapter = adapter;
             isTableInitialized = new HashSet<string>();
             this.tableInitializationOptions = tableInitializationOptions;
         }
