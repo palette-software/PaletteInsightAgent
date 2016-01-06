@@ -194,7 +194,7 @@ namespace PalMon
         {
             tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
             {
-                logPollerAgent.pollLogs(options.Writer);
+                logPollerAgent.pollLogs(options.Writer, WriteLock);
             });
         }
 
@@ -206,7 +206,7 @@ namespace PalMon
         {
             tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
             {
-                threadInfoAgent.poll(options.Writer);
+                threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
             });
         }
 
