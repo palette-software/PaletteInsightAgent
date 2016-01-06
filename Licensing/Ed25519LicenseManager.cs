@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Licensing
 {
+    /// <summary>
+    /// A license manager using the ED25519 digital signatures from NaCL.
+    /// </summary>
     public class Ed25519LicenseManager : ILicenseManager
     {
         public LicenseKeyPair generateKey()
@@ -21,26 +24,25 @@ namespace Licensing
 
         }
 
-        public License generateLicense(string owner, string licenseId, DateTime validUntilUTC)
+        public License generateLicense(string owner, string licenseId, int coreCount, DateTime validUntilUTC)
         {
             return new License
             {
+                // The maximum number available for SoudimCore.GetRandomNumber is 2147483647
                 seed = SodiumCore.GetRandomNumber(2147483647),
                 owner = owner,
                 licenseId = licenseId,
+                coreCount = coreCount,
                 validUntilUTC = validUntilUTC
             };
         }
 
         public string serializeLicense(License license, byte[] privateKey)
         {
-            //return Convert.ToBase64String(LicenseSerializer.licenseToBytes(license));
-            return
-                LicenseSerializer.toWrapped(
-                    Convert.ToBase64String(
+            return LicenseFormatting.toWrappedString(
                         PublicKeyAuth.Sign(
                             LicenseSerializer.licenseToString(license),
-                            privateKey)));
+                            privateKey));
         }
 
         public ValidatedLicense isValidLicense(string licenseString, byte[] publicKey)
@@ -54,7 +56,6 @@ namespace Licensing
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine(e.ToString());
                 return new ValidatedLicense { isValid = false, license = License.Invalid };
             }
         }

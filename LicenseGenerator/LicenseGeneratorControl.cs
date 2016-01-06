@@ -16,17 +16,39 @@ namespace LicenseGenerator
             // because of this line in the generated designer:
             // this.keyGeneratorControl.KeyPair = ((Licensing.LicenseKeyPair)(resources.GetObject("keyGeneratorControl.KeyPair")));
             // we need to generate a new key here.
-            keyGeneratorControl.GenerateNewKey();
+            try
+            {
+                keyGeneratorControl.GenerateNewKey();
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+
+        /// <summary>
+        /// Returns a License object corresponding to the currently set data in the form.
+        /// </summary>
+        /// <returns></returns>
+        private License getCurrentLicense()
+        {
+            return licenseManager.generateLicense(
+                licenseName.Text,
+                licenseId.Text,
+                Decimal.ToInt32(coreCount.Value),
+                validUntilPicker.Value);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
 
+            var licenseText = licenseManager.serializeLicense(
+                        getCurrentLicense(),
+                        keyGeneratorControl.KeyPair.privateKey);
 
-            licenseTextBox.Lines = licenseManager.serializeLicense(
-                licenseManager.generateLicense(licenseName.Text, licenseId.Text, validUntilPicker.Value),
-                keyGeneratorControl.KeyPair.privateKey
-                ).Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+            licenseTextBox.Lines = licenseText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             // Do a selection on the contents of the license
             licenseTextBox.Focus();
@@ -58,6 +80,11 @@ namespace LicenseGenerator
                     writer.Write(licenseTextBox.Text);
                 }
             }
+        }
+
+        private void keyGeneratorControl_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -49,6 +49,9 @@
   <ItemGroup>
     <Compile Include="Ed25519LicenseManager.cs" />
     <Compile Include="ILicenseManager.cs" />
+    <Compile Include="License.cs" />
+    <Compile Include="LicenseFormatting.cs" />
+    <Compile Include="LicenseKeyPair.cs" />
     <Compile Include="LicenseSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

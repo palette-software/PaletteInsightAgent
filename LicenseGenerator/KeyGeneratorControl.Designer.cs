@@ -41,6 +41,7 @@
             // 
             // publicKey
             // 
+            this.publicKey.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.publicKey.Location = new System.Drawing.Point(115, 62);
             this.publicKey.Multiline = true;
             this.publicKey.Name = "publicKey";
@@ -51,6 +52,7 @@
             // 
             // privateKey
             // 
+            this.privateKey.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.privateKey.Location = new System.Drawing.Point(115, 92);
             this.privateKey.Multiline = true;
             this.privateKey.Name = "privateKey";

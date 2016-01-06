@@ -17,18 +17,9 @@ namespace Licensing
             XmlSerializer writer = new XmlSerializer(license.GetType());
             using (var memoryStream = new MemoryStream())
             {
-                //using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Compress, false))
-                //writer.Serialize(zipStream, license);
                 writer.Serialize(memoryStream, license);
                 return Encoding.UTF8.GetString(memoryStream.ToArray());
-
             }
-            //using (StreamWriter streamWriter = new StreamWriter(zipStream))
-            ////using (StreamWriter streamWriter = new StreamWriter(memoryStream))
-            //{
-            //    writer.Serialize(streamWriter, license);
-            //    return Encoding.UTF8.GetString(memoryStream.ToArray());
-            //}
         }
 
         public static byte[] licenseToBytes(License license)
@@ -36,8 +27,6 @@ namespace Licensing
             XmlSerializer writer = new XmlSerializer(license.GetType());
             using (var memoryStream = new MemoryStream())
             {
-                //using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Compress))
-                //writer.Serialize(zipStream, license);
                 writer.Serialize(memoryStream, license);
                 return memoryStream.ToArray();
             }
@@ -54,10 +43,6 @@ namespace Licensing
             XmlSerializer reader = new XmlSerializer(typeof(License));
             using (var memoryStream = new MemoryStream(bytes))
                 return (License)reader.Deserialize(memoryStream);
-            //using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-            //{
-            //    return (License)reader.Deserialize(zipStream);
-            //}
         }
 
 

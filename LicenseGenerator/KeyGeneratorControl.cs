@@ -17,6 +17,7 @@ namespace LicenseGenerator
         /// <summary>
         /// The keypair currently used
         /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public LicenseKeyPair KeyPair
         {
             get { return keyPair; }

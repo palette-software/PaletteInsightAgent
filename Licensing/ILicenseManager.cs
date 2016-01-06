@@ -6,45 +6,24 @@ using System.Threading.Tasks;
 
 namespace Licensing
 {
+
+
     /// <summary>
-    /// The license to be submitted
+    /// A combination struct so we can return a license + its validity
     /// </summary>
-    [Serializable]
-    public struct License
-    {
-        // Add some random data here, so that each license generated differs in some
-        // bytes
-        public int seed;
-
-        public string owner;
-        public string licenseId;
-
-        /// <summary>
-        /// The license is valid until this time.
-        /// NOTE: the .NET XML serializer cannot serialize DateTimeOffset by default, so 
-        /// we are using DateTime instead.
-        /// </summary>
-        public DateTime validUntilUTC;
-
-        public static License Invalid = new License { seed = 0, owner = "", licenseId = "", validUntilUTC = new DateTime(1984,1,1) };
-    }
-
-    [Serializable]
-    public struct LicenseKeyPair
-    {
-        public string name;
-
-        public byte[] publicKey;
-        public byte[] privateKey;
-    }
-
-
     public struct ValidatedLicense
     {
         public bool isValid;
         public License license;
     }
 
+    /// <summary>
+    /// A generic interface for license validation.
+    /// 
+    /// Since C# has no template support, and generics arent templates,
+    /// we are bound to the License struct to use here, altough the code
+    /// itself is generic enough
+    /// </summary>
     public interface ILicenseManager
     {
         /// <summary>
@@ -53,7 +32,14 @@ namespace Licensing
         /// <returns></returns>
         LicenseKeyPair generateKey();
 
-        License generateLicense(string owner, string licenseId, DateTime validUntilUTC);
+        /// <summary>
+        /// Generate a new license
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="licenseId"></param>
+        /// <param name="validUntilUTC"></param>
+        /// <returns></returns>
+        License generateLicense(string owner, string licenseId, int coreCount, DateTime validUntilUTC);
 
         /// <summary>
         /// Returns the crypted form of a license
