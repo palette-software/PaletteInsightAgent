@@ -181,7 +181,10 @@ namespace PalMon
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
-                options.Writer.Write(sampleResults);
+                lock (WriteLock)
+                {
+                    options.Writer.Write(sampleResults);
+                }
             });
         }
 
