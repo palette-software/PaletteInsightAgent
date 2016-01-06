@@ -30,6 +30,7 @@ Patch dialog sequence:
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
+    <WixVariable Id="WixUIDialogBmp" Value="palette-insight-install-bg.bmp" />
     <UI Id="CustomInstallDir">
       <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
       <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
