@@ -34,7 +34,7 @@ namespace PalMon.ThreadInfoPoller
                 var threadInfoTable = ThreadTables.makeThreadInfoTable();
                 foreach (var process in processList)
                 {
-                    pollThreadsOfCounter(process, threadInfoTable, ref threadInfoTableCount);
+                    pollThreadCountersOfProcess(process, threadInfoTable, ref threadInfoTableCount);
                 }
                 lock (WriteLock)
                 {
@@ -53,7 +53,7 @@ namespace PalMon.ThreadInfoPoller
             }
         }
 
-        protected void pollThreadsOfCounter(Process process, DataTable table, ref long serverLogsTableCount)
+        protected void pollThreadCountersOfProcess(Process process, DataTable table, ref long serverLogsTableCount)
         {
             try
             {
