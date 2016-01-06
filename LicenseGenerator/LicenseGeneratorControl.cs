@@ -42,19 +42,18 @@ namespace LicenseGenerator
 
         private void button1_Click(object sender, EventArgs e)
         {
-
-            var licenseText = licenseManager.serializeLicense(
-                        getCurrentLicense(),
-                        keyGeneratorControl.KeyPair.privateKey);
-
-
+            // get the current license
+            var license = getCurrentLicense();
+            // serialize it
+            var licenseText = licenseManager.serializeLicense( license, keyGeneratorControl.KeyPair.privateKey);
+            // set the output text
             licenseTextBox.Lines = licenseText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
             // Do a selection on the contents of the license
             licenseTextBox.Focus();
             licenseTextBox.SelectAll();
 
-            var result = licenseManager.isValidLicense(licenseTextBox.Text, keyGeneratorControl.KeyPair.publicKey);
+            var result = licenseManager.isValidLicense(licenseTextBox.Text, license.coreCount,  keyGeneratorControl.KeyPair.publicKey);
 
             if (!result.isValid)
             {

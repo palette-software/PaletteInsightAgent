@@ -53,6 +53,6 @@ namespace Licensing
         /// <param name="license"></param>
         /// <param name="publicKey"></param>
         /// <returns></returns>
-        ValidatedLicense isValidLicense(string license, byte[] publicKey);
+        ValidatedLicense isValidLicense(string license, int coreCount, byte[] publicKey);
     }
 }

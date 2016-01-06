@@ -21,5 +21,10 @@ namespace Licensing
         {
             return LicenseSerializer.toWrapped(Convert.ToBase64String(bytes), wrapWidth);
         }
+
+        public static byte[] fromWrappedString(string data)
+        {
+            return Convert.FromBase64String(LicenseSerializer.fromWrapped(data));
+        }
     }
 }

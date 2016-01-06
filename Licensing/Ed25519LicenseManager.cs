@@ -39,20 +39,20 @@ namespace Licensing
 
         public string serializeLicense(License license, byte[] privateKey)
         {
-            return LicenseFormatting.toWrappedString(
-                        PublicKeyAuth.Sign(
-                            LicenseSerializer.licenseToString(license),
-                            privateKey));
+            return LicenseFormatting.toWrappedString( PublicKeyAuth.Sign( LicenseSerializer.licenseToString(license), privateKey));
         }
 
-        public ValidatedLicense isValidLicense(string licenseString, byte[] publicKey)
+        public ValidatedLicense isValidLicense(string licenseString, int coreCount, byte[] publicKey)
         {
             try
             {
-                var licenseText = PublicKeyAuth.Verify(Convert.FromBase64String(LicenseSerializer.fromWrapped(licenseString)), publicKey);
-                //var tmp = System.Text.Encoding.UTF8.GetString(licenseText);
+                // verify the signature
+                var licenseText = PublicKeyAuth.Verify(LicenseFormatting.fromWrappedString(licenseString), publicKey);
+                // deserialize the license
                 var license = LicenseSerializer.stringToLicense(licenseText);
-                return new ValidatedLicense { isValid = (license.validUntilUTC > DateTime.UtcNow), license = license };
+                // a license is valid if the core count is within limits and the time is ok
+                var isValid = (license.coreCount >= coreCount) && (license.validUntilUTC > DateTime.UtcNow);
+                return new ValidatedLicense { isValid = isValid, license = license };
             }
             catch (Exception e)
             {

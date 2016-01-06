@@ -46,12 +46,7 @@ namespace PalMon
             // Load the configuration
             XmlConfigurator.Configure(new FileInfo(ConfigurationManager.AppSettings[Log4NetConfigKey]));
 
-            // check for license
-            if (!LicenseChecker.LicenseChecker.checkForLicensesIn(".", LicensePublicKey.PUBLIC_KEY))
-            {
-                Log.Fatal("License expired!");
-                Environment.Exit(-1);
-            }
+            CheckLicense();
 
 
 
@@ -64,7 +59,7 @@ namespace PalMon
 
             Log.Info("Setting up LogPoller agent.");
 
-            
+
             // Load the log poller config & start the agent
             //var logPollerConfig = LogPollerConfigurationLoader.load();
             logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
@@ -72,6 +67,24 @@ namespace PalMon
 
             // start the thread info agent
             threadInfoAgent = new ThreadInfoAgent();
+        }
+
+        private void CheckLicense()
+        {
+            // get the core count
+            var coreCount = LicenseChecker.LicenseChecker.getCoreCount(
+                options.RepoHost,
+                options.RepoPort,
+                options.RepoUser,
+                options.RepoPass,
+                options.RepoDb
+                );
+            // check for license.
+            if (!LicenseChecker.LicenseChecker.checkForLicensesIn(".", LicensePublicKey.PUBLIC_KEY, coreCount))
+            {
+                Log.Fatal("License expired!");
+                Environment.Exit(-1);
+            }
         }
 
         ~PalMonAgent()
