@@ -19,6 +19,7 @@ namespace PalMon
         public string TableName { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
+        public ICollection<string> Processes { get; set;  }
 
         #region LogPoller config settings
 

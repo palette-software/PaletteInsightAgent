@@ -72,6 +72,13 @@ namespace PalMon.Config
                     Log.Fatal("Invalid output mode specified in configuration!");
                 }
 
+                // Load thread monitoring configuration
+                options.Processes = new System.Collections.Generic.List<string>();
+                foreach (PalMon.Config.Process ProcessData in config.Processes)
+                {
+                    options.Processes.Add(ProcessData.Name);
+                }
+
                 // Load Cluster/Host configuration.
                 var clusters = config.Clusters;
                 foreach (Cluster cluster in clusters)
