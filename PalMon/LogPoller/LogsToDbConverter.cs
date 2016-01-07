@@ -61,11 +61,20 @@ namespace PalMon.LogPoller
                 Log.Info("Inserting " + statusLine);
 
 
-                lock (writeLock)
+                if (serverLogsTableCount > 0)
                 {
-                    // Server logs need to be inserted first for the triggers to work.
-                    if (serverLogsTableCount > 0) writer.Write(serverLogsTable);
-                    if (filterStateCount > 0) writer.Write(filterStateTable);
+                    lock (writeLock)
+                    {
+                        writer.Write(serverLogsTable);
+                    }
+                }
+
+                if (filterStateCount > 0)
+                {
+                    lock (writeLock)
+                    {
+                        writer.Write(filterStateTable);
+                    }
                 }
 
                 Log.Info("Inserted " + statusLine);

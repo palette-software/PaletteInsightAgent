@@ -34,6 +34,7 @@ namespace PalMon
         private const string PathToCountersConfig = @"Config\Counters.config";
         private const int WriteLockAcquisitionTimeout = 10; // In seconds.
         private static readonly object WriteLock = new object();
+        private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         public static readonly string Log4NetConfigKey = "log4net-config-file";
 
@@ -177,11 +178,14 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void Poll(object stateInfo)
         {
-            var sampleResults = sampler.SampleAll();
-            lock (WriteLock)
+            tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
-                options.Writer.Write(sampleResults);
-            }
+                var sampleResults = sampler.SampleAll();
+                lock (WriteLock)
+                {
+                    options.Writer.Write(sampleResults);
+                }
+            });
         }
 
 
@@ -191,7 +195,10 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollLogs(object stateInfo)
         {
-            logPollerAgent.pollLogs(options.Writer, WriteLock);
+            tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
+            {
+                logPollerAgent.pollLogs(options.Writer, WriteLock);
+            });
         }
 
         /// <summary>
@@ -200,7 +207,34 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
         {
-            threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
+            tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
+            {
+                threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
+            });
+        }
+
+        /// <summary>
+        /// Checks whether polling is in progress at the moment for a given poll method.
+        /// If not, it executes the poll.
+        /// </summary>
+        private void tryStartIndividualPoll(object pollTypeLock, int timeout, Action pollDelegate)
+        {
+            if (!Monitor.TryEnter(pollTypeLock, timeout))
+            {
+                // Do not execute the poll delegate as it is already being executed.
+                Log.Debug("Skipping poll as it is already in progress: " + pollTypeLock.ToString());
+                return;
+            }
+
+            try
+            {
+                pollDelegate();
+            }
+            finally
+            {
+                // Ensure that the lock is released.
+                Monitor.Exit(pollTypeLock);
+            }
         }
 
         #endregion Private Methods
