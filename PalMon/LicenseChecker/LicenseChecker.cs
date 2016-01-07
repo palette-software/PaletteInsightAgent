@@ -73,9 +73,9 @@ namespace PalMon.LicenseChecker
                     cmd.Connection = conn;
                     // Insert some data
                     cmd.CommandText = "SELECT sum(allocated_cores) FROM core_licenses;";
-                    int coreCount = (int)cmd.ExecuteScalar();
+                    long coreCount = (long)cmd.ExecuteScalar();
                     Log.InfoFormat("Tableau total allocated cores: {0}", coreCount);
-                    return coreCount;
+                    return (int)coreCount;
                 }
             }
         }

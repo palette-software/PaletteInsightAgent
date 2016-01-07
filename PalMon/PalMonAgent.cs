@@ -46,7 +46,6 @@ namespace PalMon
             // Load the configuration
             XmlConfigurator.Configure(new FileInfo(ConfigurationManager.AppSettings[Log4NetConfigKey]));
 
-            CheckLicense();
 
 
 
@@ -57,11 +56,10 @@ namespace PalMon
                 PalMonConfigReader.LoadOptions();
             }
 
-            Log.Info("Setting up LogPoller agent.");
-
+            // check the license after the configuration has been loaded.
+            CheckLicense();
 
             // Load the log poller config & start the agent
-            //var logPollerConfig = LogPollerConfigurationLoader.load();
             logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
                 options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
 
@@ -82,7 +80,7 @@ namespace PalMon
             // check for license.
             if (!LicenseChecker.LicenseChecker.checkForLicensesIn(".", LicensePublicKey.PUBLIC_KEY, coreCount))
             {
-                Log.Fatal("License expired!");
+                Log.Fatal("No valid license found for Palette Insight. Exiting...");
                 Environment.Exit(-1);
             }
         }
