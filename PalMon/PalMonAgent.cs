@@ -215,7 +215,7 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
         {
-            threadInfoAgent.poll(options.Writer, WriteLock);
+            threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
         }
 
         #endregion Private Methods
