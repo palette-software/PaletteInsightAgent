@@ -53,7 +53,7 @@
             this.licenseTextBox.Multiline = true;
             this.licenseTextBox.Name = "licenseTextBox";
             this.licenseTextBox.ReadOnly = true;
-            this.licenseTextBox.Size = new System.Drawing.Size(607, 170);
+            this.licenseTextBox.Size = new System.Drawing.Size(607, 202);
             this.licenseTextBox.TabIndex = 15;
             this.licenseTextBox.WordWrap = false;
             // 

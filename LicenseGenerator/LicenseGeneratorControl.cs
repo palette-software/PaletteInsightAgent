@@ -45,20 +45,25 @@ namespace LicenseGenerator
             // get the current license
             var license = getCurrentLicense();
             // serialize it
-            var licenseText = licenseManager.serializeLicense( license, keyGeneratorControl.KeyPair.privateKey);
+            var licenseText = licenseManager.serializeLicense(license, keyGeneratorControl.KeyPair.privateKey);
             // set the output text
-            licenseTextBox.Lines = licenseText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            licenseTextBox.Lines = LinesOf(licenseText);
 
             // Do a selection on the contents of the license
             licenseTextBox.Focus();
             licenseTextBox.SelectAll();
 
-            var result = licenseManager.isValidLicense(licenseTextBox.Text, license.coreCount,  keyGeneratorControl.KeyPair.publicKey);
+            var result = licenseManager.isValidLicense(licenseTextBox.Text, license.coreCount, keyGeneratorControl.KeyPair.publicKey);
 
             if (!result.isValid)
             {
-                MessageBox.Show("Invalid license generated... Please notify the authors of the License Generator Utility." );
+                MessageBox.Show("Invalid license generated... Please notify the authors of the License Generator Utility.");
             }
+        }
+
+        private static string[] LinesOf(string licenseText)
+        {
+            return licenseText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
         }
 
         private void saveLicenseButton_Click(object sender, EventArgs e)
