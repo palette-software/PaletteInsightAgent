@@ -117,10 +117,9 @@
             // 
             // keyGeneratorControl
             // 
-            this.keyGeneratorControl.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.keyGeneratorControl.Location = new System.Drawing.Point(38, 349);
+            this.keyGeneratorControl.Location = new System.Drawing.Point(37, 349);
             this.keyGeneratorControl.Name = "keyGeneratorControl";
-            this.keyGeneratorControl.Size = new System.Drawing.Size(571, 187);
+            this.keyGeneratorControl.Size = new System.Drawing.Size(608, 187);
             this.keyGeneratorControl.TabIndex = 16;
             this.keyGeneratorControl.Load += new System.EventHandler(this.keyGeneratorControl_Load);
             // 

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LicenseGenerator.Properties {
+namespace PaletteGUI.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace LicenseGenerator.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LicenseGenerator.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PaletteGUI.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace LicenseGenerator.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap palette_logo {
+        internal static System.Drawing.Bitmap palette_header_bar_bg_1800 {
             get {
-                object obj = ResourceManager.GetObject("palette_logo", resourceCulture);
+                object obj = ResourceManager.GetObject("palette_header_bar_bg_1800", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
