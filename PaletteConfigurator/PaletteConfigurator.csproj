@@ -33,6 +33,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.2.2.7\lib\net45\Mono.Security.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Npgsql, Version=2.2.7.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.2.2.7\lib\net45\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,19 +60,42 @@
     <Compile Include="DbConfigurator.Designer.cs">
       <DependentUpon>DbConfigurator.cs</DependentUpon>
     </Compile>
+    <Compile Include="DbDetails.cs" />
+    <Compile Include="DbTesters\DbTesterFactory.cs" />
+    <Compile Include="DbTesters\IDbTester.cs" />
+    <Compile Include="DbTesters\PostgresDbTester.cs" />
+    <Compile Include="FolderSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FolderSelector.Designer.cs">
+      <DependentUpon>FolderSelector.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="InisightAgentConfiguration.cs" />
+    <Compile Include="InsightAgentConfigurator.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="InsightAgentConfigurator.Designer.cs">
+      <DependentUpon>InsightAgentConfigurator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="DbConfigurator.resx">
       <DependentUpon>DbConfigurator.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FolderSelector.resx">
+      <DependentUpon>FolderSelector.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InsightAgentConfigurator.resx">
+      <DependentUpon>InsightAgentConfigurator.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -75,6 +106,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

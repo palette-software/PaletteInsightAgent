@@ -1,7 +1,7 @@
-﻿0
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{92353DCB-38FD-423B-AD14-99BCFBF2BFCD}"
 	ProjectSection(SolutionItems) = preProject
@@ -42,6 +42,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PalMonConfiguration", "PalMonConfigSectionGenerator\PalMonConfiguration.csproj", "{7A21A43B-78DF-4EDB-939B-4DD17B850994}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PalMon", "PalMon\PalMon.csproj", "{332FB878-A88D-4413-813D-910A1E678498}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaletteConfigurator", "PaletteConfigurator\PaletteConfigurator.csproj", "{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,6 +143,18 @@ Global
 		{332FB878-A88D-4413-813D-910A1E678498}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{332FB878-A88D-4413-813D-910A1E678498}.Release|x86.ActiveCfg = Release|Any CPU
 		{332FB878-A88D-4413-813D-910A1E678498}.Release|x86.Build.0 = Release|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Debug|x86.Build.0 = Debug|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Release|x86.ActiveCfg = Release|Any CPU
+		{DBEC1F75-1D9E-4B1E-9157-EEF90F6673C1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
