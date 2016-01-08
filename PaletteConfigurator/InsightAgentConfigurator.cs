@@ -103,12 +103,22 @@ namespace PaletteConfigurator
         /// <param name="e"></param>
         private void saveConfigButton_Click(object sender, EventArgs e)
         {
-            PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config);
-            XmlSerializer writer = new XmlSerializer(configOut.GetType());
             var outputPath = Path.Combine(config.AgentFolder, ConfigFileName);
-            using (var file = new FileStream(outputPath, FileMode.Create))
+            try
             {
-                writer.Serialize(file, configOut);
+                PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config);
+                XmlSerializer writer = new XmlSerializer(configOut.GetType());
+                using (var file = new FileStream(outputPath, FileMode.Create))
+                {
+                    writer.Serialize(file, configOut);
+                    MessageBox.Show("Configuration successfuly saved to:\n" + outputPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    String.Format("Cannot save configuration to:\n{0}\nreason:\n{1}", outputPath, ex.Message));
+
             }
         }
     }
