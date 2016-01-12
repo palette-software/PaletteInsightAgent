@@ -1,4 +1,4 @@
-# PalMon #
+# Palette Insight Agent #
 
 ## What is PalMon?
 
