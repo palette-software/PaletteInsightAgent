@@ -14,6 +14,7 @@ namespace PaletteConfigurator
     public partial class DbConfigurator : UserControl
     {
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DbDetails Database
         {
             get { return database; }

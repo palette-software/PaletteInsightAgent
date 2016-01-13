@@ -54,6 +54,42 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChargebackConfigurator\ChargebackCategoryEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ChargebackCategoryEditor.Designer.cs">
+      <DependentUpon>ChargebackCategoryEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ChargebackConfigurationPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ChargebackConfigurationPanel.Designer.cs">
+      <DependentUpon>ChargebackConfigurationPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ChargebackHourControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ChargebackHourControl.Designer.cs">
+      <DependentUpon>ChargebackHourControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ChargeBackKind.cs" />
+    <Compile Include="ChargebackConfigurator\ChargebackKindSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ChargebackKindSelector.Designer.cs">
+      <DependentUpon>ChargebackKindSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\ColorPalette.cs" />
+    <Compile Include="ChargebackConfigurator\ComboBoxHelpers.cs" />
+    <Compile Include="ChargebackConfigurator\CurrencyEntry.cs" />
+    <Compile Include="ChargebackConfigurator\CurrencyTools.cs" />
+    <Compile Include="ChargebackConfigurator\DataModel.cs" />
+    <Compile Include="ChargebackConfigurator\WeeklyCategoriesControl.cs">
+      <SubType>Chargeback</SubType>
+    </Compile>
+    <Compile Include="ChargebackConfigurator\WeeklyCategoriesControl.Designer.cs">
+      <DependentUpon>WeeklyCategoriesControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="DbConfigurator.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -85,6 +121,21 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ChargebackConfigurator\ChargebackCategoryEditor.resx">
+      <DependentUpon>ChargebackCategoryEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChargebackConfigurator\ChargebackConfigurationPanel.resx">
+      <DependentUpon>ChargebackConfigurationPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChargebackConfigurator\ChargebackHourControl.resx">
+      <DependentUpon>ChargebackHourControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChargebackConfigurator\ChargebackKindSelector.resx">
+      <DependentUpon>ChargebackKindSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChargebackConfigurator\WeeklyCategoriesControl.resx">
+      <DependentUpon>WeeklyCategoriesControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DbConfigurator.resx">
       <DependentUpon>DbConfigurator.cs</DependentUpon>
     </EmbeddedResource>
