@@ -14,6 +14,9 @@ namespace PaletteConfigurator.ChargebackConfigurator
 
     public partial class ChargebackConfigurationPanel : UserControl
     {
+        /// <summary>
+        /// The binding target for the model setup
+        /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ChargebackModel SelectedModel
         {
@@ -27,18 +30,6 @@ namespace PaletteConfigurator.ChargebackConfigurator
 
         private ChargebackModel selectedModel;
 
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public IList<ChargeBackKind> ChargebackKinds
-        {
-            get { return chargebackKinds; }
-            set
-            {
-                chargebackKinds = value;
-                kindDataSource.DataSource = value;
-            }
-        }
-        private IList<ChargeBackKind> chargebackKinds;
-
 
 
         public ChargebackConfigurationPanel()
@@ -47,31 +38,6 @@ namespace PaletteConfigurator.ChargebackConfigurator
 
             SetupControls();
             InitializeBindings();
-
-            ChargebackKinds = new ChargeBackKind[] {
-
-                new ChargeBackKind
-                {
-                    Name = "Peak",
-                    Price = 200,
-                    SymbolColor = ChargeBackKind.COLORS[0],
-                },
-
-                new ChargeBackKind
-                {
-                    Name = "Off Peak",
-                    Price = 100,
-                    SymbolColor = ChargeBackKind.COLORS[1],
-                },
-
-                new ChargeBackKind
-                {
-                    Name = "Holidays",
-                    Price = 50,
-                    SymbolColor = ChargeBackKind.COLORS[2],
-                },
-            };
-
             SelectedModel = new ChargebackModel
             {
                 EffectiveFrom = DateTime.UtcNow,
@@ -95,6 +61,9 @@ namespace PaletteConfigurator.ChargebackConfigurator
                 }
         }
 
+        /// <summary>
+        /// Initialize the comboboxes with content
+        /// </summary>
         private void SetupControls()
         {
             // Setup the comboboxes
@@ -110,6 +79,9 @@ namespace PaletteConfigurator.ChargebackConfigurator
                 TimeZoneInfo.Local);
         }
 
+        /// <summary>
+        /// Set up the bindings
+        /// </summary>
         private void InitializeBindings()
         {
             effectiveFromPicker.DataBindings.Add(new Binding("Value", modelBindingSource, "EffectiveFrom", true, DataSourceUpdateMode.OnPropertyChanged));

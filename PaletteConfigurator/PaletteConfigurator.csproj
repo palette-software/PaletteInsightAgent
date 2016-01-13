@@ -66,13 +66,6 @@
     <Compile Include="ChargebackConfigurator\ChargebackConfigurationPanel.Designer.cs">
       <DependentUpon>ChargebackConfigurationPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="ChargebackConfigurator\ChargebackHourControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ChargebackConfigurator\ChargebackHourControl.Designer.cs">
-      <DependentUpon>ChargebackHourControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ChargebackConfigurator\ChargeBackKind.cs" />
     <Compile Include="ChargebackConfigurator\ChargebackKindSelector.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -127,9 +120,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ChargebackConfigurator\ChargebackConfigurationPanel.resx">
       <DependentUpon>ChargebackConfigurationPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ChargebackConfigurator\ChargebackHourControl.resx">
-      <DependentUpon>ChargebackHourControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ChargebackConfigurator\ChargebackKindSelector.resx">
       <DependentUpon>ChargebackKindSelector.cs</DependentUpon>

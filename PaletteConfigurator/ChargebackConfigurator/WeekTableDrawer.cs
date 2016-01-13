@@ -6,7 +6,6 @@ namespace PaletteConfigurator.ChargebackConfigurator
     public struct WeekTableDescription
     {
         public Rectangle Bounds;
-        public Size LocalPadding;
         public Size GlobalPadding;
 
         public int LabelWidth;
@@ -31,6 +30,9 @@ namespace PaletteConfigurator.ChargebackConfigurator
         }
     }
 
+    /// <summary>
+    /// POD struct to pass cell sizes
+    /// </summary>
     public struct CellSizes
     {
         public Size raw;
@@ -50,6 +52,12 @@ namespace PaletteConfigurator.ChargebackConfigurator
             "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
         };
 
+        /// <summary>
+        /// Main entry point to the drawer
+        /// </summary>
+        /// <param name="desc"></param>
+        /// <param name="g"></param>
+        /// <param name="categoryIndices"></param>
         public static void DrawWeekTable(WeekTableDescription desc, Graphics g, int[] categoryIndices)
         {
             // dont work on bad input
@@ -203,6 +211,12 @@ namespace PaletteConfigurator.ChargebackConfigurator
         }
 
 
+        /// <summary>
+        /// Returns the index in the categories array from a mouse point
+        /// </summary>
+        /// <param name="desc"></param>
+        /// <param name="mouse"></param>
+        /// <returns></returns>
         public static int GetEntryIndex(WeekTableDescription desc, Point mouse)
         {
             var c = mouse;
@@ -221,6 +235,12 @@ namespace PaletteConfigurator.ChargebackConfigurator
         }
 
 
+        /// <summary>
+        /// Returns the bounding rectangle of the category entry @ idx
+        /// </summary>
+        /// <param name="desc"></param>
+        /// <param name="idx"></param>
+        /// <returns></returns>
         public static Rectangle GetEntryPosition(WeekTableDescription desc, int idx)
         {
             // calc the cell size

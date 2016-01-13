@@ -95,7 +95,6 @@ namespace PaletteConfigurator.ChargebackConfigurator
             tableDescription = new WeekTableDescription
             {
                 Bounds = Bounds,
-                LocalPadding = new Size(2, 2),
                 GlobalPadding = new Size(5, 5),
 
                 LabelWidth = 70,

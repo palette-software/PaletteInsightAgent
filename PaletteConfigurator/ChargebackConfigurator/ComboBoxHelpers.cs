@@ -9,6 +9,13 @@ namespace PaletteConfigurator.ChargebackConfigurator
 {
     class ComboBoxHelpers
     {
+        /// <summary>
+        /// Fills a combobox with values and selects the default one
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="comboBox"></param>
+        /// <param name="objects"></param>
+        /// <param name="defaultValue"></param>
         public static void FillCombobox<T>(ComboBox comboBox, IEnumerable<T> objects,
              object defaultValue = null)
         {
