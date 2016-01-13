@@ -7,11 +7,13 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using PalMon.Counters;
+using DataTableWriter.Helpers;
 
 namespace PalMon.ThreadInfoPoller
 {
     struct ThreadInfo
     {
+        public long rowId;
         public string host;
         public string instance;
         public long processId;
@@ -22,9 +24,16 @@ namespace PalMon.ThreadInfoPoller
 
     class ThreadInfoAgent
     {
+        private long tableBaseId;
         public static readonly string InProgressLock = "Thread Info";
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static readonly string HostName = Dns.GetHostName();
+
+        public ThreadInfoAgent()
+        {
+            tableBaseId = RunCycleIdGenerator.CreteEpochPrefixedBaseId();
+            Log.WarnFormat("Thread Info table base ID: {0}", tableBaseId);
+        }
 
         public void poll(ICollection<string> processNames, IDataTableWriter writer, object WriteLock)
         {
@@ -61,6 +70,7 @@ namespace PalMon.ThreadInfoPoller
                 foreach (ProcessThread thread in process.Threads)
                 {
                     ThreadInfo threadInfo = new ThreadInfo();
+                    threadInfo.rowId = tableBaseId++;
                     threadInfo.processId = process.Id;
                     threadInfo.threadId = thread.Id;
                     threadInfo.cpuTime = thread.TotalProcessorTime.Ticks;

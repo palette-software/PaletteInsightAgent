@@ -28,7 +28,7 @@ namespace DataTableWriter
             {
                 if (!adapter.ExistsTable(schema.TableName))
                 {
-                    adapter.CreateTable(schema, false);
+                    adapter.CreateTable(schema);
                 }
                 else
                 {

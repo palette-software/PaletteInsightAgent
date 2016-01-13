@@ -16,7 +16,7 @@ namespace DataTableWriter.Adapters
 
         void OpenConnection();
         bool IsConnectionOpen();
-        void CreateTable(DataTable schema, bool generateIdentity = true);
+        void CreateTable(DataTable schema, bool generateIdentity = false);
         bool ExistsTable(string tableName);
         DataTable GetSchema(string tableName);
         void AddColumn(string tableName, DataColumn column);

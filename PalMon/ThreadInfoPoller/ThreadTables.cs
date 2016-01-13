@@ -14,6 +14,7 @@ namespace PalMon.ThreadInfoPoller
         {
             var table = new DataTable("threadinfo");
 
+            TableHelper.addColumn(table, "id", "System.Int64");
             TableHelper.addColumn(table, "host_name");
             TableHelper.addColumn(table, "instance");
             TableHelper.addColumn(table, "ts", "System.DateTime");
@@ -27,6 +28,7 @@ namespace PalMon.ThreadInfoPoller
         public static void addToTable(DataTable table, ThreadInfo item)
         {
             var row = table.NewRow();
+            row["id"] = item.rowId;
             row["host_name"] = item.host;
             row["instance"] = item.instance;
             row["ts"] = item.pollTimeStamp;
