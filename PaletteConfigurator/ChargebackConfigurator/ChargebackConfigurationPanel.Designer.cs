@@ -39,9 +39,9 @@
             this.effectiveToPicker = new System.Windows.Forms.DateTimePicker();
             this.modelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.kindDataSource = new System.Windows.Forms.BindingSource(this.components);
+            this.categoryIndexSource = new System.Windows.Forms.BindingSource(this.components);
             this.chargebackKindSelector = new PaletteConfigurator.ChargebackConfigurator.ChargebackKindSelector();
             this.weeklyCategoriesControl = new PaletteConfigurator.ChargebackConfigurator.WeeklyCategoriesControl();
-            this.categoryIndexSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.modelBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.kindDataSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.categoryIndexSource)).BeginInit();
@@ -113,24 +113,26 @@
             this.effectiveToPicker.Size = new System.Drawing.Size(201, 20);
             this.effectiveToPicker.TabIndex = 6;
             // 
-            // chargebackKindSelector1
+            // chargebackKindSelector
             // 
+            this.chargebackKindSelector.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.chargebackKindSelector.Currency = null;
             this.chargebackKindSelector.Location = new System.Drawing.Point(0, 114);
-            this.chargebackKindSelector.Name = "chargebackKindSelector1";
+            this.chargebackKindSelector.Name = "chargebackKindSelector";
             this.chargebackKindSelector.SelectedIndex = 0;
-            this.chargebackKindSelector.Size = new System.Drawing.Size(292, 431);
+            this.chargebackKindSelector.Size = new System.Drawing.Size(220, 502);
             this.chargebackKindSelector.TabIndex = 11;
             // 
-            // weeklyCategoriesControl1
+            // weeklyCategoriesControl
             // 
             this.weeklyCategoriesControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.weeklyCategoriesControl.BoxPadding = 2;
-            this.weeklyCategoriesControl.Location = new System.Drawing.Point(298, 114);
-            this.weeklyCategoriesControl.Name = "weeklyCategoriesControl1";
-            this.weeklyCategoriesControl.Size = new System.Drawing.Size(383, 485);
+            this.weeklyCategoriesControl.Location = new System.Drawing.Point(226, 114);
+            this.weeklyCategoriesControl.Name = "weeklyCategoriesControl";
+            this.weeklyCategoriesControl.Size = new System.Drawing.Size(465, 491);
             this.weeklyCategoriesControl.TabIndex = 10;
             // 
             // ChargebackConfigurationPanel

@@ -26,43 +26,13 @@ namespace PaletteConfigurator.ChargebackConfigurator
             set
             {
                 categoryIndices = value;
-                UpdateIndices();
             }
         }
 
 
         private int[] categoryIndices;
 
-
-        private Size cellSize;
-
-        /// <summary>
-        /// The colors used
-        /// </summary>
-        public static readonly Color[] COLORS = new Color[] {
-            Color.Green,
-            Color.Red,
-            Color.Orange,
-            Color.Blue,
-            Color.Yellow,
-            Color.SkyBlue,
-            Color.YellowGreen
-        };
-
-        /// <summary>
-        /// Colors for writing text on the previous color list
-        /// </summary>
-        public static readonly Color[] CONTRAST_COLORS = new Color[]
-        {
-            Color.Black,
-            Color.White,
-            Color.Black,
-            Color.White,
-            Color.Black,
-            Color.Black,
-            Color.White
-        };
-
+        private WeekTableDescription tableDescription;
 
         public WeeklyCategoriesControl()
         {
@@ -75,67 +45,64 @@ namespace PaletteConfigurator.ChargebackConfigurator
             CategoryIndices = ci;
             Paint += WeeklyCategoriesControl_Paint;
             Click += WeeklyCategoriesControl_Click;
+            MouseMove += WeeklyCategoriesControl_MouseMove;
         }
 
+        /// <summary>
+        /// Updates any boxes the user dragged the mouse over
+        /// while holding the left button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void WeeklyCategoriesControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            // if the left mouse button is down
+            if ((Control.MouseButtons & MouseButtons.Left) == MouseButtons.Left)
+            {
+                UpdateFromMouse(e);
+            }
+        }
+
+        /// <summary>
+        /// Updates the clicked box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void WeeklyCategoriesControl_Click(object sender, EventArgs e)
+        {
+            UpdateFromMouse(e);
+        }
+
+        private void UpdateFromMouse(EventArgs e)
         {
             MouseEventArgs me = (MouseEventArgs)e;
             Point coords = me.Location;
 
-            var dow = coords.X / cellSize.Width;
-            var hod = coords.Y / cellSize.Height;
-
-            //categoryIndices[GetIdx(dow, hod)] += 1;
-            categoryIndices[GetIdx(dow, hod)] = CategoryIndex;
+            var idx = WeekTableDrawer.GetEntryIndex(tableDescription, coords);
+            // dont do anything if clicked outside of the valid borders
+            if (idx < 0 || idx >= categoryIndices.Length) return;
+            // dont refresh if the category is already set to this
+            if (categoryIndices[idx] == CategoryIndex) return;
+            // update the category
+            categoryIndices[idx] = CategoryIndex;
             // Invalidate the paint rectangle.
-            Invalidate(
-                new Rectangle(
-                    dow * (cellSize.Width + BoxPadding),
-                    hod * (cellSize.Height + BoxPadding),
-                    cellSize.Width,
-                    cellSize.Height));
+            Invalidate(WeekTableDrawer.GetEntryPosition(tableDescription, idx));
         }
 
         private void WeeklyCategoriesControl_Paint(object sender, PaintEventArgs e)
         {
             // TODO: paint only the desired parts inside e.ClipRectangle
-            var innerPadding = 2;
-            var halfPadding = BoxPadding / 2;
-            var cellWidth = (Size.Width / 7) - BoxPadding;
-            var cellHeight = (Size.Height / 24) - BoxPadding;
-            var cellSize = new Size(cellWidth, cellHeight);
-            // store the cellsize for processing
-            this.cellSize = cellSize;
-            var textPadding = new Size(innerPadding, innerPadding);
-
-            var g = e.Graphics;
-            var f = SystemFonts.DefaultFont;
-
-
-            ForAllHours((dow, hod, idx) =>
+            tableDescription = new WeekTableDescription
             {
-                var x = dow * (cellWidth + BoxPadding);
-                var y = hod * (cellHeight + BoxPadding);
+                Bounds = Bounds,
+                LocalPadding = new Size(2, 2),
+                GlobalPadding = new Size(5, 5),
 
-                var colorIndex = categoryIndices[idx] % COLORS.Length;
-                using (var brush = new SolidBrush(COLORS[colorIndex]))
-                using (var contrastBrush = new SolidBrush(CONTRAST_COLORS[colorIndex]))
-                {
-                    var rectOrigin = new Point(x, y);
-                    var origin = new Point(x + halfPadding, y + halfPadding);
+                LabelWidth = 70,
+                LabelHeight = 20,
+            };
 
-                    g.FillRectangle(brush, new Rectangle(rectOrigin, cellSize));
-                    g.DrawRectangle(Pens.White, new Rectangle(rectOrigin, cellSize));
-
-                    g.DrawString(
-                        string.Format("{0}-{1}h", hod, hod + 1),
-                        f,
-                        contrastBrush,
-                        Point.Add(origin, textPadding));
-                }
-
-            });
-
+            WeekTableDrawer.DrawWeekTable(tableDescription, e.Graphics, categoryIndices);
         }
 
         /// <summary>
@@ -163,9 +130,5 @@ namespace PaletteConfigurator.ChargebackConfigurator
             return dow * 24 + hod;
         }
 
-        private void UpdateIndices()
-        {
-            //           
-        }
     }
 }

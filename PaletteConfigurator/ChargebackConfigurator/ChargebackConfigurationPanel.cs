@@ -112,19 +112,19 @@ namespace PaletteConfigurator.ChargebackConfigurator
 
         private void InitializeBindings()
         {
-            effectiveFromPicker.DataBindings.Add(new Binding("Value", modelBindingSource, "EffectiveFrom"));
-            effectiveToPicker.DataBindings.Add(new Binding("Value", modelBindingSource, "EffectiveTo"));
+            effectiveFromPicker.DataBindings.Add(new Binding("Value", modelBindingSource, "EffectiveFrom", true, DataSourceUpdateMode.OnPropertyChanged));
+            effectiveToPicker.DataBindings.Add(new Binding("Value", modelBindingSource, "EffectiveTo", true, DataSourceUpdateMode.OnPropertyChanged));
 
             
-            currencySelector.DataBindings.Add(new Binding("SelectedItem", modelBindingSource, "UnitPriceCurrency"));
+            currencySelector.DataBindings.Add(new Binding("SelectedItem", modelBindingSource, "UnitPriceCurrency", true, DataSourceUpdateMode.OnPropertyChanged));
 
             categoryIndexSource.DataSource = chargebackKindSelector;
             // bind the selected category in the category editor to the
             // index we'll update the clicked hours
-            weeklyCategoriesControl.DataBindings.Add(new Binding("CategoryIndex", categoryIndexSource, "SelectedIndex"));
+            weeklyCategoriesControl.DataBindings.Add(new Binding("CategoryIndex", categoryIndexSource, "SelectedIndex", false, DataSourceUpdateMode.OnPropertyChanged));
 
             // bind the currency selector to the category selector for currency display
-            chargebackKindSelector.DataBindings.Add(new Binding("Currency", modelBindingSource, "UnitPriceCurrency"));
+            chargebackKindSelector.DataBindings.Add(new Binding("Currency", modelBindingSource, "UnitPriceCurrency", false, DataSourceUpdateMode.OnPropertyChanged));
         }
     }
 }

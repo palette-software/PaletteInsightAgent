@@ -49,7 +49,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(857, 797);
+            this.tabControl1.Size = new System.Drawing.Size(589, 683);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -59,7 +59,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(849, 771);
+            this.tabPage1.Size = new System.Drawing.Size(581, 657);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Agent Options";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -93,7 +93,7 @@
             this.insightAgentConfigurator1.MaximumSize = new System.Drawing.Size(1800, 620);
             this.insightAgentConfigurator1.MinimumSize = new System.Drawing.Size(534, 620);
             this.insightAgentConfigurator1.Name = "insightAgentConfigurator1";
-            this.insightAgentConfigurator1.Size = new System.Drawing.Size(837, 620);
+            this.insightAgentConfigurator1.Size = new System.Drawing.Size(569, 620);
             this.insightAgentConfigurator1.TabIndex = 0;
             // 
             // chargebackConfigurationPanel1
@@ -103,14 +103,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chargebackConfigurationPanel1.Location = new System.Drawing.Point(0, 0);
             this.chargebackConfigurationPanel1.Name = "chargebackConfigurationPanel1";
-            this.chargebackConfigurationPanel1.Size = new System.Drawing.Size(585, 661);
+            this.chargebackConfigurationPanel1.Size = new System.Drawing.Size(578, 657);
             this.chargebackConfigurationPanel1.TabIndex = 0;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(857, 798);
+            this.ClientSize = new System.Drawing.Size(589, 684);
             this.Controls.Add(this.tabControl1);
             this.MinimumSize = new System.Drawing.Size(605, 722);
             this.Name = "Form1";

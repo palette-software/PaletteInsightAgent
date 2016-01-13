@@ -32,8 +32,8 @@ namespace PaletteConfigurator.ChargebackConfigurator
         {
             InitializeComponent();
             Category = new ChargebackCategory { };
-            nameText.DataBindings.Add(new Binding("Text", categoryBindingSource, "Name"));
-            priceNumeric.DataBindings.Add(new Binding("Value", categoryBindingSource, "Price"));
+            nameText.DataBindings.Add(new Binding("Text", categoryBindingSource, "Name", true, DataSourceUpdateMode.OnPropertyChanged));
+            priceNumeric.DataBindings.Add(new Binding("Value", categoryBindingSource, "Price", true, DataSourceUpdateMode.OnPropertyChanged));
 
             currencyTextBox.DataBindings.Add(new Binding("Text", categoryBindingSource, "Currency"));
 

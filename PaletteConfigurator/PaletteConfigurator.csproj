@@ -90,6 +90,7 @@
     <Compile Include="ChargebackConfigurator\WeeklyCategoriesControl.Designer.cs">
       <DependentUpon>WeeklyCategoriesControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="ChargebackConfigurator\WeekTableDrawer.cs" />
     <Compile Include="DbConfigurator.cs">
       <SubType>UserControl</SubType>
     </Compile>

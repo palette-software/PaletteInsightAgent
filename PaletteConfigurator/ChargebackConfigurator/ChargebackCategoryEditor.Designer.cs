@@ -72,10 +72,31 @@
             // 
             this.priceNumeric.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.priceNumeric.DecimalPlaces = 2;
+            this.priceNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.priceNumeric.Location = new System.Drawing.Point(68, 49);
+            this.priceNumeric.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.priceNumeric.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.priceNumeric.Name = "priceNumeric";
             this.priceNumeric.Size = new System.Drawing.Size(120, 20);
             this.priceNumeric.TabIndex = 3;
+            this.priceNumeric.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
             // 
             // saveButton
             // 

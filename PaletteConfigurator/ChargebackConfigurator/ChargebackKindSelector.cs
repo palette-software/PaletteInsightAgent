@@ -64,19 +64,28 @@ namespace PaletteConfigurator.ChargebackConfigurator
         public ChargebackKindSelector()
         {
             InitializeComponent();
-            categoryListBox.DisplayMember = "DisplayString";
+            SetupCategorySelector();
+
             Categories = new List<ChargebackCategory> {
                 new ChargebackCategory { Name="Peak", Price = 100, Currency = Currency },
                 new ChargebackCategory { Name="Off-Peak", Price = 50, Currency = Currency }
             };
-            categoryListBox.DrawItem += CategoryListBox_DrawItem;
-            categoryListBox.DrawMode = DrawMode.OwnerDrawFixed;
 
             selectionBindingSource.DataSource = this;
+
+        }
+
+        /// <summary>
+        /// Initialize the category selector listbox
+        /// </summary>
+        private void SetupCategorySelector()
+        {
+            categoryListBox.DisplayMember = "DisplayString";
+            categoryListBox.DrawItem += CategoryListBox_DrawItem;
+            categoryListBox.DrawMode = DrawMode.OwnerDrawFixed;
             categoryListBox.DataBindings.Add(new Binding("SelectedIndex", selectionBindingSource, "SelectedIndex"));
 
             categoryListBox.MouseDoubleClick += CategoryListBox_MouseDoubleClick;
-
         }
 
         /// <summary>
