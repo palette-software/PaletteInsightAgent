@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using PalMon.Counters;
+using DataTableWriter;
+using DataTableWriter.Helpers;
 
 namespace PalMon.Sampler
 {
@@ -14,6 +16,7 @@ namespace PalMon.Sampler
     {
         public static readonly string InProgressLock = "Counter Sampler";
 
+        private long tableBaseId;
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -22,6 +25,8 @@ namespace PalMon.Sampler
         {
             counters = counterCollection;
             schema = GenerateSchema(tableName);
+            tableBaseId = RunCycleIdGenerator.CreteEpochPrefixedBaseId();
+            Log.DebugFormat("Counter Sampler table base ID: {0}", tableBaseId);
         }
 
         #region Public Methods
@@ -50,7 +55,7 @@ namespace PalMon.Sampler
                 // Map sample result to schema and insert it into result table.
                 var row = MapToSchema(counterSample, dataTable);
                 row["timestamp"] = pollTimestamp;
-                dataTable.Rows.Add(row);
+                dataTable.AddRowWithBaseId(row, ref tableBaseId);
             }
 
             var numFailed = counters.Count - dataTable.Rows.Count;
@@ -77,6 +82,10 @@ namespace PalMon.Sampler
         {
             var generatedSchema = new DataTable(tableName);
 
+            var idColumn = BuildColumnMetadata("id", "System.Int64", false);
+            idColumn.ReadOnly = true;
+            idColumn.Unique = true;
+            generatedSchema.Columns.Add(idColumn);
             generatedSchema.Columns.Add(BuildColumnMetadata("timestamp", "System.DateTime", false));
             generatedSchema.Columns.Add(BuildColumnMetadata("cluster", "System.String", true, 32));
             generatedSchema.Columns.Add(BuildColumnMetadata("machine", "System.String", false, 16));

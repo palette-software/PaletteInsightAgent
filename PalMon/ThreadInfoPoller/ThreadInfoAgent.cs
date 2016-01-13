@@ -13,7 +13,6 @@ namespace PalMon.ThreadInfoPoller
 {
     struct ThreadInfo
     {
-        public long rowId;
         public string host;
         public string instance;
         public long processId;
@@ -32,7 +31,7 @@ namespace PalMon.ThreadInfoPoller
         public ThreadInfoAgent()
         {
             tableBaseId = RunCycleIdGenerator.CreteEpochPrefixedBaseId();
-            Log.WarnFormat("Thread Info table base ID: {0}", tableBaseId);
+            Log.DebugFormat("Thread Info table base ID: {0}", tableBaseId);
         }
 
         public void poll(ICollection<string> processNames, IDataTableWriter writer, object WriteLock)
@@ -70,14 +69,13 @@ namespace PalMon.ThreadInfoPoller
                 foreach (ProcessThread thread in process.Threads)
                 {
                     ThreadInfo threadInfo = new ThreadInfo();
-                    threadInfo.rowId = tableBaseId++;
                     threadInfo.processId = process.Id;
                     threadInfo.threadId = thread.Id;
                     threadInfo.cpuTime = thread.TotalProcessorTime.Ticks;
                     threadInfo.pollTimeStamp = DateTimeOffset.Now.UtcDateTime;
                     threadInfo.host = HostName;
                     threadInfo.instance = process.ProcessName;
-                    ThreadTables.addToTable(table, threadInfo);
+                    ThreadTables.addToTable(table, threadInfo, ref tableBaseId);
                     serverLogsTableCount++;
                 }
             }
