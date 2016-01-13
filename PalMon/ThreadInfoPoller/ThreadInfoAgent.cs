@@ -30,7 +30,7 @@ namespace PalMon.ThreadInfoPoller
 
         public ThreadInfoAgent()
         {
-            tableBaseId = RunCycleIdGenerator.CreteEpochPrefixedBaseId();
+            tableBaseId = Generator.CreteEpochPrefixedBaseId();
             Log.DebugFormat("Thread Info table base ID: {0}", tableBaseId);
         }
 

@@ -30,14 +30,15 @@ namespace DataTableWriter
         }
 
         /// <summary>
-        /// Add a row to the table, where the "id" field is filled based on
-        /// the cycle ID, and then cycle ID gets incremented.
+        /// Add a row to the table, where the "id" field is calculated for
+        /// the current runcycle, and gets incremented with every insert.
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="row"></param>
-        public static void AddRowWithBaseId(this DataTable dt, DataRow row, ref long cycleId)
+        /// <param name="baseId"></param>
+        public static void AddRowWithBaseId(this DataTable dt, DataRow row, ref long baseId)
         {
-            row["id"] = cycleId++;
+            row["id"] = baseId++;
             dt.Rows.Add(row);
         }
     }

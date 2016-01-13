@@ -25,7 +25,7 @@ namespace PalMon.Sampler
         {
             counters = counterCollection;
             schema = GenerateSchema(tableName);
-            tableBaseId = RunCycleIdGenerator.CreteEpochPrefixedBaseId();
+            tableBaseId = Generator.CreteEpochPrefixedBaseId();
             Log.DebugFormat("Counter Sampler table base ID: {0}", tableBaseId);
         }
 

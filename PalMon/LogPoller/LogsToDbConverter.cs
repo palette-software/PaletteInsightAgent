@@ -29,9 +29,9 @@ namespace PalMon.LogPoller
         public LogsToDbConverter()
         {
             this.HostName = Dns.GetHostName();
-            this.serverLogsTableBaseId = RunCycleIdGenerator.CreteEpochPrefixedBaseId();
+            this.serverLogsTableBaseId = Generator.CreteEpochPrefixedBaseId();
             Log.DebugFormat("Server logs table base ID: {0}", serverLogsTableBaseId);
-            this.filterStateTableBaseId = RunCycleIdGenerator.CreteEpochPrefixedBaseId();
+            this.filterStateTableBaseId = Generator.CreteEpochPrefixedBaseId();
             Log.DebugFormat("Filter state audit table base ID: {0}", filterStateTableBaseId);
         }
 
