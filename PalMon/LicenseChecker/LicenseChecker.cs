@@ -72,7 +72,7 @@ namespace PalMon.LicenseChecker
                 {
                     cmd.Connection = conn;
                     // Insert some data
-                    cmd.CommandText = "SELECT sum(allocated_cores) FROM core_licenses;";
+                    cmd.CommandText = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
                     long coreCount = (long)cmd.ExecuteScalar();
                     Log.InfoFormat("Tableau total allocated cores: {0}", coreCount);
                     return (int)coreCount;
