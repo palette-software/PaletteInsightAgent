@@ -58,7 +58,7 @@ namespace PalMon
             }
 
             // check the license after the configuration has been loaded.
-            CheckLicense();
+            CheckLicense(Path.GetDirectoryName(assemblyLocation) + "\\");
 
             // Load the log poller config & start the agent
             logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
@@ -68,21 +68,29 @@ namespace PalMon
             threadInfoAgent = new ThreadInfoAgent();
         }
 
-        private void CheckLicense()
+        private void CheckLicense(string pathToCheck)
         {
-            // get the core count
-            var coreCount = LicenseChecker.LicenseChecker.getCoreCount(
-                options.RepoHost,
-                options.RepoPort,
-                options.RepoUser,
-                options.RepoPass,
-                options.RepoDb
-                );
-            // check for license.
-            if (!LicenseChecker.LicenseChecker.checkForLicensesIn(".", LicensePublicKey.PUBLIC_KEY, coreCount))
+            try
             {
-                Log.Fatal("No valid license found for Palette Insight. Exiting...");
-                Environment.Exit(-1);
+                Log.InfoFormat("Checking for licenses in: {0}", pathToCheck);
+                // get the core count
+                var coreCount = LicenseChecker.LicenseChecker.getCoreCount(
+                    options.RepoHost,
+                    options.RepoPort,
+                    options.RepoUser,
+                    options.RepoPass,
+                    options.RepoDb
+                    );
+                // check for license.
+                if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck , LicensePublicKey.PUBLIC_KEY, coreCount))
+                {
+                    Log.FatalFormat("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
+                    Environment.Exit(-1);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Fatal("Error during license check.", e);
             }
         }
 
