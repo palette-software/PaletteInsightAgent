@@ -24,7 +24,8 @@ namespace PaletteConfigurator.ChargebackConfigurator
 
         override public string ToString()
         {
-            return String.Format("{2} ({1}) -- {0}", Name, Key, EnglishName);
+            return Key;
+            //return String.Format("{2} ({1}) -- {0}", Name, Key, EnglishName);
         }
     }
 

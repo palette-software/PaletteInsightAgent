@@ -42,7 +42,7 @@ namespace PaletteConfigurator.ChargebackConfigurator
             {
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = DateTime.UtcNow.AddMonths(3),
-                UnitPriceCurrency = "USD"
+                UnitPriceCurrency = selectedModel.UnitPriceCurrency
             };
 
         }
