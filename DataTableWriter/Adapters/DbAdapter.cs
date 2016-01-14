@@ -72,7 +72,7 @@ namespace DataTableWriter.Adapters
         /// <param name="schema">The schema defining the table to be created.</param>
         /// <param name="generateIdentity">If true, automatically generates an identity column.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities")]
-        public void CreateTable(DataTable schema, bool generateIdentity = true)
+        public void CreateTable(DataTable schema, bool generateIdentity = false)
         {
             var columns = new List<string>();
             if (generateIdentity)
@@ -203,7 +203,7 @@ namespace DataTableWriter.Adapters
             using (var command = Connection.CreateCommand())
             {
                 command.Connection = Connection;
-                command.CommandText = Driver.BuildQueryColumnNamesAndTypes(tableName);
+                command.CommandText = Driver.BuildQueryColumnNamesAndTypes(tableName, false);
 
                 try
                 {

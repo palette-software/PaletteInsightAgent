@@ -68,6 +68,7 @@
     <Compile Include="Helpers\DataColumnEqualityComparer.cs" />
     <Compile Include="Extensions\DataTableExtensions.cs" />
     <Compile Include="Connection\IDbConnectionInfo.cs" />
+    <Compile Include="Helpers\RunCycleIdGenerator.cs" />
     <Compile Include="Writers\DataTableCsvWriter.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Connection\DbConnectionInfo.cs" />

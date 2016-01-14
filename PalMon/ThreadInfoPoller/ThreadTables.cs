@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PalMon.Helpers;
+using DataTableWriter;
 
 namespace PalMon.ThreadInfoPoller
 {
@@ -14,6 +15,7 @@ namespace PalMon.ThreadInfoPoller
         {
             var table = new DataTable("threadinfo");
 
+            TableHelper.addColumn(table, "id", "System.Int64", true, true);
             TableHelper.addColumn(table, "host_name");
             TableHelper.addColumn(table, "instance");
             TableHelper.addColumn(table, "ts", "System.DateTime");
@@ -24,7 +26,7 @@ namespace PalMon.ThreadInfoPoller
             return table;
         }
 
-        public static void addToTable(DataTable table, ThreadInfo item)
+        public static void addToTable(DataTable table, ThreadInfo item, ref long baseId)
         {
             var row = table.NewRow();
             row["host_name"] = item.host;
@@ -34,7 +36,7 @@ namespace PalMon.ThreadInfoPoller
             row["tid"] = item.threadId;
             row["cpu_time"] = item.cpuTime;
 
-            table.Rows.Add(row);
+            table.AddRowWithBaseId(row, ref baseId);
         }
     }
 }

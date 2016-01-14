@@ -28,5 +28,18 @@ namespace DataTableWriter
             var exceptCount = dtColumns.Except(valueColumns, DataColumnEqualityComparer.instance).Count();
             return (exceptCount == 0);
         }
+
+        /// <summary>
+        /// Add a row to the table, where the "id" field is calculated for
+        /// the current runcycle, and gets incremented with every insert.
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="row"></param>
+        /// <param name="baseId"></param>
+        public static void AddRowWithBaseId(this DataTable dt, DataRow row, ref long baseId)
+        {
+            row["id"] = baseId++;
+            dt.Rows.Add(row);
+        }
     }
 }

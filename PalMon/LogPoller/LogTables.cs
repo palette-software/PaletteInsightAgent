@@ -29,7 +29,7 @@ namespace PalMon.LogPoller
         {
             var table = new DataTable("serverlogs");
 
-            //TableHelper.addColumn(table, "id", "System.Int32", true, true);
+            TableHelper.addColumn(table, "id", "System.Int64", true, true);
             TableHelper.addColumn(table, "filename");
             TableHelper.addColumn(table, "host_name");
             TableHelper.addColumn(table, "ts", "System.DateTime");
@@ -69,7 +69,7 @@ namespace PalMon.LogPoller
 
             var table = new DataTable("filter_state_audit");
 
-            //TableHelper.addColumn(table, "id", "System.Int32", true, true);
+            TableHelper.addColumn(table, "id", "System.Int64", true, true);
             TableHelper.addColumn(table, "ts", "System.DateTime");
             TableHelper.addColumn(table, "pid", "System.Int64");
             TableHelper.addColumn(table, "tid", "System.Int32");

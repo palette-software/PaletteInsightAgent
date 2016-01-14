@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Net;
 
 using DataTableWriter.Writers;
+using DataTableWriter.Helpers;
+using DataTableWriter;
 
 namespace PalMon.LogPoller
 {
@@ -15,6 +17,8 @@ namespace PalMon.LogPoller
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public string HostName { get; set; }
+        private long serverLogsTableBaseId;
+        private long filterStateTableBaseId;
 
         private const string GROUP_FILTER_RX = @"<groupfilter function='member' level='(.*?)' member='(.*?)'.*?/>";
 
@@ -25,6 +29,10 @@ namespace PalMon.LogPoller
         public LogsToDbConverter()
         {
             this.HostName = Dns.GetHostName();
+            this.serverLogsTableBaseId = Generator.CreteEpochPrefixedBaseId();
+            Log.DebugFormat("Server logs table base ID: {0}", serverLogsTableBaseId);
+            this.filterStateTableBaseId = Generator.CreteEpochPrefixedBaseId();
+            Log.DebugFormat("Filter state audit table base ID: {0}", filterStateTableBaseId);
         }
 
         /// <summary>
@@ -157,8 +165,7 @@ namespace PalMon.LogPoller
             row["k"] = jsonraw.k;
             row["v"] = jsonraw.v;
 
-
-            serverLogsTable.Rows.Add(row);
+            serverLogsTable.AddRowWithBaseId(row, ref serverLogsTableBaseId);
         }
 
         /// <summary>
@@ -196,7 +203,7 @@ namespace PalMon.LogPoller
                 row["hostname"] = HostName;
 
                 UpdateViewPath(repo, jsonraw, row);
-                filterStateTable.Rows.Add(row);
+                filterStateTable.AddRowWithBaseId(row, ref filterStateTableBaseId);
             }
 
         }
@@ -231,7 +238,7 @@ namespace PalMon.LogPoller
                 row["hostname"] = HostName;
 
                 UpdateViewPath(repo, jsonraw, row);
-                filterStateTable.Rows.Add(row);
+                filterStateTable.AddRowWithBaseId(row, ref filterStateTableBaseId);
             }
         }
 
