@@ -63,23 +63,17 @@ namespace PalMon.LogPoller
 
                 if (filterStateCount > 0)
                 {
-                    Log.Info("++ trying to aquire writelock for filter state");
                     lock (writeLock)
                     {
-                        Log.Info("==> Inserting filter state data.");
                         writer.Write(filterStateTable);
-                        Log.Info("<== filter state data inserted.");
                     }
                 }
 
                 if (serverLogsTableCount > 0)
                 {
-                    Log.Info("++ trying to aquire writelock for serverlogs");
                     lock (writeLock)
                     {
-                        Log.Info("==> Inserting server logs data.");
                         writer.Write(serverLogsTable);
-                        Log.Info("<== server logs data inserted.");
                     }
                 }
 
@@ -199,10 +193,7 @@ namespace PalMon.LogPoller
                 row["username"] = jsonraw.user;
                 row["filter_name"] = level;
                 row["filter_vals"] = member;
-                //row["workbook"] = viewPath.workbook;
-                //row["view"] = viewPath.view;
                 row["hostname"] = HostName;
-                //row["user_ip"] = viewPath.ip;
 
                 UpdateViewPath(repo, jsonraw, row);
                 filterStateTable.Rows.Add(row);
@@ -214,7 +205,6 @@ namespace PalMon.LogPoller
         {
 
             //insert all filters
-            //string pattern2 = @"<groupfilter function='level-members' level='(.*?)' user:ui-enumeration='(.*?)'.*?/>";
             string pattern2 = @"<groupfilter function='level-members' level='([^']*?)' user:ui-enumeration='all'.*?/>";
             MatchCollection mc2 = Regex.Matches(cache_key_Value, pattern2);
             foreach (Match m in mc2)
@@ -224,16 +214,11 @@ namespace PalMon.LogPoller
                 if (level.Contains("Calculation_"))
                     continue;
 
-                //var member = m.Groups[2].ToString();
-                //member = member.Replace("&quot;", "");
                 var member = "all";
-
-                //ViewPath viewPath = GetViewPath(repo, jsonraw);
 
                 var row = filterStateTable.NewRow();
                 string tid = jsonraw.tid;
 
-                //var insert_cmd = new NpgsqlCommand(insertQuery, PalMon_conn);
                 row["ts"] = parseJsonTimestamp(jsonraw.ts);
                 row["pid"] = (int)jsonraw.pid;
                 row["tid"] = Convert.ToInt32(tid, 16);
@@ -243,33 +228,11 @@ namespace PalMon.LogPoller
                 row["username"] = jsonraw.user;
                 row["filter_name"] = level;
                 row["filter_vals"] = member;
-                //row["workbook"] = viewPath.workbook;
-                //row["view"] = viewPath.view;
                 row["hostname"] = HostName;
-                //row["user_ip"] = viewPath.ip;
 
                 UpdateViewPath(repo, jsonraw, row);
                 filterStateTable.Rows.Add(row);
             }
-        }
-
-        private static ViewPath GetViewPath(ITableauRepoConn repo, string vizqlSessionId, string ts)
-        {
-            return MakeEmptyViewPath();
-            //DateTime timestamp = DateTime.Parse(ts);
-
-            //// If the repo is null we just return nada.
-            //if (repo == null) return MakeEmptyViewPath();
-
-            //// Otherwise look up from the repo
-            //var viewPath = repo.getViewPathForVizQLSessionId(vizqlSessionId, timestamp);
-            //if (viewPath.isEmpty())
-            //{
-            //    Log.Fatal("Cannot find view path for session!");
-            //    viewPath = MakeEmptyViewPath();
-            //}
-
-            //return viewPath;
         }
 
         private static ViewPath MakeEmptyViewPath()
@@ -278,14 +241,6 @@ namespace PalMon.LogPoller
             viewPath.workbook = "<WORKBOOK>";
             viewPath.view = "<VIEW>";
             viewPath.ip = "0.0.0.0";
-            return viewPath;
-        }
-
-        private static ViewPath GetViewPath(ITableauRepoConn repo, dynamic jsonraw)
-        {
-            string vizqlSessionId = jsonraw.sess;
-            string ts = jsonraw.ts;
-            ViewPath viewPath = GetViewPath(repo, vizqlSessionId, ts);
             return viewPath;
         }
 
@@ -298,7 +253,7 @@ namespace PalMon.LogPoller
         private static void UpdateViewPath(ITableauRepoConn repo, dynamic jsonraw, DataRow row)
         {
 
-            var viewPath = GetViewPath(repo, jsonraw);
+            var viewPath = MakeEmptyViewPath();
             row["workbook"] = viewPath.workbook;
             row["view"] = viewPath.view;
             row["user_ip"] = viewPath.ip;
