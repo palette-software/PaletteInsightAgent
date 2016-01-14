@@ -26,10 +26,12 @@ namespace Licensing
 
         public License generateLicense(string owner, string licenseId, int coreCount, DateTime validUntilUTC)
         {
+            var getrandom = new Random();
             return new License
             {
                 // The maximum number available for SoudimCore.GetRandomNumber is 2147483647
-                seed = SodiumCore.GetRandomNumber(2147483647),
+                //seed = SodiumCore.GetRandomNumber(2147483647),
+                seed = getrandom.Next(0, 2147483647),
                 owner = owner,
                 licenseId = licenseId,
                 coreCount = coreCount,
@@ -50,6 +52,7 @@ namespace Licensing
                 var licenseText = PublicKeyAuth.Verify(LicenseFormatting.fromWrappedString(licenseString), publicKey);
                 // deserialize the license
                 var license = LicenseSerializer.stringToLicense(licenseText);
+                Console.WriteLine(String.Format("Checking license: {0} / {1} cores / valid until {2}", license.owner, license.coreCount, license.validUntilUTC));
                 // a license is valid if the core count is within limits and the time is ok
                 var isValid = (license.coreCount >= coreCount) && (license.validUntilUTC > DateTime.UtcNow);
                 return new ValidatedLicense { isValid = isValid, license = license };

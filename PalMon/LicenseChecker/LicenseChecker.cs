@@ -27,29 +27,41 @@ namespace PalMon.LicenseChecker
         {
             var licenseManager = new Ed25519LicenseManager();
 
-            Log.DebugFormat("Trying to find a valid license for {0} cores", coreCount);
+            Log.InfoFormat("Trying to find a valid license for {0} cores in {1} with pattern: {2}", coreCount, baseDirectory, LICENSE_FILE_PATTERN);
 
             // check the current directory and subdirectories for license files
             var licenseFiles = Directory.GetFiles(baseDirectory, LICENSE_FILE_PATTERN, SearchOption.AllDirectories);
-            foreach (var file in licenseFiles)
+
+            foreach (var f in licenseFiles)
             {
-                Log.DebugFormat("Checking license in: {0}", file);
-                var contents = File.ReadAllText(file);
-                var validLicense = licenseManager.isValidLicense(contents, coreCount, publicKey);
-                // If the license is valid, then return true and log the success and license info
-                if (validLicense.isValid)
+                Log.InfoFormat("Checking license in: {0}", f);
+                try
                 {
-                    var license = validLicense.license;
-                    Log.InfoFormat("Found valid license in {0}", file);
-                    Log.InfoFormat("  - licensed to: {0}", license.owner);
-                    Log.InfoFormat("  - licensed id is: {0}", license.licenseId);
-                    Log.InfoFormat("  - license core count: {0}", license.coreCount);
-                    Log.InfoFormat("  - valid until: {0}", license.validUntilUTC.ToLongDateString());
-                    return true;
+                    var contents = File.ReadAllText(f);
+                    var validLicense = licenseManager.isValidLicense(contents, coreCount, publicKey);
+                    // If the license is valid, then return true and log the success and license info
+                    if (validLicense.isValid)
+                    {
+                        var license = validLicense.license;
+                        Log.InfoFormat("Found valid license in {0}", f);
+                        Log.InfoFormat("  - licensed to: {0}", license.owner);
+                        Log.InfoFormat("  - licensed id is: {0}", license.licenseId);
+                        Log.InfoFormat("  - license core count: {0}", license.coreCount);
+                        Log.InfoFormat("  - valid until: {0}", license.validUntilUTC.ToLongDateString());
+                        return true;
+                    } else
+                    {
+                        Log.InfoFormat("License is invalid.");
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Log.Fatal("Error in LicenseChecker:", e);
                 }
             }
 
-            Log.Debug("No valid license found");
+            Log.Info("No valid license found");
             // No valid licenses found
             return false;
         }
