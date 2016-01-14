@@ -61,19 +61,25 @@ namespace PalMon.LogPoller
                 Log.Info("Inserting " + statusLine);
 
 
-                if (serverLogsTableCount > 0)
+                if (filterStateCount > 0)
                 {
+                    Log.Info("++ trying to aquire writelock for filter state");
                     lock (writeLock)
                     {
-                        writer.Write(serverLogsTable);
+                        Log.Info("==> Inserting filter state data.");
+                        writer.Write(filterStateTable);
+                        Log.Info("<== filter state data inserted.");
                     }
                 }
 
-                if (filterStateCount > 0)
+                if (serverLogsTableCount > 0)
                 {
+                    Log.Info("++ trying to aquire writelock for serverlogs");
                     lock (writeLock)
                     {
-                        writer.Write(filterStateTable);
+                        Log.Info("==> Inserting server logs data.");
+                        writer.Write(serverLogsTable);
+                        Log.Info("<== server logs data inserted.");
                     }
                 }
 
@@ -249,20 +255,21 @@ namespace PalMon.LogPoller
 
         private static ViewPath GetViewPath(ITableauRepoConn repo, string vizqlSessionId, string ts)
         {
-            DateTime timestamp = DateTime.Parse(ts);
+            return MakeEmptyViewPath();
+            //DateTime timestamp = DateTime.Parse(ts);
 
-            // If the repo is null we just return nada.
-            if (repo == null) return MakeEmptyViewPath();
+            //// If the repo is null we just return nada.
+            //if (repo == null) return MakeEmptyViewPath();
 
-            // Otherwise look up from the repo
-            var viewPath = repo.getViewPathForVizQLSessionId(vizqlSessionId, timestamp);
-            if (viewPath.isEmpty())
-            {
-                Log.Fatal("Cannot find view path for session!");
-                viewPath = MakeEmptyViewPath();
-            }
+            //// Otherwise look up from the repo
+            //var viewPath = repo.getViewPathForVizQLSessionId(vizqlSessionId, timestamp);
+            //if (viewPath.isEmpty())
+            //{
+            //    Log.Fatal("Cannot find view path for session!");
+            //    viewPath = MakeEmptyViewPath();
+            //}
 
-            return viewPath;
+            //return viewPath;
         }
 
         private static ViewPath MakeEmptyViewPath()
