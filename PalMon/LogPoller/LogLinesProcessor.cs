@@ -25,6 +25,9 @@ namespace PalMon.LogPoller
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        /// <summary>
+        /// The DNS hostname of the current machine
+        /// </summary>
         public string HostName { get; set; }
 
         /// <summary>
@@ -36,6 +39,7 @@ namespace PalMon.LogPoller
         /// Regex for ALL filters
         /// </summary>
         private const string ALL_FILTER_RX = @"<groupfilter function='level-members' level='([^']*?)' user:ui-enumeration='all'.*?/>";
+        private const bool FLUSH_ONLY_ON_DATA = true;
 
         /// <summary>
         /// Creates a new instance of LogsToDbConverter.
@@ -78,21 +82,40 @@ namespace PalMon.LogPoller
                 Log.Info("Inserting " + statusLine);
 
 
-                if (filterStateCount > 0)
+                // If we dont use output.Write
+                if (FLUSH_ONLY_ON_DATA)
+                {
+                    if (filterStateCount > 0)
+                    {
+                        lock (writeLock)
+                        {
+                            output.Write(parseResult.FilterChanges.ToArray());
+                            //writer.Write(filterStateTable);
+                        }
+                    }
+
+                    if (serverLogsTableCount > 0)
+                    {
+                        lock (writeLock)
+                        {
+                            output.Write(parseResult.ServerLogs.ToArray());
+                            //writer.Write(serverLogsTable);
+                        }
+                    }
+
+                    // Make sure we trigger a flush after the data is written
+                    // so the output can trigger writing to the database.
+                    output.FlushIfNeeded();
+                }
+                // If we want to make sure that the results are flushed
+                // on polls even if there is no data, simply acquire the write lock
+                // and write the data
+                else
                 {
                     lock (writeLock)
                     {
                         output.Write(parseResult.FilterChanges.ToArray());
-                        //writer.Write(filterStateTable);
-                    }
-                }
-
-                if (serverLogsTableCount > 0)
-                {
-                    lock (writeLock)
-                    {
                         output.Write(parseResult.ServerLogs.ToArray());
-                        //writer.Write(serverLogsTable);
                     }
                 }
 

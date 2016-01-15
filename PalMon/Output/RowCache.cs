@@ -47,11 +47,23 @@ namespace PalMon.Output
             }
         }
 
+
+        /// <summary>
+        /// Starts a new file if needed and tries to write the results to the database
+        /// </summary>
+        public void FlushCacheIfNeeded()
+        {
+            StartNewFileIfNeeded();
+        }
+
         #region CSV output
 
         private DateTimeOffset lastOutputDate;
         private DateTimeOffset nextOutputDate;
 
+        /// <summary>
+        /// The CSV serialization engine
+        /// </summary>
         private FileHelpers.FileHelperEngine<T> engine;
 
         /// <summary>

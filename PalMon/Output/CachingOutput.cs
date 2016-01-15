@@ -14,9 +14,11 @@ namespace PalMon.Output
         /// </summary>
         private RowCache<FilterStateChangeRow> filterChangeQueue;
         private RowCache<ServerLogRow> serverLogsQueue;
+        private IOutput wrappedOutput;
 
         public CachingOutput(IOutput wrappedOutput)
         {
+            this.wrappedOutput = wrappedOutput;
             filterChangeQueue = new RowCache<FilterStateChangeRow>("csv/filter-state-audit", wrappedOutput.Write);
             serverLogsQueue = new RowCache<ServerLogRow>("csv/serverlogs", wrappedOutput.Write);
         }
@@ -24,6 +26,12 @@ namespace PalMon.Output
 
 
         #endregion
+
+        public void FlushIfNeeded()
+        {
+            filterChangeQueue.FlushCacheIfNeeded();
+            serverLogsQueue.FlushCacheIfNeeded();
+        }
 
         public void Write(FilterStateChangeRow[] rows)
         {
