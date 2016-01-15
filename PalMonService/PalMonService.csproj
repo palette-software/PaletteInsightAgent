@@ -135,7 +135,7 @@
     <Error Condition="!Exists('..\packages\Baseclass.Contrib.Nuget.Output.2.1.0\build\net40\Baseclass.Contrib.Nuget.Output.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Baseclass.Contrib.Nuget.Output.2.1.0\build\net40\Baseclass.Contrib.Nuget.Output.targets'))" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>cp $(ProjectDir)..\PalMon\debug.license $(TargetDir)</PostBuildEvent>
+    <PostBuildEvent>copy "$(SolutionDir)\PalMon\debug.license" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
