@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DataTableWriter.Writers;
 using PalMon.Helpers;
+using DataTableWriter.Connection;
 
 namespace PalMon
 {
@@ -12,6 +13,7 @@ namespace PalMon
     {
         [CLSCompliant(false)]
         public IDataTableWriter Writer { get; set; }
+        public IDbConnectionInfo ResultDatabase { get; set; }
         public ICollection<Host> Hosts { get; set; }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
@@ -19,7 +21,7 @@ namespace PalMon
         public string TableName { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
-        public ICollection<string> Processes { get; set;  }
+        public ICollection<string> Processes { get; set; }
 
         #region LogPoller config settings
 
@@ -64,7 +66,7 @@ namespace PalMon
                 && Writer != null
                 && PollInterval >= MinPollInterval
                 && LogPollInterval >= MinPollInterval
-                && ThreadInfoPollInterval >= MinPollInterval 
+                && ThreadInfoPollInterval >= MinPollInterval
                 && TableName != null;
         }
 

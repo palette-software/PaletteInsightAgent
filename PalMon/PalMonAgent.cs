@@ -13,6 +13,7 @@ using PalMon.Sampler;
 
 using PalMon.LogPoller;
 using PalMon.ThreadInfoPoller;
+using PalMon.Output;
 
 [assembly: CLSCompliant(true)]
 
@@ -38,6 +39,13 @@ namespace PalMon
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         public static readonly string Log4NetConfigKey = "log4net-config-file";
 
+
+        private IOutput output;
+        private CachingOutput cachingOutput;
+        private const bool USE_COUNTERSAMPLES = false;
+        private const bool USE_LOGPOLLER = true;
+        private const bool USE_THREADINFO = false;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
@@ -47,9 +55,6 @@ namespace PalMon
             // Load the configuration
             XmlConfigurator.Configure(new FileInfo(ConfigurationManager.AppSettings[Log4NetConfigKey]));
 
-
-
-
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
             if (loadOptionsFromConfig)
@@ -57,15 +62,26 @@ namespace PalMon
                 PalMonConfigReader.LoadOptions();
             }
 
+
+            // initialize the output
+            output = new PostgresOutput(options.ResultDatabase);
+            cachingOutput = new CachingOutput(output);
+
             // check the license after the configuration has been loaded.
             CheckLicense(Path.GetDirectoryName(assemblyLocation) + "\\");
 
-            // Load the log poller config & start the agent
-            logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
-                options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
+            if (USE_LOGPOLLER)
+            {
+                // Load the log poller config & start the agent
+                logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
+                    options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
+            }
 
-            // start the thread info agent
-            threadInfoAgent = new ThreadInfoAgent();
+            if (USE_THREADINFO)
+            {
+                // start the thread info agent
+                threadInfoAgent = new ThreadInfoAgent();
+            }
         }
 
         private void CheckLicense(string pathToCheck)
@@ -82,7 +98,7 @@ namespace PalMon
                     options.RepoDb
                     );
                 // check for license.
-                if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck , LicensePublicKey.PUBLIC_KEY, coreCount))
+                if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount))
                 {
                     Log.FatalFormat("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
                     Environment.Exit(-1);
@@ -115,33 +131,44 @@ namespace PalMon
                 return;
             }
 
-            // Read Counters.config & create counters.
-            Log.Info(String.Format(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig));
-            ICollection<ICounter> counters;
-            try
+            // only start the JMX if we want to
+            if (USE_COUNTERSAMPLES)
             {
-                counters = CounterConfigLoader.Load(PathToCountersConfig, options.Hosts);
+                // Read Counters.config & create counters.
+                Log.Info(String.Format(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig));
+                ICollection<ICounter> counters;
+                try
+                {
+                    counters = CounterConfigLoader.Load(PathToCountersConfig, options.Hosts);
+                }
+                catch (ConfigurationErrorsException ex)
+                {
+                    Log.Error(String.Format("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message));
+                    return;
+                }
+                Log.Debug(String.Format("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count)));
+
+                // Spin up counter sampler.
+                sampler = new CounterSampler(counters, options.TableName);
+
+                // Kick off the polling timer.
+                Log.Info("PalMon initialized!  Starting performance counter polling..");
+                timer = new Timer(callback: Poll, state: null, dueTime: 0, period: options.PollInterval * 1000);
             }
-            catch (ConfigurationErrorsException ex)
+
+
+            if (USE_LOGPOLLER)
             {
-                Log.Error(String.Format("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message));
-                return;
+                // Start the log poller agent
+                logPollerAgent.start();
+                logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.LogPollInterval * 1000);
             }
-            Log.Debug(String.Format("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count)));
 
-            // Spin up counter sampler.
-            sampler = new CounterSampler(counters, options.TableName);
-
-            // Kick off the polling timer.
-            Log.Info("PalMon initialized!  Starting performance counter polling..");
-            timer = new Timer(callback: Poll, state: null, dueTime: 0, period: options.PollInterval * 1000);
-
-            // Start the log poller agent
-            logPollerAgent.start();
-            logPollTimer = new Timer(callback: PollLogs, state: null, dueTime: 0, period: options.LogPollInterval * 1000);
-
-            // Kick off the thread polling timer
-            threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
+            if (USE_THREADINFO)
+            {
+                // Kick off the thread polling timer
+                threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
+            }
         }
 
         /// <summary>
@@ -160,23 +187,32 @@ namespace PalMon
                 Log.Debug("Acquired write lock gracefully..");
             }
 
-            if (timer != null)
+            if (USE_COUNTERSAMPLES)
             {
-                timer.Dispose();
+                if (timer != null)
+                {
+                    timer.Dispose();
+                }
             }
 
-            // Stop the log poller agent
-            if (logPollTimer != null)
+            if (USE_LOGPOLLER)
             {
-                logPollTimer.Dispose();
-                Log.Info("Stopping logPollTimer.");
+                // Stop the log poller agent
+                if (logPollTimer != null)
+                {
+                    logPollTimer.Dispose();
+                    Log.Info("Stopping logPollTimer.");
+                }
+                logPollerAgent.stop();
             }
-            logPollerAgent.stop();
 
-            // Stop the thread info timer
-            if (threadInfoTimer != null)
+            if (USE_THREADINFO)
             {
-                threadInfoTimer.Dispose();
+                // Stop the thread info timer
+                if (threadInfoTimer != null)
+                {
+                    threadInfoTimer.Dispose();
+                }
             }
 
             Log.Info("PalMon stopped.");
@@ -188,7 +224,11 @@ namespace PalMon
         /// <returns>Bool indicating whether the agent is currently running.</returns>
         public bool IsRunning()
         {
-            return sampler != null && timer != null;
+            var running = true;
+            if (USE_COUNTERSAMPLES) running = running && (sampler != null && timer != null);
+            if (USE_LOGPOLLER) running = running && (logPollTimer != null);
+            if (USE_THREADINFO) running = running && (threadInfoTimer != null);
+            return running;
         }
 
         #endregion Public Methods
@@ -220,7 +260,8 @@ namespace PalMon
         {
             tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
             {
-                logPollerAgent.pollLogs(options.Writer, WriteLock);
+                //logPollerAgent.pollLogs(options.Writer, WriteLock);
+                logPollerAgent.pollLogs(cachingOutput, WriteLock);
             });
         }
 

@@ -2,9 +2,16 @@
 using System.Reflection;
 using System;
 using DataTableWriter.Writers;
+using PalMon.Output;
 
 namespace PalMon.LogPoller
 {
+    class LogPollResult
+    {
+        FilterStateChangeRow[] filterChangeRows;
+    }
+
+
     class LogPollerAgent
     {
         private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -12,6 +19,7 @@ namespace PalMon.LogPoller
 
         private LogFileWatcher watcher;
         private LogsToDbConverter logsToDbConverter;
+        private LogLinesProcessor logLinesProcessor;
 
         private ITableauRepoConn tableauRepo;
 
@@ -26,6 +34,7 @@ namespace PalMon.LogPoller
             this.folderToWatch = folderToWatch;
             filter = filterString;
             logsToDbConverter = new LogsToDbConverter();
+            logLinesProcessor = new LogLinesProcessor();
             // 
             tableauRepo = null;
             if (ShouldUseRepo(repoHost))
@@ -67,5 +76,17 @@ namespace PalMon.LogPoller
                 logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
             });
         }
+
+
+        public void pollLogs(CachingOutput output, object writeLock)
+        {
+            watcher.watchChangeCycle((filename, lines) => {
+                Log.Info("Got new " + lines.Length + " lines from " + filename );
+                logLinesProcessor.processServerLogLines(output, writeLock, filename, lines);
+                //logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
+            });
+
+        }
+
     }
 }

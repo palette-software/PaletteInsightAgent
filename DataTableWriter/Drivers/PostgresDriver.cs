@@ -80,7 +80,7 @@ namespace DataTableWriter.Drivers
                 {
                     Host = connectionInfo.Server,
                     Port = connectionInfo.Port.Value,
-                    UserName = connectionInfo.Username,
+                    Username = connectionInfo.Username,
                     Password = connectionInfo.Password,
                     Database = connectionInfo.DatabaseName
                 };

@@ -72,6 +72,9 @@ namespace PalMon.Config
                     Log.Fatal("Invalid output mode specified in configuration!");
                 }
 
+                // store the result database details
+                options.ResultDatabase = CreateDbConnectionInfo(config.Database);
+
                 // Load thread monitoring configuration
                 options.Processes = new System.Collections.Generic.List<string>();
                 foreach (PalMon.Config.Process ProcessData in config.Processes)
@@ -143,19 +146,7 @@ namespace PalMon.Config
                 throw new ConfigurationErrorsException("Invalid database driver type specified!");
             }
 
-            IDbConnectionInfo dbConnInfo = new DbConnectionInfo()
-            {
-                Server = databaseConfig.Server.Host,
-                Port = databaseConfig.Server.Port,
-                Username = databaseConfig.User.Login,
-                Password = databaseConfig.User.Password,
-                DatabaseName = databaseConfig.Name
-            };
-
-            if (!dbConnInfo.Valid())
-            {
-                throw new ConfigurationErrorsException("Missing required database connection information!");
-            }
+            IDbConnectionInfo dbConnInfo = CreateDbConnectionInfo(databaseConfig);
 
             var tableInitializationOptions = new DbTableInitializationOptions()
             {
@@ -174,6 +165,27 @@ namespace PalMon.Config
                 Log.Fatal("Could not initialize writer: " + ex.Message);
                 return null;
             }
+        }
+
+        private static IDbConnectionInfo CreateDbConnectionInfo(Database databaseConfig)
+        {
+            IDbConnectionInfo dbConnInfo = new DbConnectionInfo()
+            {
+                Server = databaseConfig.Server.Host,
+                Port = databaseConfig.Server.Port,
+                Username = databaseConfig.User.Login,
+                Password = databaseConfig.User.Password,
+                DatabaseName = databaseConfig.Name
+            };
+
+
+
+            if (!dbConnInfo.Valid())
+            {
+                throw new ConfigurationErrorsException("Missing required database connection information!");
+            }
+
+            return dbConnInfo;
         }
 
         /// <summary>

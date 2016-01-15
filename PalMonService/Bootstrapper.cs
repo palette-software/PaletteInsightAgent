@@ -35,8 +35,9 @@ namespace PalMonService
             {
                 agent = new PalMonAgent();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.Error.WriteLine(String.Format("Exception is: {0}", e.ToString()));
                 return false;
             }
             agent.Start();
