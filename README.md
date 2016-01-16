@@ -1,6 +1,6 @@
 # Palette Insight Agent #
 
-## What is PalMon?
+## What is Palette Insight Agent?
 
 PalMon is a performance monitoring agent that periodically samples target hosts for a set of Perfmon and MBean counters and writes out the results to a database in a Tableau-friendly format.  This information can then be used to monitor & analyze performance of a Tableau Server installation, in order to detect potential issues or assess scalabiliy & sizing.
 
