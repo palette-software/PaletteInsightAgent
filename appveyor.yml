@@ -25,13 +25,7 @@ test_script:
     - echo "Installed Palette Insight successfully"
     - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', '%TESTIN_DIR%\insight-tester.zip')
     - echo "Downloaded insight-tester"
-    - ps: |
-      $shell = new-object -com shell.application
-      $zip = $shell.NameSpace("C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip")
-      foreach($item in $zip.items())
-      {
-        $shell.Namespace("C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release").copyhere($item)
-      }
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('%TESTIN_DIR%\insight-tester.zip', '%TESTIN_DIR%');
     - echo "Unzipped insight tester"
     - windows_amd64/agentrunner start
     - sleep 20
