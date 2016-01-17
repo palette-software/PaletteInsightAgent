@@ -27,10 +27,10 @@ test_script:
     - echo "Downloaded insight-tester"
     - ps: |
       $shell = new-object -com shell.application
-      $zip = $shell.NameSpace("%TESTIN_DIR%\insight-tester.zip")
+      $zip = $shell.NameSpace("C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip")
       foreach($item in $zip.items())
       {
-        $shell.Namespace("%TESTIN_DIR%").copyhere($item)
+        $shell.Namespace("C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release").copyhere($item)
       }
     - echo "Unzipped insight tester"
     - windows_amd64/agentrunner start
