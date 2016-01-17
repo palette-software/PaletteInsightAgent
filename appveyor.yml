@@ -23,9 +23,9 @@ test_script:
     - set PALIN_MSI=Palette-Black-Box-Recorder-v%APPVEYOR_BUILD_VERSION%-beta-installer.msi
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
-    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', '%TESTIN_DIR%\insight-tester.zip')
+    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstallerDBInitializer\bin\Release\insight-tester.zip')
     - echo "Downloaded insight-tester"
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('%TESTIN_DIR%\insight-tester.zip', '%TESTIN_DIR%');
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\projects\blackboxrecorder\PalMonServiceInstallerDBInitializer\bin\Release\insight-tester.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstallerDBInitializer\bin\Release');
     - echo "Unzipped insight tester"
     - windows_amd64/agentrunner start
     - sleep 20
