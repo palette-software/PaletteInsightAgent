@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,8 +14,6 @@ namespace PalMon.Output
     /// </summary>
     public interface IOutput : IDisposable
     {
-        void Write(string csvFile, FilterStateChangeRow[] rows);
-        void Write(string csvFile, ThreadInfoRow[] rows);
-        void Write(string csvFile, ServerLogRow[] rows);
+        void Write(string csvFile, DataTable rows);
     }
 }

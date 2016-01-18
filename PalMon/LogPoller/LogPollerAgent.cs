@@ -73,7 +73,7 @@ namespace PalMon.LogPoller
             watcher.watchChangeCycle((string filename, string[] lines) =>
             {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
-                logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
+                //logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
             });
         }
 
@@ -82,8 +82,13 @@ namespace PalMon.LogPoller
         {
             watcher.watchChangeCycle((filename, lines) => {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
-                logLinesProcessor.processServerLogLines(output, writeLock, filename, lines);
-                //logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
+                //logLinesProcessor.processServerLogLines(output, writeLock, filename, lines);
+                logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
+            }, ()=>
+            {
+                // if no change, just flush if needed
+                Log.Info("No changes detected -- flushing if needed");
+                output.FlushIfNeeded();
             });
 
         }

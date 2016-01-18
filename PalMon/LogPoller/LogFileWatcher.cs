@@ -50,16 +50,29 @@ namespace PalMon.LogPoller
 
         public void watchChangeCycle(ChangeDelegate changeDelegate)
         {
+            watchChangeCycle(changeDelegate, () => { });
+        }
+
+        public void watchChangeCycle(ChangeDelegate changeDelegate, Action onNoChange)
+        {
+            var hasChanges = false;
             foreach (string fileName in getFileList())
             {
                 try
                 {
-                    pollChangesTo(fileName, changeDelegate);
+                    // check if we have any changes
+                    hasChanges = hasChanges || pollChangesTo(fileName, changeDelegate);
                 }
                 catch (Exception e)
                 {
                     Log.Error("Unexpected exception occured during reading the log files: " + e.StackTrace);
                 }
+            }
+
+            // Run the on-no-change delegate if nothing has changed
+            if (!hasChanges)
+            {
+                onNoChange();
             }
         }
 
@@ -68,7 +81,7 @@ namespace PalMon.LogPoller
         /// 
         /// </summary>
         /// <param name="fullPath"></param>
-        static void pollChangesTo(string fullPath, ChangeDelegate changeDelegate)
+        static bool pollChangesTo(string fullPath, ChangeDelegate changeDelegate)
         {
             using (var fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
             using (var sr = new StreamReader(fs))
@@ -88,8 +101,14 @@ namespace PalMon.LogPoller
 
                 // Callback if we have changes
                 if (lines.Count > 0)
+                {
                     changeDelegate(Path.GetFileName(fullPath), lines.ToArray());
+                    // mark that we have done our duty
+                    return true;
+                }
 
+                // signal that we did not do any inserts
+                return false;
             }
         }
     }

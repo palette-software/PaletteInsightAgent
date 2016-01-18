@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DataTableWriter.Connection;
 using Npgsql;
 using System.IO;
+using System.Data;
 
 namespace PalMon.Output
 {
@@ -31,49 +32,71 @@ namespace PalMon.Output
 
             connection = new NpgsqlConnection(connectionString);
 
-            // connect to the db
-            Console.Out.WriteLine(String.Format("Connecting to results database", connectionString));
-            connection.Open();
-            using (var cmd = new NpgsqlCommand())
-            {
-                cmd.Connection = connection;
-
-                // Retrieve all rows
-                cmd.CommandText = "SELECT 'hello'";
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        Console.WriteLine(reader.GetString(0));
-                    }
-                }
-            }
         }
 
         #region IOutput implementation
-        public void Write(string csvFile, ServerLogRow[] rows)
+        public void Write(string csvFile, DataTable rows)
         {
-            DoBulkCopy(DataConverter.Convert(rows));
-        }
-
-        public void Write(string csvFile, ThreadInfoRow[] rows)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Write(string csvFile, FilterStateChangeRow[] rows)
-        {
-            DoBulkCopy(DataConverter.Convert(rows));
+            DoBulkCopy(rows);
         }
 
         #endregion
 
-        #region Bulk copy handling
+        #region datatable bluk ops
+
         /// <summary>
         /// Helper to do a bulk copy
         /// </summary>
         /// <param name="conversionResult"></param>
-        private void DoBulkCopy(ConvertedRows conversionResult)
+        private void DoBulkCopy(DataTable rows)
+        {
+            ReconnectoToDbIfNeeded();
+
+            var statusLine = String.Format("BULK COPY of {0} - {1} rows", rows.TableName, rows.Rows.Count);
+            string copyString = CopyStatementFor(rows);
+
+
+            LoggingHelpers.TimedLog(statusLine, () =>
+            {
+                using (var writer = connection.BeginTextImport(copyString))
+                {
+
+                    var columnCount = rows.Columns.Count;
+
+                    foreach (DataRow rowToWrite in rows.Rows)
+                    {
+                        // Output the joined row
+                        writer.WriteLine(String.Join("\t", ToTSVLine(rowToWrite.ItemArray)));
+                    }
+                }
+            });
+        }
+        
+        private static string ToTSVLine(object[] row)
+        {
+            return String.Join("\t", row.Select(x => x.ToString().Replace("\n", "\\n").Replace("\t", "    ").Replace("\r", "\\r")));
+        }
+
+        /// <summary>
+        /// Returns a postgres copy statement for the datatable
+        /// </summary>
+        /// <param name="rows"></param>
+        /// <returns></returns>
+        private static string CopyStatementFor(DataTable rows)
+        {
+
+            // build a list of column names
+            var columnNames = new List<string>();
+            foreach (DataColumn col in rows.Columns)
+            {
+                columnNames.Add(col.ColumnName);
+            }
+
+            var copyString = String.Format("COPY {0} ({1}) FROM STDIN", rows.TableName, String.Join(", ", columnNames));
+            return copyString;
+        }
+
+        private void ReconnectoToDbIfNeeded()
         {
             // connect to the db if needed
             if (connection.State == System.Data.ConnectionState.Closed)
@@ -81,39 +104,9 @@ namespace PalMon.Output
                 connection.Open();
                 Console.Out.WriteLine(String.Format("Reconnecting to results database."));
             }
-
-            var statusLine = String.Format("BULK COPY of {0} - {1} rows",
-                conversionResult.TableName,
-                conversionResult.Rows.Count());
-
-            var copyString = String.Format("COPY {0} ({1}) FROM STDIN",
-                conversionResult.TableName,
-                String.Join(", ", conversionResult.Columns));
-
-            LoggingHelpers.TimedLog(statusLine, () =>
-            {
-                using (var writer = connection.BeginTextImport(copyString))
-                {
-                    foreach (var r in conversionResult.Rows)
-                    {
-                        writer.WriteLine(ToTSVLine(r));
-                    }
-                }
-            });
-        }
-
-        /// <summary>
-        /// Converts a list of fields into a tab-separated values string
-        /// </summary>
-        /// <param name="row"></param>
-        /// <returns></returns>
-        private static string ToTSVLine(object[] row)
-        {
-            return String.Join("\t", row.Select(x => x.ToString().Replace("\n", "\\n").Replace("\t", "    ").Replace("\r", "\\r")));
         }
 
         #endregion
-
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

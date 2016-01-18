@@ -160,6 +160,7 @@
     <Compile Include="LogPoller\LogLinesProcessor.cs" />
     <Compile Include="Output\CachingOutput.cs" />
     <Compile Include="Output\DataModel.cs" />
+    <Compile Include="Output\DataTableCache.cs" />
     <Compile Include="Output\IOutput.cs" />
     <Compile Include="Output\LoggingHelpers.cs" />
     <Compile Include="Output\PostgresOutput.cs" />
