@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +18,7 @@ namespace PalMon.CounterConfig
     internal static class CounterConfigLoader
     {
         private const string PathToSchema = @"Resources\CountersConfig.xsd";
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Loads the Counters.config file, validates it against the XSD schema, and news up the appropriate CounterConfigReader object for each root counter type node.

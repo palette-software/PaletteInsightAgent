@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Net;
 using System.Reflection;
@@ -10,7 +10,7 @@ namespace PalMon.Helpers
     /// </summary>
     public static class HostnameHelper
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         #region Public Methods
 

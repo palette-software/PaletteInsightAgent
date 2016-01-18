@@ -1,5 +1,5 @@
 ﻿using DataTableWriter;
-using log4net;
+using NLog;
 using System;
 using System.Configuration;
 using System.IO;
@@ -16,7 +16,7 @@ namespace PalMon.Config
     /// </summary>
     public static class PalMonConfigReader
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         #region Public Methods
 

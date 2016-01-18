@@ -1,5 +1,5 @@
 ﻿using DataTableWriter.Adapters;
-using log4net;
+using NLog;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -12,7 +12,7 @@ namespace DataTableWriter
     /// </summary>
     internal static class DbTableManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         #region Public Methods
 

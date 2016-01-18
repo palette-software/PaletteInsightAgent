@@ -34,7 +34,7 @@ namespace PalMon
         private const int WriteLockAcquisitionTimeout = 10; // In seconds.
         private static readonly object WriteLock = new object();
         private const int PollWaitTimeout = 1000;  // In milliseconds.
-        private static Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         public static readonly string Log4NetConfigKey = "log4net-config-file";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]

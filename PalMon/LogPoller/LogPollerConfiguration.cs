@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System.Reflection;
 using System;
 using System.Configuration;
@@ -183,7 +183,7 @@ namespace PalMon.LogPoller
     class LogPollerConfigurationLoader
     {
 
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public static LogPollerConfigurationSection load()
         {
