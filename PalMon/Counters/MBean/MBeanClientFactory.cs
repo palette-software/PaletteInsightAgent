@@ -22,7 +22,7 @@ namespace PalMon.Counters.MBean
         /// <returns>Collection of MBeanClients for open ports within the given range.</returns>
         public static ICollection<IMBeanClient> CreateClients(string hostname, int startPort, int endPort)
         {
-            Log.Debug(String.Format("Scanning JMX ports {0}-{1} on {2}..", startPort, endPort, hostname));
+            Log.Debug("Scanning JMX ports {0}-{1} on {2}..", startPort, endPort, hostname);
             ICollection<IMBeanClient> validClients = new List<IMBeanClient>();
 
             for (var currentPort = startPort; currentPort <= endPort; currentPort++)
@@ -35,11 +35,11 @@ namespace PalMon.Counters.MBean
                     connector.OpenConnection();
                     IMBeanClient client = new MBeanClient(connector);
                     validClients.Add(client);
-                    Log.Debug(String.Format("Created JMX client for {0}", connectionInfo));
+                    Log.Debug("Created JMX client for {0}", connectionInfo);
                 }
                 catch (Exception)
                 {
-                    Log.Debug(String.Format("Encountered closed JMX port ({0}), stopping scan.", currentPort));
+                    Log.Debug("Encountered closed JMX port ({0}), stopping scan.", currentPort);
                     break;
                 }
             }

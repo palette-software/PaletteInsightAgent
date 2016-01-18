@@ -55,7 +55,7 @@ namespace PalMon.CounterConfig
             {
                 throw new ConfigurationErrorsException(String.Format("Failed to validate '{0}': {1} (Line {2})", pathToConfig, ex.Message, ex.LineNumber));
             }
-            Log.Debug(String.Format("Successfully validated '{0}' against '{1}'.", pathToConfig, PathToSchema));
+            Log.Debug("Successfully validated '{0}' against '{1}'.", pathToConfig, PathToSchema);
 
             // Set the root element & begin loading counters.
             var documentRoot = doc.DocumentElement.SelectSingleNode("/Counters");
@@ -63,13 +63,13 @@ namespace PalMon.CounterConfig
             foreach (XmlNode counterRootNode in counterRootNodes)
             {
                 var counterType = counterRootNode.Name;
-                Log.Debug(String.Format("Loading {0} counters..", counterType));
+                Log.Debug("Loading {0} counters..", counterType);
                 var configReader = CounterConfigReaderFactory.CreateConfigReader(counterType);
 
                 foreach (var host in hosts)
                 {
                     var countersInNode = configReader.LoadCounters(counterRootNode, host);
-                    Log.Info(String.Format("Loaded {0} {1} {2} on {3}.", countersInNode.Count, counterType, "counter".Pluralize(countersInNode.Count), host.Name));
+                    Log.Info("Loaded {0} {1} {2} on {3}.", countersInNode.Count, counterType, "counter".Pluralize(countersInNode.Count), host.Name);
                     counters.AddRange(countersInNode);
                 }
             }

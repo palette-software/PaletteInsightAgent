@@ -31,7 +31,7 @@ namespace PalMon.CounterConfig
                     break;
 
                 default:
-                    Log.Error(String.Format("Invalid counter type '{0}' encountered in configuration.", configReaderType));
+                    Log.Error("Invalid counter type '{0}' encountered in configuration.", configReaderType);
                     break;
             }
 

@@ -32,13 +32,13 @@ namespace DataTableWriter
                 }
                 else
                 {
-                    Log.Debug(String.Format("Database table '{0}' already exists; skipping creation.", schema.TableName));
+                    Log.Debug("Database table '{0}' already exists; skipping creation.", schema.TableName);
                 }
                 return true;
             }
             catch (DbException ex)
             {
-                Log.Error(String.Format("Failed to create database table '{0}': {1}", schema.TableName, ex.Message));
+                Log.Error("Failed to create database table '{0}': {1}", schema.TableName, ex.Message);
                 return false;
             }
         }
@@ -89,29 +89,29 @@ namespace DataTableWriter
                 {
                     if (!existingTableSchema.Columns.Contains(column.ColumnName))
                     {
-                        Log.Error(String.Format("Cannot update local schema to match database table; column '{1}'/'{0}' exists in the schema, but not the database table.", column.ColumnName, schema.TableName));
+                        Log.Error("Cannot update local schema to match database table; column '{1}'/'{0}' exists in the schema, but not the database table.", column.ColumnName, schema.TableName);
                         return false;
                     }
                     if (existingTableSchema.Columns[column.ColumnName].DataType != column.DataType)
                     {
-                        Log.Error(String.Format("Cannot update local schema to match database table for column '{3}'/'{2}'; data types are inconsistent. [Schema='{0}', DbTable='{1}']", column.DataType, existingTableSchema.Columns[column.ColumnName].DataType,  column.ColumnName, schema.TableName));
+                        Log.Error("Cannot update local schema to match database table for column '{3}'/'{2}'; data types are inconsistent. [Schema='{0}', DbTable='{1}']", column.DataType, existingTableSchema.Columns[column.ColumnName].DataType,  column.ColumnName, schema.TableName);
                         return false;
                     }
                     if (existingTableSchema.Columns[column.ColumnName].AllowDBNull != column.AllowDBNull)
                     {
-                        Log.Error(String.Format("Cannot update local schema to match database table; inconsistencies in 'AllowDBNull' parameter. [Schema='{0}', DbTable='{1}']", column.AllowDBNull, existingTableSchema.Columns[column.ColumnName].AllowDBNull));
+                        Log.Error("Cannot update local schema to match database table; inconsistencies in 'AllowDBNull' parameter. [Schema='{0}', DbTable='{1}']", column.AllowDBNull, existingTableSchema.Columns[column.ColumnName].AllowDBNull);
                         return false;
                     }
                 }
 
                 // Copy the remote database's schema over the top of our in-memory schema.
                 schema = existingTableSchema.Copy();
-                Log.Debug(String.Format("Updated internal schema to match database table '{0}'.", schema.TableName));
+                Log.Debug("Updated internal schema to match database table '{0}'.", schema.TableName);
                 return true;
             }
             catch (DbException ex)
             {
-                Log.Error(String.Format("Error updating schema '{0}' from database: {1}", schema.TableName, ex.Message));
+                Log.Error("Error updating schema '{0}' from database: {1}", schema.TableName, ex.Message);
                 return false;
             }
         }

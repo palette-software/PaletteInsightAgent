@@ -54,7 +54,7 @@ namespace PalMon.Sampler
             }
 
             var numFailed = counters.Count - dataTable.Rows.Count;
-            Log.Info(String.Format("Finished polling {0} {1}. [{2} {3}]", counters.Count, "counter".Pluralize(counters.Count), numFailed, "failure".Pluralize(numFailed)));
+            Log.Info("Finished polling {0} {1}. [{2} {3}]", counters.Count, "counter".Pluralize(counters.Count), numFailed, "failure".Pluralize(numFailed));
 
             return dataTable;
         }

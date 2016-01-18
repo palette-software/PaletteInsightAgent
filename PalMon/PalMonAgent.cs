@@ -112,7 +112,7 @@ namespace PalMon
             }
 
             // Read Counters.config & create counters.
-            Log.Info(String.Format(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig));
+            Log.Info(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig);
             ICollection<ICounter> counters;
             try
             {
@@ -120,10 +120,10 @@ namespace PalMon
             }
             catch (ConfigurationErrorsException ex)
             {
-                Log.Error(String.Format("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message));
+                Log.Error("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message);
                 return;
             }
-            Log.Debug(String.Format("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count)));
+            Log.Debug("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count));
 
             // Spin up counter sampler.
             sampler = new CounterSampler(counters, options.TableName);

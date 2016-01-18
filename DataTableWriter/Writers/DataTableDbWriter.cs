@@ -43,7 +43,7 @@ namespace DataTableWriter.Writers
 
         public void Write(DataTable table)
         {
-            Log.Debug(String.Format("Writing {0} {1} to database..", table.Rows.Count, "record".Pluralize(table.Rows.Count)));
+            Log.Debug("Writing {0} {1} to database..", table.Rows.Count, "record".Pluralize(table.Rows.Count));
 
             // Reopen connection, if it has closed for some reason.
             if (!Adapter.IsConnectionOpen())
@@ -70,7 +70,7 @@ namespace DataTableWriter.Writers
                 }
                 catch (DbException) { }
             }
-            Log.Debug(String.Format("Finished writing {0} {1}!", numRecordsWritten, "record".Pluralize(numRecordsWritten)));
+            Log.Debug("Finished writing {0} {1}!", numRecordsWritten, "record".Pluralize(numRecordsWritten));
         }
 
         public void Dispose()

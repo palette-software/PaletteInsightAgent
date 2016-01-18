@@ -124,7 +124,7 @@ namespace PalMon.LogPoller
             }
             catch (Exception ex)
             {
-                Log.Debug(String.Format("Failed to close Tableau database connection! Exception message: {0}", ex.Message));
+                Log.Debug("Failed to close Tableau database connection! Exception message: {0}", ex.Message);
             }
 
             OpenConnection();
@@ -176,19 +176,19 @@ namespace PalMon.LogPoller
                     }
                     catch (DbException ex)
                     {
-                        Log.Error(String.Format("Error getting the vizql information for session id={0}", vizQLSessionId), ex);
+                        Log.Error("Error getting the vizql information for session id={0}", vizQLSessionId);
                         throw;
                     }
                     catch (IOException ioe)
                     {
-                        Log.Error(String.Format("IO Exception caught while getting view path for vizql session: {0}. Exception message: {1}", vizQLSessionId, ioe.Message));
+                        Log.Error("IO Exception caught while getting view path for vizql session: {0}. Exception message: {1}", vizQLSessionId, ioe.Message);
                         try
                         {
                             connection.Close();
                         }
                         catch (Exception e)
                         {
-                            Log.Error(String.Format("Exception caught while closing crippled connection for vizql session: {0}. Exception message: {1}", vizQLSessionId, e.Message));
+                            Log.Error("Exception caught while closing crippled connection for vizql session: {0}. Exception message: {1}", vizQLSessionId, e.Message);
                         }
                         finally
                         {

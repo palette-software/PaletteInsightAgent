@@ -47,7 +47,7 @@ namespace PalMon.Counters.MBean
             }
             catch (java.io.IOException)
             {
-                Log.Debug(String.Format("Connection to JMX server at {0} is closed", ConnectionInfo));
+                Log.Debug("Connection to JMX server at {0} is closed", ConnectionInfo);
 
                 // Reconnect only if we have surpassed time threshold since last reconnection attempt, or if we have never attempted to connect at all.
                 var secondsSinceLastConnectionAttempt = (DateTime.Now - LastConnectionAttempt).TotalSeconds;
@@ -58,7 +58,7 @@ namespace PalMon.Counters.MBean
                     return null;
                 }
 
-                Log.Debug(String.Format("Attempting to reconnect to JMX server at {0}..", ConnectionInfo));
+                Log.Debug("Attempting to reconnect to JMX server at {0}..", ConnectionInfo);
                 try
                 {
                     OpenConnection();
@@ -67,7 +67,7 @@ namespace PalMon.Counters.MBean
                 catch (Exception innerEx)
                 {
                     // Failed to reconnect.. log and give up.
-                    Log.Error(String.Format("Could not establish connection to JMX server at {0}: {1}", ConnectionInfo, innerEx.Message));
+                    Log.Error("Could not establish connection to JMX server at {0}: {1}", ConnectionInfo, innerEx.Message);
                 }
                 return null;
             }
@@ -82,7 +82,7 @@ namespace PalMon.Counters.MBean
 
             Connector = JMXConnectorFactory.newJMXConnector(ConnectionInfo.GetJmxServiceUrl(), environment: null);
             Connector.connect();
-            Log.Debug(String.Format("Opened connection to JMX server at {0}", ConnectionInfo));
+            Log.Debug("Opened connection to JMX server at {0}", ConnectionInfo);
         }
 
         /// <summary>

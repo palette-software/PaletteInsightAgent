@@ -30,12 +30,12 @@ namespace PalMon.Helpers
                 {
                     resolvedHostName = resolvedHostName.Substring(0, resolvedHostName.IndexOf('.'));
                 }
-                Log.Debug(String.Format("Successfully resolved '{0}' to '{1}'.", unresolvedHostName, resolvedHostName));
+                Log.Debug("Successfully resolved '{0}' to '{1}'.", unresolvedHostName, resolvedHostName);
                 return resolvedHostName;
             }
             catch (Exception ex)
             {
-                Log.Error(String.Format("Could not resolve hostname for '{0}': {1}", unresolvedHostName, ex.Message));
+                Log.Error("Could not resolve hostname for '{0}': {1}", unresolvedHostName, ex.Message);
                 return null;
             }
         }
