@@ -81,7 +81,7 @@ namespace PalMon.LogPoller
             }
             catch (Exception e)
             {
-                Log.Fatal("Error while adding to server logs:", e);
+                Log.Fatal(e, "Error while adding to server logs:", e);
                 throw;
             }
 
@@ -102,7 +102,7 @@ namespace PalMon.LogPoller
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Json parse exception occured in string: '" + jsonString + "'", e);
+                    Log.Error(e, "Json parse exception occured in string: '" + jsonString + "'", e);
                     // skip this line
                     continue;
                 }

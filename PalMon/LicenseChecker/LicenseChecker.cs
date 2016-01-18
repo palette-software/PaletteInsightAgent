@@ -57,7 +57,7 @@ namespace PalMon.LicenseChecker
                 }
                 catch (Exception e)
                 {
-                    Log.Fatal("Error in LicenseChecker:", e);
+                    Log.Fatal(e, "Error in LicenseChecker: {0}", e);
                 }
             }
 

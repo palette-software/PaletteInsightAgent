@@ -82,7 +82,7 @@ namespace PalMon.LogPoller
             }
             catch (Exception ex)
             {
-                Log.Warn(String.Format("Failed to open database connection! Exception message: {0}", ex.Message));
+                Log.Warn("Failed to open database connection! Exception message: {0}", ex.Message);
                 connection = null;
                 return;
             }
