@@ -57,7 +57,7 @@ namespace Licensing
                 var isValid = (license.coreCount >= coreCount) && (license.validUntilUTC > DateTime.UtcNow);
                 return new ValidatedLicense { isValid = isValid, license = license };
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new ValidatedLicense { isValid = false, license = License.Invalid };
             }
