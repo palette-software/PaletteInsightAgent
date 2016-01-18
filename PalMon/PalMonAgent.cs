@@ -35,12 +35,11 @@ namespace PalMon
         private static readonly object WriteLock = new object();
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public static readonly string Log4NetConfigKey = "log4net-config-file";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
-            // Initialize log4net settings.
+            // Set the working directory
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
 
