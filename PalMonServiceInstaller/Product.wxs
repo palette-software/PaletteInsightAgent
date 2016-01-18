@@ -97,7 +97,7 @@
       </Component>
       <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03">
         <!-- NLog configuration -->
-        <File Id="NLogConfig" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.config" />
+        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config" />
       </Component>
     </DirectoryRef>
 
