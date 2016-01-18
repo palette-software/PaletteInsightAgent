@@ -154,7 +154,7 @@ namespace DataTableWriter.Drivers
         /// Generates the Postgres dialect expression of an identity column specification.
         /// </summary>
         /// <returns>Postgres expression of an identity column specification.</returns>
-        public string GetIdentityColumnSpecification()
+        public virtual string GetIdentityColumnSpecification()
         {
             return "id serial PRIMARY KEY";
         }

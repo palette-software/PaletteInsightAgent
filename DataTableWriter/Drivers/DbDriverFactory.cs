@@ -5,7 +5,7 @@ namespace DataTableWriter.Drivers
     /// <summary>
     /// Enumeration of supported database driver types.
     /// </summary>
-    public enum DbDriverType { Postgres, Oracle, MsSQL };
+    public enum DbDriverType { Postgres, Redshift, Oracle, MsSQL };
 
     /// <summary>
     /// Handles instantiation of DbDriver objects.
@@ -18,6 +18,9 @@ namespace DataTableWriter.Drivers
             {
                 case DbDriverType.Postgres:
                     return new PostgresDriver();
+
+                case DbDriverType.Redshift:
+                    return new RedshiftDriver();
 
                 case DbDriverType.Oracle:
                     return new OracleDriver();
