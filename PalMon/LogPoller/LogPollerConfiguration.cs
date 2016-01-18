@@ -207,7 +207,7 @@ namespace PalMon.LogPoller
             }
             catch (ConfigurationErrorsException err)
             {
-                Log.Fatal(err, "Cannot find configuration section: 'LogPoller': {0}", err.ToString());
+                Log.Fatal(err, "Cannot find configuration section: 'LogPoller'. Exception: {0}", err);
                 throw;
             }
 
