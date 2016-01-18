@@ -1,6 +1,6 @@
 ﻿using DataTableWriter.Connection;
 using DataTableWriter.Drivers;
-using log4net;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -19,7 +19,7 @@ namespace DataTableWriter.Adapters
         public IDbConnectionInfo ConnectionInfo { get; protected set; }
         public IDbConnection Connection { get; protected set; }
         private bool disposed;
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public DbAdapter(DbDriverType driverType, IDbConnectionInfo connectionInfo)
         {

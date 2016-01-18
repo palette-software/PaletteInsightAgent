@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -16,7 +16,7 @@ namespace PalMon.Counters.Perfmon
         private const string PerfmonSource = "Perfmon";
         private readonly PerformanceCounter perfmonCounter;
         private bool disposed;
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public Host Host { get; private set; }
         public string CounterType { get; private set; }

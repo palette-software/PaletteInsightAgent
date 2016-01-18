@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Data.Common;
 using Npgsql;
-using log4net;
+using NLog;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.IO;
@@ -47,7 +47,7 @@ namespace PalMon.LogPoller
     public class Tableau9RepoConn : ITableauRepoConn
     {
 
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private NpgsqlConnection connection;
         private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();

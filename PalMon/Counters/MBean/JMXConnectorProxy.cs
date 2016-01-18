@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Reflection;
 using JMXConnector = javax.management.remote.JMXConnector;
@@ -13,7 +13,7 @@ namespace PalMon.Counters.MBean
     public sealed class JmxConnectorProxy
     {
         private const int ConnectionRetryThreshold = 60; // How often we can retry opening this connection, in seconds.
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private bool disposed;
 
         public JmxConnectionInfo ConnectionInfo { get; private set; }

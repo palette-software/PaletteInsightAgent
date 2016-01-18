@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 using DataTableWriter.Connection;
 using Oracle.ManagedDataAccess.Client;
 
-using log4net;
+using NLog;
 using System.Reflection;
 
 namespace DataTableWriter.Drivers
 {
     class OracleDriver : IDbDriver
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
 
         public string QueryParamName(string base_param_name) { return ":" + base_param_name;  }

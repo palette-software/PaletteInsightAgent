@@ -1,5 +1,5 @@
 ﻿using DataTableWriter.Writers;
-using log4net;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -23,7 +23,7 @@ namespace PalMon.ThreadInfoPoller
     class ThreadInfoAgent
     {
         public static readonly string InProgressLock = "Thread Info";
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
 
         public void poll(ICollection<string> processNames, IDataTableWriter writer, object WriteLock)

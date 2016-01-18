@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,7 +16,7 @@ namespace PalMon.Sampler
 
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public CounterSampler(ICollection<ICounter> counterCollection, string tableName)
         {

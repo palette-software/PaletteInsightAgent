@@ -1,7 +1,7 @@
 ﻿using DataTableWriter.Adapters;
 using DataTableWriter.Connection;
 using DataTableWriter.Drivers;
-using log4net;
+using NLog;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -21,7 +21,7 @@ namespace DataTableWriter.Writers
         /// Keep track of tables already initialized
         /// </summary>
         protected HashSet<string> isTableInitialized;
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private bool disposed;
 
         public DataTableDbWriter(DbDriverType driverType, IDbConnectionInfo connectionInfo, DbTableInitializationOptions tableInitializationOptions = default(DbTableInitializationOptions))
