@@ -176,7 +176,7 @@ namespace PalMon.LogPoller
                     }
                     catch (DbException ex)
                     {
-                        Log.Error("Error getting the vizql information for session id={0}", vizQLSessionId);
+                        Log.Error("Error getting the vizql information for session id={0}. Exception message: {1}", vizQLSessionId, ex.Message);
                         throw;
                     }
                     catch (IOException ioe)
