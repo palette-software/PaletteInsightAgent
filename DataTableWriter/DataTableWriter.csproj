@@ -65,6 +65,7 @@
     <Compile Include="Drivers\PostgresDriver.cs" />
     <Compile Include="DbTableInitializationOptions.cs" />
     <Compile Include="DbTableManager.cs" />
+    <Compile Include="Drivers\RedshiftDriver.cs" />
     <Compile Include="Helpers\DataColumnEqualityComparer.cs" />
     <Compile Include="Extensions\DataTableExtensions.cs" />
     <Compile Include="Connection\IDbConnectionInfo.cs" />
