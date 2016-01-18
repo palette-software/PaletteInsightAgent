@@ -96,7 +96,7 @@ namespace PalMon.Counters.MBean
             }
             catch (java.io.IOException ex)
             {
-                Log.Warn(String.Format("Failed to cleanly close JMX connection to {0}: {1}", ConnectionInfo, ex.Message));
+                Log.Warn("Failed to cleanly close JMX connection to {0}: {1}", ConnectionInfo, ex.Message);
             }
         }
 

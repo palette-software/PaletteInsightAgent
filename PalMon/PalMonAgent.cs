@@ -85,7 +85,7 @@ namespace PalMon
             }
             catch (Exception e)
             {
-                Log.Fatal(e, "Error during license check.");
+                Log.Fatal(e, "Error during license check. Exception message: {0}", e);
                 Environment.Exit(-1);
             }
         }

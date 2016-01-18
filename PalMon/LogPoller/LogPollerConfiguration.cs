@@ -195,7 +195,7 @@ namespace PalMon.LogPoller
             }
             catch (ConfigurationErrorsException ex)
             {
-                Log.Fatal(String.Format("Could not open configuration file: {0}", ex.Message));
+                Log.Fatal(ex, "Could not open configuration file: {0}", ex);
                 throw;
             }
 
@@ -207,7 +207,7 @@ namespace PalMon.LogPoller
             }
             catch (ConfigurationErrorsException err)
             {
-                Log.Fatal(String.Format("Cannot find configuration section: 'LogPoller': {0}", err.ToString()));
+                Log.Fatal(err, "Cannot find configuration section: 'LogPoller': {0}", err.ToString());
                 throw;
             }
 

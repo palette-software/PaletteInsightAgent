@@ -184,7 +184,7 @@ namespace DataTableWriter.Adapters
             }
             catch (Exception e)
             {
-                Log.Fatal("Cannot convert to boolean:" + boolishVal);
+                Log.Fatal(e, "Cannot convert to boolean: {0} Exception: {1}", boolishVal, e);
                 throw;
             }
             

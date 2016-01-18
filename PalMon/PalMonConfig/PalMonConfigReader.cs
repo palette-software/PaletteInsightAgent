@@ -36,7 +36,7 @@ namespace PalMon.Config
             }
             catch (ConfigurationErrorsException ex)
             {
-                Log.Fatal(String.Format("Could not open configuration file: {0}", ex.Message));
+                Log.Fatal(ex, String.Format("Could not open configuration file: {0}", ex.Message));
                 throw;
             }
 
@@ -106,7 +106,7 @@ namespace PalMon.Config
             }
             catch (ConfigurationErrorsException ex)
             {
-                Log.Fatal(String.Format("Error loading PalMon.config: {0})", ex.Message));
+                Log.Fatal(ex, "Error loading PalMon.config: {0})", ex.Message);
                 throw;
             }
 

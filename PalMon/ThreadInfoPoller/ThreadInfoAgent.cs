@@ -47,7 +47,7 @@ namespace PalMon.ThreadInfoPoller
                         }
                         catch (Exception ex)
                         {
-                            Log.Warn(String.Format(@"Failed to write thread info table to DB! Exception message: {0}", ex.Message), ex);
+                            Log.Warn("Failed to write thread info table to DB! Exception message: {0}", ex.Message);
                         }
                     }
                 }
@@ -73,7 +73,7 @@ namespace PalMon.ThreadInfoPoller
             }
             catch (Exception ex)
             {
-                Log.Warn(String.Format(@"Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message));
+                Log.Warn("Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message);
             }
         }
     }
