@@ -14,6 +14,7 @@ namespace PalMon.Output
         private DateTimeOffset lastOccurance;
         private DateTimeOffset nextOccurance;
 
+
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         /// <summary>

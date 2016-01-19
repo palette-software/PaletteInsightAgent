@@ -40,7 +40,7 @@ namespace PalMon
 
         private IOutput output;
         private CachingOutput cachingOutput;
-        private const bool USE_COUNTERSAMPLES = false;
+        private const bool USE_COUNTERSAMPLES = true;
         private const bool USE_LOGPOLLER = true;
         private const bool USE_THREADINFO = true;
 
@@ -242,12 +242,28 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void Poll(object stateInfo)
         {
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
                 lock (WriteLock)
                 {
-                    options.Writer.Write(sampleResults);
+                    try
+                    {
+                        // since the countersamples tables structure is dependent
+                        // on the host, do an on-demand adding to the cache
+                        if (!cachingOutput.HasCache(sampleResults.TableName))
+                        {
+                            cachingOutput.AddCache(sampleResults);
+                        }
+                        cachingOutput.Write(sampleResults);
+                        cachingOutput.Tick();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "Error while writing sample results: {0}", e.ToString());
+                    }
+                    //options.Writer.Write(sampleResults);
                 }
             });
         }
@@ -263,6 +279,10 @@ namespace PalMon
             {
                 //logPollerAgent.pollLogs(options.Writer, WriteLock);
                 logPollerAgent.pollLogs(cachingOutput, WriteLock);
+                lock(WriteLock)
+                {
+                    cachingOutput.Tick();
+                }
             });
         }
 
@@ -276,7 +296,10 @@ namespace PalMon
             {
                 Log.Info("Polling threadinfo");
                 threadInfoAgent.poll(options.Processes, cachingOutput, WriteLock);
-                cachingOutput.Tick();
+                lock(WriteLock)
+                {
+                    cachingOutput.Tick();
+                }
                 //threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
             });
         }
@@ -297,6 +320,10 @@ namespace PalMon
             try
             {
                 pollDelegate();
+            }
+            catch(Exception e)
+            {
+                Log.Error(e, "Exception during poll:{0}", e);
             }
             finally
             {

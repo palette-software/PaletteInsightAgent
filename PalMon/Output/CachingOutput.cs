@@ -37,7 +37,7 @@ namespace PalMon.Output
         /// Adds a cache from a template DataTable
         /// </summary>
         /// <param name="table"></param>
-        private void AddCache(DataTable table)
+        public void AddCache(DataTable table)
         {
             var tableName = table.TableName;
             var csvFileName = String.Format("csv/{0}", tableName);
@@ -45,6 +45,10 @@ namespace PalMon.Output
         }
 
 
+        public bool HasCache(string tableName)
+        {
+            return caches.ContainsKey(tableName);
+        }
 
         #endregion
 

@@ -48,7 +48,7 @@ namespace PalMon.Output
 
 
             // Writing to CSV
-            csvWrite = new DelayedAction(TimeSpan.FromSeconds(10), (start, end) =>
+            csvWrite = new DelayedAction(TimeSpan.FromSeconds(20), (start, end) =>
             {
                 // skip writing if no data
                 if (csvQueue.Rows.Count == 0)
@@ -67,7 +67,7 @@ namespace PalMon.Output
             });
 
             // Flushing to DB
-            dbFlush = new DelayedAction(TimeSpan.FromSeconds(30), (start, end) =>
+            dbFlush = new DelayedAction(TimeSpan.FromSeconds(10), (start, end) =>
             {
                 if (dbQueue.Rows.Count == 0)
                 {

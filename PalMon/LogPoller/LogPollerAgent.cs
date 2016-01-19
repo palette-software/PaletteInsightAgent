@@ -75,8 +75,6 @@ namespace PalMon.LogPoller
             });
 
 
-            // whatever happened, we tick the output
-            output.Tick();
         }
 
     }

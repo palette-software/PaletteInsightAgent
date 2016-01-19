@@ -8,6 +8,7 @@ using Npgsql;
 using System.IO;
 using System.Data;
 using NLog;
+using System.Globalization;
 
 namespace PalMon.Output
 {
@@ -52,7 +53,9 @@ namespace PalMon.Output
         /// <param name="conversionResult"></param>
         private void DoBulkCopy(DataTable rows)
         {
+
             ReconnectoToDbIfNeeded();
+            UpdateTableStructureFor(rows);
 
             var statusLine = String.Format("BULK COPY of {0} - {1} rows", rows.TableName, rows.Rows.Count);
             string copyString = CopyStatementFor(rows);
@@ -73,10 +76,47 @@ namespace PalMon.Output
                 }
             });
         }
-        
+
+        /// <summary>
+        /// Converts an array of objects to a TSV-line
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns></returns>
         private static string ToTSVLine(object[] row)
         {
-            return String.Join("\t", row.Select(x => x.ToString().Replace("\n", "\\n").Replace("\t", "    ").Replace("\r", "\\r")));
+            return String.Join("\t", row.Select(ToTSVValue));
+        }
+
+        /// <summary>
+        /// Converters for types for the tsv output
+        /// </summary>
+        private static Dictionary<Type, Func<object, string>> tsvTypeSwitch = new Dictionary<Type, Func<object, string>>
+        {
+            {typeof(int), (o) => ((int)o).ToString() },
+            {typeof(long), (o) => ((long)o).ToString() },
+            {typeof(float), (o)=> ((float)o).ToString("F6", CultureInfo.InvariantCulture) },
+            {typeof(double), (o)=> ((double)o).ToString("F12", CultureInfo.InvariantCulture) },
+            {typeof(DateTime), (o) => ((DateTime)o).ToString("yyyy-MM-dd HH:mm:ss.fff") },
+            {typeof(string), (o) => ((string)o).Replace("\n", "\\n").Replace("\t", "    ").Replace("\r", "\\r") },
+            {typeof(DBNull), (o) => "" }
+        };
+
+        /// <summary>
+        ///  Tries to convert a value to TSV
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        private static string ToTSVValue(object o)
+        {
+            var t = o.GetType();
+
+            if (!tsvTypeSwitch.ContainsKey(t))
+            {
+                Log.Info("Trying type converter for {0}", t);
+                throw new ArgumentException(String.Format("Cannot find type converter for:{0}", t));
+            }
+
+            return tsvTypeSwitch[t](o);
         }
 
         /// <summary>
@@ -91,7 +131,7 @@ namespace PalMon.Output
             var columnNames = new List<string>();
             foreach (DataColumn col in rows.Columns)
             {
-                columnNames.Add(col.ColumnName);
+                columnNames.Add(String.Format("\"{0}\"", col.ColumnName));
             }
 
             var copyString = String.Format("COPY {0} ({1}) FROM STDIN", rows.TableName, String.Join(", ", columnNames));
@@ -106,6 +146,156 @@ namespace PalMon.Output
                 connection.Open();
                 Log.Info("Reconnecting to results database.");
             }
+        }
+
+        #endregion
+
+
+        #region Structure modifications
+
+        // Map of System types -> Postgres types.
+        protected readonly IReadOnlyDictionary<string, string> systemToPostgresTypeMap
+            = new Dictionary<string, string>()
+            {
+                { "System.Boolean", "boolean" },
+                { "System.Byte", "smallint" },
+                { "System.Char", "character(1)" },
+                { "System.DateTime", "timestamp" },
+                { "System.DateTimeOffset", "timestamp with time zone" },
+                { "System.Decimal", "numeric" },
+                { "System.Double", "double precision" },
+                { "System.Int16", "smallint" },
+                { "System.Int32", "integer" },
+                { "System.Int64", "bigint" },
+                { "System.Single", "float8" },
+                { "System.String", "text" },
+            };
+
+        /// <summary>
+        /// Maps the name of a C# System type to a Postgres type.
+        /// </summary>
+        /// <param name="systemType">The name of the System type.</param>
+        /// <param name="allowDbNull">Flag indicating whether the input type is nullable.</param>
+        /// <returns>Postgres type that correlates to the given System type.</returns>
+        public string MapToDbType(string systemType, bool allowDbNull = true)
+        {
+            string pgType;
+            if (!systemToPostgresTypeMap.ContainsKey(systemType))
+            {
+                pgType = "text";
+            }
+            else
+            {
+                pgType = systemToPostgresTypeMap[systemType];
+            }
+
+            if (!allowDbNull)
+            {
+                pgType = String.Format("{0} NOT NULL", pgType);
+            }
+
+            return pgType;
+        }
+
+        private void UpdateTableStructureFor(DataTable aTable)
+        {
+            ReconnectoToDbIfNeeded();
+            var tableName = aTable.TableName;
+
+            // figure out if the table exists
+            var output = false;
+
+            if (!TableExists(tableName))
+            {
+                // create the table
+                CreateTable(aTable);
+            }
+            else
+            {
+                HashSet<string> columnsExisting = GetDbColumnNames(aTable);
+
+                foreach (DataColumn col in aTable.Columns)
+                {
+                    if (columnsExisting.Contains(col.ColumnName))
+                        continue;
+
+                    Log.Info("Adding column {0} to table {1}", col.ColumnName, aTable.TableName);
+
+                    var sql = String.Format("ALTER TABLE \"{0}\" ADD COLUMN \"{1}\" {2}", tableName, col.ColumnName, MapToDbType(col.DataType.ToString()));
+
+                    using (var cmd = new NpgsqlCommand(sql, connection))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the names of all DB columns
+        /// </summary>
+        /// <param name="aTable"></param>
+        /// <returns></returns>
+        private HashSet<string> GetDbColumnNames(DataTable aTable)
+        {
+            var columnsExisting = new HashSet<string>();
+            var sql = String.Format(@"SELECT
+                                      column_name as name,
+                                      data_type as type,
+                                      is_nullable as nullable
+                                    FROM information_schema.columns
+                                    WHERE table_schema = 'public'
+                                      AND table_name = '{0}'", aTable.TableName);
+            using (var cmd = new NpgsqlCommand(sql, connection))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    columnsExisting.Add(reader["name"].ToString());
+                }
+            }
+
+            return columnsExisting;
+        }
+
+        /// <summary>
+        /// Creates a table from the description in a DataTable
+        /// </summary>
+        /// <param name="aTable"></param>
+        private void CreateTable(DataTable aTable)
+        {
+            var columnTypes = new List<string>();
+
+            foreach (DataColumn col in aTable.Columns)
+            {
+                columnTypes.Add(String.Format("\"{0}\" {1}", col.ColumnName, MapToDbType(col.DataType.ToString(), true)));
+            }
+
+            var sql = String.Format("CREATE TABLE {0}({1})", aTable.TableName, String.Join(", ", columnTypes));
+
+            Log.Info("Creating DB table: {0}", sql);
+            using (var cmd = new NpgsqlCommand(sql, connection))
+            {
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Does the given table exist in the database?
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        private bool TableExists(string tableName)
+        {
+            bool output;
+            using (var cmd = new NpgsqlCommand(string.Format("SELECT * FROM pg_tables WHERE tablename='{0}'", tableName), connection))
+            {
+                var result = cmd.ExecuteScalar();
+                output = !(result == null);
+            }
+
+            return output;
         }
 
         #endregion
