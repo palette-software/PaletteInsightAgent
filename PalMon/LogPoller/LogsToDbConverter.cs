@@ -59,7 +59,7 @@ namespace PalMon.LogPoller
                      serverLogsTableCount, "row".Pluralize(serverLogsTableCount));
 
 
-                Log.Info("Inserting " + statusLine);
+                Log.Info("Sending off " + statusLine);
 
 
                 if (filterStateCount > 0)
@@ -78,14 +78,13 @@ namespace PalMon.LogPoller
                     }
                 }
 
-                Log.Info("Inserted " + statusLine);
-
+                Log.Info("Sent off {0}", statusLine);
 
 
             }
             catch (Exception e)
             {
-                Log.Fatal(e, "Error while adding to server logs:", e);
+                Log.Fatal(e, "Error while adding to server logs.");
                 throw;
             }
 
@@ -136,7 +135,6 @@ namespace PalMon.LogPoller
                 insertIntoServerLogsTable(filename, serverLogsTable, jsonraw);
             }
 
-            //Log.Info("Parsed into server logs table: " + serverLogsTable.Rows.ToString());
         }
 
         private void insertIntoServerLogsTable(string filename, DataTable serverLogsTable, dynamic jsonraw)

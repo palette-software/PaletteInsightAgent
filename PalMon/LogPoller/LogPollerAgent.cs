@@ -64,16 +64,19 @@ namespace PalMon.LogPoller
 
         public void pollLogs(CachingOutput output, object writeLock)
         {
-            watcher.watchChangeCycle((filename, lines) => {
-                Log.Info("Got new " + lines.Length + " lines from " + filename );
+            watcher.watchChangeCycle((filename, lines) =>
+            {
+                Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
                 logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
-            }, ()=>
+            }, () =>
             {
                 // if no change, just flush if needed
-                Log.Info("No changes detected -- flushing if needed");
-                output.FlushIfNeeded();
+                Log.Debug("No changes detected -- flushing if needed");
             });
 
+
+            // whatever happened, we tick the output
+            output.Tick();
         }
 
     }

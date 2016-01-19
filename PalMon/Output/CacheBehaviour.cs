@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,12 @@ namespace PalMon.Output
 {
 
 
-    public class DelayedAction<T>
+    public class DelayedAction
     {
         private DateTimeOffset lastOccurance;
         private DateTimeOffset nextOccurance;
 
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// The recommended intervals between triggers. The actual interval depends
@@ -61,9 +63,8 @@ namespace PalMon.Output
                 }
                 catch (Exception e)
                 {
-
+                    Log.Error(e, "Error during delayed action run. {0}", e.ToString());
                 }
-
             }
 
             lastOccurance = DateTimeOffset.UtcNow;

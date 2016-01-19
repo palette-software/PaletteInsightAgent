@@ -42,7 +42,7 @@ namespace PalMon
         private CachingOutput cachingOutput;
         private const bool USE_COUNTERSAMPLES = false;
         private const bool USE_LOGPOLLER = true;
-        private const bool USE_THREADINFO = false;
+        private const bool USE_THREADINFO = true;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
@@ -274,7 +274,10 @@ namespace PalMon
         {
             tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
             {
-                threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
+                Log.Info("Polling threadinfo");
+                threadInfoAgent.poll(options.Processes, cachingOutput, WriteLock);
+                cachingOutput.Tick();
+                //threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
             });
         }
 

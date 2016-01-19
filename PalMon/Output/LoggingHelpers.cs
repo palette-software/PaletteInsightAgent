@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,14 +9,15 @@ namespace PalMon.Output
 {
     public class LoggingHelpers
     {
-        public static void TimedLog(string message, Action act)
+
+        public static void TimedLog(Logger Log, string message, Action act)
         {
-            Console.Out.WriteLine(String.Format("--> Starting {0}", message));
+            Log.Info("--> Starting {0}", message);
             var currentTime = DateTime.UtcNow;
             act();
             var endTime = DateTime.UtcNow;
-            Console.Out.WriteLine(String.Format("<-- Done [{1}ms] {0}", message,
-                (endTime - currentTime).TotalMilliseconds));
+            Log.Info("<-- Done [{1}ms] {0}", message,
+                (endTime - currentTime).TotalMilliseconds);
         }
     }
 }

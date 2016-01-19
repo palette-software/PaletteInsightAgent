@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PalMon.LogPoller;
+using PalMon.ThreadInfoPoller;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -10,11 +12,6 @@ namespace PalMon.Output
     class CachingOutput
     {
         #region Internal stuff
-        /// <summary>
-        /// The output we wrap with cache.
-        /// </summary>
-        private DataTableCache filterChangeCache;
-        private DataTableCache serverLogsCache;
 
 
         /// <summary>
@@ -22,36 +19,42 @@ namespace PalMon.Output
         /// </summary>
         private Dictionary<string, DataTableCache> caches;
 
-        //private RowCache<FilterStateChangeRow> filterChangeQueue;
-        //private RowCache<ServerLogRow> serverLogsQueue;
         private IOutput wrappedOutput;
 
         public CachingOutput(IOutput wrappedOutput)
         {
             this.wrappedOutput = wrappedOutput;
-            //filterChangeQueue = new RowCache<FilterStateChangeRow>("csv/filter-state-audit", wrappedOutput.Write);
-            //serverLogsQueue = new RowCache<ServerLogRow>("csv/serverlogs", wrappedOutput.Write);
 
-            filterChangeCache = new DataTableCache("csv/filter-state-audit", LogPoller.LogTables.makeFilterStateAuditTable(), wrappedOutput.Write);
-            serverLogsCache = new DataTableCache("csv/server-logs", LogPoller.LogTables.makeServerLogsTable(), wrappedOutput.Write);
+            caches = new Dictionary<string, DataTableCache>();
 
-            caches = new Dictionary<string, DataTableCache> {
-                { filterChangeCache.TableName, filterChangeCache },
-                { serverLogsCache.TableName, serverLogsCache }
-            };
+            AddCache(LogTables.makeFilterStateAuditTable());
+            AddCache(LogTables.makeServerLogsTable());
+            AddCache(ThreadTables.makeThreadInfoTable());
+
+        }
+
+        /// <summary>
+        /// Adds a cache from a template DataTable
+        /// </summary>
+        /// <param name="table"></param>
+        private void AddCache(DataTable table)
+        {
+            var tableName = table.TableName;
+            var csvFileName = String.Format("csv/{0}", tableName);
+            caches.Add(tableName, new DataTableCache(csvFileName, table, this.wrappedOutput.Write));
         }
 
 
 
         #endregion
 
-        public void FlushIfNeeded()
+        public void Tick()
         {
-            //filterChangeQueue.FlushCacheIfNeeded();
-            //serverLogsQueue.FlushCacheIfNeeded();
-
-            filterChangeCache.FlushCacheIfNeeded();
-            serverLogsCache.FlushCacheIfNeeded();
+            // call Tick() on each cache
+            foreach(var kv in caches)
+            {
+                kv.Value.Tick();
+            }
         }
 
         public void Write(DataTable rows)
@@ -65,22 +68,6 @@ namespace PalMon.Output
             cache.Put(rows);
         }
 
-
-        public void Write(FilterStateChangeRow[] rows)
-        {
-
-            throw new NotImplementedException();
-        }
-
-        public void Write(ServerLogRow[] rows)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Write(string csvFile, ThreadInfoRow[] rows)
-        {
-            throw new NotImplementedException();
-        }
 
 
         #region IDisposable Support

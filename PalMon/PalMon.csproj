@@ -165,9 +165,11 @@
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
+    <Compile Include="Output\CacheBehaviour.cs" />
     <Compile Include="Output\CachingOutput.cs" />
     <Compile Include="Output\DataModel.cs" />
     <Compile Include="Output\DataTableCache.cs" />
+    <Compile Include="Output\DataTableUtils.cs" />
     <Compile Include="Output\IOutput.cs" />
     <Compile Include="Output\LoggingHelpers.cs" />
     <Compile Include="Output\OutputDbFactory.cs" />

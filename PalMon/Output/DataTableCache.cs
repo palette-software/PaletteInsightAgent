@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,17 +10,19 @@ using System.Threading.Tasks;
 
 namespace PalMon.Output
 {
+
     /// <summary>
     /// A csv-caching writer
     /// </summary>
     class DataTableCache
     {
-        private const int FlushTimeInSeconds = 10;
-        private DataTable queue;
+        private const string CSV_DATETIME_FORMAT = "yyyy-MM-dd--HH";
 
         private string fileBaseName;
 
-        public string TableName { get { return queue.TableName; } }
+        public string TableName { get { return csvQueue.TableName; } }
+
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// On each flush, this delegate will be called with the CSV file name and the objects
@@ -29,174 +32,128 @@ namespace PalMon.Output
         /// </summary>
         Action<string, DataTable> onFlushDelegate;
 
+        DelayedAction csvWrite;
+        DelayedAction dbFlush;
+
+        DataTable csvQueue;
+        DataTable dbQueue;
 
         public DataTableCache(string baseName, DataTable structureTable, Action<string, DataTable> onFlush)
         {
             fileBaseName = baseName;
             onFlushDelegate = onFlush;
 
-            // create the new datatable
-            queue = new DataTable(structureTable.TableName);
-            // copy the columns
-            foreach (DataColumn c in structureTable.Columns)
-            {
-                queue.Columns.Add(c.ColumnName, c.DataType);
-            }
+            dbQueue = DataTableUtils.CloneColumns(structureTable);
+            csvQueue = DataTableUtils.CloneColumns(structureTable);
 
-            lastOutputDate = DateTimeOffset.MinValue;
+
+            // Writing to CSV
+            csvWrite = new DelayedAction(TimeSpan.FromSeconds(10), (start, end) =>
+            {
+                // skip writing if no data
+                if (csvQueue.Rows.Count == 0)
+                {
+                    Log.Debug("No data - skipping CSV write.");
+                    return;
+                }
+
+                // write out if any
+                var csvFileName = GetCSVFile(baseName, start);
+                Log.Info("Writing to CSV file: {0}", csvFileName);
+                WriteCsvFile(csvFileName, csvQueue);
+
+                // remove any rows from the csv queue
+                csvQueue.Rows.Clear();
+            });
+
+            // Flushing to DB
+            dbFlush = new DelayedAction(TimeSpan.FromSeconds(30), (start, end) =>
+            {
+                if (dbQueue.Rows.Count == 0)
+                {
+                    Log.Debug("No data - skipping DB flush");
+                    return;
+                }
+
+                var csvFileName = GetCSVFile(baseName, start);
+                Log.Info("Flushing to DB.");
+                onFlushDelegate(csvFileName, dbQueue);
+
+                // clean the db queue table
+                dbQueue.Rows.Clear();
+            });
 
         }
 
         public void Put(DataTable rows)
         {
-            // validate table name
-            if (rows.TableName != queue.TableName)
-                throw new ArgumentException(String.Format("Invalid data table given:{0} instead of {1}", rows.TableName, queue.TableName));
-
-            // validate column count
-            if (rows.Columns.Count != queue.Columns.Count)
-                throw new ArgumentException(String.Format("Invalid data table columns:{0} instead of {1}", rows.Columns.Count, queue.Columns.Count));
-
-            // validate columns
-            for (var i = 0; i < rows.Columns.Count; ++i)
-            {
-                var colIn = rows.Columns[i];
-                var colHave = queue.Columns[i];
-
-                if (colIn.ColumnName != colHave.ColumnName || colIn.DataType != colHave.DataType)
-                    throw new ArgumentException(String.Format("Mismatching column in datatable: {0} instead of {1}", colIn.ColumnName, colHave.ColumnName));
-            }
-
-            Console.Out.WriteLine(String.Format("+ Got {0} rows of {1} - cache is {2} rows - flush at {3}",
-                rows.Rows.Count, rows.TableName, queue.Rows.Count, nextOutputDate));
-
-            // start a new output if we need to and flush the existing output
-            var newFileStarted = StartNewFileIfNeeded();
-
-            // add all rows to the queue datatable
-            foreach (DataRow row in rows.Rows)
-            {
-                queue.Rows.Add(row.ItemArray);
-            }
-
+            DataTableUtils.Append(dbQueue, rows);
+            DataTableUtils.Append(csvQueue, rows);
         }
 
 
-        /// <summary>
-        /// Starts a new file if needed and tries to write the results to the database
-        /// </summary>
-        public void FlushCacheIfNeeded()
+        public void Tick()
         {
-            StartNewFileIfNeeded();
+            csvWrite.Tick();
+            dbFlush.Tick();
         }
 
         #region CSV output
 
-        private DateTimeOffset lastOutputDate;
-        private DateTimeOffset nextOutputDate;
-
-
         /// <summary>
-        /// Starts a new CSV file
+        /// Gets the filename of our CSV file and creates 
+        /// any directories we may need.
+        /// 
+        /// The filename returned will be truncated by the hour
+        /// so 1 CSV/hour currently
         /// </summary>
-        private void StartNewFile()
+        /// <param name="fileBaseName"></param>
+        /// <param name="baseDate"></param>
+        /// <returns></returns>
+        private static string GetCSVFile(string fileBaseName, DateTimeOffset baseDate)
         {
-            var hasRows = !(queue.Rows.Count == 0);
-            // If there is no last output time is set, and the queue is not empty, we have trouble
-            if (lastOutputDate == DateTimeOffset.MinValue && hasRows)
+            var dateString = baseDate.UtcDateTime.ToString(CSV_DATETIME_FORMAT);
+            // get a new filename
+            var fileName = String.Format("{0}-{1}.csv", fileBaseName, dateString);
+
+            // try to create the directory of the output
+            try
             {
-                throw new ArgumentNullException("No CSV filename set while the queue is not empty!");
+                Directory.CreateDirectory(Path.GetDirectoryName(fileName));
+            }
+            catch (Exception e)
+            {
+                // Do nada
             }
 
-            // Output the existing data to CSV if we need to
-            if (lastOutputDate != DateTimeOffset.MinValue && hasRows)
-            {
-                // get a new filename
-                var lastFileName = String.Format("{0}-{1:yyyy-MM-dd--HH-mm-ss}.csv", fileBaseName, lastOutputDate.UtcDateTime);
-
-                // try to create the directory of the output
-                try
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(lastFileName));
-                }
-                catch (Exception e)
-                {
-                    // Do nada
-                }
-
-                WriteCsvFile(lastFileName);
-
-                // Call the flush function with the data in the queue
-                onFlushDelegate(lastFileName, queue);
-
-                // after the flush delegate is called and the CSV is written, clear our queue
-                queue.Rows.Clear();
-            }
-
-            // set up the output timestamps
-            lastOutputDate = DateTimeOffset.UtcNow;
-            nextOutputDate = lastOutputDate.AddSeconds(FlushTimeInSeconds);
+            return fileName;
         }
 
         /// <summary>
-        /// Writes the CSV out
+        /// Writes the CSV out. This method appends to the file if it
+        /// already exists so we can just add more rows while 
+        /// making sure the file is flushed and closed after each write
         /// </summary>
         /// <param name="lastFileName"></param>
-        private void WriteCsvFile(string lastFileName)
+        private static void WriteCsvFile(string lastFileName, DataTable queue)
         {
-            using (var streamWriter = File.CreateText(lastFileName))
+
+            var fileExists = File.Exists(lastFileName);
+
+            using (var streamWriter = File.AppendText(lastFileName))
             using (var csvWriter = new CsvWriter(streamWriter))
             {
-                // write the csv header
-                foreach (DataColumn column in queue.Columns)
+                // only write the header if the file does not exists
+                if (!fileExists)
                 {
-                    csvWriter.WriteField(column.ColumnName);
+                    DataTableUtils.WriteCSVHeader(queue, csvWriter);
                 }
-                csvWriter.NextRecord();
 
-
-                var columnCount = queue.Columns.Count;
-
-                foreach (DataRow row in queue.Rows)
-                {
-                    try
-                    {
-                        for (var i = 0; i < columnCount; i++)
-                        {
-                            if (row[i] != null)
-                            {
-                                csvWriter.WriteField(row[i]);
-                            }
-                            else
-                            {
-                                csvWriter.WriteField("");
-                            }
-                        }
-                        csvWriter.NextRecord();
-                    }
-                    catch (CsvWriterException ex)
-                    {
-                        Console.Error.WriteLine("Error writing record to CSV: " + ex.Message);
-                    }
-                }
+                DataTableUtils.WriteCSVBody(queue, csvWriter);
             }
         }
 
 
-        /// <summary>
-        /// Only start a new file if we need to
-        /// </summary>
-        /// <returns></returns>
-        private bool StartNewFileIfNeeded()
-        {
-            // if either the last or next update date is null or the time is over the next output date
-            var needsNewFile = (lastOutputDate == null) || (nextOutputDate == null) || (DateTimeOffset.UtcNow >= nextOutputDate);
-
-            if (!needsNewFile) return false;
-
-            StartNewFile();
-            return true;
-        }
         #endregion
 
 

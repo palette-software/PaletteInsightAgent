@@ -7,11 +7,13 @@ using DataTableWriter.Connection;
 using Npgsql;
 using System.IO;
 using System.Data;
+using NLog;
 
 namespace PalMon.Output
 {
     class PostgresOutput : IOutput
     {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         private IDbConnectionInfo resultDatabase;
         private string connectionString;
@@ -56,7 +58,7 @@ namespace PalMon.Output
             string copyString = CopyStatementFor(rows);
 
 
-            LoggingHelpers.TimedLog(statusLine, () =>
+            LoggingHelpers.TimedLog(Log, statusLine, () =>
             {
                 using (var writer = connection.BeginTextImport(copyString))
                 {
@@ -102,7 +104,7 @@ namespace PalMon.Output
             if (connection.State == System.Data.ConnectionState.Closed)
             {
                 connection.Open();
-                Console.Out.WriteLine(String.Format("Reconnecting to results database."));
+                Log.Info("Reconnecting to results database.");
             }
         }
 
