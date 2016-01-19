@@ -39,7 +39,7 @@ namespace PalMonService
             }
             catch (Exception e)
             {
-                Log.Info("Exception is: {0}", e.ToString());
+                Log.Fatal(e, "Exception is: {0}", e);
                 return false;
             }
             agent.Start();

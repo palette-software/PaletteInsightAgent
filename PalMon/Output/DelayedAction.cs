@@ -64,7 +64,7 @@ namespace PalMon.Output
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Error during delayed action run. {0}", e.ToString());
+                    Log.Error(e, "Error during delayed action run. {0}", e);
                 }
             }
 
