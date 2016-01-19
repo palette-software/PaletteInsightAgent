@@ -63,8 +63,9 @@ namespace PalMon
             }
 
 
+            output = OutputDbFactory.DriverFor(options.DatabaseType, options.ResultDatabase);
             // initialize the output
-            output = new PostgresOutput(options.ResultDatabase);
+            //output = new PostgresOutput(options.ResultDatabase);
             cachingOutput = new CachingOutput(output);
 
             // check the license after the configuration has been loaded.

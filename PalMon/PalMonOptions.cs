@@ -23,6 +23,8 @@ namespace PalMon
         private const int MinPollInterval = 1; // In seconds.
         public ICollection<string> Processes { get; set; }
 
+        public string DatabaseType { get; set; }
+
         #region LogPoller config settings
 
         public string FolderToWatch { get; set; }

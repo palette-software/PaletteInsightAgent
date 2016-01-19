@@ -58,6 +58,8 @@ namespace PalMon.Config
                 var outputMode = config.OutputMode.Value;
                 if (outputMode.Equals("DB", StringComparison.InvariantCultureIgnoreCase))
                 {
+                    options.DatabaseType = config.Database.Type;
+
                     options.Writer = LoadDbWriterFromConfig(config);
                     options.TableName = config.Database.Table.Name;
 
@@ -72,6 +74,7 @@ namespace PalMon.Config
                     Log.Fatal("Invalid output mode specified in configuration!");
                 }
 
+                options.DatabaseType = config.Database.Type;
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
 

@@ -19,7 +19,6 @@ namespace PalMon.LogPoller
 
         private LogFileWatcher watcher;
         private LogsToDbConverter logsToDbConverter;
-        private LogLinesProcessor logLinesProcessor;
 
         private ITableauRepoConn tableauRepo;
 
@@ -34,7 +33,6 @@ namespace PalMon.LogPoller
             this.folderToWatch = folderToWatch;
             filter = filterString;
             logsToDbConverter = new LogsToDbConverter();
-            logLinesProcessor = new LogLinesProcessor();
             // 
             tableauRepo = null;
             if (ShouldUseRepo(repoHost))
@@ -64,25 +62,10 @@ namespace PalMon.LogPoller
         }
 
 
-        /// <summary>
-        /// Actual function to poll from the logs
-        /// </summary>
-        /// <returns></returns>
-        public void pollLogs(IDataTableWriter writer, object writeLock)
-        {
-            watcher.watchChangeCycle((string filename, string[] lines) =>
-            {
-                Log.Info("Got new " + lines.Length + " lines from " + filename );
-                //logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
-            });
-        }
-
-
         public void pollLogs(CachingOutput output, object writeLock)
         {
             watcher.watchChangeCycle((filename, lines) => {
                 Log.Info("Got new " + lines.Length + " lines from " + filename );
-                //logLinesProcessor.processServerLogLines(output, writeLock, filename, lines);
                 logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
             }, ()=>
             {

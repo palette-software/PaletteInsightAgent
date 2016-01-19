@@ -130,6 +130,10 @@
       <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Oracle.DataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\Oracle.DataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="Sodium, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\libsodium-net.0.8.0\lib\Net40\Sodium.dll</HintPath>
       <Private>True</Private>
@@ -157,12 +161,13 @@
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
-    <Compile Include="LogPoller\LogLinesProcessor.cs" />
     <Compile Include="Output\CachingOutput.cs" />
     <Compile Include="Output\DataModel.cs" />
     <Compile Include="Output\DataTableCache.cs" />
     <Compile Include="Output\IOutput.cs" />
     <Compile Include="Output\LoggingHelpers.cs" />
+    <Compile Include="Output\OracleOutput.cs" />
+    <Compile Include="Output\OutputDbFactory.cs" />
     <Compile Include="Output\PostgresOutput.cs" />
     <Compile Include="Output\RowCache.cs" />
     <Compile Include="PalMonAgent.cs" />
@@ -199,10 +204,12 @@
     <Content Include="Config\Log.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Oracle.DataAccess.dll" />
     <Content Include="Resources\CountersConfig.xsd">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="App.config" />
     <None Include="Config\PalMon.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

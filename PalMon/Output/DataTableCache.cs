@@ -35,7 +35,6 @@ namespace PalMon.Output
             fileBaseName = baseName;
             onFlushDelegate = onFlush;
 
-            Console.WriteLine("=========================");
             // create the new datatable
             queue = new DataTable(structureTable.TableName);
             // copy the columns
