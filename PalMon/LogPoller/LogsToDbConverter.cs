@@ -83,7 +83,7 @@ namespace PalMon.LogPoller
             }
             catch (Exception e)
             {
-                Log.Fatal(e, "Error while adding to server logs.");
+                Log.Fatal(e, "Error while adding to server logs. {0}", e.ToString());
                 throw;
             }
 

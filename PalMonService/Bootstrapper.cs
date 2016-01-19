@@ -9,6 +9,8 @@ namespace PalMonService
     /// </summary>
     public class PalMonServiceBootstrapper : ServiceControl, IDisposable
     {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
         private PalMonAgent agent;
         private bool disposed;
 
@@ -36,7 +38,7 @@ namespace PalMonService
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine(String.Format("Exception is: {0}", e.ToString()));
+                Log.Info("Exception is: {0}", e.ToString());
                 return false;
             }
             agent.Start();
