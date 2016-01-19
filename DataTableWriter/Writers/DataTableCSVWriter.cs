@@ -1,5 +1,5 @@
 ﻿using CsvHelper;
-using log4net;
+using NLog;
 using System;
 using System.Data;
 using System.IO;
@@ -12,7 +12,7 @@ namespace DataTableWriter.Writers
     /// </summary>
     public class DataTableCsvWriter : IDataTableWriter
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private bool disposed;
         protected bool headerHasBeenWritten;
         protected StreamWriter streamWriter;
@@ -44,12 +44,12 @@ namespace DataTableWriter.Writers
                 headerHasBeenWritten = true;
             }
 
-            Log.Debug(String.Format("Writing {0} {1} to CSV..", table.Rows.Count, "record".Pluralize(table.Rows.Count)));
+            Log.Debug("Writing {0} {1} to CSV..", table.Rows.Count, "record".Pluralize(table.Rows.Count));
             foreach (DataRow row in table.Rows)
             {
                 WriteRow(row);
             }
-            Log.Debug(String.Format("Finished writing {0}!", "record".Pluralize(table.Rows.Count)));
+            Log.Debug("Finished writing {0}!", "record".Pluralize(table.Rows.Count));
         }
 
         #endregion Public Methods

@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System.Reflection;
 using System;
 using DataTableWriter.Writers;
@@ -14,7 +14,7 @@ namespace PalMon.LogPoller
 
     class LogPollerAgent
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         public static readonly string InProgressLock = "Log Poller";
 
         private LogFileWatcher watcher;

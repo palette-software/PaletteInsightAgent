@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Data.Common;
 using Npgsql;
-using log4net;
+using NLog;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.IO;
@@ -47,7 +47,7 @@ namespace PalMon.LogPoller
     public class Tableau9RepoConn : ITableauRepoConn
     {
 
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private NpgsqlConnection connection;
         private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();
@@ -82,7 +82,7 @@ namespace PalMon.LogPoller
             }
             catch (Exception ex)
             {
-                Log.Warn(String.Format("Failed to open database connection! Exception message: {0}", ex.Message));
+                Log.Warn("Failed to open database connection! Exception message: {0}", ex.Message);
                 connection = null;
                 return;
             }
@@ -124,7 +124,7 @@ namespace PalMon.LogPoller
             }
             catch (Exception ex)
             {
-                Log.Debug(String.Format("Failed to close Tableau database connection! Exception message: {0}", ex.Message));
+                Log.Debug("Failed to close Tableau database connection! Exception message: {0}", ex.Message);
             }
 
             OpenConnection();
@@ -176,19 +176,19 @@ namespace PalMon.LogPoller
                     }
                     catch (DbException ex)
                     {
-                        Log.Error(String.Format("Error getting the vizql information for session id={0}", vizQLSessionId), ex);
+                        Log.Error("Error getting the vizql information for session id={0}. Exception message: {1}", vizQLSessionId, ex.Message);
                         throw;
                     }
                     catch (IOException ioe)
                     {
-                        Log.Error(String.Format("IO Exception caught while getting view path for vizql session: {0}. Exception message: {1}", vizQLSessionId, ioe.Message));
+                        Log.Error("IO Exception caught while getting view path for vizql session: {0}. Exception message: {1}", vizQLSessionId, ioe.Message);
                         try
                         {
                             connection.Close();
                         }
                         catch (Exception e)
                         {
-                            Log.Error(String.Format("Exception caught while closing crippled connection for vizql session: {0}. Exception message: {1}", vizQLSessionId, e.Message));
+                            Log.Error("Exception caught while closing crippled connection for vizql session: {0}. Exception message: {1}", vizQLSessionId, e.Message);
                         }
                         finally
                         {

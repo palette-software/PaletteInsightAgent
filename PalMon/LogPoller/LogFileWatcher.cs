@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System.Reflection;
 using System;
 using System.IO;
@@ -14,7 +14,7 @@ namespace PalMon.LogPoller
 
     class LogFileWatcher
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         string watchedFolderPath;
         string filter;

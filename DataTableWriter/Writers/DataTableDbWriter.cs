@@ -1,7 +1,7 @@
 ﻿using DataTableWriter.Adapters;
 using DataTableWriter.Connection;
 using DataTableWriter.Drivers;
-using log4net;
+using NLog;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -21,7 +21,7 @@ namespace DataTableWriter.Writers
         /// Keep track of tables already initialized
         /// </summary>
         protected HashSet<string> isTableInitialized;
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private bool disposed;
 
         public DataTableDbWriter(DbDriverType driverType, IDbConnectionInfo connectionInfo, DbTableInitializationOptions tableInitializationOptions = default(DbTableInitializationOptions))
@@ -43,7 +43,7 @@ namespace DataTableWriter.Writers
 
         public void Write(DataTable table)
         {
-            Log.Debug(String.Format("Writing {0} {1} to database..", table.Rows.Count, "record".Pluralize(table.Rows.Count)));
+            Log.Debug("Writing {0} {1} to database..", table.Rows.Count, "record".Pluralize(table.Rows.Count));
 
             // Reopen connection, if it has closed for some reason.
             if (!Adapter.IsConnectionOpen())
@@ -70,7 +70,7 @@ namespace DataTableWriter.Writers
                 }
                 catch (DbException) { }
             }
-            Log.Debug(String.Format("Finished writing {0} {1}!", numRecordsWritten, "record".Pluralize(numRecordsWritten)));
+            Log.Debug("Finished writing {0} {1}!", numRecordsWritten, "record".Pluralize(numRecordsWritten));
         }
 
         public void Dispose()

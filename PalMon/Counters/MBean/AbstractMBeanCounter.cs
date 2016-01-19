@@ -1,5 +1,5 @@
 ﻿using javax.management;
-using log4net;
+using NLog;
 using System;
 using System.Reflection;
 using PalMon.Helpers;
@@ -13,7 +13,7 @@ namespace PalMon.Counters.MBean
     [CLSCompliant(false)]
     public abstract class AbstractMBeanCounter : ICounter
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public Host Host { get; private set; }
         public string CounterType { get; private set; }
@@ -58,12 +58,12 @@ namespace PalMon.Counters.MBean
             }
             catch (FormatException)
             {
-                Log.Warn(String.Format(@"Failed to parse counter {0} from value {1}", this, counterStr));
+                Log.Warn("Failed to parse counter {0} from value {1}", this, counterStr);
                 return null;
             }
             catch (Exception ex)
             {
-                Log.Warn(String.Format(@"Error sampling counter {0}. Exception message: {1}", this, ex.Message));
+                Log.Warn("Error sampling counter {0}. Exception message: {1}", this, ex.Message);
                 return null;
             }
         }

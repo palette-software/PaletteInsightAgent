@@ -11,7 +11,6 @@ namespace PalMonService
     {
         private PalMonAgent agent;
         private bool disposed;
-        public static readonly string Log4NetConfigKey = PalMonAgent.Log4NetConfigKey;
 
         ~PalMonServiceBootstrapper()
         {

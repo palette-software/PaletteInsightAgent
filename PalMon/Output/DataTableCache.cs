@@ -40,7 +40,6 @@ namespace PalMon.Output
             // copy the columns
             foreach (DataColumn c in structureTable.Columns)
             {
-                Console.Out.WriteLine(String.Format("Col:{0} -- {1}", c.ColumnName, c.DataType));
                 queue.Columns.Add(c.ColumnName, c.DataType);
             }
 

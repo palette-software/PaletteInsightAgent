@@ -1,5 +1,4 @@
-﻿using log4net;
-using log4net.Config;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -36,8 +35,7 @@ namespace PalMon
         private const int WriteLockAcquisitionTimeout = 10; // In seconds.
         private static readonly object WriteLock = new object();
         private const int PollWaitTimeout = 1000;  // In milliseconds.
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        public static readonly string Log4NetConfigKey = "log4net-config-file";
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
 
         private IOutput output;
@@ -49,11 +47,10 @@ namespace PalMon
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
-            // Initialize log4net settings.
+            // Set the working directory
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
-            // Load the configuration
-            XmlConfigurator.Configure(new FileInfo(ConfigurationManager.AppSettings[Log4NetConfigKey]));
+
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
@@ -89,7 +86,7 @@ namespace PalMon
         {
             try
             {
-                Log.InfoFormat("Checking for licenses in: {0}", pathToCheck);
+                Log.Info("Checking for licenses in: {0}", pathToCheck);
                 // get the core count
                 var coreCount = LicenseChecker.LicenseChecker.getCoreCount(
                     options.RepoHost,
@@ -101,14 +98,15 @@ namespace PalMon
                 // check for license.
                 if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount))
                 {
-                    Log.FatalFormat("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
+                    Log.Fatal("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
+                    Console.WriteLine("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
                     Environment.Exit(-1);
                 }
             }
             catch (Exception e)
             {
-                Log.Fatal("Error during license check.", e);
-                Environment.Exit(-1);
+                Log.Fatal(e, "Error during license check. Exception: {0}", e);
+				Environment.Exit(-1);
             }
         }
 
@@ -137,7 +135,7 @@ namespace PalMon
             if (USE_COUNTERSAMPLES)
             {
                 // Read Counters.config & create counters.
-                Log.Info(String.Format(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig));
+                Log.Info(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig);
                 ICollection<ICounter> counters;
                 try
                 {
@@ -145,10 +143,11 @@ namespace PalMon
                 }
                 catch (ConfigurationErrorsException ex)
                 {
-                    Log.Error(String.Format("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message));
+                    Log.Error("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message);
                     return;
                 }
-                Log.Debug(String.Format("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count)));
+                Log.Debug("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count));
+
 
                 // Spin up counter sampler.
                 sampler = new CounterSampler(counters, options.TableName);

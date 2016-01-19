@@ -1,5 +1,5 @@
 ﻿using DataTableWriter;
-using log4net;
+using NLog;
 using System;
 using System.Configuration;
 using System.IO;
@@ -16,7 +16,7 @@ namespace PalMon.Config
     /// </summary>
     public static class PalMonConfigReader
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         #region Public Methods
 
@@ -36,7 +36,7 @@ namespace PalMon.Config
             }
             catch (ConfigurationErrorsException ex)
             {
-                Log.Fatal(String.Format("Could not open configuration file: {0}", ex.Message));
+                Log.Fatal(ex, "Could not open configuration file: {0}", ex);
                 throw;
             }
 
@@ -112,7 +112,7 @@ namespace PalMon.Config
             }
             catch (ConfigurationErrorsException ex)
             {
-                Log.Fatal(String.Format("Error loading PalMon.config: {0})", ex.Message));
+                Log.Fatal(ex, "Error loading PalMon.config: {0})", ex);
                 throw;
             }
 
@@ -165,7 +165,7 @@ namespace PalMon.Config
             }
             catch (Exception ex)
             {
-                Log.Fatal("Could not initialize writer: " + ex.Message);
+                Log.Fatal("Could not initialize writer: " + ex);
                 return null;
             }
         }
@@ -210,7 +210,7 @@ namespace PalMon.Config
             }
             catch (Exception ex)
             {
-                Log.Fatal(String.Format("Could not open file stream to {0}: {1}", csvFileName, ex.Message));
+                Log.Fatal("Could not open file stream to {0}: {1}", csvFileName, ex);
                 return null;
             }
         }
