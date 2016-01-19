@@ -122,7 +122,7 @@ namespace PalMon.Output
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fileName));
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // Do nada
             }

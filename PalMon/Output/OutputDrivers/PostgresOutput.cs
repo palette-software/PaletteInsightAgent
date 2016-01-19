@@ -203,8 +203,6 @@ namespace PalMon.Output
             var tableName = aTable.TableName;
 
             // figure out if the table exists
-            var output = false;
-
             if (!TableExists(tableName))
             {
                 // create the table
