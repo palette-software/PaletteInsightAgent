@@ -28,12 +28,17 @@ test_script:
     - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
 #    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
     - echo "Downloaded insight-tester"
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstallerDBInitializer\bin\Release');
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release');
     - echo "Unzipped insight tester"
     - windows_amd64\agentrunner.exe start
+    - echo "Started PalMon service"
     - sleep 20
     - echo "Sleeping for 20 seconds"
     - windows_amd64\agentrunner.exe stop
+    - echo "Stopped PalMon service"
+    - echo "Contents of the PalMon log"
+    - type "C:\Program Files (x86)\PalMon\Logs\PalMon.nlog.txt"
+    - echo "End of PalMon log"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
 
