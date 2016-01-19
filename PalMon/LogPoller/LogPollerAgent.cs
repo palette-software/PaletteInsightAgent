@@ -1,16 +1,10 @@
 ﻿using NLog;
 using System.Reflection;
 using System;
-using DataTableWriter.Writers;
 using PalMon.Output;
 
 namespace PalMon.LogPoller
 {
-    class LogPollResult
-    {
-        FilterStateChangeRow[] filterChangeRows;
-    }
-
 
     class LogPollerAgent
     {

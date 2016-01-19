@@ -64,10 +64,6 @@
       <HintPath>..\packages\CsvHelper.2.13.2.0\lib\net40-client\CsvHelper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FileHelpers, Version=3.1.5.0, Culture=neutral, PublicKeyToken=3e0c08d59cc3d657, processorArchitecture=MSIL">
-      <HintPath>..\packages\FileHelpers.3.1.5\lib\net45\FileHelpers.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="IKVM.OpenJDK.Beans, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <HintPath>..\packages\IKVM.OpenJDK.Beans.7.2.4630.5\lib\IKVM.OpenJDK.Beans.dll</HintPath>
       <Private>True</Private>
@@ -134,10 +130,6 @@
       <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Oracle.DataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>dll\Oracle.DataAccess.dll</HintPath>
-    </Reference>
     <Reference Include="Sodium, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\libsodium-net.0.8.0\lib\Net40\Sodium.dll</HintPath>
       <Private>True</Private>
@@ -167,14 +159,14 @@
     <Compile Include="LicensePublicKey.cs" />
     <Compile Include="Output\CacheBehaviour.cs" />
     <Compile Include="Output\CachingOutput.cs" />
-    <Compile Include="Output\DataModel.cs" />
+    <Compile Include="Output\Connection\DbConnectionInfo.cs" />
+    <Compile Include="Output\Connection\IDbConnectionInfo.cs" />
     <Compile Include="Output\DataTableCache.cs" />
     <Compile Include="Output\DataTableUtils.cs" />
-    <Compile Include="Output\IOutput.cs" />
-    <Compile Include="Output\LoggingHelpers.cs" />
-    <Compile Include="Output\OutputDbFactory.cs" />
-    <Compile Include="Output\PostgresOutput.cs" />
-    <Compile Include="Output\RowCache.cs" />
+    <Compile Include="Output\OutputDrivers\IOutput.cs" />
+    <Compile Include="Helpers\LoggingHelpers.cs" />
+    <Compile Include="Output\OutputDrivers\OutputDbFactory.cs" />
+    <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PalMonAgent.cs" />
     <Compile Include="PalMonConfig\PalMonConfigReader.cs" />
     <Compile Include="PalMonConfig\PalMonConfigSection.cs" />
@@ -253,10 +245,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataTableWriter\DataTableWriter.csproj">
-      <Project>{4b340b47-c905-459c-85ea-75611f0e8b1c}</Project>
-      <Name>DataTableWriter</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Licensing\Licensing.csproj">
       <Project>{ef71c0c3-ffe7-4c3a-827b-b9386b0c47fa}</Project>
       <Name>Licensing</Name>

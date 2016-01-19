@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Net;
 
-using DataTableWriter.Writers;
 using PalMon.Output;
 
 namespace PalMon.LogPoller

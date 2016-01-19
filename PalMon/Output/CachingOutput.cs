@@ -1,4 +1,5 @@
 ﻿using PalMon.LogPoller;
+using PalMon.Sampler;
 using PalMon.ThreadInfoPoller;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace PalMon.Output
             AddCache(LogTables.makeFilterStateAuditTable());
             AddCache(LogTables.makeServerLogsTable());
             AddCache(ThreadTables.makeThreadInfoTable());
+            AddCache(CounterSampler.makeCounterSamplesTable());
 
         }
 

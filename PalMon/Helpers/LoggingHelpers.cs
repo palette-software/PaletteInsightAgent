@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PalMon.Output
+namespace PalMon.Helpers
 {
     public class LoggingHelpers
     {

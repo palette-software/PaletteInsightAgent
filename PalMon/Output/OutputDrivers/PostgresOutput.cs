@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataTableWriter.Connection;
 using Npgsql;
 using System.IO;
 using System.Data;
 using NLog;
 using System.Globalization;
+using PalMon.Helpers;
 
 namespace PalMon.Output
 {

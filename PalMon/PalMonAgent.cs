@@ -248,22 +248,8 @@ namespace PalMon
                 var sampleResults = sampler.SampleAll();
                 lock (WriteLock)
                 {
-                    try
-                    {
-                        // since the countersamples tables structure is dependent
-                        // on the host, do an on-demand adding to the cache
-                        if (!cachingOutput.HasCache(sampleResults.TableName))
-                        {
-                            cachingOutput.AddCache(sampleResults);
-                        }
-                        cachingOutput.Write(sampleResults);
-                        cachingOutput.Tick();
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, "Error while writing sample results: {0}", e.ToString());
-                    }
-                    //options.Writer.Write(sampleResults);
+                    cachingOutput.Write(sampleResults);
+                    cachingOutput.Tick();
                 }
             });
         }
@@ -277,12 +263,8 @@ namespace PalMon
         {
             tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
             {
-                //logPollerAgent.pollLogs(options.Writer, WriteLock);
                 logPollerAgent.pollLogs(cachingOutput, WriteLock);
-                lock(WriteLock)
-                {
-                    cachingOutput.Tick();
-                }
+                TickOutput();
             });
         }
 
@@ -296,12 +278,19 @@ namespace PalMon
             {
                 Log.Info("Polling threadinfo");
                 threadInfoAgent.poll(options.Processes, cachingOutput, WriteLock);
-                lock(WriteLock)
-                {
-                    cachingOutput.Tick();
-                }
-                //threadInfoAgent.poll(options.Processes, options.Writer, WriteLock);
+                TickOutput();
             });
+        }
+
+        /// <summary>
+        /// Tick the output while locking the write lock so its actually safe
+        /// </summary>
+        private void TickOutput()
+        {
+            lock (WriteLock)
+            {
+                cachingOutput.Tick();
+            }
         }
 
         /// <summary>
@@ -349,9 +338,9 @@ namespace PalMon
 
             if (disposing)
             {
-                if (options.Writer != null)
+                if (cachingOutput != null)
                 {
-                    options.Writer.Dispose();
+                    cachingOutput.Dispose();
                 }
             }
             disposed = true;

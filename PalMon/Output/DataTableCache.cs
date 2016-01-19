@@ -17,7 +17,8 @@ namespace PalMon.Output
     class DataTableCache
     {
         private const string CSV_DATETIME_FORMAT = "yyyy-MM-dd--HH";
-
+        private const int CSV_OUTPUT_BATCH_TIME_SECONDS = 30;
+        private const int DB_OUTPUT_BATCH_TIME_SECONDS = 60;
         private string fileBaseName;
 
         public string TableName { get { return csvQueue.TableName; } }
@@ -48,7 +49,7 @@ namespace PalMon.Output
 
 
             // Writing to CSV
-            csvWrite = new DelayedAction(TimeSpan.FromSeconds(20), (start, end) =>
+            csvWrite = new DelayedAction(TimeSpan.FromSeconds(CSV_OUTPUT_BATCH_TIME_SECONDS), (start, end) =>
             {
                 // skip writing if no data
                 if (csvQueue.Rows.Count == 0)
@@ -67,7 +68,7 @@ namespace PalMon.Output
             });
 
             // Flushing to DB
-            dbFlush = new DelayedAction(TimeSpan.FromSeconds(10), (start, end) =>
+            dbFlush = new DelayedAction(TimeSpan.FromSeconds(DB_OUTPUT_BATCH_TIME_SECONDS), (start, end) =>
             {
                 if (dbQueue.Rows.Count == 0)
                 {
