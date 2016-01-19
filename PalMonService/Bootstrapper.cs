@@ -1,6 +1,7 @@
 ﻿using System;
 using Topshelf;
 using PalMon;
+using NLog;
 
 namespace PalMonService
 {
