@@ -98,7 +98,6 @@ namespace PalMon
                 if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount))
                 {
                     Log.Fatal("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
-                    Console.WriteLine("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
                     Environment.Exit(-1);
                 }
             }
@@ -241,7 +240,6 @@ namespace PalMon
         /// <param name="stateInfo"></param>
         private void Poll(object stateInfo)
         {
-            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
