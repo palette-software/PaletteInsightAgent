@@ -1,6 +1,6 @@
 ﻿using DataTableWriter.Connection;
 using DataTableWriter.Drivers;
-using log4net;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -19,7 +19,7 @@ namespace DataTableWriter.Adapters
         public IDbConnectionInfo ConnectionInfo { get; protected set; }
         public IDbConnection Connection { get; protected set; }
         private bool disposed;
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public DbAdapter(DbDriverType driverType, IDbConnectionInfo connectionInfo)
         {
@@ -92,12 +92,12 @@ namespace DataTableWriter.Adapters
 
                 try
                 {
-                    Log.Debug(String.Format("Dynamically creating database table '{0}'..", schema.TableName));
+                    Log.Debug("Dynamically creating database table '{0}'..", schema.TableName);
                     command.ExecuteNonQuery();
                 }
                 catch (DbException ex)
                 {
-                    Log.Error(String.Format("Could not create database table '{0}': {1}", schema.TableName, ex.Message));
+                    Log.Error("Could not create database table '{0}': {1}", schema.TableName, ex.Message);
                     throw;
                 }
             }
@@ -123,7 +123,7 @@ namespace DataTableWriter.Adapters
                 }
                 catch (DbException ex)
                 {
-                    Log.Error(String.Format("Could not query database for table '{0}': {1}", tableName, ex.Message));
+                    Log.Error("Could not query database for table '{0}': {1}", tableName, ex.Message);
                     throw;
                 }
             }
@@ -166,11 +166,11 @@ namespace DataTableWriter.Adapters
             // Log results.
             if (numColumnsAdded > 0)
             {
-                Log.Debug(String.Format("Modified database table '{0}' to match schema. [{1} {2} added]", tableName, numColumnsAdded, "column".Pluralize(numColumnsAdded)));
+                Log.Debug("Modified database table '{0}' to match schema. [{1} {2} added]", tableName, numColumnsAdded, "column".Pluralize(numColumnsAdded));
             }
             else
             {
-                Log.Debug(String.Format("All columns in schema are present in database table '{0}'.", tableName));
+                Log.Debug("All columns in schema are present in database table '{0}'.", tableName);
             }
         }
 
@@ -184,7 +184,7 @@ namespace DataTableWriter.Adapters
             }
             catch (Exception e)
             {
-                Log.Fatal("Cannot convert to boolean:" + boolishVal);
+                Log.Fatal(e, "Cannot convert to boolean: {0} Exception: {1}", boolishVal, e);
                 throw;
             }
             
@@ -224,7 +224,7 @@ namespace DataTableWriter.Adapters
                 }
                 catch (DbException ex)
                 {
-                    Log.Error(String.Format("Could not query database table '{0}': {1}", tableName, ex.Message));
+                    Log.Error("Could not query database table '{0}': {1}", tableName, ex.Message);
                     throw;
                 }
             }
@@ -246,12 +246,12 @@ namespace DataTableWriter.Adapters
                 command.CommandText = Driver.BuildQueryAddColumnToTable(dbTableName, column);
                 try
                 {
-                    Log.Debug(String.Format("Adding column '{0}' to table '{1}'..", column.ColumnName, dbTableName));
+                    Log.Debug("Adding column '{0}' to table '{1}'..", column.ColumnName, dbTableName);
                     command.ExecuteNonQuery();
                 }
                 catch (DbException ex)
                 {
-                    Log.Error(String.Format("Could not add column '{0}' to table '{1}': {2}", column.ColumnName, dbTableName, ex.Message));
+                    Log.Error("Could not add column '{0}' to table '{1}': {2}", column.ColumnName, dbTableName, ex.Message);
                     throw;
                 }
             }
@@ -309,7 +309,7 @@ namespace DataTableWriter.Adapters
                 }
                 catch (DbException ex)
                 {
-                    Log.Error(String.Format("Could not insert row into database table '{0}': {1}", dbTableName, ex.Message), ex);
+                    Log.Error("Could not insert row into database table '{0}': {1}", dbTableName, ex.Message);
                     throw;
                 }
             }

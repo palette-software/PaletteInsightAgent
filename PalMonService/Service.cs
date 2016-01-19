@@ -34,7 +34,7 @@ namespace PalMonService
                 hostConfigurator.Service(() => new PalMonServiceBootstrapper());
                 hostConfigurator.RunAsLocalSystem();
                 hostConfigurator.StartAutomaticallyDelayed();
-                hostConfigurator.UseLog4Net(PalMonServiceBootstrapper.Log4NetConfigKey);
+                hostConfigurator.UseNLog();
 
                 hostConfigurator.EnableServiceRecovery(r =>
                 {

@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System.Reflection;
 using System;
 using System.Data;
@@ -12,7 +12,7 @@ namespace PalMon.LogPoller
 {
     class LogsToDbConverter
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public string HostName { get; set; }
 
@@ -81,7 +81,7 @@ namespace PalMon.LogPoller
             }
             catch (Exception e)
             {
-                Log.Fatal("Error while adding to server logs:", e);
+                Log.Fatal(e, "Error while adding to server logs:", e);
                 throw;
             }
 
@@ -90,7 +90,7 @@ namespace PalMon.LogPoller
 
         private void addServerLogs(ITableauRepoConn repo, string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
-            Log.Info("Trying to parse " + jsonStringLines.Length + " rows of new log data.");
+            Log.Info("Trying to parse {0} rows of new log data.", jsonStringLines.Length);
             foreach (var jsonString in jsonStringLines)
             {
 
@@ -102,7 +102,7 @@ namespace PalMon.LogPoller
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Json parse exception occured in string: '" + jsonString + "'", e);
+                    Log.Error("Json parse exception occured in string: '{0}'. Exception message: {1}", jsonString, e.Message);
                     // skip this line
                     continue;
                 }

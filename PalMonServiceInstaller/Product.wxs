@@ -73,11 +73,12 @@
         <File Id="IKVMOpenJDKTextDLL" Name="IKVM.OpenJDK.Text.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Text.dll" />
         <File Id="IKVMOpenJDKUtilDLL" Name="IKVM.OpenJDK.Util.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Util.dll" />
         <File Id="IKVMRuntimeDLL" Name="IKVM.Runtime.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.Runtime.dll" />
-        <File Id="Log4NetDLL" Name="log4net.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\log4net.dll" />
+        <File Id="NLogDLL" Name="NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.dll" />
+        <File Id="NLogXML" Name="NLog.xml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.xml" />
         <File Id="MonoSecurityDLL" Name="Mono.Security.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Mono.Security.dll" />
         <File Id="NpgsqlDLL" Name="Npgsql.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Npgsql.dll" />
         <File Id="TopshelfDLL" Name="Topshelf.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.dll" />
-        <File Id="TopshelfLog4NetDLL" Name="Topshelf.Log4Net.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.Log4Net.dll" />
+        <File Id="TopshelfNLogDLL" Name="Topshelf.NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.NLog.dll" />
         <File Id="NewtonsoftJSONDLL" Name="Newtonsoft.Json.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Newtonsoft.Json.dll" />
         <File Id="OracleManagedDataAccessDLL" Name="Oracle.ManagedDataAccess.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Oracle.ManagedDataAccess.dll" />
         <File Id="SodiumNetDLL" Name="libsodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium.dll" />
@@ -94,13 +95,16 @@
         <!-- User Documentation -->
         <File Id="UserGuide" Name="PalMon User Guide.pdf" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Documentation\UserGuide.pdf" />
       </Component>
+      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03">
+        <!-- NLog configuration -->
+        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config" />
+      </Component>
     </DirectoryRef>
 
     <!-- Config Files -->
     <DirectoryRef Id="CONFIGFOLDER">
       <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0">
         <File Id="CountersConfig" Name="Counters.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.config" />
-        <File Id="Log4NetConfig" Name="Log.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Log.config" />
         <File Id="PalMonConfig" Name="PalMon.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\PalMon.config" />
       </Component>
     </DirectoryRef>
@@ -144,6 +148,7 @@
       <Feature Id='MainProgram' Title="$(var.ApplicationName)" Description='$(var.ApplicationName) main program.' Level='1'>
         <ComponentRef Id='Executable' />
         <ComponentRef Id='Libraries' />
+        <ComponentRef Id='LogConfig' />
         <ComponentRef Id='ConfigFiles' />
         <ComponentRef Id='Resources' />
         <ComponentRef Id='Utilities' />

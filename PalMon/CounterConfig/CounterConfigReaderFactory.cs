@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Reflection;
 
@@ -9,7 +9,7 @@ namespace PalMon.CounterConfig
     /// </summary>
     internal static class CounterConfigReaderFactory
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Given the name of a config reader, news up an instance of the appropriate type.
@@ -31,7 +31,7 @@ namespace PalMon.CounterConfig
                     break;
 
                 default:
-                    Log.Error(String.Format("Invalid counter type '{0}' encountered in configuration.", configReaderType));
+                    Log.Error("Invalid counter type '{0}' encountered in configuration.", configReaderType);
                     break;
             }
 

@@ -20,7 +20,7 @@ namespace LicenseGenerator
             {
                 keyGeneratorControl.GenerateNewKey();
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }
