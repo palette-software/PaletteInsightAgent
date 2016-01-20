@@ -71,7 +71,7 @@ namespace PalMon.Output
                     foreach (DataRow rowToWrite in rows.Rows)
                     {
                         var row = String.Join("\t", ToTSVLine(rowToWrite.ItemArray));
-                        // if the row ends with a backslash, we need to add another one to it
+                        // if the row ends with a backslash, we need to add a space after it
                         if (row.Last() == '\\') row += " ";
                         writer.WriteLine(row);
                     }
