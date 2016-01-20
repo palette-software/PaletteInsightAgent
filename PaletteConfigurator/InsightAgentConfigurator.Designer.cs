@@ -52,6 +52,10 @@
             this.addProcessButton = new System.Windows.Forms.Button();
             this.deleteProcessBtn = new System.Windows.Forms.Button();
             this.processListView = new System.Windows.Forms.ListView();
+            this.clusterTreeView = new System.Windows.Forms.TreeView();
+            this.deleteClusterButton = new System.Windows.Forms.Button();
+            this.addClusterButton = new System.Windows.Forms.Button();
+            this.addClusterNodeButton = new System.Windows.Forms.Button();
             this.agentLocationSelector = new PaletteConfigurator.FolderSelector();
             this.logfilesFolderSelector = new PaletteConfigurator.FolderSelector();
             this.tableauRepo = new PaletteConfigurator.DbConfigurator();
@@ -94,7 +98,7 @@
             // 
             // saveConfigButton
             // 
-            this.saveConfigButton.Location = new System.Drawing.Point(335, 568);
+            this.saveConfigButton.Location = new System.Drawing.Point(11, 567);
             this.saveConfigButton.Name = "saveConfigButton";
             this.saveConfigButton.Size = new System.Drawing.Size(163, 23);
             this.saveConfigButton.TabIndex = 7;
@@ -276,7 +280,7 @@
             // 
             // addProcessButton
             // 
-            this.addProcessButton.Location = new System.Drawing.Point(463, 443);
+            this.addProcessButton.Location = new System.Drawing.Point(463, 432);
             this.addProcessButton.Name = "addProcessButton";
             this.addProcessButton.Size = new System.Drawing.Size(54, 23);
             this.addProcessButton.TabIndex = 29;
@@ -286,7 +290,7 @@
             // 
             // deleteProcessBtn
             // 
-            this.deleteProcessBtn.Location = new System.Drawing.Point(465, 473);
+            this.deleteProcessBtn.Location = new System.Drawing.Point(465, 462);
             this.deleteProcessBtn.Name = "deleteProcessBtn";
             this.deleteProcessBtn.Size = new System.Drawing.Size(52, 23);
             this.deleteProcessBtn.TabIndex = 30;
@@ -298,12 +302,50 @@
             // 
             this.processListView.LabelEdit = true;
             this.processListView.LabelWrap = false;
-            this.processListView.Location = new System.Drawing.Point(290, 443);
+            this.processListView.Location = new System.Drawing.Point(290, 432);
             this.processListView.Name = "processListView";
-            this.processListView.Size = new System.Drawing.Size(167, 119);
+            this.processListView.Size = new System.Drawing.Size(167, 70);
             this.processListView.TabIndex = 31;
             this.processListView.UseCompatibleStateImageBehavior = false;
             this.processListView.View = System.Windows.Forms.View.List;
+            // 
+            // clusterTreeView
+            // 
+            this.clusterTreeView.LabelEdit = true;
+            this.clusterTreeView.Location = new System.Drawing.Point(290, 508);
+            this.clusterTreeView.Name = "clusterTreeView";
+            this.clusterTreeView.Size = new System.Drawing.Size(167, 95);
+            this.clusterTreeView.TabIndex = 32;
+            // 
+            // deleteClusterButton
+            // 
+            this.deleteClusterButton.Location = new System.Drawing.Point(467, 580);
+            this.deleteClusterButton.Name = "deleteClusterButton";
+            this.deleteClusterButton.Size = new System.Drawing.Size(52, 23);
+            this.deleteClusterButton.TabIndex = 34;
+            this.deleteClusterButton.Text = "Del";
+            this.deleteClusterButton.UseVisualStyleBackColor = true;
+            this.deleteClusterButton.Click += new System.EventHandler(this.deleteClusterButton_Click);
+            // 
+            // addClusterButton
+            // 
+            this.addClusterButton.Location = new System.Drawing.Point(465, 508);
+            this.addClusterButton.Name = "addClusterButton";
+            this.addClusterButton.Size = new System.Drawing.Size(54, 23);
+            this.addClusterButton.TabIndex = 33;
+            this.addClusterButton.Text = "+Cluster";
+            this.addClusterButton.UseVisualStyleBackColor = true;
+            this.addClusterButton.Click += new System.EventHandler(this.addClusterButton_Click);
+            // 
+            // addClusterNodeButton
+            // 
+            this.addClusterNodeButton.Location = new System.Drawing.Point(465, 537);
+            this.addClusterNodeButton.Name = "addClusterNodeButton";
+            this.addClusterNodeButton.Size = new System.Drawing.Size(54, 23);
+            this.addClusterNodeButton.TabIndex = 35;
+            this.addClusterNodeButton.Text = "+Node";
+            this.addClusterNodeButton.UseVisualStyleBackColor = true;
+            this.addClusterNodeButton.Click += new System.EventHandler(this.addClusterNodeButton_Click);
             // 
             // agentLocationSelector
             // 
@@ -355,6 +397,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.addClusterNodeButton);
+            this.Controls.Add(this.deleteClusterButton);
+            this.Controls.Add(this.addClusterButton);
+            this.Controls.Add(this.clusterTreeView);
             this.Controls.Add(this.processListView);
             this.Controls.Add(this.deleteProcessBtn);
             this.Controls.Add(this.addProcessButton);
@@ -422,5 +468,9 @@
         private System.Windows.Forms.Button addProcessButton;
         private System.Windows.Forms.Button deleteProcessBtn;
         private System.Windows.Forms.ListView processListView;
+        private System.Windows.Forms.TreeView clusterTreeView;
+        private System.Windows.Forms.Button deleteClusterButton;
+        private System.Windows.Forms.Button addClusterButton;
+        private System.Windows.Forms.Button addClusterNodeButton;
     }
 }

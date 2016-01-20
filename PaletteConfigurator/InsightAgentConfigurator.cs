@@ -39,6 +39,16 @@ namespace PaletteConfigurator
             InitializeConfiguration();
             SetupBindings();
 
+
+            clusterTreeView.BeginUpdate();
+            clusterTreeView.Nodes.Clear();
+            string yourParentNode;
+            yourParentNode = "Primary"; // textBox1.Text.Trim();
+            clusterTreeView.Nodes.Add(yourParentNode);
+            clusterTreeView.Nodes[0].Nodes.Add("localhost");
+
+            clusterTreeView.ExpandAll();
+            clusterTreeView.EndUpdate();
         }
 
         private void SetupBindings()
@@ -112,8 +122,26 @@ namespace PaletteConfigurator
                 {
                     processes.Add(item.Text);
                 }
+
+                // collect the cluster information
+                var clusters = new List<ClusterData>();
+                foreach(TreeNode cluster in clusterTreeView.Nodes)
+                {
+                    // collect the child nodes
+                    var clusterNodes = new List<string>();
+                    foreach(TreeNode clusterNode in cluster.Nodes)
+                    {
+                        clusterNodes.Add(clusterNode.Text);
+
+                    }
+                    clusters.Add(new ClusterData
+                    {
+                        ClusterName = cluster.Text,
+                        Nodes = clusterNodes
+                    });
+                }
                 // serialize the config
-                PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config, processes);
+                PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config, processes, clusters);
                 XmlSerializer writer = new XmlSerializer(configOut.GetType());
                 using (var file = new FileStream(outputPath, FileMode.Create))
                 {
@@ -150,5 +178,45 @@ namespace PaletteConfigurator
         }
 
         #endregion
+
+        private void addClusterButton_Click(object sender, EventArgs e)
+        {
+            var clusterName = "CLUSTER NAME";
+            clusterTreeView.BeginUpdate();
+            var newNode = clusterTreeView.Nodes.Add(clusterName);
+            clusterTreeView.SelectedNode = newNode;
+            clusterTreeView.EndUpdate();
+            newNode.BeginEdit();
+
+
+            
+        }
+
+        private void addClusterNodeButton_Click(object sender, EventArgs e)
+        {
+            var nodeName = "NODE NAME";
+            clusterTreeView.BeginUpdate();
+
+
+            var selected = clusterTreeView.SelectedNode;
+            var targetCluster = (selected.Parent == null) ? selected : selected.Parent;
+            var newNode = targetCluster.Nodes.Add(nodeName);
+
+            clusterTreeView.SelectedNode = newNode;
+            clusterTreeView.ExpandAll();
+            clusterTreeView.EndUpdate();
+
+            newNode.BeginEdit();
+
+        }
+
+        private void deleteClusterButton_Click(object sender, EventArgs e)
+        {
+            clusterTreeView.BeginUpdate();
+            var selected = clusterTreeView.SelectedNode;
+            var removeFrom = (selected.Parent == null) ? clusterTreeView.Nodes : selected.Parent.Nodes;
+            removeFrom.Remove(selected);
+            clusterTreeView.EndUpdate();
+        }
     }
 }

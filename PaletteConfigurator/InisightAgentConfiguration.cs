@@ -23,6 +23,12 @@ namespace PaletteConfigurator
 
     }
 
+    public class ClusterData
+    {
+        public string ClusterName { get; set; }
+        public IList<string> Nodes { get; set; }
+    }
+
 
 
     #region PalMon.Config description
@@ -114,6 +120,20 @@ namespace PaletteConfigurator
             public string Name { get; set; }
         }
 
+        public class Host
+        {
+            [XmlAttribute("name")]
+            public string Name { get; set; }
+        }
+
+        public class Cluster
+        {
+            [XmlAttribute("name")]
+            public string Name { get; set; }
+
+            [XmlElement("Host")]
+            public List<Host> Hosts { get; set; }
+        }
 
         [XmlRoot(ElementName = "PalMonConfig")]
         public class PalMonConfiguration
@@ -132,6 +152,10 @@ namespace PaletteConfigurator
             [XmlArray("Processes")]
             [XmlArrayItem("Process")]
             public List<Process> Processes { get; set; }
+
+            [XmlArray("Clusters")]
+            [XmlArrayItem("Cluster")]
+            public List<Cluster> Clusters { get; set; }
 
             [XmlElement]
             public Database Database { get; set; }
@@ -153,7 +177,7 @@ namespace PaletteConfigurator
             /// </summary>
             /// <param name="cfg"></param>
             /// <returns></returns>
-            public static PalMonConfiguration ConfigToPalMonConfig(InsightAgentConfiguration cfg, IEnumerable<string> processes)
+            public static PalMonConfiguration ConfigToPalMonConfig(InsightAgentConfiguration cfg, IEnumerable<string> processes, IEnumerable<ClusterData> clusters)
             {
                 return new PalMonConfiguration
                 {
@@ -162,6 +186,11 @@ namespace PaletteConfigurator
                     LogPollInterval = new IntValue(cfg.LogPollInterval),
                     ThreadInfoPollInterval = new IntValue(cfg.ThreadInfoPollInterval),
                     Processes = processes.Select(x => new Process { Name = x }).ToList(),
+                    Clusters = clusters.Select(x => new Cluster {
+                        Name = x.ClusterName,
+                        Hosts = x.Nodes.Select( node => new Host { Name = node }).ToList()
+                    }).ToList(),
+                    
                     Database = new Database
                     {
                         Name = cfg.ResultsDatabase.Database,
