@@ -4,7 +4,7 @@
 <?define Manufacturer = "Palette Software"?>
 <?define AboutURL = "http://www.palette-software.com"?>
 <?define ProductUpgradeCode = "d926f2c5-3ab6-4101-a292-f1cd325e23f6"?>
-<?define IconFile = "Resources\PalMon.ico"?>
+<?define IconFile = "Resources\palette_symbol.ico"?>
 <?define LogoFile = "Resources\Logo.png"?>
 <?define LogoSideFile = "Resources\LogoSide.png"?>
 <?define LicenseFile = ""?> <!-- disables license box being shown -->

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?define ApplicationName = "PalMon"?>
-<?define ProductVersion = "2.1.0"?>
-<?define Manufacturer = "Tableau"?>
+<?define ProductVersion = "1.6.85"?>
+<?define Manufacturer = "Palette Software"?>
 <?define HelpLink = "http://www.tableau.com"?>
 <?define UrlInfoAbout = "http://www.tableau.com"?>
 <?define ProductUpgradeCode = "8c39f7f6-ad31-4efd-96ae-1f6f1a5e4f3a"?>
-<?define IconFile = "..\PalMonService\Resources\PalMon.ico"?>
+<?define IconFile = "..\PalMonService\Resources\palette_symbol.ico"?>
 <?define BinFolder = "..\PalMonService\bin\Release"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
