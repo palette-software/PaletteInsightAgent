@@ -54,7 +54,7 @@
             this.databaseText.Location = new System.Drawing.Point(342, 5);
             this.databaseText.Name = "databaseText";
             this.databaseText.Size = new System.Drawing.Size(175, 20);
-            this.databaseText.TabIndex = 23;
+            this.databaseText.TabIndex = 2;
             // 
             // label6
             // 
@@ -72,7 +72,7 @@
             this.passwordText.Location = new System.Drawing.Point(342, 61);
             this.passwordText.Name = "passwordText";
             this.passwordText.Size = new System.Drawing.Size(175, 20);
-            this.passwordText.TabIndex = 21;
+            this.passwordText.TabIndex = 6;
             // 
             // label7
             // 
@@ -91,7 +91,7 @@
             this.usernameText.Location = new System.Drawing.Point(71, 57);
             this.usernameText.Name = "usernameText";
             this.usernameText.Size = new System.Drawing.Size(198, 20);
-            this.usernameText.TabIndex = 19;
+            this.usernameText.TabIndex = 5;
             // 
             // label8
             // 
@@ -118,7 +118,7 @@
             0});
             this.portSpinner.Name = "portSpinner";
             this.portSpinner.Size = new System.Drawing.Size(96, 20);
-            this.portSpinner.TabIndex = 17;
+            this.portSpinner.TabIndex = 4;
             this.portSpinner.Value = new decimal(new int[] {
             5432,
             0,
@@ -156,7 +156,7 @@
             this.databaseTypeCombobox.Location = new System.Drawing.Point(71, 4);
             this.databaseTypeCombobox.Name = "databaseTypeCombobox";
             this.databaseTypeCombobox.Size = new System.Drawing.Size(127, 21);
-            this.databaseTypeCombobox.TabIndex = 14;
+            this.databaseTypeCombobox.TabIndex = 1;
             // 
             // hostNameText
             // 
@@ -165,7 +165,7 @@
             this.hostNameText.Location = new System.Drawing.Point(71, 31);
             this.hostNameText.Name = "hostNameText";
             this.hostNameText.Size = new System.Drawing.Size(312, 20);
-            this.hostNameText.TabIndex = 13;
+            this.hostNameText.TabIndex = 3;
             // 
             // label11
             // 
@@ -182,7 +182,7 @@
             this.testConnectionButton.Location = new System.Drawing.Point(380, 87);
             this.testConnectionButton.Name = "testConnectionButton";
             this.testConnectionButton.Size = new System.Drawing.Size(137, 23);
-            this.testConnectionButton.TabIndex = 24;
+            this.testConnectionButton.TabIndex = 7;
             this.testConnectionButton.Text = "Test Connection";
             this.testConnectionButton.UseVisualStyleBackColor = true;
             this.testConnectionButton.Click += new System.EventHandler(this.testConnectionButton_Click);

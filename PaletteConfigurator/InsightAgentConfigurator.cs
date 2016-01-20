@@ -106,7 +106,14 @@ namespace PaletteConfigurator
             var outputPath = Path.Combine(config.AgentFolder, ConfigFileName);
             try
             {
-                PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config);
+                // Collect the process information
+                var processes = new List<string>();
+                foreach(ListViewItem item in processListView.Items)
+                {
+                    processes.Add(item.Text);
+                }
+                // serialize the config
+                PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config, processes);
                 XmlSerializer writer = new XmlSerializer(configOut.GetType());
                 using (var file = new FileStream(outputPath, FileMode.Create))
                 {
@@ -121,5 +128,27 @@ namespace PaletteConfigurator
 
             }
         }
+
+        #region processes
+
+        private void addProcessButton_Click(object sender, EventArgs e)
+        {
+            // Add a new item to the ListView, with an empty label
+            ListViewItem item = processListView.Items.Add(String.Empty);
+
+            // Place the newly-added item into edit mode immediately
+            item.BeginEdit();
+        }
+
+        private void deleteProcessBtn_Click(object sender, EventArgs e)
+        {
+            var selection = processListView.SelectedItems;
+            foreach (ListViewItem s in selection)
+            {
+                processListView.Items.Remove(s);
+            }
+        }
+
+        #endregion
     }
 }

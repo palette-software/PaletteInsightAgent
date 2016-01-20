@@ -80,6 +80,10 @@
         <File Id="TopshelfLog4NetDLL" Name="Topshelf.Log4Net.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.Log4Net.dll" />
         <File Id="NewtonsoftJSONDLL" Name="Newtonsoft.Json.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Newtonsoft.Json.dll" />
         <File Id="OracleManagedDataAccessDLL" Name="Oracle.ManagedDataAccess.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Oracle.ManagedDataAccess.dll" />
+        <File Id="SodiumNetDLL" Name="libsodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium.dll" />
+        <File Id="SodiumNet64DLL" Name="libsodium-64.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium-64.dll" />
+        <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
+        <File Id="LicensingDLL" Name="Licensing.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Licensing.dll" />
       </Component>
       <Component Id="Utilities" Guid="93dd2c94-e909-4b30-a2ed-80e78d53ed5b">
         <!-- Helper Utilities -->

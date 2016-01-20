@@ -76,11 +76,11 @@ namespace PaletteConfigurator
             public string Name { get; set; }
             [XmlAttribute("type")]
             public string DbType { get; set; }
-            [XmlElement("Server")]
+            [XmlElement]
             public DbServer Server { get; set; }
-            [XmlElement("User")]
+            [XmlElement]
             public DbUser User { get; set; }
-            [XmlElement("Table")]
+            [XmlElement]
             public DbTable Table { get; set; }
         }
 
@@ -108,7 +108,12 @@ namespace PaletteConfigurator
             public string Db { get; set; }
         }
 
-        
+        public class Process
+        {
+            [XmlAttribute("name")]
+            public string Name { get; set; }
+        }
+
 
         [XmlRoot(ElementName = "PalMonConfig")]
         public class PalMonConfiguration
@@ -124,6 +129,9 @@ namespace PaletteConfigurator
             [XmlElement]
             public IntValue ThreadInfoPollInterval { get; set; }
 
+            [XmlArray("Processes")]
+            [XmlArrayItem("Process")]
+            public List<Process> Processes { get; set; }
 
             [XmlElement]
             public Database Database { get; set; }
@@ -145,7 +153,7 @@ namespace PaletteConfigurator
             /// </summary>
             /// <param name="cfg"></param>
             /// <returns></returns>
-            public static PalMonConfiguration ConfigToPalMonConfig(InsightAgentConfiguration cfg)
+            public static PalMonConfiguration ConfigToPalMonConfig(InsightAgentConfiguration cfg, IEnumerable<string> processes)
             {
                 return new PalMonConfiguration
                 {
@@ -153,6 +161,7 @@ namespace PaletteConfigurator
                     PollInterval = new IntValue(cfg.PollInterval),
                     LogPollInterval = new IntValue(cfg.LogPollInterval),
                     ThreadInfoPollInterval = new IntValue(cfg.ThreadInfoPollInterval),
+                    Processes = processes.Select(x => new Process { Name = x }).ToList(),
                     Database = new Database
                     {
                         Name = cfg.ResultsDatabase.Database,

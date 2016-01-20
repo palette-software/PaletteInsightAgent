@@ -41,16 +41,14 @@ namespace PalMon
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
-            // "license check"
-            if (DateTime.Now > new DateTime(2016, 02, 01))
-            {
-                Log.Fatal("License expired!");
-                Environment.Exit(-1);
-            }
             // Initialize log4net settings.
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
+            // Load the configuration
             XmlConfigurator.Configure(new FileInfo(ConfigurationManager.AppSettings[Log4NetConfigKey]));
+
+
+
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
@@ -59,16 +57,42 @@ namespace PalMon
                 PalMonConfigReader.LoadOptions();
             }
 
-            Log.Info("Setting up LogPoller agent.");
+            // check the license after the configuration has been loaded.
+            CheckLicense(Path.GetDirectoryName(assemblyLocation) + "\\");
 
-            
             // Load the log poller config & start the agent
-            //var logPollerConfig = LogPollerConfigurationLoader.load();
             logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
                 options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
 
             // start the thread info agent
             threadInfoAgent = new ThreadInfoAgent();
+        }
+
+        private void CheckLicense(string pathToCheck)
+        {
+            try
+            {
+                Log.InfoFormat("Checking for licenses in: {0}", pathToCheck);
+                // get the core count
+                var coreCount = LicenseChecker.LicenseChecker.getCoreCount(
+                    options.RepoHost,
+                    options.RepoPort,
+                    options.RepoUser,
+                    options.RepoPass,
+                    options.RepoDb
+                    );
+                // check for license.
+                if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck , LicensePublicKey.PUBLIC_KEY, coreCount))
+                {
+                    Log.FatalFormat("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
+                    Environment.Exit(-1);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Fatal("Error during license check.", e);
+                Environment.Exit(-1);
+            }
         }
 
         ~PalMonAgent()
