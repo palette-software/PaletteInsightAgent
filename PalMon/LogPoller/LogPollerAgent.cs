@@ -1,10 +1,11 @@
 ﻿using NLog;
 using System.Reflection;
 using System;
-using DataTableWriter.Writers;
+using PalMon.Output;
 
 namespace PalMon.LogPoller
 {
+
     class LogPollerAgent
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -55,17 +56,20 @@ namespace PalMon.LogPoller
         }
 
 
-        /// <summary>
-        /// Actual function to poll from the logs
-        /// </summary>
-        /// <returns></returns>
-        public void pollLogs(IDataTableWriter writer, object writeLock)
+        public void pollLogs(CachingOutput output, object writeLock)
         {
-            watcher.watchChangeCycle((string filename, string[] lines) =>
+            watcher.watchChangeCycle((filename, lines) =>
             {
-                Log.Info("Got new " + lines.Length + " lines from " + filename );
-                logsToDbConverter.processServerLogLines(writer, writeLock, tableauRepo, filename, lines);
+                Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
+                logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
+            }, () =>
+            {
+                // if no change, just flush if needed
+                Log.Debug("No changes detected -- flushing if needed");
             });
+
+
         }
+
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using DataTableWriter.Writers;
 using PalMon.Helpers;
+using PalMon.Output;
 
 namespace PalMon
 {
@@ -11,7 +11,7 @@ namespace PalMon
     public class PalMonOptions
     {
         [CLSCompliant(false)]
-        public IDataTableWriter Writer { get; set; }
+        public IDbConnectionInfo ResultDatabase { get; set; }
         public ICollection<Host> Hosts { get; set; }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
@@ -19,7 +19,9 @@ namespace PalMon
         public string TableName { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
-        public ICollection<string> Processes { get; set;  }
+        public ICollection<string> Processes { get; set; }
+
+        public string DatabaseType { get; set; }
 
         #region LogPoller config settings
 
@@ -61,23 +63,15 @@ namespace PalMon
         public bool Valid()
         {
             return Hosts.Count > 0
-                && Writer != null
                 && PollInterval >= MinPollInterval
                 && LogPollInterval >= MinPollInterval
-                && ThreadInfoPollInterval >= MinPollInterval 
-                && TableName != null;
+                && ThreadInfoPollInterval >= MinPollInterval;
         }
 
         public override string ToString()
         {
-            var writerName = "null";
-            if (Writer != null)
-            {
-                writerName = Writer.Name;
-            }
-
-            return String.Format("[{0}='{1}', Writer='{2}', PollInterval='{3}', LogPollInterval='{4}', ThreadInfoPollInterval='{5}', TableName='{6}']",
-                                   "Host".Pluralize(Hosts.Count), String.Join(",", Hosts), writerName, PollInterval, LogPollInterval, ThreadInfoPollInterval, TableName);
+            return String.Format("[{0}='{1}', PollInterval='{2}', LogPollInterval='{3}', ThreadInfoPollInterval='{4}', TableName='{5}']",
+                                   "Host".Pluralize(Hosts.Count), String.Join(",", Hosts), PollInterval, LogPollInterval, ThreadInfoPollInterval, TableName);
         }
 
         #endregion

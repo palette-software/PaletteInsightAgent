@@ -59,7 +59,7 @@ namespace PalMon.LogPoller
                 {
                     Host = host,
                     Port = port,
-                    UserName = username,
+                    Username = username,
                     Password = password,
                     Database = database
                 };

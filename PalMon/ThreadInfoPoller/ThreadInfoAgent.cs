@@ -1,5 +1,4 @@
-﻿using DataTableWriter.Writers;
-using NLog;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,6 +6,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using PalMon.Counters;
+using PalMon.Output;
 
 namespace PalMon.ThreadInfoPoller
 {
@@ -26,7 +26,7 @@ namespace PalMon.ThreadInfoPoller
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
 
-        public void poll(ICollection<string> processNames, IDataTableWriter writer, object WriteLock)
+        public void poll(ICollection<string> processNames, CachingOutput writer, object WriteLock)
         {
             foreach (string processName in processNames)
             {

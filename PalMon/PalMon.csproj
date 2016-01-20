@@ -60,6 +60,10 @@
     </StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CsvHelper, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
+      <HintPath>..\packages\CsvHelper.2.13.2.0\lib\net40-client\CsvHelper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="IKVM.OpenJDK.Beans, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <HintPath>..\packages\IKVM.OpenJDK.Beans.7.2.4630.5\lib\IKVM.OpenJDK.Beans.dll</HintPath>
       <Private>True</Private>
@@ -111,10 +115,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\IKVM.Runtime.7.2.4630.5\lib\IKVM.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\Npgsql.2.2.7\lib\net45\Mono.Security.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -122,8 +122,8 @@
     <Reference Include="NLog">
       <HintPath>..\packages\NLog.4.2.3\lib\net45\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="Npgsql, Version=2.2.7.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Npgsql.2.2.7\lib\net45\Npgsql.dll</HintPath>
+    <Reference Include="Npgsql, Version=3.0.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sodium, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -153,6 +153,16 @@
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
+    <Compile Include="Output\DelayedAction.cs" />
+    <Compile Include="Output\CachingOutput.cs" />
+    <Compile Include="Output\Connection\DbConnectionInfo.cs" />
+    <Compile Include="Output\Connection\IDbConnectionInfo.cs" />
+    <Compile Include="Output\DataTableCache.cs" />
+    <Compile Include="Output\DataTableUtils.cs" />
+    <Compile Include="Output\OutputDrivers\IOutput.cs" />
+    <Compile Include="Helpers\LoggingHelpers.cs" />
+    <Compile Include="Output\OutputDrivers\OutputDbFactory.cs" />
+    <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PalMonAgent.cs" />
     <Compile Include="PalMonConfig\PalMonConfigReader.cs" />
     <Compile Include="PalMonConfig\PalMonConfigSection.cs" />
@@ -188,6 +198,7 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="App.config" />
     <None Include="Config\PalMon.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -230,10 +241,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DataTableWriter\DataTableWriter.csproj">
-      <Project>{4b340b47-c905-459c-85ea-75611f0e8b1c}</Project>
-      <Name>DataTableWriter</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Licensing\Licensing.csproj">
       <Project>{ef71c0c3-ffe7-4c3a-827b-b9386b0c47fa}</Project>
       <Name>Licensing</Name>

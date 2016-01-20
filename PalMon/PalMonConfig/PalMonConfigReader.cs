@@ -1,13 +1,8 @@
-﻿using DataTableWriter;
-using NLog;
+﻿using NLog;
 using System;
 using System.Configuration;
-using System.IO;
-using System.Reflection;
-using DataTableWriter.Connection;
-using DataTableWriter.Drivers;
-using DataTableWriter.Writers;
 using PalMon.Helpers;
+using PalMon.Output;
 
 namespace PalMon.Config
 {
@@ -53,24 +48,9 @@ namespace PalMon.Config
 
                 // Load ThreadInfoPollInterval.
                 options.ThreadInfoPollInterval = config.ThreadInfoPollInterval.Value;
-
-                // Load OutputMode.
-                var outputMode = config.OutputMode.Value;
-                if (outputMode.Equals("DB", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    options.Writer = LoadDbWriterFromConfig(config);
-                    options.TableName = config.Database.Table.Name;
-
-                }
-                else if (outputMode.Equals("CSV", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    options.Writer = LoadCsvWriter();
-                    options.TableName = "countersamples";
-                }
-                else
-                {
-                    Log.Fatal("Invalid output mode specified in configuration!");
-                }
+                options.DatabaseType = config.Database.Type;
+                // store the result database details
+                options.ResultDatabase = CreateDbConnectionInfo(config.Database);
 
                 // Load thread monitoring configuration
                 options.Processes = new System.Collections.Generic.List<string>();
@@ -125,24 +105,8 @@ namespace PalMon.Config
 
         #region Private Methods
 
-        /// <summary>
-        /// Initializes a new Database Writer object using a PalMonConfig.
-        /// </summary>
-        /// <param name="config">User's PalMon.config file containing the required Db Writer parameters.</param>
-        /// <returns>Initialized DataTableDbWriter object.</returns>
-        private static DataTableDbWriter LoadDbWriterFromConfig(PalMonConfig config)
+        private static IDbConnectionInfo CreateDbConnectionInfo(Database databaseConfig)
         {
-            DbDriverType dbDriverType;
-
-            Log.Debug("Loading database configuration..");
-            var databaseConfig = config.Database;
-
-            var validDriverType = Enum.TryParse(databaseConfig.Type, true, out dbDriverType);
-            if (!validDriverType)
-            {
-                throw new ConfigurationErrorsException("Invalid database driver type specified!");
-            }
-
             IDbConnectionInfo dbConnInfo = new DbConnectionInfo()
             {
                 Server = databaseConfig.Server.Host,
@@ -152,52 +116,14 @@ namespace PalMon.Config
                 DatabaseName = databaseConfig.Name
             };
 
+
+
             if (!dbConnInfo.Valid())
             {
                 throw new ConfigurationErrorsException("Missing required database connection information!");
             }
 
-            var tableInitializationOptions = new DbTableInitializationOptions()
-            {
-                CreateTableDynamically = true,
-                UpdateDbTableToMatchSchema = true,
-                UpdateSchemaToMatchDbTable = true
-            };
-
-            Log.Info("Connecting to results database..");
-            try
-            {
-                return new DataTableDbWriter(dbDriverType, dbConnInfo, tableInitializationOptions);
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal("Could not initialize writer: " + ex);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new CSV Writer object.
-        /// </summary>
-        /// <returns>Initialized DataTableCSVWriter object.</returns>
-        private static DataTableCsvWriter LoadCsvWriter()
-        {
-            Log.Info("Initializing CSV writer..");
-            // Set up output directory & filename.
-            var resultOutputDirectory = Directory.GetCurrentDirectory() + @"\Results";
-            var csvFileName = String.Format("PalMonResult_{0}.csv", DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-            var csvFilePath = resultOutputDirectory + @"\" + csvFileName;
-
-            try
-            {
-                Directory.CreateDirectory(resultOutputDirectory);
-                return new DataTableCsvWriter(csvFilePath);
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal("Could not open file stream to {0}: {1}", csvFileName, ex);
-                return null;
-            }
+            return dbConnInfo;
         }
 
         #endregion
