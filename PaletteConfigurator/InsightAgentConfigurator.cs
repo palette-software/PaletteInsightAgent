@@ -29,6 +29,7 @@ namespace PaletteConfigurator
             }
         }
 
+        private const string ConfigFolderName = "Config";
         private const string ConfigFileName = "PalMon.Config";
         private InsightAgentConfiguration config;
 
@@ -106,6 +107,56 @@ namespace PaletteConfigurator
             };
         }
 
+        private void LoadFromFolder(string folderName)
+        {
+            var configPath = GetConfigFilePath(folderName);
+            try
+            {
+                // serialize the config
+                XmlSerializer writer = new XmlSerializer(typeof(PalMonConfiguration));
+                // try to create the directory
+                using (var file = new FileStream(configPath, FileMode.Open))
+                {
+                    var result = (PalMonConfiguration)writer.Deserialize(file);
+                    Config = ConfigConverter.FromPalMonConfig(folderName, result);
+
+                    // Add the processes
+                    processListView.BeginUpdate();
+                    processListView.Items.Clear();
+                    foreach(var process in Config.Processes)
+                    {
+                        processListView.Items.Add(process);
+                    }
+                    processListView.EndUpdate();
+
+                    // Add the clusters
+
+                    clusterTreeView.BeginUpdate();
+                    clusterTreeView.Nodes.Clear();
+                    foreach(var cluster in Config.Clusters)
+                    {
+                        var clusterNode = clusterTreeView.Nodes.Add(cluster.ClusterName);
+                        foreach(var node in cluster.Nodes)
+                        {
+                            clusterNode.Nodes.Add(node);
+                        }
+                    }
+                    clusterTreeView.ExpandAll();
+                    clusterTreeView.EndUpdate();
+
+
+                    MessageBox.Show("Configuration successfuly loaded from:\n" + configPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    String.Format("Cannot load configuration from:\n{0}\nreason:\n{1}", configPath, ex.Message));
+
+            }
+
+        }
+
         /// <summary>
         /// Serializes the configuration to a file
         /// </summary>
@@ -113,36 +164,23 @@ namespace PaletteConfigurator
         /// <param name="e"></param>
         private void saveConfigButton_Click(object sender, EventArgs e)
         {
-            var outputPath = Path.Combine(config.AgentFolder, ConfigFileName);
+            string outputPath = GetConfigFilePath(config.AgentFolder);
             try
             {
-                // Collect the process information
-                var processes = new List<string>();
-                foreach(ListViewItem item in processListView.Items)
-                {
-                    processes.Add(item.Text);
-                }
-
-                // collect the cluster information
-                var clusters = new List<ClusterData>();
-                foreach(TreeNode cluster in clusterTreeView.Nodes)
-                {
-                    // collect the child nodes
-                    var clusterNodes = new List<string>();
-                    foreach(TreeNode clusterNode in cluster.Nodes)
-                    {
-                        clusterNodes.Add(clusterNode.Text);
-
-                    }
-                    clusters.Add(new ClusterData
-                    {
-                        ClusterName = cluster.Text,
-                        Nodes = clusterNodes
-                    });
-                }
+                UpdateProcessesAndClustersInConfig();
                 // serialize the config
-                PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config, processes, clusters);
+                PalMonConfiguration configOut = ConfigConverter.ConfigToPalMonConfig(Config);
                 XmlSerializer writer = new XmlSerializer(configOut.GetType());
+                // try to create the directory
+                try
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                }
+                catch (Exception)
+                {
+                    // the directory 
+                }
+
                 using (var file = new FileStream(outputPath, FileMode.Create))
                 {
                     writer.Serialize(file, configOut);
@@ -155,6 +193,42 @@ namespace PaletteConfigurator
                     String.Format("Cannot save configuration to:\n{0}\nreason:\n{1}", outputPath, ex.Message));
 
             }
+        }
+
+        private string GetConfigFilePath(string agentFolder)
+        {
+            return Path.Combine(agentFolder, ConfigFolderName, ConfigFileName);
+        }
+
+        private void UpdateProcessesAndClustersInConfig()
+        {
+            // Collect the process information
+            var processes = new List<string>();
+            foreach (ListViewItem item in processListView.Items)
+            {
+                processes.Add(item.Text);
+            }
+
+            // collect the cluster information
+            var clusters = new List<ClusterData>();
+            foreach (TreeNode cluster in clusterTreeView.Nodes)
+            {
+                // collect the child nodes
+                var clusterNodes = new List<string>();
+                foreach (TreeNode clusterNode in cluster.Nodes)
+                {
+                    clusterNodes.Add(clusterNode.Text);
+
+                }
+                clusters.Add(new ClusterData
+                {
+                    ClusterName = cluster.Text,
+                    Nodes = clusterNodes
+                });
+            }
+            // update the configuration
+            Config.Processes = processes;
+            Config.Clusters = clusters;
         }
 
         #region processes
@@ -217,6 +291,11 @@ namespace PaletteConfigurator
             var removeFrom = (selected.Parent == null) ? clusterTreeView.Nodes : selected.Parent.Nodes;
             removeFrom.Remove(selected);
             clusterTreeView.EndUpdate();
+        }
+
+        private void loadConfigurationButton_Click(object sender, EventArgs e)
+        {
+            LoadFromFolder(config.AgentFolder);
         }
     }
 }

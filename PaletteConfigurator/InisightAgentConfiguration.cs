@@ -21,6 +21,9 @@ namespace PaletteConfigurator
         public int LogPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
 
+        public List<ClusterData> Clusters { get; set; }
+        public List<string> Processes { get; set; }
+
     }
 
     public class ClusterData
@@ -135,7 +138,7 @@ namespace PaletteConfigurator
             public List<Host> Hosts { get; set; }
         }
 
-        [XmlRoot(ElementName = "PalMonConfig")]
+        [XmlRoot(ElementName = "PalMonConfig", Namespace ="PalMon")]
         public class PalMonConfiguration
         {
 
@@ -177,7 +180,7 @@ namespace PaletteConfigurator
             /// </summary>
             /// <param name="cfg"></param>
             /// <returns></returns>
-            public static PalMonConfiguration ConfigToPalMonConfig(InsightAgentConfiguration cfg, IEnumerable<string> processes, IEnumerable<ClusterData> clusters)
+            public static PalMonConfiguration ConfigToPalMonConfig(InsightAgentConfiguration cfg)
             {
                 return new PalMonConfiguration
                 {
@@ -185,8 +188,8 @@ namespace PaletteConfigurator
                     PollInterval = new IntValue(cfg.PollInterval),
                     LogPollInterval = new IntValue(cfg.LogPollInterval),
                     ThreadInfoPollInterval = new IntValue(cfg.ThreadInfoPollInterval),
-                    Processes = processes.Select(x => new Process { Name = x }).ToList(),
-                    Clusters = clusters.Select(x => new Cluster {
+                    Processes = cfg.Processes.Select(x => new Process { Name = x }).ToList(),
+                    Clusters = cfg.Clusters.Select(x => new Cluster {
                         Name = x.ClusterName,
                         Hosts = x.Nodes.Select( node => new Host { Name = node }).ToList()
                     }).ToList(),
@@ -223,6 +226,51 @@ namespace PaletteConfigurator
                         Directory = cfg.LogWatchFolder,
                         Filter = cfg.LogWatchMask
                     }
+                };
+            }
+
+
+            public static InsightAgentConfiguration FromPalMonConfig(string agentFolder, PalMonConfiguration conf)
+            {
+                return new InsightAgentConfiguration
+                {
+                    ThreadInfoPollInterval = conf.ThreadInfoPollInterval.Value,
+                    LogPollInterval = conf.LogPollInterval.Value,
+                    PollInterval = conf.PollInterval.Value,
+
+                    AgentFolder = agentFolder,
+                    LogWatchFolder = conf.LogPoller.Directory,
+                    LogWatchMask = conf.LogPoller.Filter,
+
+                    TableauRepo = new DbDetails
+                    {
+                        Host = conf.TableauRepo.Host,
+                        Port = conf.TableauRepo.Port,
+                        Username = conf.TableauRepo.Username,
+                        Password = conf.TableauRepo.Password,
+                        Database = conf.TableauRepo.Db
+                    },
+
+                    ResultsDatabase = new DbDetails
+                    {
+                        Host = conf.Database.Server.Host,
+                        Port = conf.Database.Server.Port,
+                        Username = conf.Database.User.Login,
+                        Password = conf.Database.User.Password,
+                        Database = conf.Database.Name
+                    },
+                    Clusters = conf.Clusters.Select( cluster => new ClusterData
+                        {
+                            ClusterName = cluster.Name,
+                            Nodes = cluster.Hosts.Select(host => host.Name).ToList()
+                        }).ToList(),
+
+                    Processes = conf.Processes.Select(proc => proc.Name).ToList()
+
+
+                   
+
+
                 };
             }
         }

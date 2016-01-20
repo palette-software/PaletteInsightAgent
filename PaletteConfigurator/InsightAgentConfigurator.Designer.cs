@@ -60,6 +60,7 @@
             this.logfilesFolderSelector = new PaletteConfigurator.FolderSelector();
             this.tableauRepo = new PaletteConfigurator.DbConfigurator();
             this.resultDbConfiguration = new PaletteConfigurator.DbConfigurator();
+            this.loadConfigurationButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.configBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.threadPollNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pollIntervalNumeric)).BeginInit();
@@ -98,7 +99,7 @@
             // 
             // saveConfigButton
             // 
-            this.saveConfigButton.Location = new System.Drawing.Point(11, 567);
+            this.saveConfigButton.Location = new System.Drawing.Point(11, 537);
             this.saveConfigButton.Name = "saveConfigButton";
             this.saveConfigButton.Size = new System.Drawing.Size(163, 23);
             this.saveConfigButton.TabIndex = 7;
@@ -393,10 +394,21 @@
             this.resultDbConfiguration.Size = new System.Drawing.Size(530, 110);
             this.resultDbConfiguration.TabIndex = 0;
             // 
+            // loadConfigurationButton
+            // 
+            this.loadConfigurationButton.Location = new System.Drawing.Point(9, 580);
+            this.loadConfigurationButton.Name = "loadConfigurationButton";
+            this.loadConfigurationButton.Size = new System.Drawing.Size(163, 23);
+            this.loadConfigurationButton.TabIndex = 36;
+            this.loadConfigurationButton.Text = "Load Configuration";
+            this.loadConfigurationButton.UseVisualStyleBackColor = true;
+            this.loadConfigurationButton.Click += new System.EventHandler(this.loadConfigurationButton_Click);
+            // 
             // InsightAgentConfigurator
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.loadConfigurationButton);
             this.Controls.Add(this.addClusterNodeButton);
             this.Controls.Add(this.deleteClusterButton);
             this.Controls.Add(this.addClusterButton);
@@ -472,5 +484,6 @@
         private System.Windows.Forms.Button deleteClusterButton;
         private System.Windows.Forms.Button addClusterButton;
         private System.Windows.Forms.Button addClusterNodeButton;
+        private System.Windows.Forms.Button loadConfigurationButton;
     }
 }
