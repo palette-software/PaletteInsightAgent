@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?define ApplicationName = "PalMon"?>
 <?define ProductVersion = "2.1.0"?>
-<?define Manufacturer = "Tableau"?>
-<?define HelpLink = "http://www.tableau.com"?>
-<?define UrlInfoAbout = "http://www.tableau.com"?>
+<?define Manufacturer = "Palette Software"?>
+<?define HelpLink = "http://www.palette-software.com"?>
+<?define UrlInfoAbout = "http://www.palette-software.com"?>
 <?define ProductUpgradeCode = "8c39f7f6-ad31-4efd-96ae-1f6f1a5e4f3a"?>
 <?define IconFile = "..\PalMonService\Resources\PalMon.ico"?>
 <?define BinFolder = "..\PalMonService\bin\Release"?>
+<?define ConfiguratorFolder = "..\PaletteConfigurator\bin\Release"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
   <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
@@ -53,6 +54,11 @@
 
     <!-- Main Application Folder -->
     <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="ConfiguratorTool" Guid="277511fb-37f4-482f-ac43-d02b7474663f">
+        <!-- Main EXE file -->
+        <File Id="PaletteConfigurator.exe" Name="PaletteConfigurator.exe" DiskId="1" Vital="yes" Source="$(var.ConfiguratorFolder)\PaletteConfigurator.exe" />
+        <File Id="ConfiguratorAppConfig" Name="PaletteConfigurator.exe.config" DiskId="1" Vital="yes" Source="$(var.ConfiguratorFolder)\PaletteConfigurator.exe.config" />
+      </Component>
       <Component Id="Executable" Guid="9fd4a8c4-6da6-49a8-91ab-e40db98efcde">
         <!-- Main EXE file -->
         <File Id="PalMonExe" Name="PalMon.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PalMon.exe" />
@@ -119,13 +125,13 @@
         <Condition>(INSTALLSHORTCUTS = 1)</Condition>
         <Shortcut Id="StartApplicationStartMenuShortcut"
                   Name="Start $(var.ApplicationName)"
-                  Description="Start Tableau Server performance monitoring agent"
+                  Description="Start Palette Server performance monitoring agent"
                   Target="[#StartPalMonScript]"
                   Icon="ProductIcon"
                   WorkingDirectory="INSTALLFOLDER"/>
         <Shortcut Id="StopApplicationStartMenuShortcut"
                   Name="Stop $(var.ApplicationName)"
-                  Description="Stop Tableau Server performance monitoring agent"
+                  Description="Stop Palette Server performance monitoring agent"
                   Target="[#StopPalMonScript]"
                   Icon="ProductIcon"
                   WorkingDirectory="INSTALLFOLDER"/>
@@ -143,6 +149,7 @@
     <Feature Id='Complete' Title='$(var.ApplicationName)' Description='The complete package.' Display='expand' Level='1' ConfigurableDirectory='TARGETDIR'>
       <Feature Id='MainProgram' Title="$(var.ApplicationName)" Description='$(var.ApplicationName) main program.' Level='1'>
         <ComponentRef Id='Executable' />
+        <ComponentRef Id='ConfiguratorTool' />
         <ComponentRef Id='Libraries' />
         <ComponentRef Id='ConfigFiles' />
         <ComponentRef Id='Resources' />

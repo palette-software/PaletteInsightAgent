@@ -120,30 +120,7 @@ namespace PaletteConfigurator
                     var result = (PalMonConfiguration)writer.Deserialize(file);
                     Config = ConfigConverter.FromPalMonConfig(folderName, result);
 
-                    // Add the processes
-                    processListView.BeginUpdate();
-                    processListView.Items.Clear();
-                    foreach(var process in Config.Processes)
-                    {
-                        processListView.Items.Add(process);
-                    }
-                    processListView.EndUpdate();
-
-                    // Add the clusters
-
-                    clusterTreeView.BeginUpdate();
-                    clusterTreeView.Nodes.Clear();
-                    foreach(var cluster in Config.Clusters)
-                    {
-                        var clusterNode = clusterTreeView.Nodes.Add(cluster.ClusterName);
-                        foreach(var node in cluster.Nodes)
-                        {
-                            clusterNode.Nodes.Add(node);
-                        }
-                    }
-                    clusterTreeView.ExpandAll();
-                    clusterTreeView.EndUpdate();
-
+                    UpdateProcessAndListboxFromConfig();
 
                     MessageBox.Show("Configuration successfuly loaded from:\n" + configPath);
                 }
@@ -155,6 +132,33 @@ namespace PaletteConfigurator
 
             }
 
+        }
+
+        private void UpdateProcessAndListboxFromConfig()
+        {
+            // Add the processes
+            processListView.BeginUpdate();
+            processListView.Items.Clear();
+            foreach (var process in Config.Processes)
+            {
+                processListView.Items.Add(process);
+            }
+            processListView.EndUpdate();
+
+            // Add the clusters
+
+            clusterTreeView.BeginUpdate();
+            clusterTreeView.Nodes.Clear();
+            foreach (var cluster in Config.Clusters)
+            {
+                var clusterNode = clusterTreeView.Nodes.Add(cluster.ClusterName);
+                foreach (var node in cluster.Nodes)
+                {
+                    clusterNode.Nodes.Add(node);
+                }
+            }
+            clusterTreeView.ExpandAll();
+            clusterTreeView.EndUpdate();
         }
 
         /// <summary>
@@ -273,6 +277,15 @@ namespace PaletteConfigurator
 
 
             var selected = clusterTreeView.SelectedNode;
+            if (selected == null)
+            {
+                if (clusterTreeView.Nodes.Count > 0)
+                {
+                    selected = clusterTreeView.Nodes[0];
+                }
+                // if no clusters, then we cant add a new node
+                else return;
+            }
             var targetCluster = (selected.Parent == null) ? selected : selected.Parent;
             var newNode = targetCluster.Nodes.Add(nodeName);
 
