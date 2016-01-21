@@ -81,7 +81,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = global::PaletteGUI.Properties.Resources.palette_header_bar_bg_1800;
+            this.BackgroundImage = global::LicenseGenerator.Properties.Resources.palette_header_bar_bg_1800;
             this.Controls.Add(this.headerSmoothLabel);
             this.Controls.Add(this.supportCenterLink);
             this.Controls.Add(this.paletteSiteLink);
