@@ -95,7 +95,7 @@
     <Content Include="Documentation\UserGuide.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\PalMon.ico">
+    <Content Include="Resources\palette_symbol.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
