@@ -10,10 +10,10 @@ using System.Xml;
 
 namespace PalMon.LogPoller
 {
-    public class LogPollerConfigurationSection : ConfigurationSection
+    public class LogFolderConfigurationSection : ConfigurationSection
     {
 
-        public LogPollerConfigurationSection()
+        public LogFolderConfigurationSection()
         {
 
         }
@@ -51,7 +51,7 @@ namespace PalMon.LogPoller
     }
 
 
-    public partial class LogPollerConfigElement : global::System.Configuration.ConfigurationElement
+    public partial class LogFolderConfigElement : global::System.Configuration.ConfigurationElement
     {
         #region IsReadOnly override
 
@@ -80,16 +80,16 @@ namespace PalMon.LogPoller
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
         [global::System.ComponentModel.DescriptionAttribute("The name of the instantiated database.")]
         [global::System.Configuration.StringValidatorAttribute(InvalidCharacters = "", MaxLength = 2147483647, MinLength = 1)]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogPollerConfigElement.DirectoryPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = "PalMon")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogFolderConfigElement.DirectoryPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = "PalMon")]
         public virtual string Directory
         {
             get
             {
-                return ((string)(base[global::PalMon.LogPoller.LogPollerConfigElement.DirectoryPropertyName]));
+                return ((string)(base[global::PalMon.LogPoller.LogFolderConfigElement.DirectoryPropertyName]));
             }
             set
             {
-                base[global::PalMon.LogPoller.LogPollerConfigElement.DirectoryPropertyName] = value;
+                base[global::PalMon.LogPoller.LogFolderConfigElement.DirectoryPropertyName] = value;
             }
         }
 
@@ -108,16 +108,16 @@ namespace PalMon.LogPoller
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
         [global::System.ComponentModel.DescriptionAttribute("Contains information about the database server location.")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogPollerConfigElement.FilterPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogFolderConfigElement.FilterPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
         public virtual string Filter
         {
             get
             {
-                return ((string)(base[global::PalMon.LogPoller.LogPollerConfigElement.FilterPropertyName]));
+                return ((string)(base[global::PalMon.LogPoller.LogFolderConfigElement.FilterPropertyName]));
             }
             set
             {
-                base[global::PalMon.LogPoller.LogPollerConfigElement.FilterPropertyName] = value;
+                base[global::PalMon.LogPoller.LogFolderConfigElement.FilterPropertyName] = value;
             }
         }
 
@@ -136,16 +136,16 @@ namespace PalMon.LogPoller
         ///// </summary>
         //[global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
         //[global::System.ComponentModel.DescriptionAttribute("Contains information about the database user.")]
-        //[global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogPollerConfigElement.UserPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        //[global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogFolderConfigElement.UserPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
         //public virtual global::PalMon.LogPoller.User User
         //{
         //    get
         //    {
-        //        return ((global::PalMon.LogPoller.User)(base[global::PalMon.LogPoller.LogPollerConfigElement.UserPropertyName]));
+        //        return ((global::PalMon.LogPoller.User)(base[global::PalMon.LogPoller.LogFolderConfigElement.UserPropertyName]));
         //    }
         //    set
         //    {
-        //        base[global::PalMon.LogPoller.LogPollerConfigElement.UserPropertyName] = value;
+        //        base[global::PalMon.LogPoller.LogFolderConfigElement.UserPropertyName] = value;
         //    }
         //}
 
@@ -164,28 +164,28 @@ namespace PalMon.LogPoller
         ///// </summary>
         //[global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
         //[global::System.ComponentModel.DescriptionAttribute("Contains information about the results table.")]
-        //[global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogPollerConfigElement.TablePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        //[global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.LogPoller.LogFolderConfigElement.TablePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
         //public virtual global::PalMon.LogPoller.Table Table
         //{
         //    get
         //    {
-        //        return ((global::PalMon.LogPoller.Table)(base[global::PalMon.LogPoller.LogPollerConfigElement.TablePropertyName]));
+        //        return ((global::PalMon.LogPoller.Table)(base[global::PalMon.LogPoller.LogFolderConfigElement.TablePropertyName]));
         //    }
         //    set
         //    {
-        //        base[global::PalMon.LogPoller.LogPollerConfigElement.TablePropertyName] = value;
+        //        base[global::PalMon.LogPoller.LogFolderConfigElement.TablePropertyName] = value;
         //    }
         //}
 
         //#endregion Table Property
     }
 
-    class LogPollerConfigurationLoader
+    class LogFolderConfigurationLoader
     {
 
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public static LogPollerConfigurationSection load()
+        public static LogFolderConfigurationSection load()
         {
             Configuration config;
             // Load the config file
@@ -203,11 +203,11 @@ namespace PalMon.LogPoller
             // Get the section
             try
             {
-                return config.GetSection("LogPoller") as LogPollerConfigurationSection;
+                return config.GetSection("LogFolder") as LogFolderConfigurationSection;
             }
             catch (ConfigurationErrorsException err)
             {
-                Log.Fatal(err, "Cannot find configuration section: 'LogPoller'. Exception: {0}", err);
+                Log.Fatal(err, "Cannot find configuration section: 'LogFolder'. Exception: {0}", err);
                 throw;
             }
 

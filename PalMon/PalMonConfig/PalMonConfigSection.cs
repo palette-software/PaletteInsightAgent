@@ -112,33 +112,33 @@ namespace PalMon.Config
 
         #endregion Database Property
 
-        #region LogPoller Property
+        #region LogFolder Property
 
         /// <summary>
         /// The XML name of the <see cref="Database"/> property.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
-        internal const string LogPollerPropertyName = "LogPoller";
+        internal const string LogFolderPropertyName = "LogFolder";
 
         /// <summary>
         /// Gets or sets contains configuration information for the results database.  Only required if OutputMode is "DB".
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
         [global::System.ComponentModel.DescriptionAttribute("Log Poller Properties")]
-        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.PalMonConfig.LogPollerPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
-        public virtual global::PalMon.LogPoller.LogPollerConfigElement LogPoller
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.PalMonConfig.LogFolderPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::PalMon.LogPoller.LogFolderConfigElement LogFolder
         {
             get
             {
-                return ((global::PalMon.LogPoller.LogPollerConfigElement)(base[global::PalMon.Config.PalMonConfig.LogPollerPropertyName]));
+                return ((global::PalMon.LogPoller.LogFolderConfigElement)(base[global::PalMon.Config.PalMonConfig.LogFolderPropertyName]));
             }
             set
             {
-                base[global::PalMon.Config.PalMonConfig.LogPollerPropertyName] = value;
+                base[global::PalMon.Config.PalMonConfig.LogFolderPropertyName] = value;
             }
         }
 
-        #endregion LogPoller Property
+        #endregion LogFolder Property
 
         #region TableauRepo Property
 
@@ -195,6 +195,34 @@ namespace PalMon.Config
         }
 
         #endregion Processes Property
+
+        #region Logs Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Logs"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string LogsPropertyName = "Logs";
+
+        /// <summary>
+        /// Gets or sets contains definitions of which machines to monitor and their logical clustering.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Contains definitions of which machines to monitor and their logical clustering.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.PalMonConfig.LogsPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::PalMon.Config.Logs Logs
+        {
+            get
+            {
+                return ((global::PalMon.Config.Logs)(base[global::PalMon.Config.PalMonConfig.LogsPropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.PalMonConfig.LogsPropertyName] = value;
+            }
+        }
+
+        #endregion Logs Property
 
         #region Clusters Property
 
@@ -1081,6 +1109,84 @@ namespace PalMon.Config
     /// <summary>
     /// Contains information about a process that is being monitored
     /// </summary>
+    public partial class LogFolder : global::System.Configuration.ConfigurationElement
+    {
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+
+        #region Directory Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Directory"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string DirectoryPropertyName = "directory";
+
+        /// <summary>
+        /// Gets or sets the interval between polling cycles, in seconds.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Directory that is to be monitored.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.LogFolder.DirectoryPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual string Directory
+        {
+            get
+            {
+                return ((string)(base[global::PalMon.Config.LogFolder.DirectoryPropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.LogFolder.DirectoryPropertyName] = value;
+            }
+        }
+
+        #endregion Directory Property
+
+        #region Filter Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Filter"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string FilterPropertyName = "filter";
+
+        /// <summary>
+        /// Gets or sets the interval between polling cycles, in seconds.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Filter that is to be monitored.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.LogFolder.FilterPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual string Filter
+        {
+            get
+            {
+                return ((string)(base[global::PalMon.Config.LogFolder.FilterPropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.LogFolder.FilterPropertyName] = value;
+            }
+        }
+
+        #endregion Filter Property
+    }
+}
+
+namespace PalMon.Config
+{
+    /// <summary>
+    /// Contains information about a process that is being monitored
+    /// </summary>
     public partial class Process : global::System.Configuration.ConfigurationElement
     {
         #region IsReadOnly override
@@ -1410,6 +1516,187 @@ namespace PalMon.Config
     }
 }
 
+namespace PalMon.Config
+{
+    /// <summary>
+    /// Contains definitions of which machines to monitor and their logical clustering.  Each cluster may contain multiple hosts.
+    /// </summary>
+    [global::System.Configuration.ConfigurationCollectionAttribute(typeof(global::PalMon.Config.LogFolder), CollectionType = global::System.Configuration.ConfigurationElementCollectionType.BasicMapAlternate, AddItemName = global::PalMon.Config.Logs.LogFolderPropertyName)]
+    public partial class Logs : global::System.Configuration.ConfigurationElementCollection
+    {
+        #region Constants
+
+        /// <summary>
+        /// The XML name of the individual <see cref="global::PalMon.Config.LogFolder"/> instances in this collection.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string LogFolderPropertyName = "LogFolder";
+
+        #endregion Constants
+
+        #region Overrides
+
+        /// <summary>
+        /// Gets the type of the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <returns>The <see cref="global::System.Configuration.ConfigurationElementCollectionType"/> of this collection.</returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override global::System.Configuration.ConfigurationElementCollectionType CollectionType
+        {
+            get
+            {
+                return global::System.Configuration.ConfigurationElementCollectionType.BasicMapAlternate;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name used to identify this collection of elements
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override string ElementName
+        {
+            get
+            {
+                return global::PalMon.Config.Logs.LogFolderPropertyName;
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether the specified <see cref="global::System.Configuration.ConfigurationElement"/> exists in the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <param name="elementName">The name of the element to verify.</param>
+        /// <returns>
+        /// <see langword="true"/> if the element exists in the collection; otherwise, <see langword="false"/>.
+        /// </returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override bool IsElementName(string elementName)
+        {
+            return (elementName == global::PalMon.Config.Logs.LogFolderPropertyName);
+        }
+
+        /// <summary>
+        /// Gets the element key for the specified configuration element.
+        /// </summary>
+        /// <param name="element">The <see cref="global::System.Configuration.ConfigurationElement"/> to return the key for.</param>
+        /// <returns>
+        /// An <see cref="object"/> that acts as the key for the specified <see cref="global::System.Configuration.ConfigurationElement"/>.
+        /// </returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override object GetElementKey(global::System.Configuration.ConfigurationElement element)
+        {
+            return ((global::PalMon.Config.LogFolder)(element)).Directory;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="global::PalMon.Config.LogFolder"/>.
+        /// </summary>
+        /// <returns>
+        /// A new <see cref="global::PalMon.Config.LogFolder"/>.
+        /// </returns>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        protected override global::System.Configuration.ConfigurationElement CreateNewElement()
+        {
+            return new global::PalMon.Config.LogFolder();
+        }
+
+        #endregion Overrides
+
+        #region Indexer
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.LogFolder"/> at the specified index.
+        /// </summary>
+        /// <param name="index">The index of the <see cref="global::PalMon.Config.LogFolder"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.LogFolder this[int index]
+        {
+            get
+            {
+                return ((global::PalMon.Config.LogFolder)(base.BaseGet(index)));
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.LogFolder"/> with the specified key.
+        /// </summary>
+        /// <param name="name">The key of the <see cref="global::PalMon.Config.LogFolder"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.LogFolder this[object name]
+        {
+            get
+            {
+                return ((global::PalMon.Config.LogFolder)(base.BaseGet(name)));
+            }
+        }
+
+        #endregion Indexer
+
+        #region Add
+
+        /// <summary>
+        /// Adds the specified <see cref="global::PalMon.Config.LogFolder"/> to the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <param name="LogFolder">The <see cref="global::PalMon.Config.LogFolder"/> to add.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public void Add(global::PalMon.Config.LogFolder LogFolder)
+        {
+            base.BaseAdd(LogFolder);
+        }
+
+        #endregion Add
+
+        #region Remove
+
+        /// <summary>
+        /// Removes the specified <see cref="global::PalMon.Config.LogFolder"/> from the <see cref="global::System.Configuration.ConfigurationElementCollection"/>.
+        /// </summary>
+        /// <param name="LogFolder">The <see cref="global::PalMon.Config.LogFolder"/> to remove.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public void Remove(global::PalMon.Config.LogFolder LogFolder)
+        {
+            base.BaseRemove(this.GetElementKey(LogFolder));
+        }
+
+        #endregion Remove
+
+        #region GetItem
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.LogFolder"/> at the specified index.
+        /// </summary>
+        /// <param name="index">The index of the <see cref="global::PalMon.Config.LogFolder"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.LogFolder GetItemAt(int index)
+        {
+            return ((global::PalMon.Config.LogFolder)(base.BaseGet(index)));
+        }
+
+        /// <summary>
+        /// Gets the <see cref="global::PalMon.Config.LogFolder"/> with the specified key.
+        /// </summary>
+        /// <param name="name">The key of the <see cref="global::PalMon.Config.LogFolder"/> to retrieve.</param>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public global::PalMon.Config.LogFolder GetItemByKey(string name)
+        {
+            return ((global::PalMon.Config.LogFolder)(base.BaseGet(((object)(name)))));
+        }
+
+        #endregion GetItem
+
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+    }
+}
 namespace PalMon.Config
 {
     /// <summary>
