@@ -70,8 +70,10 @@ namespace PalMon.ThreadInfoPoller
         {
             try
             {
+                // Store the total processor time of the whole process so that we can do sanity checks on the sum of thread cpu times
                 addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks);
                 serverLogsTableCount++;
+
                 foreach (ProcessThread thread in process.Threads)
                 {
                     addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks);
