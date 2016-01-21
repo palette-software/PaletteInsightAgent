@@ -97,7 +97,19 @@ namespace PalMon.Output
             {typeof(float), (o)=> ((float)o).ToString("F6", CultureInfo.InvariantCulture) },
             {typeof(double), (o)=> ((double)o).ToString("F12", CultureInfo.InvariantCulture) },
             {typeof(DateTime), (o) => ((DateTime)o).ToString("yyyy-MM-dd HH:mm:ss.fff") },
-            {typeof(string), (o) => ((string)o).Replace("\n", "\\n").Replace("\t", "    ").Replace("\r", "\\r") },
+            // escape a string properly:
+            // http://www.postgresql.org/docs/9.4/static/sql-copy.html
+            // Backslash characters (\) can be used in the COPY data to quote data
+            // characters that might otherwise be taken as row or column delimiters. 
+            // In particular, the following characters must be preceded by a backslash
+            // if they appear as part of a column value: backslash itself, newline,
+            // carriage return, and the current delimiter character.
+            {typeof(string), (o) => ((string)o)
+                .Replace("\\", "\\\\")
+                .Replace("\n", "\\n")
+                .Replace("\r", "\\r")
+                .Replace("\t", "    ")
+            },
             {typeof(DBNull), (o) => "" }
         };
 
