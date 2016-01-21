@@ -54,26 +54,33 @@ namespace PalMon.ThreadInfoPoller
             }
         }
 
+        protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks)
+        {
+            ThreadInfo threadInfo = new ThreadInfo();
+            threadInfo.processId = process.Id;
+            threadInfo.threadId = threadId;
+            threadInfo.cpuTime = ticks;
+            threadInfo.pollTimeStamp = DateTimeOffset.Now.UtcDateTime;
+            threadInfo.host = HostName;
+            threadInfo.instance = process.ProcessName;
+            ThreadTables.addToTable(table, threadInfo);
+        }
+
         protected void pollThreadCountersOfProcess(Process process, DataTable table, ref long serverLogsTableCount)
         {
             try
             {
+                addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks);
+                serverLogsTableCount++;
                 foreach (ProcessThread thread in process.Threads)
                 {
-                    ThreadInfo threadInfo = new ThreadInfo();
-                    threadInfo.processId = process.Id;
-                    threadInfo.threadId = thread.Id;
-                    threadInfo.cpuTime = thread.TotalProcessorTime.Ticks;
-                    threadInfo.pollTimeStamp = DateTimeOffset.Now.UtcDateTime;
-                    threadInfo.host = HostName;
-                    threadInfo.instance = process.ProcessName;
-                    ThreadTables.addToTable(table, threadInfo);
+                    addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks);
                     serverLogsTableCount++;
                 }
             }
             catch (Exception ex)
             {
-                Log.Warn("Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message);
+                Log.Error("Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message);
             }
         }
     }
