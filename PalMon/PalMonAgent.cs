@@ -74,7 +74,7 @@ namespace PalMon
             if (USE_LOGPOLLER)
             {
                 // Load the log poller config & start the agent
-                logPollerAgent = new LogPollerAgent(options.FolderToWatch, options.DirectoryFilter,
+	            logPollerAgent = new LogPollerAgent(options.LogFolders,
                     options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
             }
 
