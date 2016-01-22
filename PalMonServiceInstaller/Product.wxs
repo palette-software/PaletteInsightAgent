@@ -61,7 +61,6 @@
       <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
         <!-- Required Libraries -->
         <File Id="PalMonLibDLL" Name="PalMonLib.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PalMonLib.dll" />
-        <!--<File Id="DataTableWriterDLL" Name="DataTableWriter.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\DataTableWriter.dll" />-->
         <File Id="CsvHelperDLL" Name="CsvHelper.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\CsvHelper.dll" />
         <File Id="IKVMOpenJDKCorbaDLL" Name="IKVM.OpenJDK.Corba.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Corba.dll" />
         <File Id="IKVMOpenJDKCoreDLL" Name="IKVM.OpenJDK.Core.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Core.dll" />
@@ -75,12 +74,10 @@
         <File Id="IKVMRuntimeDLL" Name="IKVM.Runtime.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.Runtime.dll" />
         <File Id="NLogDLL" Name="NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.dll" />
         <File Id="NLogXML" Name="NLog.xml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.xml" />
-        <!--<File Id="MonoSecurityDLL" Name="Mono.Security.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Mono.Security.dll" />-->
         <File Id="NpgsqlDLL" Name="Npgsql.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Npgsql.dll" />
         <File Id="TopshelfDLL" Name="Topshelf.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.dll" />
         <File Id="TopshelfNLogDLL" Name="Topshelf.NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.NLog.dll" />
         <File Id="NewtonsoftJSONDLL" Name="Newtonsoft.Json.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Newtonsoft.Json.dll" />
-        <!--<File Id="OracleManagedDataAccessDLL" Name="Oracle.ManagedDataAccess.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Oracle.ManagedDataAccess.dll" />-->
         <File Id="SodiumNetDLL" Name="libsodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium.dll" />
         <File Id="SodiumNet64DLL" Name="libsodium-64.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium-64.dll" />
         <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
