@@ -43,6 +43,10 @@ namespace PalMon.LicenseChecker
                     if (validLicense.isValid)
                     {
                         var license = validLicense.license;
+
+                        // Set a custom variable for NLog, so that we can filter on it in LogEntries
+                        NLog.GlobalDiagnosticsContext.Set("license_owner", license.owner);
+
                         Log.Info("Found valid license in {0}", f);
                         Log.Info("  - licensed to: {0}", license.owner);
                         Log.Info("  - licensed id is: {0}", license.licenseId);

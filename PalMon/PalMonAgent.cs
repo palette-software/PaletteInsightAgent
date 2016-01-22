@@ -52,12 +52,6 @@ namespace PalMon
             Assembly assembly = Assembly.GetExecutingAssembly();
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assembly.Location));
 
-            // Start the log by showing the current version.
-            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-            string version = fvi.FileVersion;
-            Log.Info("Starting up Palette Insight Agent with version: " + version);
-
-
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
             if (loadOptionsFromConfig)
@@ -65,13 +59,17 @@ namespace PalMon
                 PalMonConfigReader.LoadOptions();
             }
 
+            // check the license after the configuration has been loaded.
+            CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
+
+            // Showing the current version in the log
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+            Log.Info("Palette Insight Agent version: " + version);
 
             output = OutputDbFactory.DriverFor(options.DatabaseType, options.ResultDatabase);
             // initialize the output
             cachingOutput = new CachingOutput(output);
-
-            // check the license after the configuration has been loaded.
-            CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
 
             if (USE_LOGPOLLER)
             {
