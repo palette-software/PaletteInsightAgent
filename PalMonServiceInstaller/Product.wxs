@@ -74,6 +74,8 @@
         <File Id="IKVMRuntimeDLL" Name="IKVM.Runtime.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.Runtime.dll" />
         <File Id="NLogDLL" Name="NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.dll" />
         <File Id="NLogXML" Name="NLog.xml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.xml" />
+        <File Id="LogEntriesCoreDLL" Name="LogEntriesCore.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\LogEntriesCore.dll" />
+        <File Id="LogEntriesNLogDLL" Name="LogEntriesNLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\LogEntriesNLog.dll" />
         <File Id="NpgsqlDLL" Name="Npgsql.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Npgsql.dll" />
         <File Id="TopshelfDLL" Name="Topshelf.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.dll" />
         <File Id="TopshelfNLogDLL" Name="Topshelf.NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.NLog.dll" />
