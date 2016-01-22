@@ -13,6 +13,7 @@ using PalMon.Sampler;
 using PalMon.LogPoller;
 using PalMon.ThreadInfoPoller;
 using PalMon.Output;
+using System.Diagnostics;
 
 [assembly: CLSCompliant(true)]
 
@@ -48,8 +49,13 @@ namespace PalMon
         public PalMonAgent(bool loadOptionsFromConfig = true)
         {
             // Set the working directory
-            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyLocation));
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(assembly.Location));
+
+            // Start the log by showing the current version.
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+            Log.Info("Starting up Palette Insight Agent with version: " + version);
 
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
@@ -65,7 +71,7 @@ namespace PalMon
             cachingOutput = new CachingOutput(output);
 
             // check the license after the configuration has been loaded.
-            CheckLicense(Path.GetDirectoryName(assemblyLocation) + "\\");
+            CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
 
             if (USE_LOGPOLLER)
             {
@@ -104,7 +110,7 @@ namespace PalMon
             catch (Exception e)
             {
                 Log.Fatal(e, "Error during license check. Exception: {0}", e);
-				Environment.Exit(-1);
+                Environment.Exit(-1);
             }
         }
 
