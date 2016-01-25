@@ -10,6 +10,11 @@ namespace PalMon
     /// </summary>
     public class PalMonOptions
     {
+        public struct LogFolderInfo
+        {
+            public string FolderToWatch { get; set; }
+            public string DirectoryFilter { get; set; }
+        }
         [CLSCompliant(false)]
         public IDbConnectionInfo ResultDatabase { get; set; }
         public ICollection<Host> Hosts { get; set; }
@@ -22,13 +27,7 @@ namespace PalMon
         public ICollection<string> Processes { get; set; }
 
         public string DatabaseType { get; set; }
-
-        #region LogPoller config settings
-
-        public string FolderToWatch { get; set; }
-        public string DirectoryFilter { get; set; }
-
-        #endregion LogPoller config settings
+        public ICollection<LogFolderInfo> LogFolders { get; set; }
 
         #region Repo properties
 
@@ -44,6 +43,7 @@ namespace PalMon
 
         private PalMonOptions()
         {
+            LogFolders = new List<LogFolderInfo>();
             Hosts = new List<Host>();
         }
 
