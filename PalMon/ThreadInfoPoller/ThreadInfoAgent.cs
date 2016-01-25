@@ -81,7 +81,7 @@ namespace PalMon.ThreadInfoPoller
                         addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks);
                         serverLogsTableCount++;
                     }
-                    catch (InvalidOperationException ex)
+                    catch (InvalidOperationException)
                     {
                         // This can happen when a thread exits while we try to get info from it. It is normal operation so nothing to do here.
                         continue;
