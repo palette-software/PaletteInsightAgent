@@ -127,19 +127,19 @@
         <Condition>(INSTALLSHORTCUTS = 1)</Condition>
         <Shortcut Id="StartApplicationStartMenuShortcut"
                   Name="Start $(var.ApplicationName)"
-                  Description="Start Palette Server performance monitoring agent"
+                  Description="Start Tableau Server monitoring agent"
                   Target="[#StartPalMonScript]"
                   Icon="ProductIcon"
                   WorkingDirectory="INSTALLFOLDER"/>
         <Shortcut Id="StopApplicationStartMenuShortcut"
                   Name="Stop $(var.ApplicationName)"
-                  Description="Stop Palette Server performance monitoring agent"
+                  Description="Stop Tableau Server monitoring agent"
                   Target="[#StopPalMonScript]"
                   Icon="ProductIcon"
                   WorkingDirectory="INSTALLFOLDER"/>
         <Shortcut Id="UserGuideStartMenuShortcut"
                   Name="PalMon User Guide"
-                  Description="Documentation on how to use PalMon Agent."
+                  Description="Documentation on how to use Palette Insight Agent."
                   Target="[#UserGuide]"
                   WorkingDirectory="INSTALLFOLDER"/>
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
