@@ -1,5 +1,5 @@
 ﻿using Licensing;
-using log4net;
+using NLog;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace PalMon.LicenseChecker
 {
     class LicenseChecker
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         const string LICENSE_FILE_PATTERN = "*.license";
 
         /// <summary>
@@ -27,14 +27,14 @@ namespace PalMon.LicenseChecker
         {
             var licenseManager = new Ed25519LicenseManager();
 
-            Log.InfoFormat("Trying to find a valid license for {0} cores in {1} with pattern: {2}", coreCount, baseDirectory, LICENSE_FILE_PATTERN);
+            Log.Info("Trying to find a valid license for {0} cores in {1} with pattern: {2}", coreCount, baseDirectory, LICENSE_FILE_PATTERN);
 
             // check the current directory and subdirectories for license files
             var licenseFiles = Directory.GetFiles(baseDirectory, LICENSE_FILE_PATTERN, SearchOption.AllDirectories);
 
             foreach (var f in licenseFiles)
             {
-                Log.InfoFormat("Checking license in: {0}", f);
+                Log.Info("Checking license in: {0}", f);
                 try
                 {
                     var contents = File.ReadAllText(f);
@@ -43,21 +43,25 @@ namespace PalMon.LicenseChecker
                     if (validLicense.isValid)
                     {
                         var license = validLicense.license;
-                        Log.InfoFormat("Found valid license in {0}", f);
-                        Log.InfoFormat("  - licensed to: {0}", license.owner);
-                        Log.InfoFormat("  - licensed id is: {0}", license.licenseId);
-                        Log.InfoFormat("  - license core count: {0}", license.coreCount);
-                        Log.InfoFormat("  - valid until: {0}", license.validUntilUTC.ToLongDateString());
+
+                        // Set a custom variable for NLog, so that we can filter on it in LogEntries
+                        NLog.GlobalDiagnosticsContext.Set("license_owner", license.owner);
+
+                        Log.Info("Found valid license in {0}", f);
+                        Log.Info("  - licensed to: {0}", license.owner);
+                        Log.Info("  - licensed id is: {0}", license.licenseId);
+                        Log.Info("  - license core count: {0}", license.coreCount);
+                        Log.Info("  - valid until: {0}", license.validUntilUTC.ToLongDateString());
                         return true;
                     } else
                     {
-                        Log.InfoFormat("License is invalid.");
+                        Log.Info("License is invalid.");
                     }
 
                 }
                 catch (Exception e)
                 {
-                    Log.Fatal("Error in LicenseChecker:", e);
+                    Log.Fatal(e, "Error in LicenseChecker: {0}", e);
                 }
             }
 
@@ -86,7 +90,7 @@ namespace PalMon.LicenseChecker
                     // Insert some data
                     cmd.CommandText = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
                     long coreCount = (long)cmd.ExecuteScalar();
-                    Log.InfoFormat("Tableau total allocated cores: {0}", coreCount);
+                    Log.Info("Tableau total allocated cores: {0}", coreCount);
                     return (int)coreCount;
                 }
             }

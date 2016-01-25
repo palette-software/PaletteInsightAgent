@@ -1,9 +1,10 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using PalMon.Counters;
+using PalMon.Helpers;
 
 namespace PalMon.Sampler
 {
@@ -12,16 +13,24 @@ namespace PalMon.Sampler
     /// </summary>
     internal sealed class CounterSampler
     {
+        private const bool USE_STATIC_COLUMN_NAMES = true;
         public static readonly string InProgressLock = "Counter Sampler";
 
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public CounterSampler(ICollection<ICounter> counterCollection, string tableName)
         {
             counters = counterCollection;
-            schema = GenerateSchema(tableName);
+            if (USE_STATIC_COLUMN_NAMES)
+            {
+                schema = makeCounterSamplesTable();
+            }
+            else
+            {
+                schema = GenerateSchema(tableName);
+            }
         }
 
         #region Public Methods
@@ -54,7 +63,7 @@ namespace PalMon.Sampler
             }
 
             var numFailed = counters.Count - dataTable.Rows.Count;
-            Log.Info(String.Format("Finished polling {0} {1}. [{2} {3}]", counters.Count, "counter".Pluralize(counters.Count), numFailed, "failure".Pluralize(numFailed)));
+            Log.Info("Finished polling {0} {1}. [{2} {3}]", counters.Count, "counter".Pluralize(counters.Count), numFailed, "failure".Pluralize(numFailed));
 
             return dataTable;
         }
@@ -83,6 +92,7 @@ namespace PalMon.Sampler
             generatedSchema.Columns.Add(BuildColumnMetadata("counter_type", "System.String", false, 32));
             generatedSchema.Columns.Add(BuildColumnMetadata("source", "System.String", false, 32));
             generatedSchema.Columns.Add(BuildColumnMetadata("category", "System.String", false, 64));
+
             foreach (var counter in counters)
             {
                 var colName = toOracleColumnName(counter.Counter.ToSnakeCase());
@@ -94,8 +104,8 @@ namespace PalMon.Sampler
             generatedSchema.Columns.Add(BuildColumnMetadata("instance", "System.String", true, 64));
             generatedSchema.Columns.Add(BuildColumnMetadata("unit", "System.String", true, 32));
 
-            Log.Debug(String.Format("Dynamically built result schema '{0}'. [{1} {2}]",
-                      tableName, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count)));
+            Log.Debug("Dynamically built result schema '{0}'. [{1} {2}]",
+                      tableName, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
             return generatedSchema;
         }
 
@@ -143,14 +153,46 @@ namespace PalMon.Sampler
             row["counter_type"] = counter.CounterType;
             row["source"] = counter.Source;
             row["category"] = counter.Category;
-            // Oracle has a 30 char limimt for columnNames.
-            row[toOracleColumnName(counter.Counter.ToSnakeCase())] = sample.SampleValue;
+            
+            if (USE_STATIC_COLUMN_NAMES)
+            {
+                row["name"] = counter.Counter;
+                row["value"] = sample.SampleValue;
+            }
+            else
+            {
+                // Oracle has a 30 char limimt for columnNames.
+                row[toOracleColumnName(counter.Counter.ToSnakeCase())] = sample.SampleValue;
+            }
             row["instance"] = counter.Instance;
             row["unit"] = counter.Unit;
 
             return row;
         }
 
+        public static DataTable makeCounterSamplesTable()
+        {
+
+            var table = new DataTable("countersamples");
+
+            //TableHelper.addColumn(table, "id", "System.Int32", true, true);
+            TableHelper.addColumn(table, "timestamp", "System.DateTime");
+            TableHelper.addColumn(table, "cluster");
+            TableHelper.addColumn(table, "machine");
+            TableHelper.addColumn(table, "counter_type");
+            TableHelper.addColumn(table, "source");
+            TableHelper.addColumn(table, "category");
+            TableHelper.addColumn(table, "instance");
+            TableHelper.addColumn(table, "unit");
+
+            TableHelper.addColumn(table, "name");
+            TableHelper.addColumn(table, "value", "System.Double");
+
+
+            return table;
+
+
+        }
 
         /// <summary>
         /// Converts a table to an oracle-compatible 30 char max underscored name.

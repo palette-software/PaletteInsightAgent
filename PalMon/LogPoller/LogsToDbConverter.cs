@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System.Reflection;
 using System;
 using System.Data;
@@ -6,13 +6,13 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Net;
 
-using DataTableWriter.Writers;
+using PalMon.Output;
 
 namespace PalMon.LogPoller
 {
     class LogsToDbConverter
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public string HostName { get; set; }
 
@@ -40,7 +40,7 @@ namespace PalMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(IDataTableWriter writer, object writeLock, ITableauRepoConn repo, String filename, String[] jsonStringLines)
+        public void processServerLogLines(CachingOutput writer, object writeLock, String filename, String[] jsonStringLines)
         {
             // Create the datatable
             var serverLogsTable = LogTables.makeServerLogsTable();
@@ -48,7 +48,7 @@ namespace PalMon.LogPoller
 
             try
             {
-                addServerLogs(repo, filename, jsonStringLines, serverLogsTable, filterStateTable);
+                addServerLogs(filename, jsonStringLines, serverLogsTable, filterStateTable);
 
                 var filterStateCount = filterStateTable.Rows.Count;
                 var serverLogsTableCount = serverLogsTable.Rows.Count;
@@ -58,7 +58,7 @@ namespace PalMon.LogPoller
                      serverLogsTableCount, "row".Pluralize(serverLogsTableCount));
 
 
-                Log.Info("Inserting " + statusLine);
+                Log.Info("Sending off " + statusLine);
 
 
                 if (filterStateCount > 0)
@@ -77,20 +77,21 @@ namespace PalMon.LogPoller
                     }
                 }
 
-                Log.Info("Inserted " + statusLine);
+                Log.Info("Sent off {0}", statusLine);
+
+
             }
             catch (Exception e)
             {
-                Log.Fatal("Error while adding to server logs:", e);
+                Log.Fatal(e, "Error while adding to server logs. {0}", e);
                 throw;
             }
 
-
         }
 
-        private void addServerLogs(ITableauRepoConn repo, string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
+        private void addServerLogs(string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
-            Log.Info("Trying to parse " + jsonStringLines.Length + " rows of new log data.");
+            Log.Info("Trying to parse {0} rows of new log data.", jsonStringLines.Length);
             foreach (var jsonString in jsonStringLines)
             {
 
@@ -102,7 +103,7 @@ namespace PalMon.LogPoller
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Json parse exception occured in string: '" + jsonString + "'", e);
+                    Log.Error("Json parse exception occured in string: '{0}'. Exception message: {1}", jsonString, e.Message);
                     // skip this line
                     continue;
                 }
@@ -123,8 +124,8 @@ namespace PalMon.LogPoller
                     }
                     else
                     {
-                        insertToFilterState(repo, cacheKeyValue, filterStateTable, jsonraw);
-                        insertAllFilters(repo, cacheKeyValue, filterStateTable, jsonraw);
+                        insertToFilterState(cacheKeyValue, filterStateTable, jsonraw);
+                        insertAllFilters(cacheKeyValue, filterStateTable, jsonraw);
                     }
 
                 }
@@ -133,7 +134,6 @@ namespace PalMon.LogPoller
                 insertIntoServerLogsTable(filename, serverLogsTable, jsonraw);
             }
 
-            //Log.Info("Parsed into server logs table: " + serverLogsTable.Rows.ToString());
         }
 
         private void insertIntoServerLogsTable(string filename, DataTable serverLogsTable, dynamic jsonraw)
@@ -142,7 +142,6 @@ namespace PalMon.LogPoller
             var row = serverLogsTable.NewRow();
             string tid = jsonraw.tid;
 
-            //row["id"] = 1;
             row["filename"] = filename;
             row["host_name"] = HostName;
             row["ts"] = parseJsonTimestamp(jsonraw.ts);
@@ -157,7 +156,6 @@ namespace PalMon.LogPoller
             row["k"] = jsonraw.k;
             row["v"] = jsonraw.v;
 
-
             serverLogsTable.Rows.Add(row);
         }
 
@@ -168,40 +166,31 @@ namespace PalMon.LogPoller
         /// 
         /// </summary>
         /// <param name="jsonraw">The deserialized JSON object.</param>
-        void insertToFilterState(ITableauRepoConn repo, string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
+        void insertToFilterState(string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
         {
             var mc = Regex.Matches(cache_key_Value, GROUP_FILTER_RX);
             foreach (Match m in mc)
             {
-
-                // get the session id and the timestamp
-                //ViewPath viewPath = GetViewPath(repo, jsonraw);
-
-                var level = m.Groups[1].ToString();
-                var member = m.Groups[2].ToString();
-                member = member.Replace("&quot;", "");
-
                 var row = filterStateTable.NewRow();
-                string tid = jsonraw.tid;
 
                 row["ts"] = parseJsonTimestamp(jsonraw.ts);
                 row["pid"] = (int)jsonraw.pid;
-                row["tid"] = Convert.ToInt32(tid, 16);
+                row["tid"] = Convert.ToInt32((string)jsonraw.tid, 16);
                 row["req"] = jsonraw.req;
                 row["sess"] = jsonraw.sess;
                 row["site"] = jsonraw.site;
                 row["username"] = jsonraw.user;
-                row["filter_name"] = level;
-                row["filter_vals"] = member;
+                row["filter_name"] = m.Groups[1].ToString();
+                row["filter_vals"] = m.Groups[2].ToString().Replace("&quot;", "");
                 row["hostname"] = HostName;
 
-                UpdateViewPath(repo, jsonraw, row);
+                UpdateViewPath(row);
                 filterStateTable.Rows.Add(row);
             }
 
         }
 
-        void insertAllFilters(ITableauRepoConn repo, string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
+        void insertAllFilters(string cache_key_Value, DataTable filterStateTable, dynamic jsonraw)
         {
 
             //insert all filters
@@ -214,34 +203,22 @@ namespace PalMon.LogPoller
                 if (level.Contains("Calculation_"))
                     continue;
 
-                var member = "all";
-
                 var row = filterStateTable.NewRow();
-                string tid = jsonraw.tid;
 
                 row["ts"] = parseJsonTimestamp(jsonraw.ts);
                 row["pid"] = (int)jsonraw.pid;
-                row["tid"] = Convert.ToInt32(tid, 16);
+                row["tid"] = Convert.ToInt32((string)jsonraw.tid, 16);
                 row["req"] = jsonraw.req;
                 row["sess"] = jsonraw.sess;
                 row["site"] = jsonraw.site;
                 row["username"] = jsonraw.user;
                 row["filter_name"] = level;
-                row["filter_vals"] = member;
+                row["filter_vals"] = "all";
                 row["hostname"] = HostName;
 
-                UpdateViewPath(repo, jsonraw, row);
+                UpdateViewPath(row);
                 filterStateTable.Rows.Add(row);
             }
-        }
-
-        private static ViewPath MakeEmptyViewPath()
-        {
-            ViewPath viewPath;
-            viewPath.workbook = "<WORKBOOK>";
-            viewPath.view = "<VIEW>";
-            viewPath.ip = "0.0.0.0";
-            return viewPath;
         }
 
         /// <summary>
@@ -250,13 +227,11 @@ namespace PalMon.LogPoller
         /// <param name="repo"></param>
         /// <param name="jsonraw"></param>
         /// <param name="row"></param>
-        private static void UpdateViewPath(ITableauRepoConn repo, dynamic jsonraw, DataRow row)
+        private static void UpdateViewPath(DataRow row)
         {
-
-            var viewPath = MakeEmptyViewPath();
-            row["workbook"] = viewPath.workbook;
-            row["view"] = viewPath.view;
-            row["user_ip"] = viewPath.ip;
+            row["workbook"] = "<WORKBOOK>";
+            row["view"] = "<VIEW>";
+            row["user_ip"] = "0.0.0.0";
         }
 
         /// <summary>

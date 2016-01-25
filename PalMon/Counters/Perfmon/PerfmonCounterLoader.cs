@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +14,7 @@ namespace PalMon.Counters.Perfmon
     /// </summary>
     internal static class PerfmonCounterLoader
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Loads all Perfmon counters on the target host matching the given parameters.
@@ -42,7 +42,7 @@ namespace PalMon.Counters.Perfmon
             }
             catch (Win32Exception ex)
             {
-                Log.Error(String.Format("Could not communicate with Perfmon on target host '{0}': {1}", host.Name, ex.Message));
+                Log.Error("Could not communicate with Perfmon on target host '{0}': {1}", host.Name, ex.Message);
             }
 
             // If the requested counter does not exist, log it and bail out.

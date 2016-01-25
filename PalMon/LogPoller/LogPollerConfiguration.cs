@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System.Reflection;
 using System;
 using System.Configuration;
@@ -183,7 +183,7 @@ namespace PalMon.LogPoller
     class LogPollerConfigurationLoader
     {
 
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public static LogPollerConfigurationSection load()
         {
@@ -195,7 +195,7 @@ namespace PalMon.LogPoller
             }
             catch (ConfigurationErrorsException ex)
             {
-                Log.Fatal(String.Format("Could not open configuration file: {0}", ex.Message));
+                Log.Fatal(ex, "Could not open configuration file: {0}", ex);
                 throw;
             }
 
@@ -207,7 +207,7 @@ namespace PalMon.LogPoller
             }
             catch (ConfigurationErrorsException err)
             {
-                Log.Fatal(String.Format("Cannot find configuration section: 'LogPoller': {0}", err.ToString()));
+                Log.Fatal(err, "Cannot find configuration section: 'LogPoller'. Exception: {0}", err);
                 throw;
             }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using Topshelf;
 using PalMon;
+using NLog;
 
 namespace PalMonService
 {
@@ -9,9 +10,10 @@ namespace PalMonService
     /// </summary>
     public class PalMonServiceBootstrapper : ServiceControl, IDisposable
     {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
         private PalMonAgent agent;
         private bool disposed;
-        public static readonly string Log4NetConfigKey = PalMonAgent.Log4NetConfigKey;
 
         ~PalMonServiceBootstrapper()
         {
@@ -35,8 +37,9 @@ namespace PalMonService
             {
                 agent = new PalMonAgent();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Log.Fatal(e, "Exception is: {0}", e);
                 return false;
             }
             agent.Start();
