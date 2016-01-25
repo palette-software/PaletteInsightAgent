@@ -16,8 +16,8 @@ namespace PalMon.LogPoller
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public string watchedFolderPath { get; }
-        public string filter {get;}
+        public string watchedFolderPath { get; set; }
+        public string filter { get; set; }
 
         static Dictionary<string, long> stateOfFiles; //contains filename and actual number of lines in the file
         public LogFileWatcher(string folderpath, string filter)
