@@ -69,7 +69,7 @@ namespace PalMon.LogPoller
                 }, () =>
                 {
                     // if no change, just flush if needed
-                    Log.Debug("No changes detected -- flushing if needed");
+                    Log.Debug("No changes detected folder={0} filter={1} -- flushing if needed", watcher.watchedFolderPath, watcher.filter);
                 });
 			}
         }
