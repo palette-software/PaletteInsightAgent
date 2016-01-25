@@ -72,9 +72,15 @@ namespace PalMon.Config
                 }
 
 
-                var pollerConfig = config.LogPoller;
-                options.FolderToWatch = pollerConfig.Directory;
-                options.DirectoryFilter = pollerConfig.Filter;
+                // Load Log Folder configurations
+                var logFolders = config.Logs;
+                foreach (LogFolder logFolder in logFolders)
+                {
+                    PalMonOptions.LogFolderInfo logInfo = new PalMonOptions.LogFolderInfo();
+                    logInfo.FolderToWatch = logFolder.Directory;
+                    logInfo.DirectoryFilter = logFolder.Filter;
+                    options.LogFolders.Add(logInfo);
+                }
 
                 var repoProps = config.TableauRepo;
                 options.RepoHost = repoProps.Host;

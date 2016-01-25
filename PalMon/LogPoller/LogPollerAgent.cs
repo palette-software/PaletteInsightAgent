@@ -1,6 +1,7 @@
 ﻿using NLog;
 using System.Reflection;
 using System;
+using System.Collections.Generic;
 using PalMon.Output;
 
 namespace PalMon.LogPoller
@@ -11,21 +12,18 @@ namespace PalMon.LogPoller
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         public static readonly string InProgressLock = "Log Poller";
 
-        private LogFileWatcher watcher;
+        private ICollection<LogFileWatcher> watchers;
         private LogsToDbConverter logsToDbConverter;
 
         private ITableauRepoConn tableauRepo;
 
-        private string folderToWatch;
-        private string filter;
+        private ICollection<PalMonOptions.LogFolderInfo> foldersToWatch;
 
 
-
-        public LogPollerAgent(string folderToWatch, string filterString, string repoHost, int repoPort, string repoUser, string repoPass, string repoDb)
+        public LogPollerAgent(ICollection<PalMonOptions.LogFolderInfo> foldersToWatch, string repoHost, int repoPort, string repoUser, string repoPass, string repoDb)
         {
-            Log.Info("Initializing LogPollerAgent with folder:" + folderToWatch + " and filter: " + filter);
-            this.folderToWatch = folderToWatch;
-            filter = filterString;
+            Log.Info("Initializing LogPollerAgent with number of folders: {0}.", foldersToWatch.Count);
+            this.foldersToWatch = foldersToWatch;
             logsToDbConverter = new LogsToDbConverter();
             // 
             tableauRepo = null;
@@ -41,15 +39,19 @@ namespace PalMon.LogPoller
         }
 
 
-        // Start the log file watcher
+        // Start the log file watchers
         public void start()
         {
 
-            Log.Info("Starting LogFileWatcher in " + folderToWatch + " with file mask:" + filter);
-            watcher = new LogFileWatcher(folderToWatch, filter);
+            watchers = new List<LogFileWatcher>();
+            foreach (var folderInfo in foldersToWatch)
+            {
+                Log.Info("Starting LogFileWatcher in " + folderInfo.FolderToWatch + " with file mask:" + folderInfo.DirectoryFilter);
+                watchers.Add(new LogFileWatcher(folderInfo.FolderToWatch, folderInfo.DirectoryFilter));
+            }
         }
 
-        // Stop the log file watcher
+        // Stop the log file watchers
         public void stop()
         {
             Log.Info("Stopping LogFileWatcher.");
@@ -58,17 +60,18 @@ namespace PalMon.LogPoller
 
         public void pollLogs(CachingOutput output, object writeLock)
         {
-            watcher.watchChangeCycle((filename, lines) =>
-            {
-                Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
-                logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
-            }, () =>
-            {
-                // if no change, just flush if needed
-                Log.Debug("No changes detected -- flushing if needed");
-            });
-
-
+            foreach (var watcher in watchers)
+	        { 
+                watcher.watchChangeCycle((filename, lines) =>
+                {
+                    Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
+                    logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
+                }, () =>
+                {
+                    // if no change, just flush if needed
+                    Log.Debug("No changes detected folder={0} filter={1} -- flushing if needed", watcher.watchedFolderPath, watcher.filter);
+                });
+			}
         }
 
     }
