@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?define ApplicationName = "PalMon"?>
-<?define ProductVersion = "2.1.0"?>
 <?define Manufacturer = "Palette Software"?>
 <?define HelpLink = "http://www.palette-software.com"?>
 <?define UrlInfoAbout = "http://www.palette-software.com"?>
