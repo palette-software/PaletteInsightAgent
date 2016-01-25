@@ -62,15 +62,15 @@ namespace PalMon.LogPoller
         {
             foreach (var watcher in watchers)
 	        { 
-			   watcher.watchChangeCycle((filename, lines) =>
-    	        {
-        	        Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
-            	    logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
-	            }, () =>
-    	        {
-	                // if no change, just flush if needed
-    	            Log.Debug("No changes detected -- flushing if needed");
-        	    });
+                watcher.watchChangeCycle((filename, lines) =>
+                {
+                    Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
+                    logsToDbConverter.processServerLogLines(output, writeLock, filename, lines);
+                }, () =>
+                {
+                    // if no change, just flush if needed
+                    Log.Debug("No changes detected -- flushing if needed");
+                });
 			}
         }
 
