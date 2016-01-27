@@ -19,7 +19,7 @@ namespace PalMon.LogPoller
         public string watchedFolderPath { get; protected set; }
         public string filter { get; protected set; }
 
-        static Dictionary<string, long> stateOfFiles; //contains filename and actual number of lines in the file
+        Dictionary<string, long> stateOfFiles; //contains filename and actual number of lines in the file
         public LogFileWatcher(string folderpath, string filter)
         {
             stateOfFiles = new Dictionary<string, long>();
@@ -82,7 +82,7 @@ namespace PalMon.LogPoller
         /// 
         /// </summary>
         /// <param name="fullPath"></param>
-        static bool pollChangesTo(string fullPath, ChangeDelegate changeDelegate)
+        bool pollChangesTo(string fullPath, ChangeDelegate changeDelegate)
         {
             using (var fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
             using (var sr = new StreamReader(fs))
