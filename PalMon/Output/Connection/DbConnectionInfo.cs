@@ -10,6 +10,7 @@
         public string Username { get; set; }
         public string Password { get; set; }
         public string DatabaseName { get; set; }
+        public int CommandTimeout { get; set; }
 
         /// <summary>
         /// Indicates whether the current connection information is well-formed.
@@ -23,7 +24,8 @@
                    Port <= 65535 &&
                    Username != null &&
                    Password != null &&
-                   DatabaseName != null;
+                   DatabaseName != null &&
+                   CommandTimeout > 0;
         }
     }
 }
