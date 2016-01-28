@@ -62,7 +62,10 @@ namespace PalMon.LogPoller
                 try
                 {
                     // check if we have any changes
-                    hasChanges = hasChanges || pollChangesTo(fileName, changeDelegate);
+                    // Two lines by intention. Please do not unite into one line as in that case the order of
+                    // the operands would be meaningful and in wrong order would cause pollChangesTo to not be called!!!!
+                    var changedThisFile = pollChangesTo(fileName, changeDelegate);
+                    hasChanges = changedThisFile || hasChanges;
                 }
                 catch (Exception e)
                 {
