@@ -738,6 +738,34 @@ namespace PalMon.Config
         }
 
         #endregion Table Property
+
+        #region SqlCommand Property
+
+        /// <summary>
+        /// The XML name of the <see cref="SqlCommand"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string SqlCommandPropertyName = "SqlCommand";
+
+        /// <summary>
+        /// Gets or sets contains information about the database SqlCommand.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Contains information about the database SQL Command.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.Database.SqlCommandPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::PalMon.Config.SqlCommand SqlCommand
+        {
+            get
+            {
+                return ((global::PalMon.Config.SqlCommand)(base[global::PalMon.Config.Database.SqlCommandPropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.Database.SqlCommandPropertyName] = value;
+            }
+        }
+
+        #endregion SqlCommand Property
     }
 }
 
@@ -999,6 +1027,57 @@ namespace PalMon.Config
         }
 
         #endregion Name Property
+    }
+}
+
+namespace PalMon.Config
+{
+    /// <summary>
+    /// Contains information about the database SQL command timeout.
+    /// </summary>
+    public partial class SqlCommand : global::System.Configuration.ConfigurationElement
+    {
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+
+        #region SqlCommand Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Timeout"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string SqlCommandPropertyName = "timeout";
+
+        /// <summary>
+        /// Gets or sets the database connection timeout.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("The timeout value for the database server.")]
+        [global::System.Configuration.IntegerValidatorAttribute(ExcludeRange = false, MaxValue = 2147483647, MinValue = 1)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.SqlCommand.SqlCommandPropertyName, IsRequired = false, IsKey = false, IsDefaultCollection = false, DefaultValue = 600)]
+        public virtual int Timeout
+        {
+            get
+            {
+                return ((int)(base[global::PalMon.Config.SqlCommand.SqlCommandPropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.SqlCommand.SqlCommandPropertyName] = value;
+            }
+        }
+
+        #endregion SqlCommand Property
     }
 }
 

@@ -27,10 +27,11 @@ namespace PalMon.Output
 
 
             // Generate a postgres-compatible connection string
-            connectionString = String.Format("Host={0};Port={1};Username={2};Password={3};Database={4}",
+            connectionString = String.Format("Host={0};Port={1};Username={2};Password={3};Database={4};CommandTimeout={5}",
                 resultDatabase.Server, resultDatabase.Port,
                 resultDatabase.Username, resultDatabase.Password,
-                resultDatabase.DatabaseName
+                resultDatabase.DatabaseName,
+                resultDatabase.CommandTimeout
                 );
 
             connection = new NpgsqlConnection(connectionString);
