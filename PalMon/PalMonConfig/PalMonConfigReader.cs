@@ -119,7 +119,8 @@ namespace PalMon.Config
                 Port = databaseConfig.Server.Port,
                 Username = databaseConfig.User.Login,
                 Password = databaseConfig.User.Password,
-                DatabaseName = databaseConfig.Name
+                DatabaseName = databaseConfig.Name,
+                CommandTimeout = databaseConfig.SqlCommand.Timeout
             };
 
 
