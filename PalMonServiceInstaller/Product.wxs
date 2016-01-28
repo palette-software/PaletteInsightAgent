@@ -93,15 +93,15 @@
         <!-- User Documentation -->
         <File Id="UserGuide" Name="PalMon User Guide.pdf" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Documentation\UserGuide.pdf" />
       </Component>
-      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03">
+      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03" Permanent="yes">
         <!-- NLog configuration -->
-        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config" />
+        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config"/>
       </Component>
     </DirectoryRef>
 
     <!-- Config Files -->
     <DirectoryRef Id="CONFIGFOLDER">
-      <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0">
+      <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes">
         <File Id="CountersConfig" Name="Counters.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.config" />
         <File Id="PalMonConfig" Name="PalMon.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\PalMon.config" />
       </Component>
