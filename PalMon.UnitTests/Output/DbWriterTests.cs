@@ -65,12 +65,8 @@ namespace PalMonTests.Output
         public void TestGetFilesOfSameTable()
         {
             // Arrange
-            string file1 = "serverlog-2016-01-28-15-06-00.csv";
-            string file2 = "serverlog-2016-01-28-15-06-30.csv";
-            string file3 = "threadinfo-2016-01-28-15-06-00.csv";
-            string[] testFiles = { file1, file2, file3 };
-            string[] actualFiles = { file1, file2 };
-
+            string[] testFiles = { "serverlog-2016-01-28-15-06-00.csv", "serverlog-2016-01-28-15-06-30.csv",
+                                   "threadinfo-2016-01-28-15-06-00.csv" };
             Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(testFiles);
 
             // Act
