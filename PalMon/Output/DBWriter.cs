@@ -68,8 +68,11 @@ namespace PalMon.Output
         {
             var fileName = GetFileName(fullFileName);
             var tokens = fileName.Split('-');
-            if (tokens.Length == 0)
+            if (tokens.Length == 1)
             {
+                // If the file name does not contain any delimiters,
+                // then it must be some error since we are creating
+                // these files.
                 return "";
             }
             return tokens[0];
