@@ -48,6 +48,9 @@ namespace PalMon.Config
 
                 // Load ThreadInfoPollInterval.
                 options.ThreadInfoPollInterval = config.ThreadInfoPollInterval.Value;
+
+                options.DBWriteInterval = config.DBWriteInterval.Value;
+
                 options.DatabaseType = config.Database.Type;
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);

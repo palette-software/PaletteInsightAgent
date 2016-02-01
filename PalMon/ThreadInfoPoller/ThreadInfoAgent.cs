@@ -26,7 +26,7 @@ namespace PalMon.ThreadInfoPoller
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
 
-        public void poll(ICollection<string> processNames, CachingOutput writer, object WriteLock)
+        public void poll(ICollection<string> processNames, object WriteLock)
         {
             foreach (string processName in processNames)
             {
@@ -43,7 +43,7 @@ namespace PalMon.ThreadInfoPoller
                     {
                         try
                         {
-                            writer.Write(threadInfoTable);
+                            CachingOutput.Write(threadInfoTable);
                         }
                         catch (Exception ex)
                         {

@@ -66,24 +66,6 @@ namespace PalMon.Output
                 // remove any rows from the csv queue
                 csvQueue.Rows.Clear();
             });
-
-            // Flushing to DB
-            dbFlush = new DelayedAction(TimeSpan.FromSeconds(DB_OUTPUT_BATCH_TIME_SECONDS), (start, end) =>
-            {
-                if (dbQueue.Rows.Count == 0)
-                {
-                    Log.Debug("No data - skipping DB flush");
-                    return;
-                }
-
-                var csvFileName = GetCSVFile(baseName, start);
-                Log.Info("Flushing to DB.");
-                onFlushDelegate(csvFileName, dbQueue);
-
-                // clean the db queue table
-                dbQueue.Rows.Clear();
-            });
-
         }
 
         public void Put(DataTable rows)
@@ -96,7 +78,7 @@ namespace PalMon.Output
         public void Tick()
         {
             csvWrite.Tick();
-            dbFlush.Tick();
+            // dbFlush.Tick();
         }
 
         #region CSV output
