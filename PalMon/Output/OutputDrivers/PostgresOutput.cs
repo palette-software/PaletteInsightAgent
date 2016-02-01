@@ -44,6 +44,11 @@ namespace PalMon.Output
             DoBulkCopy(rows);
         }
 
+        public void Write(string csvFile)
+        {
+            DoBulkCopy(csvFile);
+        }
+
         #endregion
 
         #region datatable bluk ops
@@ -66,15 +71,36 @@ namespace PalMon.Output
             {
                 using (var writer = connection.BeginTextImport(copyString))
                 {
-
-                    var columnCount = rows.Columns.Count;
-
                     foreach (DataRow rowToWrite in rows.Rows)
                     {
                         var row = String.Join("\t", ToTSVLine(rowToWrite.ItemArray));
                         // if the row ends with a backslash, we need to add a space after it
                         if (row.Last() == '\\') row += " ";
                         writer.WriteLine(row);
+                    }
+                }
+            });
+        }
+
+        private void DoBulkCopy(string fileName)
+        {
+            return;
+            var tableName = DBWriter.GetTableName(fileName);
+            ReconnectoToDbIfNeeded();
+            // TODO: This has to be done elsewhere as we don't have data types here!!!!
+            // UpdateTableStructureFor(fileName);
+
+            // TODO: Rowcount should be determined for this log 
+            var statusLine = String.Format("BULK COPY of {0} - {1} rows", tableName, 0);
+            string copyString = CopyStatementFor(fileName);
+
+            LoggingHelpers.TimedLog(Log, statusLine, () =>
+            {
+                using (var writer = connection.BeginTextImport(copyString))
+                {
+                    using (var reader = new StreamReader(fileName))
+                    {
+                        writer.WriteLine(reader.ReadLine());
                     }
                 }
             });
@@ -150,6 +176,21 @@ namespace PalMon.Output
             }
 
             var copyString = String.Format("COPY {0} ({1}) FROM STDIN", rows.TableName, String.Join(", ", columnNames));
+            return copyString;
+        }
+
+        public static string CopyStatementFor(string fileName)
+        {
+            var tableName = DBWriter.GetTableName(fileName);
+            if (tableName == "")
+            {
+                Log.Error("Invalid fileName format when creating CopyStatement.");
+                return "";
+            }
+
+            // first row contains column names
+            string columnNames = File.ReadLines(fileName).First(); // gets the first line from file.
+            var copyString = String.Format("COPY {0} ({1}) FROM STDIN", tableName, columnNames);
             return copyString;
         }
 

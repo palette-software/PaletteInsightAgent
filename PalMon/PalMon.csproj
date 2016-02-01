@@ -165,6 +165,7 @@
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
+    <Compile Include="Output\DBWriter.cs" />
     <Compile Include="Output\DelayedAction.cs" />
     <Compile Include="Output\CachingOutput.cs" />
     <Compile Include="Output\Connection\DbConnectionInfo.cs" />

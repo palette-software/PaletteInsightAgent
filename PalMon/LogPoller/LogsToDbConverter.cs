@@ -40,7 +40,7 @@ namespace PalMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(CachingOutput writer, object writeLock, String filename, String[] jsonStringLines)
+        public void processServerLogLines(object writeLock, String filename, String[] jsonStringLines)
         {
             // Create the datatable
             var serverLogsTable = LogTables.makeServerLogsTable();
@@ -65,7 +65,7 @@ namespace PalMon.LogPoller
                 {
                     lock (writeLock)
                     {
-                        writer.Write(filterStateTable);
+                        CachingOutput.Write(filterStateTable);
                     }
                 }
 
@@ -73,7 +73,7 @@ namespace PalMon.LogPoller
                 {
                     lock (writeLock)
                     {
-                        writer.Write(serverLogsTable);
+                        CachingOutput.Write(serverLogsTable);
                     }
                 }
 

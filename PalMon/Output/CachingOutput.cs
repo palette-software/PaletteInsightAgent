@@ -18,13 +18,13 @@ namespace PalMon.Output
         /// <summary>
         /// Helper map to figure out which cache to put a record into
         /// </summary>
-        private Dictionary<string, DataTableCache> caches;
+        private static Dictionary<string, DataTableCache> caches;
 
-        private IOutput wrappedOutput;
+        private static IOutput wrappedOutput;
 
-        public CachingOutput(IOutput wrappedOutput)
+        public static void Init(IOutput output)
         {
-            this.wrappedOutput = wrappedOutput;
+            wrappedOutput = output;
 
             caches = new Dictionary<string, DataTableCache>();
 
@@ -39,22 +39,22 @@ namespace PalMon.Output
         /// Adds a cache from a template DataTable
         /// </summary>
         /// <param name="table"></param>
-        public void AddCache(DataTable table)
+        public static void AddCache(DataTable table)
         {
             var tableName = table.TableName;
             var csvFileName = String.Format("csv/{0}", tableName);
-            caches.Add(tableName, new DataTableCache(csvFileName, table, this.wrappedOutput.Write));
+            caches.Add(tableName, new DataTableCache(csvFileName, table, wrappedOutput.Write));
         }
 
 
-        public bool HasCache(string tableName)
+        public static bool HasCache(string tableName)
         {
             return caches.ContainsKey(tableName);
         }
 
         #endregion
 
-        public void Tick()
+        public static void Tick()
         {
             // call Tick() on each cache
             foreach(var kv in caches)
@@ -63,7 +63,7 @@ namespace PalMon.Output
             }
         }
 
-        public void Write(DataTable rows)
+        public static void Write(DataTable rows)
         {
             // check if we have the cache
             if (!caches.ContainsKey(rows.TableName))
@@ -74,7 +74,10 @@ namespace PalMon.Output
             cache.Put(rows);
         }
 
-
+        public static void Write(string fileName)
+        {
+            wrappedOutput.Write(fileName);
+        }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
