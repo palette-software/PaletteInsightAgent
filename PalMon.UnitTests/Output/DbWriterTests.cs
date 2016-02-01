@@ -193,41 +193,69 @@ namespace PalMonTests.Output
     }
 
 
-    //[TestClass]
-    //public class DbWriterTests_MoveToProcessed
-    //{
-    //    IList<string> testFileList;
+    [TestClass]
+    public class DbWriterTests_MoveToProcessed
+    {
+        IList<string> testFileList;
 
-    //    public DbWriterTests_MoveToProcessed()
-    //    {
-    //    }
+        public DbWriterTests_MoveToProcessed()
+        {
+        }
 
-    //    #region Additional test attributes
+        #region Additional test attributes
 
-    //    // Use TestInitialize to run code before running each test
-    //    [TestInitialize()]
-    //    public void MyTestInitialize()
-    //    {
-    //        testFileList = new List<string>();
-    //        testFileList.Add("csv/serverlog-2016-01-28-15-06-00.csv");
-    //        testFileList.Add("csv/serverlog-2016-01-28-15-06-30.csv");
-    //        testFileList.Add("csv/threadinfo-2016-01-28-15-06-00.csv");
-    //    }
+        // Use TestInitialize to run code before running each test
+        [TestInitialize()]
+        public void MyTestInitialize()
+        {
+            testFileList = new List<string>();
+            testFileList.Add("csv/serverlog-2016-01-28-15-06-00.csv");
+            testFileList.Add("csv/serverlog-2016-01-28-15-06-30.csv");
+            testFileList.Add("csv/threadinfo-2016-01-28-15-06-00.csv");
+        }
 
-    //    #endregion
+        #endregion
 
-    //    [TestMethod, Isolated]
-    //    public void TestMoveToProcessed()
-    //    {
-    //        // Arrange
-    //        Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
-    //        var fakeLog = Isolate.Fake.AllInstances<LogManager>();
+        [TestMethod, Isolated]
+        public void TestMoveToProcessed()
+        {
+            // Arrange
+            var fakeLog = Isolate.Fake.Instance<Logger>();
+            Isolate.WhenCalled(() => LogManager.GetCurrentClassLogger()).WillReturn(fakeLog);
+            Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
 
-    //        // Act
-    //        DBWriter.MoveToProcessed(testFileList);
+            // Act
+            DBWriter.MoveToProcessed(testFileList);
 
-    //        // Assert
-    //        Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
-    //    }
-    //}
+            // Assert
+            Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[0], "csv/processed/serverlog-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[1], "csv/processed/serverlog-2016-01-28-15-06-30.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[2], "csv/processed/threadinfo-2016-01-28-15-06-00.csv"));
+        }
+
+        [TestMethod, Isolated]
+        public void TestMoveToProcessed_DestinationFileAlreadyExists()
+        {
+            // Arrange
+            var fakeLog = Isolate.Fake.Instance<Logger>();
+            Isolate.WhenCalled(() => LogManager.GetCurrentClassLogger()).WillReturn(fakeLog);
+            Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(true);
+            Isolate.WhenCalled(() => File.Delete("anyfile")).IgnoreCall();
+
+            // Act
+            DBWriter.MoveToProcessed(testFileList);
+
+            // Assert
+            Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Delete("anyfile")));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("csv/processed/serverlog-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("csv/processed/serverlog-2016-01-28-15-06-30.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("csv/processed/threadinfo-2016-01-28-15-06-00.csv"));
+
+            Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[0], "csv/processed/serverlog-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[1], "csv/processed/serverlog-2016-01-28-15-06-30.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[2], "csv/processed/threadinfo-2016-01-28-15-06-00.csv"));
+        }
+    }
 }
