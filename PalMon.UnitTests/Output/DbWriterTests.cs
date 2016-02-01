@@ -75,5 +75,34 @@ namespace PalMonTests.Output
             // Assert
             Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("csv/", "serverlog-*.csv"));
         }
+
+        [TestMethod, Isolated]
+        public void TestGetFilesOfSameTable_NoFiles()
+        {
+            // Arrange
+            Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(new string[0]);
+
+            // Act
+            var resultFiles = DBWriter.GetFilesOfSameTable();
+
+            // Assert
+            Assert.IsTrue(resultFiles.Count == 0);
+        }
+
+        [TestMethod, Isolated]
+        public void TestGetFilesOfSameTable_NoFilesMatchingPattern()
+        {
+            // Arrange
+            string[] testFiles = { "serverlog1.csv", "serverlog2.csv",
+                                   "threadinfo.csv" };
+            Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(testFiles);
+
+            // Act
+            var resultFiles = DBWriter.GetFilesOfSameTable();
+
+            // Assert
+            // The result is expected to be an empty list, since none of the filenames contain "-" (hyphens).
+            Assert.AreEqual(0, resultFiles.Count);
+        }
     }
 }
