@@ -23,6 +23,26 @@ The current development requirements are:
 3. WiX Toolset Visual Studio Extension - Required to build the installer projects.
   * Available at http://www.wixtoolset.org
 4. [Java SE Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+5. [TypeMock Isolator for C#](http://www.typemock.com/files/TypemockIsolatorSuite-8.2.3.20.msi). We already have developer licenses:  
+    Typemock Isolator - Essential  Edition (6 ) License  
+    ................................................................................  
+    Order#                  :  ORD-04292-F3T2Y3  
+    Subscription expires:  04-Apr-2016  
+    Company               :  Starschema  
+    ................................................................................  
+    License Key            : M9CC-FE5N-CB62-2F44-7B4A  
+    ................................................................................  
+
+   and 1 [build server] license:  
+    Typemock Isolator - Essential Build Server  Edition (1 ) License  
+    ................................................................................  
+    Order#                  :  ORD-04292-F3T2Y3  
+    Subscription expires:  04-Apr-2016  
+    Company               :  Starschema  
+    ................................................................................  
+    License Key            : DF7E-AE4N-7BAB-EFC4-463B  
+    ................................................................................  
+
 
 See [Developer Notes.txt](https://github.com/palette-software/BlackBoxRecorder/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
 
