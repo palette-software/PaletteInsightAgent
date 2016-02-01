@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TypeMock.ArrangeActAssert;
 using PalMon.Output;
 using System.IO;
+using NLog;
 
 namespace PalMonTests.Output
 {
@@ -105,4 +106,128 @@ namespace PalMonTests.Output
             Assert.AreEqual(0, resultFiles.Count);
         }
     }
+
+
+    [TestClass]
+    public class DbWriterTests_GetFileOrTableName
+    {
+        private string testFile = "";
+
+        public DbWriterTests_GetFileOrTableName()
+        {
+        }
+
+        #region Additional test attributes
+
+        // Use TestInitialize to run code before running each test
+        [TestInitialize()]
+        public void MyTestInitialize()
+        {
+            testFile = "serverlog-2016-01-28-15-06-00.csv";
+        }
+
+        #endregion
+
+        [TestMethod, Isolated]
+        public void TestGetFileName()
+        {
+            // Arrange
+            var fullFileName = "csv/" + testFile;
+
+            // Act
+            var fileName = DBWriter.GetFileName(fullFileName);
+
+            // Assert
+            Assert.AreEqual(testFile, fileName);
+        }
+
+        [TestMethod, Isolated]
+        public void TestGetFileName_NotInFolder()
+        {
+            // Arrange
+            var fullFileName = testFile;
+
+            // Act
+            var fileName = DBWriter.GetFileName(fullFileName);
+
+            // Assert
+            Assert.AreEqual(testFile, fileName);
+        }
+
+        [TestMethod, Isolated]
+        public void TestGetFileName_InTheDeep()
+        {
+            // Arrange
+            var fullFileName = "one/two/three/" + testFile;
+
+            // Act
+            var fileName = DBWriter.GetFileName(fullFileName);
+
+            // Assert
+            Assert.AreEqual(testFile, fileName);
+        }
+
+
+        [TestMethod, Isolated]
+        public void TestGetTableName()
+        {
+            // Act
+            var tableName = DBWriter.GetTableName(testFile);
+
+            // Assert
+            Assert.AreEqual("serverlog", tableName);
+        }
+
+        [TestMethod, Isolated]
+        public void TestGetTableName_InvalidFile()
+        {
+            // Arrange
+            var invalidFile = "threadinfo.csv"; // invalid because it does not contain "-" (hyphen)
+
+            // Act
+            var tableName = DBWriter.GetTableName(invalidFile);
+
+            // Assert
+            Assert.AreEqual("", tableName);
+        }
+    }
+
+
+    //[TestClass]
+    //public class DbWriterTests_MoveToProcessed
+    //{
+    //    IList<string> testFileList;
+
+    //    public DbWriterTests_MoveToProcessed()
+    //    {
+    //    }
+
+    //    #region Additional test attributes
+
+    //    // Use TestInitialize to run code before running each test
+    //    [TestInitialize()]
+    //    public void MyTestInitialize()
+    //    {
+    //        testFileList = new List<string>();
+    //        testFileList.Add("csv/serverlog-2016-01-28-15-06-00.csv");
+    //        testFileList.Add("csv/serverlog-2016-01-28-15-06-30.csv");
+    //        testFileList.Add("csv/threadinfo-2016-01-28-15-06-00.csv");
+    //    }
+
+    //    #endregion
+
+    //    [TestMethod, Isolated]
+    //    public void TestMoveToProcessed()
+    //    {
+    //        // Arrange
+    //        Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
+    //        var fakeLog = Isolate.Fake.AllInstances<LogManager>();
+
+    //        // Act
+    //        DBWriter.MoveToProcessed(testFileList);
+
+    //        // Assert
+    //        Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
+    //    }
+    //}
 }
