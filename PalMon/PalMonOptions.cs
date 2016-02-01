@@ -21,6 +21,7 @@ namespace PalMon
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
+        public int DBWriteInterval { get; set; }
         public string TableName { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
@@ -65,7 +66,8 @@ namespace PalMon
             return Hosts.Count > 0
                 && PollInterval >= MinPollInterval
                 && LogPollInterval >= MinPollInterval
-                && ThreadInfoPollInterval >= MinPollInterval;
+                && ThreadInfoPollInterval >= MinPollInterval
+                && DBWriteInterval >= MinPollInterval;
         }
 
         public override string ToString()

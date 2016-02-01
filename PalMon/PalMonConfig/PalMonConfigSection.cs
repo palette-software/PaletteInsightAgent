@@ -336,6 +336,34 @@ namespace PalMon.Config
 
         #endregion ThreadInfoPollInterval Property
 
+        #region DBWriteInterval Property
+
+        /// <summary>
+        /// The XML name of the <see cref="DBWriteInterval"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string DBWriteIntervalPropertyName = "DBWriteInterval";
+
+        /// <summary>
+        /// Gets or sets contains information about the polling frequency.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Contains information about the polling frequency.")]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.PalMonConfig.DBWriteIntervalPropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false)]
+        public virtual global::PalMon.Config.DBWriteInterval DBWriteInterval
+        {
+            get
+            {
+                return ((global::PalMon.Config.DBWriteInterval)(base[global::PalMon.Config.PalMonConfig.DBWriteIntervalPropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.PalMonConfig.DBWriteIntervalPropertyName] = value;
+            }
+        }
+
+        #endregion DBWriteInterval Property
+
         #region OutputMode Property
 
         /// <summary>
@@ -1176,6 +1204,57 @@ namespace PalMon.Config
             set
             {
                 base[global::PalMon.Config.ThreadInfoPollInterval.ValuePropertyName] = value;
+            }
+        }
+
+        #endregion Value Property
+    }
+}
+
+namespace PalMon.Config
+{
+    /// <summary>
+    /// Determines how often DB write operations are to be initiated.
+    /// </summary>
+    public partial class DBWriteInterval : global::System.Configuration.ConfigurationElement
+    {
+        #region IsReadOnly override
+
+        /// <summary>
+        /// Gets a value indicating whether the element is read-only.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
+
+        #endregion IsReadOnly override
+
+        #region Value Property
+
+        /// <summary>
+        /// The XML name of the <see cref="Value"/> property.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        internal const string ValuePropertyName = "value";
+
+        /// <summary>
+        /// Gets or sets the interval between polling cycles, in seconds.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("ConfigurationSectionDesigner.CsdFileGenerator", "2.0.1.7")]
+        [global::System.ComponentModel.DescriptionAttribute("Determines how often to initiate DB writes.")]
+        [global::System.Configuration.IntegerValidatorAttribute(ExcludeRange = false, MaxValue = 2147483647, MinValue = 1)]
+        [global::System.Configuration.ConfigurationPropertyAttribute(global::PalMon.Config.DBWriteInterval.ValuePropertyName, IsRequired = true, IsKey = false, IsDefaultCollection = false, DefaultValue = 60)]
+        public virtual int Value
+        {
+            get
+            {
+                return ((int)(base[global::PalMon.Config.DBWriteInterval.ValuePropertyName]));
+            }
+            set
+            {
+                base[global::PalMon.Config.DBWriteInterval.ValuePropertyName] = value;
             }
         }
 

@@ -36,6 +36,21 @@
           <xs:documentation>Contains information about the polling frequency.</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="1" name="LogPollInterval" type="tns:PalMon.Config.LogPollIntervalCT">
+        <xs:annotation>
+          <xs:documentation>Contains information about the server log polling frequency.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" name="ThreadInfoPollInterval" type="tns:PalMon.Config.ThreadInfoPollIntervalCT">
+        <xs:annotation>
+          <xs:documentation>Contains information about the thread information polling frequency.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" name="DBWriteInterval" type="tns:PalMon.Config.DBWriteIntervalCT">
+        <xs:annotation>
+          <xs:documentation>Contains information about the DB write frequency.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element minOccurs="1" name="OutputMode" type="tns:PalMon.Config.OutputModeCT">
         <xs:annotation>
           <xs:documentation>Contains information about the result output mode.</xs:documentation>
@@ -133,6 +148,27 @@
     <xs:attribute name="value" use="required" type="xs:int">
       <xs:annotation>
         <xs:documentation>The interval between polling cycles, in seconds.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PalMon.Config.LogPollIntervalCT">
+    <xs:attribute name="value" use="required" type="xs:int">
+      <xs:annotation>
+        <xs:documentation>The interval between server log polling cycles, in seconds.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PalMon.Config.ThreadInfoPollIntervalCT">
+    <xs:attribute name="value" use="required" type="xs:int">
+      <xs:annotation>
+        <xs:documentation>The interval between thread information polling cycles, in seconds.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PalMon.Config.DBWriteIntervalCT">
+    <xs:attribute name="value" use="required" type="xs:int">
+      <xs:annotation>
+        <xs:documentation>The interval between DB write operations in seconds.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
