@@ -15,5 +15,6 @@ namespace PalMon.Output
     public interface IOutput : IDisposable
     {
         void Write(string csvFile, DataTable rows);
+        void Write(string csvFile);
     }
 }
