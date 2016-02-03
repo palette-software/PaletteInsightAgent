@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PalMonLib")]
-[assembly: AssemblyDescription("Tableau Server Performance Monitor Libraries")]
+[assembly: AssemblyTitle("Palette Insight Agent Monitoring Library")]
+[assembly: AssemblyDescription("Palette Tableau Server Performance Monitor Libraries")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Tableau Software")]
-[assembly: AssemblyProduct("PalMon")]
-[assembly: AssemblyCopyright("Copyright Tableau Software ©2015")]
+[assembly: AssemblyCompany("Palette Software")]
+[assembly: AssemblyProduct("Palette Insight")]
+[assembly: AssemblyCopyright("Copyright Palette Software ©2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
