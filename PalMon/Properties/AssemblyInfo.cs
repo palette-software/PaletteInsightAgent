@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Palette Software")]
 [assembly: AssemblyProduct("Palette Insight")]
-[assembly: AssemblyCopyright("Copyright Palette Software ©2015")]
+[assembly: AssemblyCopyright("Copyright Palette Software ©2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
