@@ -1,0 +1,16 @@
+- vizqlserver
+- tabprotosrv
+- backgrounder
+- clustercontroller
+- dataserver
+- filestore
+- PalMon
+- tabadmsvc
+- tabadmwrk
+- tabspawn
+- tabsvc
+- tdeserver64
+- vizportal
+- wgserver
+- zookeeper
+- redis-server
