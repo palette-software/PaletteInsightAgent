@@ -24,8 +24,9 @@
                    Port <= 65535 &&
                    Username != null &&
                    Password != null &&
-                   DatabaseName != null &&
-                   CommandTimeout > 0;
+                   DatabaseName != null;
+            // command timeout is unused for now, it could be null
+            // and we dont care one little bit.
         }
     }
 }
