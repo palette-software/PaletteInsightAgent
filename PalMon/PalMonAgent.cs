@@ -5,7 +5,6 @@ using System.Configuration;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using PalMon.Config;
 using PalMon.CounterConfig;
 using PalMon.Counters;
 using PalMon.Sampler;
