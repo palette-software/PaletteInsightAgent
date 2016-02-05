@@ -131,12 +131,12 @@
       <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="PaletteAlertsCore, Version=1.0.0.19, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PaletteAlertsCore.1.0.0.19\lib\net40\PaletteAlertsCore.dll</HintPath>
+    <Reference Include="PaletteAlertsCore, Version=1.0.0.20, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PaletteAlertsCore.1.0.0.20\lib\net40\PaletteAlertsCore.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="PaletteAlertsNLog, Version=1.0.0.19, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PaletteAlertsNLog.1.0.0.19\lib\net40\PaletteAlertsNLog.dll</HintPath>
+    <Reference Include="PaletteAlertsNLog, Version=1.0.0.20, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PaletteAlertsNLog.1.0.0.20\lib\net40\PaletteAlertsNLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sodium, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
