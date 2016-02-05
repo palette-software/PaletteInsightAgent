@@ -36,14 +36,16 @@ namespace PalMonService
             try
             {
                 agent = new PalMonAgent();
+                // move starting the agent here, so exceptions get properly logged not only on construction,
+                // but on start  also
+                agent.Start();
+                return agent.IsRunning();
             }
             catch (Exception e)
             {
                 Log.Fatal(e, "Exception is: {0}", e);
                 return false;
             }
-            agent.Start();
-            return agent.IsRunning();
         }
 
         /// <summary>
