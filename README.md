@@ -23,7 +23,9 @@ The current development requirements are:
 3. WiX Toolset Visual Studio Extension - Required to build the installer projects.
   * Available at http://www.wixtoolset.org
 4. [Java SE Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-5. [TypeMock Isolator for C#](http://www.typemock.com/files/TypemockIsolatorSuite-8.2.3.20.msi). We already have developer licenses:  
+5. [Our LogEntries fork](https://github.com/palette-software/le_dotnet)'s NuGet feed ([here](https://www.appveyor.com/docs/nuget#configuring-private-nuget-feed-in-visual-studio) is how you can add the NuGet feed as a source):  
+   https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
+6. [TypeMock Isolator for C#](http://www.typemock.com/files/TypemockIsolatorSuite-8.2.3.20.msi). We already have developer licenses:  
     Typemock Isolator - Essential  Edition (6 ) License  
     ................................................................................  
     Order#                  :  ORD-04292-F3T2Y3  
