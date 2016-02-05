@@ -69,8 +69,9 @@
       <HintPath>..\packages\NLog.4.2.3\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="PaletteLogentriesCore">
-      <HintPath>..\packages\PaletteLogentriesCore.1.0.0.17\lib\net40\PaletteLogentriesCore.dll</HintPath>
+    <Reference Include="PaletteLogentriesCore, Version=1.0.0.18, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PaletteLogentriesCore.1.0.0.18\lib\net40\PaletteLogentriesCore.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="PaletteLogentriesNLog, Version=1.0.0.17, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\PaletteLogentriesNLog.1.0.0.17\lib\net40\PaletteLogentriesNLog.dll</HintPath>
