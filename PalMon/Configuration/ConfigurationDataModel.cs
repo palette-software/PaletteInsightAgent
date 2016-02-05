@@ -49,6 +49,12 @@ namespace PaletteInsight
             public string Name { get; set; }
         }
 
+        public class SqlCommand
+        {
+            [XmlAttribute("timeout")]
+            public int Timeout { get; set; }
+        }
+
         public class Database
         {
             [XmlAttribute("name")]
@@ -61,6 +67,8 @@ namespace PaletteInsight
             public DbUser User { get; set; }
             [XmlElement]
             public DbTable Table { get; set; }
+            [XmlElement]
+            public SqlCommand SqlCommand { get; set; }
         }
 
 
