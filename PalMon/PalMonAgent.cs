@@ -14,7 +14,7 @@ using PalMon.ThreadInfoPoller;
 using PalMon.Output;
 using System.Diagnostics;
 using System.Xml.Serialization;
-using PaletteInsight.Conf;
+using PaletteInsight.Configuration;
 
 [assembly: CLSCompliant(true)]
 
@@ -55,7 +55,7 @@ namespace PalMon
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
-            PaletteInsight.Conf.Loader.LoadConfigTo( LoadConfigFile("config/PalMon.config"), options );
+            PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/PalMon.config"), options );
 
             // check the license after the configuration has been loaded.
             CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
