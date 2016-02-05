@@ -55,21 +55,7 @@ namespace PalMon
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
-            //if (loadOptionsFromConfig)
-            //{
-            //    PalMonConfigReader.LoadOptions();
-            //}
-
-
-
-
-            PaletteInsight.Conf.Loader.LoadConfigTo(
-                LoadConfigFile("config/PalMon.config"),
-                PalMonOptions.Instance
-                );
-
-
-
+            PaletteInsight.Conf.Loader.LoadConfigTo( LoadConfigFile("config/PalMon.config"), options );
 
             // check the license after the configuration has been loaded.
             CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
