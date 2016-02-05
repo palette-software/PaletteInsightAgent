@@ -181,8 +181,6 @@
     <Compile Include="Output\OutputDrivers\OutputDbFactory.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PalMonAgent.cs" />
-    <Compile Include="PalMonConfig\PalMonConfigReader.cs" />
-    <Compile Include="PalMonConfig\PalMonConfigSection.cs" />
     <Compile Include="PalMonOptions.cs" />
     <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
