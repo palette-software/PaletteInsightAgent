@@ -34,7 +34,7 @@ namespace PalMon.Output
         Action<string, DataTable> onFlushDelegate;
 
         DelayedAction csvWrite;
-        DelayedAction dbFlush;
+        //DelayedAction dbFlush;
 
         DataTable csvQueue;
         DataTable dbQueue;
