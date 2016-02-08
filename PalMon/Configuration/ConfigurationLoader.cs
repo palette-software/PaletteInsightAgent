@@ -38,6 +38,10 @@ namespace PaletteInsight
 
                 // Load ThreadInfoPollInterval.
                 options.ThreadInfoPollInterval = config.ThreadInfoPollInterval.Value;
+
+                // Load DBWriterInterval
+                options.DBWriteInterval = config.DBWriteInterval.Value;
+
                 options.DatabaseType = config.Database.DbType;
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);

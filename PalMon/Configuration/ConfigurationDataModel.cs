@@ -129,6 +129,8 @@ namespace PaletteInsight
             public IntValue LogPollInterval { get; set; }
             [XmlElement]
             public IntValue ThreadInfoPollInterval { get; set; }
+            [XmlElement]
+            public IntValue DBWriteInterval { get; set; }
 
             [XmlArray("Processes")]
             [XmlArrayItem("Process")]
