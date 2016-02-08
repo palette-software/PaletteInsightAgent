@@ -46,7 +46,14 @@ namespace PaletteInsight
                 // Load thread monitoring configuration
                 options.Processes = new System.Collections.Generic.List<string>();
                 foreach (var processName in LoadDefaultProcessNames())
+                {
                     options.Processes.Add(processName);
+                }
+
+                foreach (var process in config.Processes)
+                {
+                    options.Processes.Add(process.Name);
+                }
 
                 // Add the log folders based on the Tableau Data path from the registry
                 var tableauRoot = GetTableauRegistryString("Data");
@@ -65,10 +72,11 @@ namespace PaletteInsight
             private static void AddRepoToOptions(PaletteInsightConfiguration config, PalMonOptions options, string tableauRoot)
             {
                 Repository repo = null;
+                string workgroupyml = @"tabsvc\config\workgroup.yml";
 
-                var configFilePath = Path.Combine(tableauRoot, @"tabsvc\config\workgroup.yml");
                 try
                 {
+                    var configFilePath = Path.Combine(tableauRoot, workgroupyml);
                     using (var reader = File.OpenText(configFilePath))
                     {
                         repo = GetRepoFromWorkgroupYaml(reader);
@@ -76,7 +84,7 @@ namespace PaletteInsight
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Error while trying to load and parse YAML config from {0} -- {1}", configFilePath, e);
+                    Log.Warn("Error while trying to load and parse YAML config from {0}/{1} -- {2}", tableauRoot, workgroupyml, e);
                 }
 
 
