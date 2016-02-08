@@ -74,10 +74,10 @@ namespace PaletteInsight
 
         public class LogFolder
         {
-            [XmlAttribute]
+            [XmlAttribute("directory")]
             public string Directory { get; set; }
 
-            [XmlAttribute]
+            [XmlAttribute("filter")]
             public string Filter { get; set; }
         }
 
