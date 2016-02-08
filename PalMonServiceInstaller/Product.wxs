@@ -83,6 +83,9 @@
         <File Id="SodiumNet64DLL" Name="libsodium-64.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium-64.dll" />
         <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
         <File Id="LicensingDLL" Name="Licensing.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Licensing.dll" />
+        <File Id="YamlDotNetDLL" Name="YamlDotNet.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\YamlDotNet.dll" />
+        <File Id="LogFolderDefaultsYAML" Name="logfolders.defaults.yaml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\logfolders.defaults.yaml" />
+        <File Id="ProcessesDefaultsYAML" Name="processes.defaults.yaml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\processes.defaults.yaml" />
       </Component>
       <Component Id="Utilities" Guid="93dd2c94-e909-4b30-a2ed-80e78d53ed5b">
         <!-- Helper Utilities -->

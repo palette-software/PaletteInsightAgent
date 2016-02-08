@@ -1,0 +1,2 @@
+- { directory: 'tabsvc\vizqlserver\Logs', filter: '*.txt' }
+- { directory: 'tabsvc\logs\vizqlserver', filter: 'tabprotosrv*.txt' }
