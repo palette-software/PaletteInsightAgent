@@ -20,7 +20,7 @@ namespace PaletteInsight
         public class Loader
         {
             private const string LOGFOLDER_DEFAULTS_FILE = "logfolders.defaults.yaml";
-            private const string V = "processes.defaults.yaml";
+            private const string PROCESSES_DEFAULT_FILE = "processes.defaults.yaml";
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
 
@@ -49,8 +49,6 @@ namespace PaletteInsight
                     options.Processes.Add(processName);
 
                 // Add the log folders based on the Tableau Data path from the registry
-
-
                 var tableauRoot = GetTableauRegistryString("Data");
 
                 AddLogFoldersToOptions(config, options, tableauRoot);
@@ -67,7 +65,6 @@ namespace PaletteInsight
             private static void AddRepoToOptions(PaletteInsightConfiguration config, PalMonOptions options, string tableauRoot)
             {
                 Repository repo = null;
-                //
 
                 var configFilePath = Path.Combine(tableauRoot, @"tabsvc\config\workgroup.yml");
                 try
@@ -79,7 +76,7 @@ namespace PaletteInsight
                 }
                 catch (Exception e)
                 {
-                    Log.Fatal("Error while trying to load and parse YAML config from {0} -- {1}", configFilePath, e);
+                    Log.Warn("Error while trying to load and parse YAML config from {0} -- {1}", configFilePath, e);
                 }
 
 
@@ -150,7 +147,7 @@ namespace PaletteInsight
                 foreach (var logFolder in LoadDefaultLogFolders())
                 {
                     var fullPath = Path.Combine(tableauRoot, logFolder.Directory);
-                    // we check here so we wont add non-existant folders
+                    // we check here so we wont add non-existent folders
                     if (!Directory.Exists(fullPath)) continue;
                     options.LogFolders.Add(new PalMonOptions.LogFolderInfo
                     {
@@ -308,7 +305,7 @@ namespace PaletteInsight
                 // load the defaults from the application
                 // since PalMonAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
-                using (var reader = File.OpenText(V))
+                using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
                     var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
                     return deserializer.Deserialize<List<string>>(reader);
