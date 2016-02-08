@@ -115,14 +115,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\IKVM.Runtime.7.2.4630.5\lib\IKVM.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="LogentriesCore, Version=2.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\logentries.nlog.2.6.0\lib\net40\LogentriesCore.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="LogentriesNLog, Version=2.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\logentries.nlog.2.6.0\lib\net40\LogentriesNLog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.1.0\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
       <Private>True</Private>
@@ -131,11 +123,20 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NLog">
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NLog.4.2.3\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=3.0.5.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\packages\Npgsql.3.0.5\lib\net45\Npgsql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PaletteAlertsCore, Version=1.0.0.20, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PaletteAlertsCore.1.0.0.20\lib\net40\PaletteAlertsCore.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PaletteAlertsNLog, Version=1.0.0.20, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PaletteAlertsNLog.1.0.0.20\lib\net40\PaletteAlertsNLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sodium, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -148,8 +149,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Xml" />
+    <Reference Include="YamlDotNet, Version=3.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.3.8.0\lib\net35\YamlDotNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigurationDataModel.cs" />
     <Compile Include="CounterConfig\CounterConfigLoader.cs" />
     <Compile Include="CounterConfig\CounterConfigReaderFactory.cs" />
     <Compile Include="Counters\MBean\MBeanCounterBuilder.cs" />
@@ -163,6 +169,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\Host.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
+    <Compile Include="Configuration\ConfigurationLoader.cs" />
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
     <Compile Include="Output\DBWriter.cs" />
@@ -177,8 +184,6 @@
     <Compile Include="Output\OutputDrivers\OutputDbFactory.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PalMonAgent.cs" />
-    <Compile Include="PalMonConfig\PalMonConfigReader.cs" />
-    <Compile Include="PalMonConfig\PalMonConfigSection.cs" />
     <Compile Include="PalMonOptions.cs" />
     <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
@@ -212,12 +217,19 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="App.config" />
+    <None Include="logfolders.defaults.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="processes.defaults.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\PalMon.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </None>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="NLog_forService.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
