@@ -61,7 +61,7 @@ namespace PalMon.LogPoller
         public void pollLogs(object writeLock)
         {
             foreach (var watcher in watchers)
-	        { 
+            { 
                 watcher.watchChangeCycle((filename, lines) =>
                 {
                     Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
@@ -71,7 +71,7 @@ namespace PalMon.LogPoller
                     // if no change, just flush if needed
                     Log.Debug("No changes detected folder={0} filter={1} -- flushing if needed", watcher.watchedFolderPath, watcher.filter);
                 });
-			}
+            }
         }
 
     }

@@ -63,8 +63,8 @@ namespace PalMon
         /// <returns>True if current options are all valid.</returns>
         public bool Valid()
         {
-            return Hosts.Count > 0
-                && PollInterval >= MinPollInterval
+            // removed the host from here as we arent using that functionality
+            return PollInterval >= MinPollInterval
                 && LogPollInterval >= MinPollInterval
                 && ThreadInfoPollInterval >= MinPollInterval
                 && DBWriteInterval >= MinPollInterval;

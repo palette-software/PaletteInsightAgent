@@ -58,7 +58,7 @@ namespace PalMon.Counters.Perfmon
             }
             catch (Exception ex)
             {
-                Log.Debug("Error sampling counter {0}: {1}", this, ex.Message);
+                Log.Info("Error sampling counter {0}: {1}", this, ex.Message);
                 return null;
             }
         }
