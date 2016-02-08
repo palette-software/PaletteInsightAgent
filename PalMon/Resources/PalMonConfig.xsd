@@ -94,6 +94,11 @@
           <xs:documentation>Contains information about the results table.</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="0" name="SqlCommand" type="tns:PalMon.Config.SqlCommandCT">
+        <xs:annotation>
+          <xs:documentation>SQL command timeout value.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
     </xs:choice>
     <xs:attribute name="type" use="required" type="xs:string">
       <xs:annotation>
@@ -141,6 +146,13 @@
     <xs:attribute name="name" use="required" type="xs:string">
       <xs:annotation>
         <xs:documentation>The name of the database table to write results to.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PalMon.Config.SqlCommandCT">
+    <xs:attribute name="timeout" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The timeout value of the SQL command in seconds.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
