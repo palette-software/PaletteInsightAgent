@@ -149,8 +149,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Xml" />
+    <Reference Include="YamlDotNet, Version=3.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.3.8.0\lib\net35\YamlDotNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigurationDataModel.cs" />
     <Compile Include="CounterConfig\CounterConfigLoader.cs" />
     <Compile Include="CounterConfig\CounterConfigReaderFactory.cs" />
     <Compile Include="Counters\MBean\MBeanCounterBuilder.cs" />
@@ -164,6 +169,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\Host.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
+    <Compile Include="Configuration\ConfigurationLoader.cs" />
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
     <Compile Include="Output\DelayedAction.cs" />
@@ -177,8 +183,6 @@
     <Compile Include="Output\OutputDrivers\OutputDbFactory.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PalMonAgent.cs" />
-    <Compile Include="PalMonConfig\PalMonConfigReader.cs" />
-    <Compile Include="PalMonConfig\PalMonConfigSection.cs" />
     <Compile Include="PalMonOptions.cs" />
     <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
@@ -212,6 +216,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="App.config" />
+    <None Include="logfolders.defaults.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="processes.defaults.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\PalMon.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>

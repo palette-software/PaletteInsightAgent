@@ -5,7 +5,6 @@ using System.Configuration;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using PalMon.Config;
 using PalMon.CounterConfig;
 using PalMon.Counters;
 using PalMon.Sampler;
@@ -14,6 +13,8 @@ using PalMon.LogPoller;
 using PalMon.ThreadInfoPoller;
 using PalMon.Output;
 using System.Diagnostics;
+using System.Xml.Serialization;
+using PaletteInsight.Configuration;
 
 [assembly: CLSCompliant(true)]
 
@@ -54,10 +55,7 @@ namespace PalMon
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
-            if (loadOptionsFromConfig)
-            {
-                PalMonConfigReader.LoadOptions();
-            }
+            PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/PalMon.config"), options );
 
             // check the license after the configuration has been loaded.
             CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
@@ -82,6 +80,25 @@ namespace PalMon
             {
                 // start the thread info agent
                 threadInfoAgent = new ThreadInfoAgent();
+            }
+        }
+
+        private PaletteInsightConfiguration LoadConfigFile(string filename)
+        {
+            try
+            {
+                // deserialize the config
+                XmlSerializer reader = new XmlSerializer(typeof(PaletteInsightConfiguration));
+                // try to create the directory
+                using (var file = new FileStream(filename, FileMode.Open))
+                {
+                    return (PaletteInsightConfiguration)reader.Deserialize(file);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Fatal("Error during cofiguration loading: {0} -- {1}", filename, e);
+                return null;
             }
         }
 
