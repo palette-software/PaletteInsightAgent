@@ -37,7 +37,11 @@ namespace PalMon.LogPoller
         {
             foreach (string fileName in getFileList())
             {
+                // get the file signature
                 var signature = getFileSignature(fileName);
+                // check if we have a valid signature
+                if (signature == null) continue;
+                // check & store the state of the file based on the signature
                 using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
                 {
                     if (!stateOfFiles.ContainsKey(signature))
