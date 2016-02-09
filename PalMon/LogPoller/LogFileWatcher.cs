@@ -37,9 +37,13 @@ namespace PalMon.LogPoller
         {
             foreach (string fileName in getFileList())
             {
+                var signature = getFileSignature(fileName);
                 using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
-                    if (!stateOfFiles.ContainsKey(fileName))
-                        stateOfFiles.Add(fileName, fs.Length);
+                {
+                    if (!stateOfFiles.ContainsKey(signature))
+                        stateOfFiles.Add(signature, fs.Length);
+
+                }
 
             }
         }
