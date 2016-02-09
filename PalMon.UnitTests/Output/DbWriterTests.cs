@@ -266,6 +266,24 @@ namespace PalMonTests.Output
         }
 
         [TestMethod, Isolated]
+        public void TestMoveToProcessed_DestinationFolderDoesNotExist()
+        {
+            // Arrange
+            Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
+            var destinationFolder = "csv/processed/";
+            Isolate.WhenCalled(() => Directory.Exists(destinationFolder)).WithExactArguments().WillReturn(false);
+            // Only report in the first round that the destination folder is missing
+            Isolate.WhenCalled(() => Directory.Exists(destinationFolder)).WithExactArguments().WillReturn(true);
+
+            // Act
+            DBWriter.MoveToProcessed(testFileList);
+
+            // Assert
+            // Make sure that the not-existing folder got created
+            Isolate.Verify.WasCalledWithExactArguments(() => Directory.CreateDirectory(destinationFolder));
+        }
+
+        [TestMethod, Isolated]
         public void TestMoveToProcessed_ExceptionAtFileExists()
         {
             // Arrange

@@ -93,6 +93,10 @@ namespace PalMon.Output
             {
                 try
                 {
+                    if (!Directory.Exists(processedPath))
+                    {
+                        Directory.CreateDirectory(processedPath);
+                    }
                     var fileName = GetFileName(fullFileName);
                     Log.Info("Trying to move: {0}", fileName);
                     var targetFile = processedPath + fileName;
