@@ -105,7 +105,7 @@
     <!-- Config Files -->
     <DirectoryRef Id="CONFIGFOLDER">
       <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes">
-        <File Id="CountersConfig" Name="Counters.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.config" />
+        <File Id="CountersConfig" Name="Counters.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.yml" />
         <File Id="PalMonConfig" Name="PalMon.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\PalMon.config" />
       </Component>
     </DirectoryRef>
@@ -113,7 +113,6 @@
     <!-- Resource Files -->
     <DirectoryRef Id="RESOURCESFOLDER">
       <Component Id="Resources" Guid="78a95b43-cb29-4680-8715-46ac81fc2eb7">
-        <File Id="CountersConfigXSD" Name="CountersConfig.xsd" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Resources\CountersConfig.xsd" />
         <File Id="PalMonConfigXSD" Name="PalMonConfig.xsd" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Resources\PalMonConfig.xsd" />
       </Component>
     </DirectoryRef>

@@ -33,7 +33,7 @@ namespace PalMon
         private CounterSampler sampler;
         private readonly PalMonOptions options;
         private bool disposed;
-        private const string PathToCountersConfig = @"Config\Counters.config";
+        private const string PathToCountersYaml = @"Config\Counters.yml";
         private const int WriteLockAcquisitionTimeout = 10; // In seconds.
         private static readonly object WriteLock = new object();
         private const int PollWaitTimeout = 1000;  // In milliseconds.
@@ -153,20 +153,16 @@ namespace PalMon
             // only start the JMX if we want to
             if (USE_COUNTERSAMPLES)
             {
-                // Read Counters.config & create counters.
-                Log.Info(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig);
                 ICollection<ICounter> counters;
                 try
                 {
-                    counters = CounterConfigLoader.Load(PathToCountersConfig, options.Hosts);
+                    counters = CounterConfigLoader.Load(PathToCountersYaml);
                 }
                 catch (ConfigurationErrorsException ex)
                 {
-                    Log.Error("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message);
+                    Log.Error("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersYaml, ex.Message);
                     return;
                 }
-                Log.Debug("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count));
-
 
                 // Spin up counter sampler.
                 sampler = new CounterSampler(counters, options.TableName);
@@ -190,6 +186,7 @@ namespace PalMon
                 threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
             }
         }
+
 
         /// <summary>
         /// Stops the agent by disabling the timer.  Uses a write lock to prevent data from being corrupted mid-write.
