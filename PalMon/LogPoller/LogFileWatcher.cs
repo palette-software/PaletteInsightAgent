@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace PalMon.LogPoller
 {
+    using System.Security.Cryptography;
     using ChangeDelegate = Action<string, string[]>;
 
     class LogFileWatcher
@@ -105,6 +106,9 @@ namespace PalMon.LogPoller
                 // marked as changed.
                 var signature = getFileSignature(fullPath);
 
+                // if the signature is null here, we signal that we did not do any inserts
+                if (signature == null) return false;
+
                 // use the signature
                 var offsetInFile = stateOfFiles.ContainsKey(signature) ? stateOfFiles[signature] : 0;
                 sr.BaseStream.Seek(offsetInFile, SeekOrigin.Begin);
@@ -137,7 +141,7 @@ namespace PalMon.LogPoller
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>the file signature or a null if the file cannot be opened</returns>
-        public static string getFileSignature(string fileName)
+        public string getFileSignature(string fileName)
         {
             // if the file does not exitst, return a null
             if (!File.Exists(fileName)) return null;
@@ -157,14 +161,42 @@ namespace PalMon.LogPoller
         /// <param name="fileName">The name of the file</param>
         /// <param name="sr">The streamReader to use for signature generation</param>
         /// <returns>the file signature</returns>
-        static string getFileSignature(string fileName, StreamReader sr)
+        string getFileSignature(string fileName, StreamReader sr)
         {
-            // the first line is either the first line or empty
-            var firstLine = (sr.Peek() > 0) ? sr.ReadLine() : "";
-            // use the built-in hash function for now
-            var hashCode = firstLine.GetHashCode();
+            // return null if we cannot read anything
+            if (sr.Peek() == 0) return null;
 
-            return String.Format("{0}-{1}", fileName, hashCode);
+            // The signature should consist of the WATCHED_FOLDER|WATCH_MASK|HASH_CODE_OF_FIRST_LINE
+            return String.Format("{0}|{1}|{2}", watchedFolderPath, filter, HashOfString(sr.ReadLine()));
+        }
+
+        /// <summary>
+        /// The default encoding for the log files (we use this to read the bytes)
+        /// </summary>
+        private static Encoding defaultStringEncoding = new UTF8Encoding();
+
+        /// <summary>
+        /// The hash algorith to use for the signature
+        /// </summary>
+        private HashAlgorithm signatureHasher = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5"));
+
+
+
+        /// <summary>
+        /// Hash the given string with the signature hasher
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        private string HashOfString(string str)
+        {
+            // byte array representation of that string
+            var encodedPassword = defaultStringEncoding.GetBytes(str);
+
+            // need MD5 to calculate the hash
+            var hash = signatureHasher.ComputeHash(encodedPassword);
+
+            // string representation
+            return BitConverter.ToString(hash);
         }
     }
 }
