@@ -87,10 +87,7 @@ namespace PalMon.Sampler
             var generatedSchema = new DataTable(tableName);
 
             generatedSchema.Columns.Add(BuildColumnMetadata("timestamp", "System.DateTime", false));
-            generatedSchema.Columns.Add(BuildColumnMetadata("cluster", "System.String", true, 32));
             generatedSchema.Columns.Add(BuildColumnMetadata("machine", "System.String", false, 16));
-            generatedSchema.Columns.Add(BuildColumnMetadata("counter_type", "System.String", false, 32));
-            generatedSchema.Columns.Add(BuildColumnMetadata("source", "System.String", false, 32));
             generatedSchema.Columns.Add(BuildColumnMetadata("category", "System.String", false, 64));
 
             foreach (var counter in counters)
@@ -102,7 +99,6 @@ namespace PalMon.Sampler
                 }
             }
             generatedSchema.Columns.Add(BuildColumnMetadata("instance", "System.String", true, 64));
-            generatedSchema.Columns.Add(BuildColumnMetadata("unit", "System.String", true, 32));
 
             Log.Debug("Dynamically built result schema '{0}'. [{1} {2}]",
                       tableName, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
@@ -148,10 +144,7 @@ namespace PalMon.Sampler
             var row = tableSchema.NewRow();
 
             var counter = sample.Counter;
-            row["cluster"] = counter.Host.Cluster;
-            row["machine"] = counter.Host.Name.ToLower();
-            row["counter_type"] = counter.CounterType;
-            row["source"] = counter.Source;
+            row["machine"] = counter.HostName;
             row["category"] = counter.Category;
             
             if (USE_STATIC_COLUMN_NAMES)
@@ -165,7 +158,6 @@ namespace PalMon.Sampler
                 row[toOracleColumnName(counter.Counter.ToSnakeCase())] = sample.SampleValue;
             }
             row["instance"] = counter.Instance;
-            row["unit"] = counter.Unit;
 
             return row;
         }
@@ -177,13 +169,9 @@ namespace PalMon.Sampler
 
             //TableHelper.addColumn(table, "id", "System.Int32", true, true);
             TableHelper.addColumn(table, "timestamp", "System.DateTime");
-            TableHelper.addColumn(table, "cluster");
             TableHelper.addColumn(table, "machine");
-            TableHelper.addColumn(table, "counter_type");
-            TableHelper.addColumn(table, "source");
             TableHelper.addColumn(table, "category");
             TableHelper.addColumn(table, "instance");
-            TableHelper.addColumn(table, "unit");
 
             TableHelper.addColumn(table, "name");
             TableHelper.addColumn(table, "value", "System.Double");
