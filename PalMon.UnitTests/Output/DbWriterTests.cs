@@ -197,6 +197,7 @@ namespace PalMonTests.Output
     public class DbWriterTests_MoveToProcessed
     {
         IList<string> testFileList;
+        Logger fakeLog;
 
         public DbWriterTests_MoveToProcessed()
         {
@@ -212,6 +213,16 @@ namespace PalMonTests.Output
             testFileList.Add("csv/serverlog-2016-01-28-15-06-00.csv");
             testFileList.Add("csv/serverlog-2016-01-28-15-06-30.csv");
             testFileList.Add("csv/threadinfo-2016-01-28-15-06-00.csv");
+
+            fakeLog = Isolate.Fake.AllInstances<Logger>();
+            Isolate.WhenCalled(() => LogManager.GetCurrentClassLogger()).WillReturn(fakeLog);
+        }
+
+        // Use TestCleanup to run code after each test has run
+        // [TestCleanup()]
+        public void MyTestCleanup()
+        {
+            testFileList.Clear();
         }
 
         #endregion
@@ -220,8 +231,6 @@ namespace PalMonTests.Output
         public void TestMoveToProcessed()
         {
             // Arrange
-            var fakeLog = Isolate.Fake.Instance<Logger>();
-            Isolate.WhenCalled(() => LogManager.GetCurrentClassLogger()).WillReturn(fakeLog);
             Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
 
             // Act
@@ -238,8 +247,6 @@ namespace PalMonTests.Output
         public void TestMoveToProcessed_DestinationFileAlreadyExists()
         {
             // Arrange
-            var fakeLog = Isolate.Fake.Instance<Logger>();
-            Isolate.WhenCalled(() => LogManager.GetCurrentClassLogger()).WillReturn(fakeLog);
             Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(true);
             Isolate.WhenCalled(() => File.Delete("anyfile")).IgnoreCall();
 
@@ -256,6 +263,54 @@ namespace PalMonTests.Output
             Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[0], "csv/processed/serverlog-2016-01-28-15-06-00.csv"));
             Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[1], "csv/processed/serverlog-2016-01-28-15-06-30.csv"));
             Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[2], "csv/processed/threadinfo-2016-01-28-15-06-00.csv"));
+        }
+
+        [TestMethod, Isolated]
+        public void TestMoveToProcessed_ExceptionAtFileExists()
+        {
+            // Arrange
+            var testException = new Exception();
+            Isolate.WhenCalled(() => File.Exists("anyfile")).WillThrow(testException);
+
+            // Act
+            DBWriter.MoveToProcessed(testFileList);
+
+            // Assert
+            Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
+            Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => fakeLog.Error(testException, "any line")));
+        }
+
+        [TestMethod, Isolated]
+        public void TestMoveToProcessed_ExceptionAtFileDelete()
+        {
+            // Arrange
+            var testException = new Exception();
+            Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
+            Isolate.WhenCalled(() => File.Delete("anyfile")).WillThrow(testException);
+
+            // Act
+            DBWriter.MoveToProcessed(testFileList);
+
+            // Assert
+            Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
+            Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => fakeLog.Error(testException, "any line")));
+        }
+
+        [TestMethod, Isolated]
+        public void TestMoveToProcessed_ExceptionAtFileMove()
+        {
+            // Arrange
+            var testException = new Exception();
+            Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
+            Isolate.WhenCalled(() => File.Delete("anyfile")).IgnoreCall();
+            Isolate.WhenCalled(() => File.Move("source", "destination")).WillThrow(testException);
+
+            // Act
+            DBWriter.MoveToProcessed(testFileList);
+
+            // Assert
+            Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
+            Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => fakeLog.Error(testException, "any line")));
         }
     }
 }
