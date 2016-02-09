@@ -90,7 +90,15 @@ namespace PalMon.LogPoller
             using (var fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
             using (var sr = new StreamReader(fs))
             {
-                var offsetInFile = stateOfFiles.ContainsKey(fullPath) ? stateOfFiles[fullPath] : 0;
+
+                // re-open the file when getting the signature so the stream readers offset
+                // wont change because of it.
+                // When re-using the streamreader here, all files that we list are always
+                // marked as changed.
+                var signature = getFileSignature(fullPath);
+
+                // use the signature
+                var offsetInFile = stateOfFiles.ContainsKey(signature) ? stateOfFiles[signature] : 0;
                 sr.BaseStream.Seek(offsetInFile, SeekOrigin.Begin);
 
                 var lines = new List<string>();
@@ -101,7 +109,7 @@ namespace PalMon.LogPoller
                     lines.Add(line);
 
                 // Update the offset
-                stateOfFiles[fullPath] = fs.Position;
+                stateOfFiles[signature] = fs.Position;
 
                 // Callback if we have changes
                 if (lines.Count > 0)
@@ -114,6 +122,41 @@ namespace PalMon.LogPoller
                 // signal that we did not do any inserts
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns>the file signature or a null if the file cannot be opened</returns>
+        public static string getFileSignature(string fileName)
+        {
+            // if the file does not exitst, return a null
+            if (!File.Exists(fileName)) return null;
+
+            // otherwise open the file
+            using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var sr = new StreamReader(fs))
+            {
+                return getFileSignature(fileName, sr);
+            }
+        }
+
+
+        /// <summary>
+        /// Helper that encapsulates the signature generation from a file stream.
+        /// </summary>
+        /// <param name="fileName">The name of the file</param>
+        /// <param name="sr">The streamReader to use for signature generation</param>
+        /// <returns>the file signature</returns>
+        static string getFileSignature(string fileName, StreamReader sr)
+        {
+            // the first line is either the first line or empty
+            var firstLine = (sr.Peek() > 0) ? sr.ReadLine() : "";
+            // use the built-in hash function for now
+            var hashCode = firstLine.GetHashCode();
+
+            return String.Format("{0}-{1}", fileName, hashCode);
         }
     }
 }
