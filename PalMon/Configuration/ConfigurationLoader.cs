@@ -97,7 +97,7 @@ namespace PaletteInsight
                     options.RepoPort = Convert.ToInt32(repoProps.Port);
                     options.RepoUser = repoProps.User;
                     options.RepoPass = repoProps.Password;
-                    options.RepoDb = repoProps.Name;
+                    options.RepoDb = repoProps.Database;
                 }
                 else
                 {
@@ -189,7 +189,7 @@ namespace PaletteInsight
             /// </summary>
             /// <param name="databaseConfig"></param>
             /// <returns></returns>
-            private static IDbConnectionInfo CreateDbConnectionInfo(Database databaseConfig)
+            private static IDbConnectionInfo CreateDbConnectionInfo(DatabaseConfig databaseConfig)
             {
                 IDbConnectionInfo dbConnInfo = new DbConnectionInfo()
                 {
@@ -197,7 +197,7 @@ namespace PaletteInsight
                     Port = databaseConfig.Port,
                     Username = databaseConfig.User,
                     Password = databaseConfig.Password,
-                    DatabaseName = databaseConfig.Name,
+                    DatabaseName = databaseConfig.Database,
                     CommandTimeout = databaseConfig.CommandTimeout
                 };
 
