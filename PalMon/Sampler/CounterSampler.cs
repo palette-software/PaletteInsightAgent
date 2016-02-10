@@ -14,6 +14,7 @@ namespace PalMon.Sampler
     internal sealed class CounterSampler
     {
         private const bool USE_STATIC_COLUMN_NAMES = true;
+        public static readonly string COUNTER_SAMPLER_TABLE_NAME = "countersamples";
         public static readonly string InProgressLock = "Counter Sampler";
 
         private readonly ICollection<ICounter> counters;
@@ -173,7 +174,7 @@ namespace PalMon.Sampler
         public static DataTable makeCounterSamplesTable()
         {
 
-            var table = new DataTable("countersamples");
+            var table = new DataTable(COUNTER_SAMPLER_TABLE_NAME);
 
             //TableHelper.addColumn(table, "id", "System.Int32", true, true);
             TableHelper.addColumn(table, "timestamp", "System.DateTime");
