@@ -129,8 +129,9 @@ namespace PalMon.Output
             var statusLine = String.Format("BULK COPY of {0} (Number of files: {1})", tableName, fileNames.Count);
             string copyString = CopyStatementFor(fileNames[0]);
 
-            LoggingHelpers.TimedLog(Log, statusLine, (rowsWritten) =>
+            LoggingHelpers.TimedLog(Log, statusLine, () =>
             {
+                int rowsWritten = 0;
                 using (var writer = connection.BeginTextImport(copyString))
                 {
                     // Files contents for the same table are sent in one bulk
@@ -161,6 +162,7 @@ namespace PalMon.Output
                         }
                     }
                 }
+                return rowsWritten;
             });
         }
 
