@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using PalMon.Helpers;
 using PalMon.Output;
+using PaletteInsight.Configuration;
 
 namespace PalMon
 {
@@ -22,7 +23,7 @@ namespace PalMon
         public int ThreadInfoPollInterval { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
-        public ICollection<string> Processes { get; set; }
+        public ICollection<ProcessData> Processes { get; set; }
 
         public ICollection<LogFolderInfo> LogFolders { get; set; }
 
