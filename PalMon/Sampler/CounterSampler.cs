@@ -20,7 +20,7 @@ namespace PalMon.Sampler
         private readonly DataTable schema;
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public CounterSampler(ICollection<ICounter> counterCollection, string tableName)
+        public CounterSampler(ICollection<ICounter> counterCollection)
         {
             counters = counterCollection;
             if (USE_STATIC_COLUMN_NAMES)
@@ -29,7 +29,7 @@ namespace PalMon.Sampler
             }
             else
             {
-                schema = GenerateSchema(tableName);
+                schema = GenerateSchema();
             }
         }
 
@@ -82,9 +82,9 @@ namespace PalMon.Sampler
         /// </summary>
         /// <param name="tableName">The name of the resulting data table.</param>
         /// <returns>DataTable that can accomodate both metadata and sample results of all counters managed by this sampler.</returns>
-        private DataTable GenerateSchema(string tableName)
+        private DataTable GenerateSchema()
         {
-            var generatedSchema = new DataTable(tableName);
+            var generatedSchema = new DataTable("countersamples");
 
             generatedSchema.Columns.Add(BuildColumnMetadata("timestamp", "System.DateTime", false));
             generatedSchema.Columns.Add(BuildColumnMetadata("machine", "System.String", false, 16));
@@ -100,8 +100,8 @@ namespace PalMon.Sampler
             }
             generatedSchema.Columns.Add(BuildColumnMetadata("instance", "System.String", true, 64));
 
-            Log.Debug("Dynamically built result schema '{0}'. [{1} {2}]",
-                      tableName, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
+            Log.Debug("Dynamically built result schema 'countersamples'. [{1} {2}]",
+                      generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
             return generatedSchema;
         }
 
