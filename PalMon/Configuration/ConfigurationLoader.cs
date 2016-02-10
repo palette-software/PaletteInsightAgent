@@ -19,8 +19,8 @@ namespace PaletteInsight
         /// </summary>
         public class Loader
         {
-            private const string LOGFOLDER_DEFAULTS_FILE = "logfolders.defaults.yaml";
-            private const string PROCESSES_DEFAULT_FILE = "processes.defaults.yaml";
+            private const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
+            private const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
 
@@ -32,13 +32,12 @@ namespace PaletteInsight
             /// call its constructor, hence we cannot return it.</param>
             public static void LoadConfigTo(PaletteInsightConfiguration config, PalMon.PalMonOptions options)
             {
-                options.PollInterval = config.PollInterval.Value;
+                options.PollInterval = config.PollInterval;
                 // Load LogPollInterval.
-                options.LogPollInterval = config.LogPollInterval.Value;
+                options.LogPollInterval = config.LogPollInterval;
 
                 // Load ThreadInfoPollInterval.
-                options.ThreadInfoPollInterval = config.ThreadInfoPollInterval.Value;
-                options.DatabaseType = config.Database.DbType;
+                options.ThreadInfoPollInterval = config.ThreadInfoPollInterval;
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
 
@@ -52,7 +51,7 @@ namespace PaletteInsight
 
                 foreach (var process in config.Processes)
                 {
-                    options.Processes.Add(process.Name);
+                    options.Processes.Add(process);
                 }
 
                 // Add the log folders based on the Tableau Data path from the registry
@@ -96,9 +95,9 @@ namespace PaletteInsight
                     var repoProps = config.TableauRepo;
                     options.RepoHost = repoProps.Host;
                     options.RepoPort = Convert.ToInt32(repoProps.Port);
-                    options.RepoUser = repoProps.Username;
+                    options.RepoUser = repoProps.User;
                     options.RepoPass = repoProps.Password;
-                    options.RepoDb = repoProps.Db;
+                    options.RepoDb = repoProps.Database;
                 }
                 else
                 {
@@ -190,16 +189,16 @@ namespace PaletteInsight
             /// </summary>
             /// <param name="databaseConfig"></param>
             /// <returns></returns>
-            private static IDbConnectionInfo CreateDbConnectionInfo(Database databaseConfig)
+            private static IDbConnectionInfo CreateDbConnectionInfo(DatabaseConfig databaseConfig)
             {
                 IDbConnectionInfo dbConnInfo = new DbConnectionInfo()
                 {
-                    Server = databaseConfig.Server.Host,
-                    Port = databaseConfig.Server.Port,
-                    Username = databaseConfig.User.Login,
-                    Password = databaseConfig.User.Password,
-                    DatabaseName = databaseConfig.Name,
-                    CommandTimeout = databaseConfig.SqlCommand.Timeout
+                    Server = databaseConfig.Host,
+                    Port = databaseConfig.Port,
+                    Username = databaseConfig.User,
+                    Password = databaseConfig.Password,
+                    DatabaseName = databaseConfig.Database,
+                    CommandTimeout = databaseConfig.CommandTimeout
                 };
 
 

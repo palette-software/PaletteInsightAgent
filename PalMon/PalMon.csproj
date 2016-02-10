@@ -156,14 +156,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationDataModel.cs" />
-    <Compile Include="CounterConfig\CounterConfigLoader.cs" />
-    <Compile Include="CounterConfig\CounterConfigReaderFactory.cs" />
-    <Compile Include="Counters\MBean\MBeanCounterBuilder.cs" />
-    <Compile Include="Counters\Perfmon\PerfmonCounterBuilder.cs" />
+    <Compile Include="Counters\CounterConfigLoader.cs" />
     <Compile Include="Counters\ICounterBuilder.cs" />
-    <Compile Include="Counters\MBean\JMXConnectionInfo.cs" />
-    <Compile Include="Counters\MBean\JMXConnectorProxy.cs" />
-    <Compile Include="Counters\MBean\MBeanClientFactory.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -180,7 +174,6 @@
     <Compile Include="Output\DataTableUtils.cs" />
     <Compile Include="Output\OutputDrivers\IOutput.cs" />
     <Compile Include="Helpers\LoggingHelpers.cs" />
-    <Compile Include="Output\OutputDrivers\OutputDbFactory.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PalMonAgent.cs" />
     <Compile Include="PalMonOptions.cs" />
@@ -188,43 +181,30 @@
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
     <Compile Include="LogPoller\LogFileWatcher.cs" />
     <Compile Include="LogPoller\LogPollerAgent.cs" />
-    <Compile Include="LogPoller\LogPollerConfiguration.cs" />
     <Compile Include="LogPoller\LogsToDbConverter.cs" />
     <Compile Include="LogPoller\LogTables.cs" />
     <Compile Include="LogPoller\TableauRepo.cs" />
-    <Compile Include="LogPoller\TableauRepoConfigElement.cs" />
     <Compile Include="Sampler\ICounterSample.cs" />
-    <Compile Include="Counters\MBean\AbstractMBeanCounter.cs" />
     <Compile Include="Counters\ICounter.cs" />
-    <Compile Include="Counters\MBean\IMBeanClient.cs" />
-    <Compile Include="Counters\MBean\JavaHealthCounter.cs" />
-    <Compile Include="Counters\MBean\MBeanClient.cs" />
-    <Compile Include="CounterConfig\MBeanCounterConfigReader.cs" />
     <Compile Include="Counters\Perfmon\PerfmonCounter.cs" />
-    <Compile Include="CounterConfig\ICounterConfigReader.cs" />
     <Compile Include="Sampler\CounterSampler.cs" />
-    <Compile Include="CounterConfig\PerfmonCounterConfigReader.cs" />
-    <Compile Include="Counters\Perfmon\PerfmonCounterLoader.cs" />
     <Compile Include="Sampler\CounterSample.cs" />
-    <Compile Include="Counters\MBean\TableauHealthCounter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\HostnameHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\CountersConfig.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="App.config" />
-    <None Include="logfolders.defaults.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="processes.defaults.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\PalMon.config">
+    <None Include="Config\Config.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
+    </None>
+    <None Include="Config\Counters.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\LogFolders.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\Processes.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -236,15 +216,6 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Resources\PalMonConfig.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Config\Counters.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
