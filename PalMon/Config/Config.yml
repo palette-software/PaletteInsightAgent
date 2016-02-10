@@ -12,10 +12,10 @@ Database:
   CommandTimeout: 600
 Logs: 
   - 
-    Directory: "c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\"
+    Directory: "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\vizqlserver\\Logs\\"
     Filter: "*.txt"
   - 
-    Directory: "c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\"
+    Directory: "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\vizqlserver\\"
     Filter: "tabprotosrv*.txt"
 TableauRepo: 
   Host: localhost
