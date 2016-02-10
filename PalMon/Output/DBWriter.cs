@@ -47,7 +47,11 @@ namespace PalMon.Output
             {
                 return new List<string>();
             }
-            return Directory.GetFiles(csvPath, pattern + "-" + csvPattern);
+
+            // Remove those files that are still being written.
+            return Directory.GetFiles(csvPath, pattern + "-" + csvPattern)
+                            .Where(fileName => !fileName.Contains(DataTableCache.IN_PROGRESS_FILE_POSTFIX))
+                            .ToList();
         }
 
 

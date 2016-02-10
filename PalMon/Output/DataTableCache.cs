@@ -16,7 +16,8 @@ namespace PalMon.Output
     /// </summary>
     class DataTableCache
     {
-        private const string CSV_DATETIME_FORMAT = "yyyy-MM-dd--HH";
+        private const string CSV_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss";
+        public  const string IN_PROGRESS_FILE_POSTFIX = ".writing";
         private const int CSV_OUTPUT_BATCH_TIME_SECONDS = 30;
         private const int DB_OUTPUT_BATCH_TIME_SECONDS = 60;
         private string fileBaseName;
@@ -60,8 +61,16 @@ namespace PalMon.Output
 
                 // write out if any
                 var csvFileName = GetCSVFile(baseName, start);
-                Log.Info("Writing to CSV file: {0}", csvFileName);
-                WriteCsvFile(csvFileName, csvQueue);
+
+                // First create the file name with a prefix, so that the bulk copy
+                // loader won't touch this file, until it is being written.
+                var inProgressCsvFileName = csvFileName + IN_PROGRESS_FILE_POSTFIX;
+
+                Log.Info("Writing to CSV file: {0}", inProgressCsvFileName);
+                WriteCsvFile(inProgressCsvFileName, csvQueue);
+
+                // Remove the prefix to signal that the file write is done.
+                File.Move(inProgressCsvFileName, csvFileName);
 
                 // remove any rows from the csv queue
                 csvQueue.Rows.Clear();
@@ -120,7 +129,6 @@ namespace PalMon.Output
         /// <param name="lastFileName"></param>
         private static void WriteCsvFile(string lastFileName, DataTable queue)
         {
-
             var fileExists = File.Exists(lastFileName);
 
             using (var streamWriter = File.AppendText(lastFileName))
