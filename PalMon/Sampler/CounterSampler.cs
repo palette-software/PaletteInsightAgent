@@ -15,7 +15,7 @@ namespace PalMon.Sampler
     {
         private const bool USE_STATIC_COLUMN_NAMES = true;
         public static readonly string InProgressLock = "Counter Sampler";
-        private static readonly string TableName = "countersamples";
+        public static readonly string TableName = "countersamples";
 
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;

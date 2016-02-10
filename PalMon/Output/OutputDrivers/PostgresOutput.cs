@@ -113,7 +113,7 @@ namespace PalMon.Output
             {
                 table = ThreadTables.makeThreadInfoTable();
             }
-            else if (tableName.Contains(CounterSampler.COUNTER_SAMPLER_TABLE_NAME))
+            else if (tableName.Contains(CounterSampler.TableName))
             {
                 table = CounterSampler.makeCounterSamplesTable();
             }
