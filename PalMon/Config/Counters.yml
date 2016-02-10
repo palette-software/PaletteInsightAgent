@@ -1,0 +1,11 @@
+﻿--- 
+- 
+  Categories: 
+    - Name: Memory
+      Counters:
+        - Name: "% Committed Bytes In Use"
+    - Name: Processor
+      Counters:
+        - Name: "% Processor Time"
+          Instances:
+            - "_Total"
