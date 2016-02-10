@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+using YamlDotNet.Serialization;
 
 namespace PaletteInsight
 {
@@ -8,147 +8,62 @@ namespace PaletteInsight
 
     namespace Configuration
     {
-
-        public class StringValue
+        public class DatabaseConfig
         {
-            public StringValue() { Value = ""; }
-            public StringValue(string v) { Value = v; }
+            [YamlMember(Alias = "Database")]
+            public string Database { get; set; }
 
-            [XmlAttribute("value")]
-            public string Value { get; set; }
-        }
-
-        public class IntValue
-        {
-            public IntValue() { Value = 0; }
-            public IntValue(int v) { Value = v; }
-            [XmlAttribute("value")]
-            public int Value { get; set; }
-        }
-
-
-        public class DbServer
-        {
-            [XmlAttribute("host")]
+            [YamlMember(Alias = "Host")]
             public string Host { get; set; }
-            [XmlAttribute("port")]
+
+            [YamlMember(Alias = "Port")]
             public int Port { get; set; }
-        }
 
-        public class DbUser
-        {
-            [XmlAttribute("login")]
-            public string Login { get; set; }
-            [XmlAttribute("password")]
+            [YamlMember(Alias = "User")]
+            public string User { get; set; }
+
+            [YamlMember(Alias = "Password")]
             public string Password { get; set; }
-        }
 
-        public class DbTable
-        {
-            [XmlAttribute("name")]
-            public string Name { get; set; }
-        }
-
-        public class SqlCommand
-        {
-            [XmlAttribute("timeout")]
-            public int Timeout { get; set; }
-        }
-
-        public class Database
-        {
-            [XmlAttribute("name")]
-            public string Name { get; set; }
-            [XmlAttribute("type")]
-            public string DbType { get; set; }
-            [XmlElement]
-            public DbServer Server { get; set; }
-            [XmlElement]
-            public DbUser User { get; set; }
-            [XmlElement]
-            public DbTable Table { get; set; }
-            [XmlElement]
-            public SqlCommand SqlCommand { get; set; }
+            [YamlMember(Alias = "CommandTimeout")]
+            public int CommandTimeout { get; set; }
         }
 
 
         public class LogFolder
         {
-            [XmlAttribute("directory")]
+            [YamlMember(Alias = "Directory")]
             public string Directory { get; set; }
 
-            [XmlAttribute("filter")]
+            [YamlMember(Alias = "Filter")]
             public string Filter { get; set; }
         }
 
-        public class TableauRepo
-        {
-            [XmlAttribute]
-            public string Host { get; set; }
-            [XmlAttribute]
-            public int Port { get; set; }
-            [XmlAttribute]
-            public string Username { get; set; }
-            [XmlAttribute]
-            public string Password { get; set; }
-            [XmlAttribute]
-            public string Db { get; set; }
-        }
-
-        public class Process
-        {
-            [XmlAttribute("name")]
-            public string Name { get; set; }
-        }
-
-        public class Host
-        {
-            [XmlAttribute("name")]
-            public string Name { get; set; }
-        }
-
-        public class Cluster
-        {
-            [XmlAttribute("name")]
-            public string Name { get; set; }
-
-            [XmlElement("Host")]
-            public List<Host> Hosts { get; set; }
-        }
-
-        [XmlRoot(ElementName = "PalMonConfig", Namespace = "PalMon")]
         public class PaletteInsightConfiguration
         {
+            [YamlMember(Alias = "PollInterval")]
+            public int PollInterval { get; set; }
 
-            [XmlElement]
-            public StringValue OutputMode { get; set; }
+            [YamlMember(Alias = "ThreadInfoPollInterval")]
+            public int ThreadInfoPollInterval { get; set; }
 
-            [XmlElement]
-            public IntValue PollInterval { get; set; }
-            [XmlElement]
-            public IntValue LogPollInterval { get; set; }
-            [XmlElement]
-            public IntValue ThreadInfoPollInterval { get; set; }
-            [XmlElement]
-            public IntValue DBWriteInterval { get; set; }
+            [YamlMember(Alias = "LogPollInterval")]
+            public int LogPollInterval { get; set; }
 
-            [XmlArray("Processes")]
-            [XmlArrayItem("Process")]
-            public List<Process> Processes { get; set; }
+            [YamlMember(Alias = "DBWriteInterval")]
+            public int DBWriteInterval { get; set; }
 
-            [XmlArray("Clusters")]
-            [XmlArrayItem("Cluster")]
-            public List<Cluster> Clusters { get; set; }
+            [YamlMember(Alias = "Processes")]
+            public List<string> Processes { get; set; }
 
-            [XmlElement]
-            public Database Database { get; set; }
+            [YamlMember(Alias = "Database")]
+            public DatabaseConfig Database { get; set; }
 
-            [XmlArray("Logs")]
-            [XmlArrayItem("LogFolder")]
+            [YamlMember(Alias = "Logs")]
             public List<LogFolder> Logs { get; set; }
 
-            [XmlElement]
-            public TableauRepo TableauRepo;
+            [YamlMember(Alias = "TableauRepo")]
+            public DatabaseConfig TableauRepo { get; set; }
         }
 
         #endregion

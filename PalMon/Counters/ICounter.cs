@@ -8,16 +8,14 @@ namespace PalMon.Counters
     /// </summary>
     public interface ICounter
     {
-        Host Host { get; }
-        string CounterType { get; }
-        string Source { get; }
         string Category { get; }
         string Counter { get; }
         string Instance { get; }
-        string Unit { get; }
+        string HostName { get; }
 
         ICounterSample Sample();
 
         string ToString();
     }
+
 }

@@ -13,8 +13,9 @@ using PalMon.LogPoller;
 using PalMon.ThreadInfoPoller;
 using PalMon.Output;
 using System.Diagnostics;
-using System.Xml.Serialization;
 using PaletteInsight.Configuration;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 [assembly: CLSCompliant(true)]
 
@@ -34,7 +35,7 @@ namespace PalMon
         private CounterSampler sampler;
         private readonly PalMonOptions options;
         private bool disposed;
-        private const string PathToCountersConfig = @"Config\Counters.config";
+        private const string PathToCountersYaml = @"Config\Counters.yml";
         private const int WriteLockAcquisitionTimeout = 10; // In seconds.
         private static readonly object WriteLock = new object();
         private const int PollWaitTimeout = 1000;  // In milliseconds.
@@ -55,7 +56,7 @@ namespace PalMon
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
-            PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/PalMon.config"), options );
+            PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/Config.yml"), options );
 
             // check the license after the configuration has been loaded.
             CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
@@ -65,7 +66,7 @@ namespace PalMon
             string version = fvi.FileVersion;
             Log.Info("Palette Insight Agent version: " + version);
 
-            output = OutputDbFactory.DriverFor(options.DatabaseType, options.ResultDatabase);
+            output = new PostgresOutput(options.ResultDatabase);
             // initialize the output
             CachingOutput.Init(output); 
 
@@ -88,11 +89,11 @@ namespace PalMon
             try
             {
                 // deserialize the config
-                XmlSerializer reader = new XmlSerializer(typeof(PaletteInsightConfiguration));
-                // try to create the directory
-                using (var file = new FileStream(filename, FileMode.Open))
+                using (var reader = File.OpenText(filename))
                 {
-                    return (PaletteInsightConfiguration)reader.Deserialize(file);
+                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
+                    var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
+                    return config;
                 }
             }
             catch (Exception e)
@@ -153,23 +154,19 @@ namespace PalMon
             // only start the JMX if we want to
             if (USE_COUNTERSAMPLES)
             {
-                // Read Counters.config & create counters.
-                Log.Info(@"Loading performance counters from {0}\{1}..", Directory.GetCurrentDirectory(), PathToCountersConfig);
                 ICollection<ICounter> counters;
                 try
                 {
-                    counters = CounterConfigLoader.Load(PathToCountersConfig, options.Hosts);
+                    counters = CounterConfigLoader.Load(PathToCountersYaml);
                 }
                 catch (ConfigurationErrorsException ex)
                 {
-                    Log.Error("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersConfig, ex.Message);
+                    Log.Error("Failed to correctly load '{0}': {1}\nAborting..", PathToCountersYaml, ex.Message);
                     return;
                 }
-                Log.Debug("Successfully loaded {0} {1} from configuration file.", counters.Count, "counter".Pluralize(counters.Count));
-
 
                 // Spin up counter sampler.
-                sampler = new CounterSampler(counters, options.TableName);
+                sampler = new CounterSampler(counters);
 
                 // Kick off the polling timer.
                 Log.Info("PalMon initialized!  Starting performance counter polling..");
@@ -193,6 +190,7 @@ namespace PalMon
             // Start the DB Writer
             dbWriterTimer = new Timer(callback: WriteToDB, state: null, dueTime: 0, period: options.DBWriteInterval * 1000);
         }
+
 
         /// <summary>
         /// Stops the agent by disabling the timer.  Uses a write lock to prevent data from being corrupted mid-write.
