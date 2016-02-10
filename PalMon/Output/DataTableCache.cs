@@ -32,7 +32,7 @@ namespace PalMon.Output
         /// 
         /// Upon returning, the queue is cleared
         /// </summary>
-        Action<string, DataTable> onFlushDelegate;
+        Action<IList<string>> onFlushDelegate;
 
         DelayedAction csvWrite;
         //DelayedAction dbFlush;
@@ -40,7 +40,7 @@ namespace PalMon.Output
         DataTable csvQueue;
         DataTable dbQueue;
 
-        public DataTableCache(string baseName, DataTable structureTable, Action<string, DataTable> onFlush)
+        public DataTableCache(string baseName, DataTable structureTable, Action<IList<string>> onFlush)
         {
             fileBaseName = baseName;
             onFlushDelegate = onFlush;
