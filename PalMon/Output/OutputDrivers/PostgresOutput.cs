@@ -42,14 +42,14 @@ namespace PalMon.Output
         }
 
         #region IOutput implementation
-        public void Write(string csvFile, DataTable rows)
-        {
-            DoBulkCopy(rows);
-        }
+        //public void Write(string csvFile, DataTable rows)
+        //{
+        //    DoBulkCopy(rows);
+        //}
 
-        public void Write(string csvFile)
+        public void Write(IList<string> csvFiles)
         {
-            DoBulkCopy(csvFile);
+            DoBulkCopy(csvFiles);
         }
 
         #endregion
@@ -60,73 +60,105 @@ namespace PalMon.Output
         /// Helper to do a bulk copy
         /// </summary>
         /// <param name="conversionResult"></param>
-        private void DoBulkCopy(DataTable rows)
+        //private void DoBulkCopy(DataTable rows)
+        //{
+
+        //    ReconnectoToDbIfNeeded();
+        //    UpdateTableStructureFor(rows);
+
+        //    var statusLine = String.Format("BULK COPY of {0} - {1} rows", rows.TableName, rows.Rows.Count);
+        //    string copyString = CopyStatementFor(rows);
+
+
+        //    LoggingHelpers.TimedLog(Log, statusLine, () =>
+        //    {
+        //        using (var writer = connection.BeginTextImport(copyString))
+        //        {
+        //            foreach (DataRow rowToWrite in rows.Rows)
+        //            {
+        //                var row = String.Join("\t", ToTSVLine(rowToWrite.ItemArray));
+        //                // if the row ends with a backslash, we need to add a space after it
+        //                if (row.Last() == '\\') row += " ";
+        //                writer.WriteLine(row);
+        //            }
+        //        }
+        //    });
+        //}
+
+        /// <summary>
+        /// Helper to do a bulk copy
+        /// </summary>
+        /// <param name="conversionResult"></param>
+        private void DoBulkCopy(IList<string> fileNames)
         {
-
-            ReconnectoToDbIfNeeded();
-            UpdateTableStructureFor(rows);
-
-            var statusLine = String.Format("BULK COPY of {0} - {1} rows", rows.TableName, rows.Rows.Count);
-            string copyString = CopyStatementFor(rows);
-
-
-            LoggingHelpers.TimedLog(Log, statusLine, () =>
+            if (fileNames.Count <= 0)
             {
-                using (var writer = connection.BeginTextImport(copyString))
-                {
-                    foreach (DataRow rowToWrite in rows.Rows)
-                    {
-                        var row = String.Join("\t", ToTSVLine(rowToWrite.ItemArray));
-                        // if the row ends with a backslash, we need to add a space after it
-                        if (row.Last() == '\\') row += " ";
-                        writer.WriteLine(row);
-                    }
-                }
-            });
-        }
+                // There are no files to process.
+                return;
+            }
 
-        private void DoBulkCopy(string fileName)
-        {
-            var tableName = DBWriter.GetTableName(fileName);
             ReconnectoToDbIfNeeded();
+            var tableName = DBWriter.GetTableName(fileNames[0]);
 
             DataTable table = null;
-            if (fileName.Contains(LogTables.SERVERLOGS_TABLE_NAME))
+            if (tableName.Contains(LogTables.SERVERLOGS_TABLE_NAME))
             {
                 table = LogTables.makeServerLogsTable();
             }
-            else if (fileName.Contains(LogTables.FILTER_STATE_AUDIT_TABLE_NAME))
+            else if (tableName.Contains(LogTables.FILTER_STATE_AUDIT_TABLE_NAME))
             {
                 table = LogTables.makeFilterStateAuditTable();
             }
-            else if (fileName.Contains(ThreadTables.THREADINFO_TABLE_NAME))
+            else if (tableName.Contains(ThreadTables.THREADINFO_TABLE_NAME))
             {
                 table = ThreadTables.makeThreadInfoTable();
             }
-            else if (fileName.Contains(CounterSampler.COUNTER_SAMPLER_TABLE_NAME))
+            else if (tableName.Contains(CounterSampler.COUNTER_SAMPLER_TABLE_NAME))
             {
                 table = CounterSampler.makeCounterSamplesTable();
             }
 
             if (table == null)
             {
-                Log.Error("Could not detect the data table for CSV file: {0}", fileName);
+                Log.Error("Unexpected table name: {0}", tableName);
                 return;
             }
 
             UpdateTableStructureFor(table);
 
-            // TODO: Rowcount should be determined for this log 
-            var statusLine = String.Format("BULK COPY of {0} - TODO: <unknown number> rows", tableName);
-            string copyString = CopyStatementFor(fileName);
+            var statusLine = String.Format("BULK COPY of {0} (Number of files: {1})", tableName, fileNames.Count);
+            string copyString = CopyStatementFor(fileNames[0]);
 
-            LoggingHelpers.TimedLog(Log, statusLine, () =>
+            LoggingHelpers.TimedLog(Log, statusLine, (rowsWritten) =>
             {
                 using (var writer = connection.BeginTextImport(copyString))
                 {
-                    using (var reader = new StreamReader(fileName))
+                    // Files contents for the same table are sent in one bulk
+                    foreach (var fileName in fileNames)
                     {
-                        writer.WriteLine(reader.ReadLine());
+                        if (!copyString.Equals(CopyStatementFor(fileName)))
+                        {
+                            Log.Error("Skipping file since CSV header is not matching with others in file: {0}", fileName);
+                            continue;
+                        }
+
+                        using (var reader = new StreamReader(fileName))
+                        {
+                            // Skip the first line of the CSV file as it only contains the CSV header
+                            var lineRead = reader.ReadLine();
+
+                            while (true)
+                            {
+                                lineRead = reader.ReadLine();
+                                if (lineRead == null)
+                                {
+                                    // End of file
+                                    break;
+                                }
+                                rowsWritten++;
+                                writer.WriteLine(lineRead);
+                            }
+                        }
                     }
                 }
             });
@@ -216,7 +248,7 @@ namespace PalMon.Output
 
             // first row contains column names
             string columnNames = File.ReadLines(fileName).First(); // gets the first line from file.
-            var copyString = String.Format("COPY {0} ({1}) FROM STDIN", tableName, columnNames);
+            var copyString = String.Format("COPY {0} ({1}) FROM STDIN WITH CSV", tableName, columnNames);
             return copyString;
         }
 

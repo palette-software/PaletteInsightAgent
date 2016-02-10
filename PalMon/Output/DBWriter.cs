@@ -77,18 +77,19 @@ namespace PalMon.Output
                 // If the file name does not contain any delimiters,
                 // then it must be some error since we are creating
                 // these files.
+                Log.Error("Failed to extract table name from file name: {0}", fullFileName);
                 return "";
             }
             return tokens[0];
         }
 
-        public static void CopyToDB(ICollection<string> fileList)
+        public static void CopyToDB(IList<string> fileList)
         {
-            foreach (var fileName in fileList)
-            {
-                Log.Info("File to copy: {0}", fileName);
-                CachingOutput.Write(fileName);
-            }
+            //foreach (var fileName in fileList)
+            //{
+            //    Log.Info("File to copy: {0}", fileName);
+                CachingOutput.Write(fileList);
+            //}
         }
 
         public static void MoveToProcessed(IList<string> fileList)

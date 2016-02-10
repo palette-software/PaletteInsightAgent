@@ -74,9 +74,9 @@ namespace PalMon.Output
             cache.Put(rows);
         }
 
-        public static void Write(string fileName)
+        public static void Write(IList<string> fileNames)
         {
-            wrappedOutput.Write(fileName);
+            wrappedOutput.Write(fileNames);
         }
 
         #region IDisposable Support
