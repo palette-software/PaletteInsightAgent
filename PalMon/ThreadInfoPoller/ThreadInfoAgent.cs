@@ -18,6 +18,8 @@ namespace PalMon.ThreadInfoPoller
         public long threadId;
         public long cpuTime;
         public DateTime pollTimeStamp;
+        public DateTime pollCycleTimeStamp;
+        public DateTime startTimeStamp;
     }
 
     class ThreadInfoAgent
@@ -54,13 +56,15 @@ namespace PalMon.ThreadInfoPoller
             }
         }
 
-        protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks)
+        protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks, DateTime pollCycleTimeStamp, DateTime startTimeStamp)
         {
             ThreadInfo threadInfo = new ThreadInfo();
             threadInfo.processId = process.Id;
             threadInfo.threadId = threadId;
             threadInfo.cpuTime = ticks;
             threadInfo.pollTimeStamp = DateTimeOffset.Now.UtcDateTime;
+            threadInfo.pollCycleTimeStamp = pollCycleTimeStamp;
+            threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
             threadInfo.instance = process.ProcessName;
             ThreadTables.addToTable(table, threadInfo);
@@ -71,14 +75,15 @@ namespace PalMon.ThreadInfoPoller
             try
             {
                 // Store the total processor time of the whole process so that we can do sanity checks on the sum of thread cpu times
-                addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks);
+                var pollCycleTimeStamp = DateTimeOffset.Now.UtcDateTime;
+                addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime());
                 serverLogsTableCount++;
 
                 foreach (ProcessThread thread in process.Threads)
                 {
                     try
                     {
-                        addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks);
+                        addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime());
                         serverLogsTableCount++;
                     }
                     catch (InvalidOperationException)
