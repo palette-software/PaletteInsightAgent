@@ -78,6 +78,31 @@ namespace PalMonTests.Output
         }
 
         [TestMethod, Isolated]
+        public void TestGetFilesOfSameTable_FilterFilesThatAreBeingWritten()
+        {
+            // Arrange
+            string[] testFiles = { "serverlog-2016-01-28-15-06-00.csv", "serverlog-2016-01-28-15-06-30.csv",
+                                   "threadinfo-2016-01-28-15-06-00.csv", "serverlog-2016-01-28-15-06-30.csv.writing" };
+            string[] serverLogs = { testFiles[0], testFiles[1], testFiles[3] };
+            Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(testFiles);
+            Isolate.WhenCalled(() => Directory.GetFiles("csv/", "serverlog-*.csv")).WithExactArguments().WillReturn(serverLogs);
+
+            // Act
+            var resultFiles = DBWriter.GetFilesOfSameTable();
+
+            // Assert
+            Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("csv/", "serverlog-*.csv"));
+            List<string> expectedFiles = new List<string>();
+            expectedFiles.Add(testFiles[0]);
+            expectedFiles.Add(testFiles[1]);
+            Assert.AreEqual(2, resultFiles.Count);
+            for (int i = 0; i < resultFiles.Count; i++)
+            {
+                Assert.AreEqual(expectedFiles[i], resultFiles[i]);
+            }
+        }
+
+        [TestMethod, Isolated]
         public void TestGetFilesOfSameTable_NoFiles()
         {
             // Arrange

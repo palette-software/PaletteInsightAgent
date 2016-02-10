@@ -9,6 +9,9 @@ using System.Data;
 using NLog;
 using System.Globalization;
 using PalMon.Helpers;
+using PalMon.LogPoller;
+using PalMon.Sampler;
+using PalMon.ThreadInfoPoller;
 
 namespace PalMon.Output
 {
@@ -51,7 +54,7 @@ namespace PalMon.Output
 
         #endregion
 
-        #region datatable bluk ops
+        #region datatable bulk ops
 
         /// <summary>
         /// Helper to do a bulk copy
@@ -84,14 +87,37 @@ namespace PalMon.Output
 
         private void DoBulkCopy(string fileName)
         {
-            return;
             var tableName = DBWriter.GetTableName(fileName);
             ReconnectoToDbIfNeeded();
-            // TODO: This has to be done elsewhere as we don't have data types here!!!!
-            // UpdateTableStructureFor(fileName);
+
+            DataTable table = null;
+            if (fileName.Contains(LogTables.SERVERLOGS_TABLE_NAME))
+            {
+                table = LogTables.makeServerLogsTable();
+            }
+            else if (fileName.Contains(LogTables.FILTER_STATE_AUDIT_TABLE_NAME))
+            {
+                table = LogTables.makeFilterStateAuditTable();
+            }
+            else if (fileName.Contains(ThreadTables.THREADINFO_TABLE_NAME))
+            {
+                table = ThreadTables.makeThreadInfoTable();
+            }
+            else if (fileName.Contains(CounterSampler.COUNTER_SAMPLER_TABLE_NAME))
+            {
+                table = CounterSampler.makeCounterSamplesTable();
+            }
+
+            if (table == null)
+            {
+                Log.Error("Could not detect the data table for CSV file: {0}", fileName);
+                return;
+            }
+
+            UpdateTableStructureFor(table);
 
             // TODO: Rowcount should be determined for this log 
-            var statusLine = String.Format("BULK COPY of {0} - {1} rows", tableName, 0);
+            var statusLine = String.Format("BULK COPY of {0} - TODO: <unknown number> rows", tableName);
             string copyString = CopyStatementFor(fileName);
 
             LoggingHelpers.TimedLog(Log, statusLine, () =>

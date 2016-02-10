@@ -10,6 +10,9 @@ namespace PalMon.LogPoller
 {
     class LogTables
     {
+        public static readonly string SERVERLOGS_TABLE_NAME = "serverlogs";
+        public static readonly string FILTER_STATE_AUDIT_TABLE_NAME = "filter_state_audit";
+
         //CREATE TABLE serverlogs
         //(
         //  filename text,
@@ -27,7 +30,7 @@ namespace PalMon.LogPoller
         //)
         public static DataTable makeServerLogsTable()
         {
-            var table = new DataTable("serverlogs");
+            var table = new DataTable(SERVERLOGS_TABLE_NAME);
 
             //TableHelper.addColumn(table, "id", "System.Int32", true, true);
             TableHelper.addColumn(table, "filename");
@@ -67,7 +70,7 @@ namespace PalMon.LogPoller
         public static DataTable makeFilterStateAuditTable()
         {
 
-            var table = new DataTable("filter_state_audit");
+            var table = new DataTable(FILTER_STATE_AUDIT_TABLE_NAME);
 
             //TableHelper.addColumn(table, "id", "System.Int32", true, true);
             TableHelper.addColumn(table, "ts", "System.DateTime");
