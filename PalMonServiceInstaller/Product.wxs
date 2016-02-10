@@ -61,16 +61,6 @@
         <!-- Required Libraries -->
         <File Id="PalMonLibDLL" Name="PalMonLib.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PalMonLib.dll" />
         <File Id="CsvHelperDLL" Name="CsvHelper.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\CsvHelper.dll" />
-        <File Id="IKVMOpenJDKCorbaDLL" Name="IKVM.OpenJDK.Corba.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Corba.dll" />
-        <File Id="IKVMOpenJDKCoreDLL" Name="IKVM.OpenJDK.Core.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Core.dll" />
-        <File Id="IKVMOpenJDKManagementDLL" Name="IKVM.OpenJDK.Management.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Management.dll" />
-        <File Id="IKVMOpenJDKMiscDLL" Name="IKVM.OpenJDK.Misc.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Misc.dll" />
-        <File Id="IKVMOpenJDKNamingDLL" Name="IKVM.OpenJDK.Naming.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Naming.dll" />
-        <File Id="IKVMOpenJDKRemotingDLL" Name="IKVM.OpenJDK.Remoting.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Remoting.dll" />
-        <File Id="IKVMOpenJDKSecurityDLL" Name="IKVM.OpenJDK.Security.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Security.dll" />
-        <File Id="IKVMOpenJDKTextDLL" Name="IKVM.OpenJDK.Text.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Text.dll" />
-        <File Id="IKVMOpenJDKUtilDLL" Name="IKVM.OpenJDK.Util.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.OpenJDK.Util.dll" />
-        <File Id="IKVMRuntimeDLL" Name="IKVM.Runtime.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\IKVM.Runtime.dll" />
         <File Id="NLogDLL" Name="NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.dll" />
         <File Id="NLogXML" Name="NLog.xml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.xml" />
         <File Id="PaletteAlertsCoreDLL" Name="PaletteAlertsCore.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteAlertsCore.dll" />
@@ -84,8 +74,6 @@
         <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
         <File Id="LicensingDLL" Name="Licensing.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Licensing.dll" />
         <File Id="YamlDotNetDLL" Name="YamlDotNet.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\YamlDotNet.dll" />
-        <File Id="LogFolderDefaultsYAML" Name="logfolders.defaults.yaml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\logfolders.defaults.yaml" />
-        <File Id="ProcessesDefaultsYAML" Name="processes.defaults.yaml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\processes.defaults.yaml" />
       </Component>
       <Component Id="Utilities" Guid="93dd2c94-e909-4b30-a2ed-80e78d53ed5b">
         <!-- Helper Utilities -->
@@ -106,17 +94,12 @@
     <DirectoryRef Id="CONFIGFOLDER">
       <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes">
         <File Id="CountersConfig" Name="Counters.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.yml" />
-        <File Id="PalMonConfig" Name="PalMon.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\PalMon.config" />
+        <File Id="PalMonConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />
+        <File Id="LogFolderDefaultsYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" />
+        <File Id="ProcessesDefaultsYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" />
       </Component>
     </DirectoryRef>
     
-    <!-- Resource Files -->
-    <DirectoryRef Id="RESOURCESFOLDER">
-      <Component Id="Resources" Guid="78a95b43-cb29-4680-8715-46ac81fc2eb7">
-        <File Id="PalMonConfigXSD" Name="PalMonConfig.xsd" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Resources\PalMonConfig.xsd" />
-      </Component>
-    </DirectoryRef>
-
     <!-- Start Menu Shortcuts -->
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ProgramFilesShortcut" Guid="*">
@@ -150,7 +133,6 @@
         <ComponentRef Id='Libraries' />
         <ComponentRef Id='LogConfig' />
         <ComponentRef Id='ConfigFiles' />
-        <ComponentRef Id='Resources' />
         <ComponentRef Id='Utilities' />
         <ComponentRef Id='Documentation' />
         <ComponentRef Id='ProgramFilesShortcut' />

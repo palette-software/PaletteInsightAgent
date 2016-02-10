@@ -157,7 +157,6 @@
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationDataModel.cs" />
     <Compile Include="Counters\CounterConfigLoader.cs" />
-    <Compile Include="Counters\Perfmon\PerfmonCounterBuilder.cs" />
     <Compile Include="Counters\ICounterBuilder.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
@@ -175,7 +174,6 @@
     <Compile Include="Output\DataTableUtils.cs" />
     <Compile Include="Output\OutputDrivers\IOutput.cs" />
     <Compile Include="Helpers\LoggingHelpers.cs" />
-    <Compile Include="Output\OutputDrivers\OutputDbFactory.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PalMonAgent.cs" />
     <Compile Include="PalMonOptions.cs" />
@@ -183,34 +181,30 @@
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
     <Compile Include="LogPoller\LogFileWatcher.cs" />
     <Compile Include="LogPoller\LogPollerAgent.cs" />
-    <Compile Include="LogPoller\LogPollerConfiguration.cs" />
     <Compile Include="LogPoller\LogsToDbConverter.cs" />
     <Compile Include="LogPoller\LogTables.cs" />
     <Compile Include="LogPoller\TableauRepo.cs" />
-    <Compile Include="LogPoller\TableauRepoConfigElement.cs" />
     <Compile Include="Sampler\ICounterSample.cs" />
     <Compile Include="Counters\ICounter.cs" />
     <Compile Include="Counters\Perfmon\PerfmonCounter.cs" />
     <Compile Include="Sampler\CounterSampler.cs" />
-    <Compile Include="Counters\Perfmon\PerfmonCounterLoader.cs" />
     <Compile Include="Sampler\CounterSample.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\HostnameHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Config\Config.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Config\Counters.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="logfolders.defaults.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="processes.defaults.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\PalMon.config">
+    <None Include="Config\LogFolders.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
+    </None>
+    <None Include="Config\Processes.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -221,10 +215,6 @@
     </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\PalMonConfig.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

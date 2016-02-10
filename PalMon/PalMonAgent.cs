@@ -13,8 +13,9 @@ using PalMon.LogPoller;
 using PalMon.ThreadInfoPoller;
 using PalMon.Output;
 using System.Diagnostics;
-using System.Xml.Serialization;
 using PaletteInsight.Configuration;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 [assembly: CLSCompliant(true)]
 
@@ -55,7 +56,7 @@ namespace PalMon
 
             // Load PalMonOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PalMonOptions.Instance;
-            PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/PalMon.config"), options );
+            PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/Config.yml"), options );
 
             // check the license after the configuration has been loaded.
             CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
@@ -65,7 +66,7 @@ namespace PalMon
             string version = fvi.FileVersion;
             Log.Info("Palette Insight Agent version: " + version);
 
-            output = OutputDbFactory.DriverFor(options.DatabaseType, options.ResultDatabase);
+            output = new PostgresOutput(options.ResultDatabase);
             // initialize the output
             cachingOutput = new CachingOutput(output);
 
@@ -88,11 +89,11 @@ namespace PalMon
             try
             {
                 // deserialize the config
-                XmlSerializer reader = new XmlSerializer(typeof(PaletteInsightConfiguration));
-                // try to create the directory
-                using (var file = new FileStream(filename, FileMode.Open))
+                using (var reader = File.OpenText(filename))
                 {
-                    return (PaletteInsightConfiguration)reader.Deserialize(file);
+                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
+                    var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
+                    return config;
                 }
             }
             catch (Exception e)
@@ -165,7 +166,7 @@ namespace PalMon
                 }
 
                 // Spin up counter sampler.
-                sampler = new CounterSampler(counters, options.TableName);
+                sampler = new CounterSampler(counters);
 
                 // Kick off the polling timer.
                 Log.Info("PalMon initialized!  Starting performance counter polling..");
