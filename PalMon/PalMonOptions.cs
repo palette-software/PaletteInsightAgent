@@ -17,17 +17,14 @@ namespace PalMon
         }
         [CLSCompliant(false)]
         public IDbConnectionInfo ResultDatabase { get; set; }
-        public ICollection<Host> Hosts { get; set; }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
         public int DBWriteInterval { get; set; }
-        public string TableName { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
         public ICollection<string> Processes { get; set; }
 
-        public string DatabaseType { get; set; }
         public ICollection<LogFolderInfo> LogFolders { get; set; }
 
         #region Repo properties
@@ -45,7 +42,6 @@ namespace PalMon
         private PalMonOptions()
         {
             LogFolders = new List<LogFolderInfo>();
-            Hosts = new List<Host>();
         }
 
         public static PalMonOptions Instance
@@ -72,8 +68,8 @@ namespace PalMon
 
         public override string ToString()
         {
-            return String.Format("[{0}='{1}', PollInterval='{2}', LogPollInterval='{3}', ThreadInfoPollInterval='{4}', TableName='{5}']",
-                                   "Host".Pluralize(Hosts.Count), String.Join(",", Hosts), PollInterval, LogPollInterval, ThreadInfoPollInterval, TableName);
+            return String.Format("[PollInterval='{0}', LogPollInterval='{1}', ThreadInfoPollInterval='{2}'], DBWriteInterval='{3}'",
+                                   PollInterval, LogPollInterval, ThreadInfoPollInterval, DBWriteInterval);
         }
 
         #endregion

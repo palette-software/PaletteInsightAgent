@@ -14,14 +14,14 @@ namespace PalMon.Sampler
     internal sealed class CounterSampler
     {
         private const bool USE_STATIC_COLUMN_NAMES = true;
-        public static readonly string COUNTER_SAMPLER_TABLE_NAME = "countersamples";
         public static readonly string InProgressLock = "Counter Sampler";
+        private static readonly string TableName = "countersamples";
 
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public CounterSampler(ICollection<ICounter> counterCollection, string tableName)
+        public CounterSampler(ICollection<ICounter> counterCollection)
         {
             counters = counterCollection;
             if (USE_STATIC_COLUMN_NAMES)
@@ -30,7 +30,7 @@ namespace PalMon.Sampler
             }
             else
             {
-                schema = GenerateSchema(tableName);
+                schema = GenerateSchema();
             }
         }
 
@@ -83,15 +83,12 @@ namespace PalMon.Sampler
         /// </summary>
         /// <param name="tableName">The name of the resulting data table.</param>
         /// <returns>DataTable that can accomodate both metadata and sample results of all counters managed by this sampler.</returns>
-        private DataTable GenerateSchema(string tableName)
+        private DataTable GenerateSchema()
         {
-            var generatedSchema = new DataTable(tableName);
+            var generatedSchema = new DataTable(TableName);
 
             generatedSchema.Columns.Add(BuildColumnMetadata("timestamp", "System.DateTime", false));
-            generatedSchema.Columns.Add(BuildColumnMetadata("cluster", "System.String", true, 32));
             generatedSchema.Columns.Add(BuildColumnMetadata("machine", "System.String", false, 16));
-            generatedSchema.Columns.Add(BuildColumnMetadata("counter_type", "System.String", false, 32));
-            generatedSchema.Columns.Add(BuildColumnMetadata("source", "System.String", false, 32));
             generatedSchema.Columns.Add(BuildColumnMetadata("category", "System.String", false, 64));
 
             foreach (var counter in counters)
@@ -103,10 +100,9 @@ namespace PalMon.Sampler
                 }
             }
             generatedSchema.Columns.Add(BuildColumnMetadata("instance", "System.String", true, 64));
-            generatedSchema.Columns.Add(BuildColumnMetadata("unit", "System.String", true, 32));
 
             Log.Debug("Dynamically built result schema '{0}'. [{1} {2}]",
-                      tableName, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
+                      TableName, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
             return generatedSchema;
         }
 
@@ -149,10 +145,7 @@ namespace PalMon.Sampler
             var row = tableSchema.NewRow();
 
             var counter = sample.Counter;
-            row["cluster"] = counter.Host.Cluster;
-            row["machine"] = counter.Host.Name.ToLower();
-            row["counter_type"] = counter.CounterType;
-            row["source"] = counter.Source;
+            row["machine"] = counter.HostName;
             row["category"] = counter.Category;
             
             if (USE_STATIC_COLUMN_NAMES)
@@ -166,7 +159,6 @@ namespace PalMon.Sampler
                 row[toOracleColumnName(counter.Counter.ToSnakeCase())] = sample.SampleValue;
             }
             row["instance"] = counter.Instance;
-            row["unit"] = counter.Unit;
 
             return row;
         }
@@ -174,17 +166,13 @@ namespace PalMon.Sampler
         public static DataTable makeCounterSamplesTable()
         {
 
-            var table = new DataTable(COUNTER_SAMPLER_TABLE_NAME);
+            var table = new DataTable(TableName);
 
             //TableHelper.addColumn(table, "id", "System.Int32", true, true);
             TableHelper.addColumn(table, "timestamp", "System.DateTime");
-            TableHelper.addColumn(table, "cluster");
             TableHelper.addColumn(table, "machine");
-            TableHelper.addColumn(table, "counter_type");
-            TableHelper.addColumn(table, "source");
             TableHelper.addColumn(table, "category");
             TableHelper.addColumn(table, "instance");
-            TableHelper.addColumn(table, "unit");
 
             TableHelper.addColumn(table, "name");
             TableHelper.addColumn(table, "value", "System.Double");
