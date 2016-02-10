@@ -8,10 +8,10 @@ namespace PaletteInsight
 
     namespace Configuration
     {
-        public class Database
+        public class DatabaseConfig
         {
             [YamlMember(Alias = "Database")]
-            public string Name { get; set; }
+            public string Database { get; set; }
 
             [YamlMember(Alias = "Host")]
             public string Host { get; set; }
@@ -54,13 +54,13 @@ namespace PaletteInsight
             public List<string> Processes { get; set; }
 
             [YamlMember(Alias = "Database")]
-            public Database Database { get; set; }
+            public DatabaseConfig Database { get; set; }
 
             [YamlMember(Alias = "Logs")]
             public List<LogFolder> Logs { get; set; }
 
             [YamlMember(Alias = "TableauRepo")]
-            public Database TableauRepo { get; set; }
+            public DatabaseConfig TableauRepo { get; set; }
         }
 
         #endregion
