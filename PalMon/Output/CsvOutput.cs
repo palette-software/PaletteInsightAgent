@@ -14,7 +14,8 @@ namespace PalMon.Output
         public static void Write(DataTable table)
         {
             // skip writing if no data
-            if (table.Rows.Count == 0)
+            var rowCount = table.Rows.Count;
+            if (rowCount == 0)
             {
                 Log.Debug("No data - skipping CSV write.");
                 return;
@@ -28,7 +29,7 @@ namespace PalMon.Output
             var inProgressCsvFileName = csvFileName + IN_PROGRESS_FILE_POSTFIX;
 
             WriteCsvFile(inProgressCsvFileName, table);
-            Log.Info("{0} rows written to CSV file: {1}", table.Rows.Count, inProgressCsvFileName);
+            Log.Info("{0} {1} written to CSV file: {1}", rowCount, "row".Pluralize(rowCount), inProgressCsvFileName);
 
             // remove any rows from the csv queue
             table.Rows.Clear();
