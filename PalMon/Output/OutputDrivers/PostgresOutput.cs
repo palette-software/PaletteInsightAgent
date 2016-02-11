@@ -19,8 +19,14 @@ namespace PalMon.Output
 
         private IDbConnectionInfo resultDatabase;
         private string connectionString;
-
         private NpgsqlConnection connection;
+        private Dictionary<string, Func<DataTable>> tableCreators = new Dictionary<string, Func<DataTable>>
+        {
+            { LogTables.SERVERLOGS_TABLE_NAME,          LogTables.makeServerLogsTable },
+            { LogTables.FILTER_STATE_AUDIT_TABLE_NAME,  LogTables.makeFilterStateAuditTable},
+            { ThreadTables.TABLE_NAME,                  ThreadTables.makeThreadInfoTable},
+            { CounterSampler.TABLE_NAME,                CounterSampler.makeCounterSamplesTable}
+        };
 
         public PostgresOutput(IDbConnectionInfo resultDatabase)
         {
@@ -65,29 +71,14 @@ namespace PalMon.Output
             ReconnectoToDbIfNeeded();
             var tableName = DBWriter.GetTableName(fileNames[0]);
 
-            DataTable table = null;
-            if (tableName.Contains(LogTables.SERVERLOGS_TABLE_NAME))
-            {
-                table = LogTables.makeServerLogsTable();
-            }
-            else if (tableName.Contains(LogTables.FILTER_STATE_AUDIT_TABLE_NAME))
-            {
-                table = LogTables.makeFilterStateAuditTable();
-            }
-            else if (tableName.Contains(ThreadTables.THREADINFO_TABLE_NAME))
-            {
-                table = ThreadTables.makeThreadInfoTable();
-            }
-            else if (tableName.Contains(CounterSampler.TableName))
-            {
-                table = CounterSampler.makeCounterSamplesTable();
-            }
-
-            if (table == null)
+            if (!tableCreators.ContainsKey(tableName))
             {
                 Log.Error("Unexpected table name: {0}", tableName);
                 return;
             }
+
+            // at this point we should have a nice table
+            var table = tableCreators[tableName]();
 
             UpdateTableStructureFor(table);
 
