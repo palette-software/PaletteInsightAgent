@@ -23,17 +23,17 @@ namespace PalMon.Output
             // write out if any
             var csvFileName = GetCSVFile(table.TableName);
 
-            // First create the file name with a prefix, so that the bulk copy
+            // First create the file name with a postfix, so that the bulk copy
             // loader won't touch this file, until it is being written.
             var inProgressCsvFileName = csvFileName + IN_PROGRESS_FILE_POSTFIX;
 
-            Log.Info("Writing to CSV file: {0}", inProgressCsvFileName);
             WriteCsvFile(inProgressCsvFileName, table);
+            Log.Info("{0} rows written to CSV file: {1}", table.Rows.Count, inProgressCsvFileName);
 
             // remove any rows from the csv queue
             table.Rows.Clear();
 
-            // Remove the prefix to signal that the file write is done.
+            // Remove the postfix to signal that the file write is done.
             File.Move(inProgressCsvFileName, csvFileName);
         }
 
@@ -67,12 +67,12 @@ namespace PalMon.Output
         /// already exists so we can just add more rows while 
         /// making sure the file is flushed and closed after each write
         /// </summary>
-        /// <param name="lastFileName"></param>
-        private static void WriteCsvFile(string lastFileName, DataTable table)
+        /// <param name="fileName"></param>
+        private static void WriteCsvFile(string fileName, DataTable table)
         {
-            var fileExists = File.Exists(lastFileName);
+            var fileExists = File.Exists(fileName);
 
-            using (var streamWriter = File.AppendText(lastFileName))
+            using (var streamWriter = File.AppendText(fileName))
             using (var csvWriter = new CsvHelper.CsvWriter(streamWriter))
             {
                 // only write the header if the file does not exists

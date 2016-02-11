@@ -114,13 +114,14 @@ namespace PalMon.Output
                         Directory.CreateDirectory(processedPath);
                     }
                     var fileName = GetFileName(fullFileName);
-                    Log.Info("Trying to move: {0}", fileName);
+                    Log.Debug("Trying to move: {0}", fileName);
                     var targetFile = processedPath + fileName;
                     if (File.Exists(targetFile))
                     {
                         File.Delete(targetFile);
                     }
                     File.Move(fullFileName, targetFile);
+                    Log.Info("Processed file: {0}", fileName);
                 }
                 catch (Exception ex)
                 {
