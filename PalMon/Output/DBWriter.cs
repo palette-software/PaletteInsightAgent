@@ -49,7 +49,7 @@ namespace PalMon.Output
 
             // Remove those files that are still being written.
             return Directory.GetFiles(csvPath, pattern + "-" + csvPattern)
-                            .Where(fileName => !fileName.Contains(CsvWriter.IN_PROGRESS_FILE_POSTFIX))
+                            .Where(fileName => !fileName.Contains(CsvOutput.IN_PROGRESS_FILE_POSTFIX))
                             .ToList();
         }
 

@@ -5,7 +5,7 @@ using NLog;
 
 namespace PalMon.Output
 {
-    class CsvWriter
+    class CsvOutput
     {
         private const string CSV_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss";
         public  const string IN_PROGRESS_FILE_POSTFIX = ".writing";

@@ -268,7 +268,7 @@ namespace PalMon
                 var sampleResults = sampler.SampleAll();
                 lock (WriteLock)
                 {
-                    CsvWriter.Write(sampleResults);
+                    CsvOutput.Write(sampleResults);
                 }
             });
         }
