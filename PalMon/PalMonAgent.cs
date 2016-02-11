@@ -36,8 +36,6 @@ namespace PalMon
         private readonly PalMonOptions options;
         private bool disposed;
         private const string PathToCountersYaml = @"Config\Counters.yml";
-        private const int WriteLockAcquisitionTimeout = 10; // In seconds.
-        private static readonly object WriteLock = new object();
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -193,15 +191,6 @@ namespace PalMon
         public void Stop()
         {
             Log.Info("Shutting down PalMon..");
-            // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
-            if (!Monitor.TryEnter(WriteLock, WriteLockAcquisitionTimeout * 1000))
-            {
-                Log.Error("Could not acquire write lock; forcing exit..");
-            }
-            else
-            {
-                Log.Debug("Acquired write lock gracefully..");
-            }
 
             if (USE_COUNTERSAMPLES)
             {
@@ -266,10 +255,7 @@ namespace PalMon
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
-                lock (WriteLock)
-                {
-                    CsvOutput.Write(sampleResults);
-                }
+                CsvOutput.Write(sampleResults);
             });
         }
 
@@ -282,7 +268,7 @@ namespace PalMon
         {
             tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
             {
-                logPollerAgent.pollLogs(WriteLock);
+                logPollerAgent.pollLogs();
             });
         }
 
@@ -295,7 +281,7 @@ namespace PalMon
             tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
             {
                 Log.Info("Polling threadinfo");
-                threadInfoAgent.poll(options.Processes, WriteLock);
+                threadInfoAgent.poll(options.Processes);
             });
         }
 
