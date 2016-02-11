@@ -1,16 +1,17 @@
-- vizqlserver
-- tabprotosrv
-- backgrounder
-- clustercontroller
-- dataserver
-- filestore
-- PalMon
-- tabadmsvc
-- tabadmwrk
-- tabspawn
-- tabsvc
-- tdeserver64
-- vizportal
-- wgserver
-- zookeeper
-- redis-server
+- Name: vizqlserver
+  Granularity: Thread
+- Name: tabprotosrv
+- Name: backgrounder
+- Name: clustercontroller
+- Name: dataserver
+- Name: filestore
+- Name: PalMon
+- Name: tabadmsvc
+- Name: tabadmwrk
+- Name: tabspawn
+- Name: tabsvc
+- Name: tdeserver64
+- Name: vizportal
+- Name: wgserver
+- Name: zookeeper
+- Name: redis-server
