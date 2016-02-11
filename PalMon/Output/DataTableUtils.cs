@@ -3,6 +3,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,7 +83,15 @@ namespace PalMon.Output
                     {
                         if (row[i] != null)
                         {
-                            csvWriter.WriteField(row[i]);
+                            if (row[i].GetType() == typeof(DateTime))
+                            {
+                                DateTime timestamp = (DateTime)row[i];
+                                csvWriter.WriteField(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture));
+                            }
+                            else
+                            {
+                                csvWriter.WriteField(row[i]);
+                            }
                         }
                         else
                         {

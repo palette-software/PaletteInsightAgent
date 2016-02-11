@@ -29,13 +29,13 @@ namespace PalMon.Output
             var inProgressCsvFileName = csvFileName + IN_PROGRESS_FILE_POSTFIX;
 
             WriteCsvFile(inProgressCsvFileName, table);
-            Log.Info("{0} {1} written to CSV file: {2}", rowCount, "row".Pluralize(rowCount), inProgressCsvFileName);
 
             // remove any rows from the csv queue
             table.Rows.Clear();
 
             // Remove the postfix to signal that the file write is done.
             File.Move(inProgressCsvFileName, csvFileName);
+            Log.Info("{0} {1} written to CSV file: {2}", rowCount, "row".Pluralize(rowCount), csvFileName);
         }
 
         /// <summary>
