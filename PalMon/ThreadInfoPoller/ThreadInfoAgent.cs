@@ -31,28 +31,22 @@ namespace PalMon.ThreadInfoPoller
 
         public void poll(ICollection<ProcessData> processes)
         {
+            var threadInfoTable = ThreadTables.makeThreadInfoTable();
+            long threadInfoTableCount = 0;
+
             foreach (ProcessData processData in processes)
             {
                 bool threadLevel = processData.Granularity == "Thread";
                 var processList = Process.GetProcessesByName(processData.Name);
-                long threadInfoTableCount = 0;
-                var threadInfoTable = ThreadTables.makeThreadInfoTable();
                 foreach (var process in processList)
                 {
                     pollThreadCountersOfProcess(process, threadLevel, threadInfoTable, ref threadInfoTableCount);
                 }
+            }
 
-                if (threadInfoTableCount > 0)
-                {
-                    try
-                    {
-                        CsvOutput.Write(threadInfoTable);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warn("Failed to write thread info table to DB! Exception message: {0}", ex.Message);
-                    }
-                }
+            if (threadInfoTableCount > 0)
+            {
+                CsvOutput.Write(threadInfoTable);
             }
         }
 
