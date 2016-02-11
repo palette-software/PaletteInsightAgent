@@ -168,7 +168,7 @@
     <Compile Include="LicensePublicKey.cs" />
     <Compile Include="Output\DBWriter.cs" />
     <Compile Include="Output\DelayedAction.cs" />
-    <Compile Include="Output\CsvWriter.cs" />
+    <Compile Include="Output\CsvOutput.cs" />
     <Compile Include="Output\Connection\DbConnectionInfo.cs" />
     <Compile Include="Output\Connection\IDbConnectionInfo.cs" />
     <Compile Include="Output\DataTableUtils.cs" />
