@@ -29,7 +29,6 @@ namespace PaletteInsight
             public int CommandTimeout { get; set; }
         }
 
-
         public class LogFolder
         {
             [YamlMember(Alias = "Directory")]
@@ -37,6 +36,15 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "Filter")]
             public string Filter { get; set; }
+        }
+
+        public class ProcessData
+        {
+            [YamlMember(Alias = "Name")]
+            public string Name { get; set; }
+
+            [YamlMember(Alias = "Granularity")]
+            public string Granularity { get; set; } = "Process";
         }
 
         public class PaletteInsightConfiguration
@@ -49,9 +57,6 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
-
-            [YamlMember(Alias = "Processes")]
-            public List<string> Processes { get; set; }
 
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }

@@ -1,8 +1,6 @@
 ﻿PollInterval: 30
 ThreadInfoPollInterval: 15
 LogPollInterval: 300
-Processes: 
-  - vizqlserver
 Database: 
   Host: localhost
   Port: 5432
