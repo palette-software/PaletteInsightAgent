@@ -36,6 +36,7 @@ namespace PalMon
         private readonly PalMonOptions options;
         private bool disposed;
         private const string PathToCountersYaml = @"Config\Counters.yml";
+        private const int DBWriteLockAcquisitionTimeout = 10; // In seconds.
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -223,6 +224,16 @@ namespace PalMon
             if (dbWriterTimer != null)
             {
                 dbWriterTimer.Dispose();
+            }
+
+            // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
+            if (!Monitor.TryEnter(DBWriter.DBWriteLock, DBWriteLockAcquisitionTimeout * 1000))
+            {
+                Log.Error("Could not acquire DB write lock; forcing exit..");
+            }
+            else
+            {
+                Log.Debug("Acquired DB write lock gracefully..");
             }
 
             Log.Info("PalMon stopped.");
