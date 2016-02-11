@@ -58,14 +58,14 @@ namespace PalMon.LogPoller
         }
 
 
-        public void pollLogs(object writeLock)
+        public void pollLogs()
         {
             foreach (var watcher in watchers)
             { 
                 watcher.watchChangeCycle((filename, lines) =>
                 {
                     Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
-                    logsToDbConverter.processServerLogLines(writeLock, filename, lines);
+                    logsToDbConverter.processServerLogLines(filename, lines);
                 }, () =>
                 {
                     // if no change, just flush if needed
