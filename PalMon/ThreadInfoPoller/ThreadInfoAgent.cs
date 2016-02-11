@@ -7,6 +7,7 @@ using System.Net;
 using System.Reflection;
 using PalMon.Counters;
 using PalMon.Output;
+using PaletteInsight.Configuration;
 
 namespace PalMon.ThreadInfoPoller
 {
@@ -28,16 +29,17 @@ namespace PalMon.ThreadInfoPoller
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
 
-        public void poll(ICollection<string> processNames)
+        public void poll(ICollection<ProcessData> processes)
         {
-            foreach (string processName in processNames)
+            foreach (ProcessData processData in processes)
             {
-                var processList = Process.GetProcessesByName(processName);
+                bool threadLevel = processData.Granularity == "Thread";
+                var processList = Process.GetProcessesByName(processData.Name);
                 long threadInfoTableCount = 0;
                 var threadInfoTable = ThreadTables.makeThreadInfoTable();
                 foreach (var process in processList)
                 {
-                    pollThreadCountersOfProcess(process, threadInfoTable, ref threadInfoTableCount);
+                    pollThreadCountersOfProcess(process, threadLevel, threadInfoTable, ref threadInfoTableCount);
                 }
 
                 if (threadInfoTableCount > 0)
@@ -68,7 +70,7 @@ namespace PalMon.ThreadInfoPoller
             ThreadTables.addToTable(table, threadInfo);
         }
 
-        protected void pollThreadCountersOfProcess(Process process, DataTable table, ref long serverLogsTableCount)
+        protected void pollThreadCountersOfProcess(Process process, bool threadLevel, DataTable table, ref long serverLogsTableCount)
         {
             try
             {
@@ -77,17 +79,20 @@ namespace PalMon.ThreadInfoPoller
                 addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime());
                 serverLogsTableCount++;
 
-                foreach (ProcessThread thread in process.Threads)
+                if (threadLevel)
                 {
-                    try
+                    foreach (ProcessThread thread in process.Threads)
                     {
-                        addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime());
-                        serverLogsTableCount++;
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // This can happen when a thread exits while we try to get info from it. It is normal operation so nothing to do here.
-                        continue;
+                        try
+                        {
+                            addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime());
+                            serverLogsTableCount++;
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // This can happen when a thread exits while we try to get info from it. It is normal operation so nothing to do here.
+                            continue;
+                        }
                     }
                 }
             }

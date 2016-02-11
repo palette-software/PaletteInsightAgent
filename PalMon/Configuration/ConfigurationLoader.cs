@@ -47,13 +47,8 @@ namespace PaletteInsight
 
 
                 // Load thread monitoring configuration
-                options.Processes = new System.Collections.Generic.List<string>();
-                foreach (var processName in LoadDefaultProcessNames())
-                {
-                    options.Processes.Add(processName);
-                }
-
-                foreach (var process in config.Processes)
+                options.Processes = new System.Collections.Generic.List<ProcessData>();
+                foreach (var process in LoadProcessData())
                 {
                     options.Processes.Add(process);
                 }
@@ -141,14 +136,17 @@ namespace PaletteInsight
                 {
                     // check and load the log folder paths from the config file, so
                     // we can still debug it without installing Tableau Server
-                    foreach (LogFolder logFolder in config.Logs)
+                    if (config.Logs != null)
                     {
-                        // we just blindly add here, as this code path is only for debugging
-                        options.LogFolders.Add(new PalMonOptions.LogFolderInfo
+                        foreach (LogFolder logFolder in config.Logs)
                         {
-                            FolderToWatch = logFolder.Directory,
-                            DirectoryFilter = logFolder.Filter
-                        });
+                            // we just blindly add here, as this code path is only for debugging
+                            options.LogFolders.Add(new PalMonOptions.LogFolderInfo
+                            {
+                                FolderToWatch = logFolder.Directory,
+                                DirectoryFilter = logFolder.Filter
+                            });
+                        }
                     }
 
                     return;
@@ -311,15 +309,14 @@ namespace PaletteInsight
             ///  method throws its errors
             /// </summary>
             /// <returns></returns>
-            private static List<string> LoadDefaultProcessNames()
+            private static List<ProcessData> LoadProcessData()
             {
-                // load the defaults from the application
                 // since PalMonAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
                     var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
-                    return deserializer.Deserialize<List<string>>(reader);
+                    return deserializer.Deserialize<List<ProcessData>>(reader);
                 }
             }
 
