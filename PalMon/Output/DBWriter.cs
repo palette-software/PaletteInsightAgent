@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PalMon.Output
@@ -20,15 +21,35 @@ namespace PalMon.Output
         private const string processedPath = @"csv/processed/";
         private const string csvPattern = @"*.csv";
 
+        public  static readonly object DBWriteLock = new object();
+        private static readonly int waitLockTimeout = 1000;
+
         public static void Start(IOutput output)
         {
-            IList<string> fileList;
-            while ((fileList = GetFilesOfSameTable()).Count > 0)
+            if (!Monitor.TryEnter(DBWriteLock, waitLockTimeout))
             {
-                // BULK COPY
-                output.Write(fileList);
-                // Move files to processed folder
-                MoveToProcessed(fileList);
+                Log.Debug("Skipping DB write as it is already in progress.");
+                return;
+            }
+
+            try
+            {
+                IList<string> fileList;
+                while ((fileList = GetFilesOfSameTable()).Count > 0)
+                {
+                    // BULK COPY
+                    output.Write(fileList);
+                    // Move files to processed folder
+                    MoveToProcessed(fileList);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to write CSV files to database! Exception message: {0}", e.Message);
+            }
+            finally
+            {
+                Monitor.Exit(DBWriteLock);
             }
         }
 
