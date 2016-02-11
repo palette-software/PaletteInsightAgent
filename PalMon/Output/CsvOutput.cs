@@ -21,21 +21,28 @@ namespace PalMon.Output
                 return;
             }
 
-            // write out if any
-            var csvFileName = GetCSVFile(table.TableName);
+            try
+            {
+                // write out if any
+                var csvFileName = GetCSVFile(table.TableName);
 
-            // First create the file name with a postfix, so that the bulk copy
-            // loader won't touch this file, until it is being written.
-            var inProgressCsvFileName = csvFileName + IN_PROGRESS_FILE_POSTFIX;
+                // First create the file name with a postfix, so that the bulk copy
+                // loader won't touch this file, until it is being written.
+                var inProgressCsvFileName = csvFileName + IN_PROGRESS_FILE_POSTFIX;
 
-            WriteCsvFile(inProgressCsvFileName, table);
+                WriteCsvFile(inProgressCsvFileName, table);
 
-            // remove any rows from the csv queue
-            table.Rows.Clear();
+                // remove any rows from the csv queue
+                table.Rows.Clear();
 
-            // Remove the postfix to signal that the file write is done.
-            File.Move(inProgressCsvFileName, csvFileName);
-            Log.Info("{0} {1} written to CSV file: {2}", rowCount, "row".Pluralize(rowCount), csvFileName);
+                // Remove the postfix to signal that the file write is done.
+                File.Move(inProgressCsvFileName, csvFileName);
+                Log.Info("{0} {1} written to CSV file: {2}", rowCount, "row".Pluralize(rowCount), csvFileName);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to write {0} table contents to CSV file! Exception message: {1}", table.TableName, e.Message);
+            }
         }
 
         /// <summary>
