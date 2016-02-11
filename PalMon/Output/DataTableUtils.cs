@@ -70,7 +70,7 @@ namespace PalMon.Output
         /// </summary>
         /// <param name="queue"></param>
         /// <param name="csvWriter"></param>
-        public static void WriteCSVBody(DataTable queue, CsvWriter csvWriter)
+        public static void WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter)
         {
             var columnCount = queue.Columns.Count;
 
@@ -103,7 +103,7 @@ namespace PalMon.Output
         /// </summary>
         /// <param name="queue"></param>
         /// <param name="csvWriter"></param>
-        public static void WriteCSVHeader(DataTable queue, CsvWriter csvWriter)
+        public static void WriteCSVHeader(DataTable queue, CsvHelper.CsvWriter csvWriter)
         {
             foreach (DataColumn column in queue.Columns)
             {

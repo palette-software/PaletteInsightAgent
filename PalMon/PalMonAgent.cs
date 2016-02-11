@@ -41,8 +41,6 @@ namespace PalMon
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-
-        private IOutput output;
         private const bool USE_COUNTERSAMPLES = true;
         private const bool USE_LOGPOLLER = true;
         private const bool USE_THREADINFO = true;
@@ -65,10 +63,6 @@ namespace PalMon
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion;
             Log.Info("Palette Insight Agent version: " + version);
-
-            output = new PostgresOutput(options.ResultDatabase);
-            // initialize the output
-            CachingOutput.Init(output); 
 
             if (USE_LOGPOLLER)
             {
@@ -188,7 +182,8 @@ namespace PalMon
             }
 
             // Start the DB Writer
-            dbWriterTimer = new Timer(callback: WriteToDB, state: null, dueTime: 0, period: options.DBWriteInterval * 1000);
+            IOutput output = new PostgresOutput(options.ResultDatabase);
+            dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
         }
 
 
@@ -273,8 +268,7 @@ namespace PalMon
                 var sampleResults = sampler.SampleAll();
                 lock (WriteLock)
                 {
-                    CachingOutput.Write(sampleResults);
-                    CachingOutput.Tick();
+                    CsvWriter.Write(sampleResults);
                 }
             });
         }
@@ -289,7 +283,6 @@ namespace PalMon
             tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
             {
                 logPollerAgent.pollLogs(WriteLock);
-                TickOutput();
             });
         }
 
@@ -303,24 +296,13 @@ namespace PalMon
             {
                 Log.Info("Polling threadinfo");
                 threadInfoAgent.poll(options.Processes, WriteLock);
-                TickOutput();
             });
         }
 
         private void WriteToDB(object stateInfo)
         {
-            DBWriter.Start();
-        }
-
-        /// <summary>
-        /// Tick the output while locking the write lock so its actually safe
-        /// </summary>
-        private void TickOutput()
-        {
-            lock (WriteLock)
-            {
-                CachingOutput.Tick();
-            }
+            // Stateinfo contains an IOutput object
+            DBWriter.Start((IOutput)stateInfo);
         }
 
         /// <summary>

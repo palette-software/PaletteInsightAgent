@@ -45,7 +45,7 @@ namespace PalMon.ThreadInfoPoller
                     {
                         try
                         {
-                            CachingOutput.Write(threadInfoTable);
+                            CsvWriter.Write(threadInfoTable);
                         }
                         catch (Exception ex)
                         {
