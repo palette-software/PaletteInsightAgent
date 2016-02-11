@@ -1,4 +1,0 @@
-- Directory: 'tabsvc\vizqlserver\Logs'
-  Filter: '*.txt'
-- Directory: 'tabsvc\logs\vizqlserver'
-  Filter: 'tabprotosrv*.txt'
