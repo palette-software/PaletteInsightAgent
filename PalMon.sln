@@ -42,7 +42,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Licensing", "Licensing\Lice
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LicenseGenerator", "LicenseGenerator\LicenseGenerator.csproj", "{AF8DACF5-68F6-4706-9212-4612FF039712}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PalMon.UnitTests", "PalMon.UnitTests\PalMon.UnitTests.csproj", "{4876E1DE-4B02-40EF-8DEC-79BFEAE22341}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E94F9F78-41D8-4832-A24E-727A4AEE5DDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PalMon.UnitTests", "test\PalMon.UnitTests\PalMon.UnitTests.csproj", "{4876E1DE-4B02-40EF-8DEC-79BFEAE22341}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,5 +161,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4876E1DE-4B02-40EF-8DEC-79BFEAE22341} = {E94F9F78-41D8-4832-A24E-727A4AEE5DDC}
 	EndGlobalSection
 EndGlobal
