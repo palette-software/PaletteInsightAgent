@@ -28,7 +28,7 @@ namespace PalMon.ThreadInfoPoller
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
 
-        public void poll(ICollection<string> processNames, object WriteLock)
+        public void poll(ICollection<string> processNames)
         {
             foreach (string processName in processNames)
             {
@@ -39,18 +39,16 @@ namespace PalMon.ThreadInfoPoller
                 {
                     pollThreadCountersOfProcess(process, threadInfoTable, ref threadInfoTableCount);
                 }
-                lock (WriteLock)
+
+                if (threadInfoTableCount > 0)
                 {
-                    if (threadInfoTableCount > 0)
+                    try
                     {
-                        try
-                        {
-                            CsvOutput.Write(threadInfoTable);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Warn("Failed to write thread info table to DB! Exception message: {0}", ex.Message);
-                        }
+                        CsvOutput.Write(threadInfoTable);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warn("Failed to write thread info table to DB! Exception message: {0}", ex.Message);
                     }
                 }
             }
