@@ -13,7 +13,6 @@ namespace PalMon.Output
     // serverlog-2016-01-28-15-06-30.csv
     // threadinfo-2016-01-28-15-06-00.csv
 
-
     class DBWriter
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -21,13 +20,13 @@ namespace PalMon.Output
         private const string processedPath = @"csv/processed/";
         private const string csvPattern = @"*.csv";
 
-        public static void Start()
+        public static void Start(IOutput output)
         {
             IList<string> fileList;
             while ((fileList = GetFilesOfSameTable()).Count > 0)
             {
                 // BULK COPY
-                CopyToDB(fileList);
+                output.Write(fileList);
                 // Move files to processed folder
                 MoveToProcessed(fileList);
             }
@@ -50,7 +49,7 @@ namespace PalMon.Output
 
             // Remove those files that are still being written.
             return Directory.GetFiles(csvPath, pattern + "-" + csvPattern)
-                            .Where(fileName => !fileName.Contains(DataTableCache.IN_PROGRESS_FILE_POSTFIX))
+                            .Where(fileName => !fileName.Contains(CsvWriter.IN_PROGRESS_FILE_POSTFIX))
                             .ToList();
         }
 
@@ -81,15 +80,6 @@ namespace PalMon.Output
                 return "";
             }
             return tokens[0];
-        }
-
-        public static void CopyToDB(IList<string> fileList)
-        {
-            //foreach (var fileName in fileList)
-            //{
-            //    Log.Info("File to copy: {0}", fileName);
-                CachingOutput.Write(fileList);
-            //}
         }
 
         public static void MoveToProcessed(IList<string> fileList)
