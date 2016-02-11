@@ -85,6 +85,9 @@ namespace PalMon.Output
                         {
                             if (row[i].GetType() == typeof(DateTime))
                             {
+                                // In order to have milliseconds instead of only seconds in the string representation
+                                // of the timestamp, we need to use a custom ToString() method instead of the
+                                // default one. This is a kind-of-ugly workaround.
                                 DateTime timestamp = (DateTime)row[i];
                                 csvWriter.WriteField(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture));
                             }
