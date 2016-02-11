@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Npgsql;
 using System.IO;
 using System.Data;
@@ -42,10 +40,6 @@ namespace PalMon.Output
         }
 
         #region IOutput implementation
-        //public void Write(string csvFile, DataTable rows)
-        //{
-        //    DoBulkCopy(rows);
-        //}
 
         public void Write(IList<string> csvFiles)
         {
@@ -55,35 +49,6 @@ namespace PalMon.Output
         #endregion
 
         #region datatable bulk ops
-
-        /// <summary>
-        /// Helper to do a bulk copy
-        /// </summary>
-        /// <param name="conversionResult"></param>
-        //private void DoBulkCopy(DataTable rows)
-        //{
-
-        //    ReconnectoToDbIfNeeded();
-        //    UpdateTableStructureFor(rows);
-
-        //    var statusLine = String.Format("BULK COPY of {0} - {1} rows", rows.TableName, rows.Rows.Count);
-        //    string copyString = CopyStatementFor(rows);
-
-
-        //    LoggingHelpers.TimedLog(Log, statusLine, () =>
-        //    {
-        //        using (var writer = connection.BeginTextImport(copyString))
-        //        {
-        //            foreach (DataRow rowToWrite in rows.Rows)
-        //            {
-        //                var row = String.Join("\t", ToTSVLine(rowToWrite.ItemArray));
-        //                // if the row ends with a backslash, we need to add a space after it
-        //                if (row.Last() == '\\') row += " ";
-        //                writer.WriteLine(row);
-        //            }
-        //        }
-        //    });
-        //}
 
         /// <summary>
         /// Helper to do a bulk copy

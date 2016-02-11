@@ -65,7 +65,7 @@ namespace PalMon.LogPoller
                 {
                     lock (writeLock)
                     {
-                        CachingOutput.Write(filterStateTable);
+                        CsvWriter.Write(filterStateTable);
                     }
                 }
 
@@ -73,7 +73,7 @@ namespace PalMon.LogPoller
                 {
                     lock (writeLock)
                     {
-                        CachingOutput.Write(serverLogsTable);
+                        CsvWriter.Write(serverLogsTable);
                     }
                 }
 
