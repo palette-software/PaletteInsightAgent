@@ -18,6 +18,7 @@ namespace PalMon.ThreadInfoPoller
         public long processId;
         public long threadId;
         public long cpuTime;
+        public int threadCount;
         public DateTime pollTimeStamp;
         public DateTime pollCycleTimeStamp;
         public DateTime startTimeStamp;
@@ -50,7 +51,8 @@ namespace PalMon.ThreadInfoPoller
             }
         }
 
-        protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks, DateTime pollCycleTimeStamp, DateTime startTimeStamp)
+        protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks, DateTime pollCycleTimeStamp, 
+                                        DateTime startTimeStamp)
         {
             ThreadInfo threadInfo = new ThreadInfo();
             threadInfo.processId = process.Id;
@@ -61,6 +63,12 @@ namespace PalMon.ThreadInfoPoller
             threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
             threadInfo.instance = process.ProcessName;
+
+            // When on process level add threadCount as well
+            if (threadId == -1)
+            {
+                threadInfo.threadCount = process.Threads.Count;
+            }
             ThreadTables.addToTable(table, threadInfo);
         }
 
