@@ -26,6 +26,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             TableHelper.addColumn(table, "start_ts", "System.DateTime");
             TableHelper.addColumn(table, "thread_count", "System.Int32");
             TableHelper.addColumn(table, "working_set", "System.Int64");
+            TableHelper.addColumn(table, "thread_level", "System.Boolean");
 
             return table;
         }
@@ -43,6 +44,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             row["start_ts"] = item.startTimeStamp;
             row["thread_count"] = item.threadCount;
             row["working_set"] = item.workingSet;
+            row["thread_level"] = item.threadLevel;
 
             table.Rows.Add(row);
         }
