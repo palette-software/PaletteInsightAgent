@@ -69,7 +69,6 @@ namespace PalMon.Output
             }
 
             ReconnectoToDbIfNeeded();
-
             var tableName = DBWriter.GetTableName(fileNames[0]);
 
             if (!tableCreators.ContainsKey(tableName))
