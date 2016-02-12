@@ -1,6 +1,8 @@
 ﻿PollInterval: 30
 ThreadInfoPollInterval: 15
 LogPollInterval: 300
+DBWriteInterval: 60
+
 Database: 
   Host: localhost
   Port: 5432
