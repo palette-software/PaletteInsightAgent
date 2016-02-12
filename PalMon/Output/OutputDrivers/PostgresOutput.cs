@@ -69,6 +69,7 @@ namespace PalMon.Output
             }
 
             ReconnectoToDbIfNeeded();
+
             var tableName = DBWriter.GetTableName(fileNames[0]);
 
             if (!tableCreators.ContainsKey(tableName))
@@ -88,38 +89,58 @@ namespace PalMon.Output
             LoggingHelpers.TimedLog(Log, statusLine, () =>
             {
                 int rowsWritten = 0;
-                using (var writer = connection.BeginTextImport(copyString))
+                // begin a transaction before any insert takes place
+                var copyTransaction = connection.BeginTransaction();
+
+                // we wrap the copy in a try/catch block so we can roll back the transaction in case of errors
+                try
                 {
-                    // Files contents for the same table are sent in one bulk
-                    foreach (var fileName in fileNames)
+
+                    using (var writer = connection.BeginTextImport(copyString))
                     {
-                        if (!copyString.Equals(CopyStatementFor(fileName)))
+                        // Files contents for the same table are sent in one bulk
+                        foreach (var fileName in fileNames)
                         {
-                            Log.Error("Skipping file since CSV header is not matching with others in file: {0}", fileName);
-                            continue;
-                        }
-
-                        using (var reader = new StreamReader(fileName))
-                        {
-                            // Skip the first line of the CSV file as it only contains the CSV header
-                            var lineRead = reader.ReadLine();
-
-                            while (true)
+                            if (!copyString.Equals(CopyStatementFor(fileName)))
                             {
-                                lineRead = reader.ReadLine();
-                                if (lineRead == null)
+                                Log.Error("Skipping file since CSV header is not matching with others in file: {0}", fileName);
+                                continue;
+                            }
+
+                            using (var reader = new StreamReader(fileName))
+                            {
+                                // Skip the first line of the CSV file as it only contains the CSV header
+                                var lineRead = reader.ReadLine();
+
+                                while (true)
                                 {
-                                    // End of file
-                                    break;
+                                    lineRead = reader.ReadLine();
+                                    if (lineRead == null)
+                                    {
+                                        // End of file
+                                        break;
+                                    }
+                                    rowsWritten++;
+                                    writer.WriteLine(lineRead);
                                 }
-                                rowsWritten++;
-                                writer.WriteLine(lineRead);
                             }
                         }
                     }
+                    // commit the transaction after all rows are written (after writer.Dispose() is called)
+                    copyTransaction.Commit();
+
+                    return rowsWritten;
                 }
-                return rowsWritten;
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error during writing to the database: {0}", e);
+                    // if anything went wrong, we sh
+                    if (copyTransaction != null) copyTransaction.Rollback();
+                    // in case of errors we have inserted 0 rows thanks to the transaction
+                    return 0;
+                }
             });
+
         }
 
         /// <summary>
