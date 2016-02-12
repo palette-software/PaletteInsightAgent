@@ -43,8 +43,7 @@ namespace BBR_ChargebackModel_CLI.db
                             storage_unit_price,
                             storage_bytes_per_unit
                         )
-                        VALUES (@created_at, @effective_from, @effective_to, @timezone_for_chargeback, @unit_price_currency, @storage_unit_price, @storage_bytes_per_unit)
-                        RETURNING id";
+                        VALUES (@created_at, @effective_from, @effective_to, @timezone_for_chargeback, @unit_price_currency, @storage_unit_price, @storage_bytes_per_unit)";
 
                 AddParamToQuery(cmd, "created_at", DateTime.UtcNow);
                 AddParamToQuery(cmd, "effective_from", model.EffectiveFrom);
@@ -54,8 +53,25 @@ namespace BBR_ChargebackModel_CLI.db
 
                 AddParamToQuery(cmd, "storage_unit_price", model.StorageUnitPrice);
                 AddParamToQuery(cmd, "storage_bytes_per_unit", model.StoregeBytesPerUnit);
+
+                // insert the row
+                cmd.ExecuteNonQuery();
                 // Run it!
                 //cmd.ExecuteNonQuery();
+                //return Convert.ToInt64(cmd.ExecuteScalar());
+            }
+
+            // get the sequence name
+            string sequenceName = null;
+            using (var cmd = new NpgsqlCommand(@"SELECT pg_get_serial_sequence FROM pg_get_serial_sequence('chargeback_models','id')", conn))
+            {
+                sequenceName = (string)cmd.ExecuteScalar();
+            } 
+
+            // get the id back
+            //using (var cmd = new NpgsqlCommand(@"SELECT currval(pg_get_serial_sequence('chargeback_models','id'))", conn))
+            using (var cmd = new NpgsqlCommand(String.Format("SELECT last_value FROM {0}", sequenceName), conn))
+            {
                 return Convert.ToInt64(cmd.ExecuteScalar());
             }
         }

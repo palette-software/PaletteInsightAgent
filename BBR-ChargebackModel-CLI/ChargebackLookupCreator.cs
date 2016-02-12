@@ -71,17 +71,25 @@ namespace BBR_ChargebackModel_CLI
                     var lookup = chargebackLookup[dow, hod, usageType];
 
                     // Set up the effective range
-                    var effectiveFrom = TimeZoneInfo.ConvertTimeToUtc(currentDate, timezoneUsed);
-
-                    outputList.Add(new LookupRow
+                    try
                     {
-                        DatetimeKey = effectiveFrom,
-                        ModelId = 0,
-                        UsageType = lookup.UsageType,
-                        UnitPrice = lookup.UnitPrice,
-                        RateCategory = lookup.RateCategory,
-                        UnitPriceCurrency = model.UnitPriceCurrency
-                    });
+                        var effectiveFrom = TimeZoneInfo.ConvertTimeToUtc(currentDate, timezoneUsed);
+
+                        outputList.Add(new LookupRow
+                        {
+                            DatetimeKey = effectiveFrom,
+                            ModelId = 0,
+                            UsageType = lookup.UsageType,
+                            UnitPrice = lookup.UnitPrice,
+                            RateCategory = lookup.RateCategory,
+                            UnitPriceCurrency = model.UnitPriceCurrency
+                        });
+                    }
+                    catch(Exception e)
+                    {
+                        // skip this field if the time we want to convert is a non-existant one (daylight-savings-skipped)
+                        Console.Error.WriteLine(e.ToString());
+                    }
                 }
 
                 // advance to the next hour
