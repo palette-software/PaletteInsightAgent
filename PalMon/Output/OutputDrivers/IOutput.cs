@@ -11,10 +11,10 @@ namespace PalMon.Output
     /// <summary>
     /// An output wrapper for the results of an IOutput.Write()
     /// </summary>
-    public struct IOutputWriteResult
+    public class OutputWriteResult
     {
-        public IList<string> successfullyWrittenFiles;
-        public IList<string> failedFiles;
+        public IList<string> successfullyWrittenFiles = new List<string>();
+        public IList<string> failedFiles = new List<string>();
     }
 
     /// <summary>
@@ -30,6 +30,6 @@ namespace PalMon.Output
         /// </summary>
         /// <param name="csvFile"></param>
         /// <returns></returns>
-        IOutputWriteResult Write(IList<string> csvFile);
+        OutputWriteResult Write(IList<string> csvFile);
     }
 }
