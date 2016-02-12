@@ -65,7 +65,7 @@ namespace PalMon.Output
             if (fileNames.Count <= 0)
             {
                 // There are no files to process.
-                return new OutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>() };
+                return new OutputWriteResult();
             }
 
 
@@ -77,7 +77,7 @@ namespace PalMon.Output
             {
                 Log.Error("Unexpected table name: {0}", tableName);
                 // return with all files as failed files
-                return new OutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>(fileNames) };
+                return new OutputWriteResult { failedFiles = new List<string>(fileNames) };
             }
 
             // at this point we should have a nice table
