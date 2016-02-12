@@ -24,6 +24,7 @@ namespace PalMon.ThreadInfoPoller
             TableHelper.addColumn(table, "cpu_time", "System.Int64");
             TableHelper.addColumn(table, "poll_cycle_ts", "System.DateTime");
             TableHelper.addColumn(table, "start_ts", "System.DateTime");
+            TableHelper.addColumn(table, "thread_count", "System.Int32");
 
             return table;
         }
@@ -39,6 +40,7 @@ namespace PalMon.ThreadInfoPoller
             row["cpu_time"] = item.cpuTime;
             row["poll_cycle_ts"] = item.pollCycleTimeStamp;
             row["start_ts"] = item.startTimeStamp;
+            row["thread_count"] = item.threadCount;
 
             table.Rows.Add(row);
         }
