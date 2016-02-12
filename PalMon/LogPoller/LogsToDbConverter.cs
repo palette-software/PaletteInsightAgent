@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Net;
 
 using PalMon.Output;
+using System.IO;
 
 namespace PalMon.LogPoller
 {
@@ -85,7 +86,10 @@ namespace PalMon.LogPoller
 
         private void addServerLogs(string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
-            Log.Info("Trying to parse {0} rows of new log data.", jsonStringLines.Length);
+            // get the base filename for logging
+            var fileBaseName = Path.GetFileName(filename);
+            // log that we have started
+            Log.Info("Trying to parse {0} rows of new log data from {1}.", jsonStringLines.Length, fileBaseName);
             foreach (var jsonString in jsonStringLines)
             {
 
@@ -97,7 +101,7 @@ namespace PalMon.LogPoller
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Json parse exception occured in string: '{0}'. Exception message: {1}", jsonString, e.Message);
+                    Log.Error("Json parse exception occured in file '{0}' string: '{1}'. Exception message: {2}", fileBaseName, jsonString, e.Message);
                     // skip this line
                     continue;
                 }
@@ -114,7 +118,7 @@ namespace PalMon.LogPoller
                     // Skip if cache key is null
                     if (cacheKeyValue == null)
                     {
-                        Log.Error("Regex input value was null!");
+                        Log.Error("Regex input value was null for line: '{0}' in file '{1}'!", jsonString, fileBaseName);
                     }
                     else
                     {
