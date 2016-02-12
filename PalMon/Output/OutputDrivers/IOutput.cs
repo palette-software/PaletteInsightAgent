@@ -7,6 +7,16 @@ using System.Threading.Tasks;
 
 namespace PalMon.Output
 {
+
+    /// <summary>
+    /// An output wrapper for the results of an IOutput.Write()
+    /// </summary>
+    public struct IOutputWriteResult
+    {
+        public IList<string> successfullyWrittenFiles;
+        public IList<string> failedFiles;
+    }
+
     /// <summary>
     /// A generic interface for writing to the database.
     ///  NOTE: since we (possibly) need to close files and/or database connections,
@@ -20,6 +30,6 @@ namespace PalMon.Output
         /// </summary>
         /// <param name="csvFile"></param>
         /// <returns></returns>
-        IList<string> Write(IList<string> csvFile);
+        IOutputWriteResult Write(IList<string> csvFile);
     }
 }

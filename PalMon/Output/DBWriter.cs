@@ -16,7 +16,14 @@ namespace PalMon.Output
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private const string csvPath = @"csv/";
+        /// <summary>
+        /// The directory we store the succesfully uploaded files
+        /// </summary>
         private const string processedPath = @"csv/processed/";
+        /// <summary>
+        /// The directory where the files that have errors (invalid names, etc.)
+        /// </summary>
+        private const string ERROR_PATH = @"csv/errors/";
         private const string csvPattern = @"*.csv";
 
         public  static readonly object DBWriteLock = new object();
@@ -39,7 +46,9 @@ namespace PalMon.Output
                     // we return the list of actual files we have successfully processed
                     var processedFiles = output.Write(fileList);
                     // Move files to processed folder
-                    MoveToProcessed(processedFiles);
+                    MoveToFolder(processedFiles.successfullyWrittenFiles, processedPath);
+                    // Move files with errors to the errors folder
+                    MoveToFolder(processedFiles.failedFiles, ERROR_PATH);
                 }
             }
             catch (Exception e)
@@ -102,32 +111,39 @@ namespace PalMon.Output
             return tokens[0];
         }
 
-        public static void MoveToProcessed(IList<string> fileList)
+        /// <summary>
+        /// Helper method to move a list of files to a new folder
+        /// </summary>
+        /// <param name="fileList"></param>
+        /// <param name="outputFolder"></param>
+        private static void MoveToFolder(IList<string> fileList, string outputFolder)
         {
             foreach (var fullFileName in fileList)
             {
                 try
                 {
-                    if (!Directory.Exists(processedPath))
-                    {
-                        Directory.CreateDirectory(processedPath);
-                    }
+                    // create the output directory
+                    if (!Directory.Exists(outputFolder))
+                        Directory.CreateDirectory(outputFolder);
+
                     var fileName = GetFileName(fullFileName);
                     Log.Debug("Trying to move: {0}", fileName);
-                    var targetFile = processedPath + fileName;
+                    var targetFile = Path.Combine(outputFolder, fileName);
+                    
+                    // Delete the output if it already exists
+                    // TODO: shouldnt we rename the old file here?
                     if (File.Exists(targetFile))
-                    {
                         File.Delete(targetFile);
-                    }
+
+                    // Do the actual move
                     File.Move(fullFileName, targetFile);
                     Log.Info("Processed file: {0}", fileName);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Exception while moving file: {0}", ex);
+                    Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
                 }
             }
         }
-
     }
 }

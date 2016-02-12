@@ -47,7 +47,7 @@ namespace PalMon.Output
 
         #region IOutput implementation
 
-        public IList<string> Write(IList<string> csvFiles)
+        public IOutputWriteResult Write(IList<string> csvFiles)
         {
             return DoBulkCopy(csvFiles);
         }
@@ -60,22 +60,24 @@ namespace PalMon.Output
         /// Helper to do a bulk copy
         /// </summary>
         /// <param name="conversionResult"></param>
-        private IList<string> DoBulkCopy(IList<string> fileNames)
+        private IOutputWriteResult DoBulkCopy(IList<string> fileNames)
         {
             if (fileNames.Count <= 0)
             {
                 // There are no files to process.
-                return new List<string>();
+                return new IOutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>() };
             }
 
 
             ReconnectoToDbIfNeeded();
             var tableName = DBWriter.GetTableName(fileNames[0]);
 
+            // Make sure we have the proper table
             if (!tableCreators.ContainsKey(tableName))
             {
                 Log.Error("Unexpected table name: {0}", tableName);
-                return new List<string>();
+                // return with all files as failed files
+                return new IOutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>(fileNames) };
             }
 
             // at this point we should have a nice table
@@ -87,7 +89,7 @@ namespace PalMon.Output
             string copyString = CopyStatementFor(fileNames[0]);
 
             // create storage for the successfully uploaded csv filenames
-            var processedFiles = new List<string>();
+            var outputResult = new IOutputWriteResult();
 
             LoggingHelpers.TimedLog(Log, statusLine, () =>
             {
@@ -133,7 +135,7 @@ namespace PalMon.Output
                     copyTransaction.Commit();
                     // since we do all the copy in a single run, we add all files to the list of processed ones here, but
                     // we store every file name in case we ever want to add by-file-error-handling later
-                    processedFiles.AddRange(fileNames);
+                    outputResult.successfullyWrittenFiles.AddRange(fileNames);
 
                     return rowsWritten;
                 }
@@ -143,12 +145,16 @@ namespace PalMon.Output
                     // if anything went wrong, we should roll back the transaction
                     if (copyTransaction != null) copyTransaction.Rollback();
                     // in case of errors we have inserted 0 rows thanks to the transaction
+                    // but since we have errors in the insertion (which may come from
+                    // connectivity issues), we dont add any files to either
+                    // the successful or the error list, so the files
+                    // will be re-tried on next invocation
                     return 0;
                 }
             });
             // return the list of processed files, which should for now be either empty or
             // contain all the input file names
-            return processedFiles;
+            return outputResult;
 
         }
 
