@@ -47,7 +47,7 @@ namespace PalMon.Output
 
         #region IOutput implementation
 
-        public IOutputWriteResult Write(IList<string> csvFiles)
+        public OutputWriteResult Write(IList<string> csvFiles)
         {
             return DoBulkCopy(csvFiles);
         }
@@ -60,12 +60,12 @@ namespace PalMon.Output
         /// Helper to do a bulk copy
         /// </summary>
         /// <param name="conversionResult"></param>
-        private IOutputWriteResult DoBulkCopy(IList<string> fileNames)
+        private OutputWriteResult DoBulkCopy(IList<string> fileNames)
         {
             if (fileNames.Count <= 0)
             {
                 // There are no files to process.
-                return new IOutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>() };
+                return new OutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>() };
             }
 
 
@@ -77,7 +77,7 @@ namespace PalMon.Output
             {
                 Log.Error("Unexpected table name: {0}", tableName);
                 // return with all files as failed files
-                return new IOutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>(fileNames) };
+                return new OutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>(fileNames) };
             }
 
             // at this point we should have a nice table
@@ -89,7 +89,7 @@ namespace PalMon.Output
             string copyString = CopyStatementFor(fileNames[0]);
 
             // create storage for the successfully uploaded csv filenames
-            var outputResult = new IOutputWriteResult();
+            var outputResult = new OutputWriteResult();
 
             LoggingHelpers.TimedLog(Log, statusLine, () =>
             {
