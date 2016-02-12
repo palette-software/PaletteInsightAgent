@@ -18,6 +18,7 @@ namespace PalMon.ThreadInfoPoller
         public long processId;
         public long threadId;
         public long cpuTime;
+        public long workingSet;
         public int threadCount;
         public DateTime pollTimeStamp;
         public DateTime pollCycleTimeStamp;
@@ -68,6 +69,7 @@ namespace PalMon.ThreadInfoPoller
             if (threadId == -1)
             {
                 threadInfo.threadCount = process.Threads.Count;
+                threadInfo.workingSet = process.WorkingSet64;
             }
             ThreadTables.addToTable(table, threadInfo);
         }
