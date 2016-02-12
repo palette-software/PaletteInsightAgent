@@ -47,9 +47,9 @@ namespace PalMon.Output
 
         #region IOutput implementation
 
-        public void Write(IList<string> csvFiles)
+        public IOutputWriteResult Write(IList<string> csvFiles)
         {
-            DoBulkCopy(csvFiles);
+            return DoBulkCopy(csvFiles);
         }
 
         #endregion
@@ -60,21 +60,24 @@ namespace PalMon.Output
         /// Helper to do a bulk copy
         /// </summary>
         /// <param name="conversionResult"></param>
-        private void DoBulkCopy(IList<string> fileNames)
+        private IOutputWriteResult DoBulkCopy(IList<string> fileNames)
         {
             if (fileNames.Count <= 0)
             {
                 // There are no files to process.
-                return;
+                return new IOutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>() };
             }
+
 
             ReconnectoToDbIfNeeded();
             var tableName = DBWriter.GetTableName(fileNames[0]);
 
+            // Make sure we have the proper table
             if (!tableCreators.ContainsKey(tableName))
             {
                 Log.Error("Unexpected table name: {0}", tableName);
-                return;
+                // return with all files as failed files
+                return new IOutputWriteResult { successfullyWrittenFiles = new List<string>(), failedFiles = new List<string>(fileNames) };
             }
 
             // at this point we should have a nice table
@@ -85,41 +88,74 @@ namespace PalMon.Output
             var statusLine = String.Format("BULK COPY of {0} (Number of files: {1})", tableName, fileNames.Count);
             string copyString = CopyStatementFor(fileNames[0]);
 
+            // create storage for the successfully uploaded csv filenames
+            var outputResult = new IOutputWriteResult();
+
             LoggingHelpers.TimedLog(Log, statusLine, () =>
             {
                 int rowsWritten = 0;
-                using (var writer = connection.BeginTextImport(copyString))
+                // begin a transaction before any insert takes place
+                var copyTransaction = connection.BeginTransaction();
+
+                // we wrap the copy in a try/catch block so we can roll back the transaction in case of errors
+                try
                 {
-                    // Files contents for the same table are sent in one bulk
-                    foreach (var fileName in fileNames)
+
+                    using (var writer = connection.BeginTextImport(copyString))
                     {
-                        if (!copyString.Equals(CopyStatementFor(fileName)))
+                        // Files contents for the same table are sent in one bulk
+                        foreach (var fileName in fileNames)
                         {
-                            Log.Error("Skipping file since CSV header is not matching with others in file: {0}", fileName);
-                            continue;
-                        }
-
-                        using (var reader = new StreamReader(fileName))
-                        {
-                            // Skip the first line of the CSV file as it only contains the CSV header
-                            var lineRead = reader.ReadLine();
-
-                            while (true)
+                            if (!copyString.Equals(CopyStatementFor(fileName)))
                             {
-                                lineRead = reader.ReadLine();
-                                if (lineRead == null)
+                                Log.Error("Skipping file since CSV header is not matching with others in file: {0}", fileName);
+                                continue;
+                            }
+
+                            using (var reader = new StreamReader(fileName))
+                            {
+                                // Skip the first line of the CSV file as it only contains the CSV header
+                                var lineRead = reader.ReadLine();
+
+                                while (true)
                                 {
-                                    // End of file
-                                    break;
+                                    lineRead = reader.ReadLine();
+                                    if (lineRead == null)
+                                    {
+                                        // End of file
+                                        break;
+                                    }
+                                    rowsWritten++;
+                                    writer.WriteLine(lineRead);
                                 }
-                                rowsWritten++;
-                                writer.WriteLine(lineRead);
                             }
                         }
                     }
+                    // commit the transaction after all rows are written (after writer.Dispose() is called)
+                    copyTransaction.Commit();
+                    // since we do all the copy in a single run, we add all files to the list of processed ones here, but
+                    // we store every file name in case we ever want to add by-file-error-handling later
+                    outputResult.successfullyWrittenFiles.AddRange(fileNames);
+
+                    return rowsWritten;
                 }
-                return rowsWritten;
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error during writing to the database: {0}", e);
+                    // if anything went wrong, we should roll back the transaction
+                    if (copyTransaction != null) copyTransaction.Rollback();
+                    // in case of errors we have inserted 0 rows thanks to the transaction
+                    // but since we have errors in the insertion (which may come from
+                    // connectivity issues), we dont add any files to either
+                    // the successful or the error list, so the files
+                    // will be re-tried on next invocation
+                    return 0;
+                }
             });
+            // return the list of processed files, which should for now be either empty or
+            // contain all the input file names
+            return outputResult;
+
         }
 
         /// <summary>
