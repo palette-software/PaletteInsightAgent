@@ -19,7 +19,7 @@ namespace PalMon.Output
         /// <summary>
         /// The directory we store the succesfully uploaded files
         /// </summary>
-        private const string processedPath = @"csv/processed/";
+        private const string PROCESSED_PATH = @"csv/processed/";
         /// <summary>
         /// The directory where the files that have errors (invalid names, etc.)
         /// </summary>
@@ -46,7 +46,7 @@ namespace PalMon.Output
                     // we return the list of actual files we have successfully processed
                     var processedFiles = output.Write(fileList);
                     // Move files to processed folder
-                    MoveToFolder(processedFiles.successfullyWrittenFiles, processedPath);
+                    MoveToFolder(processedFiles.successfullyWrittenFiles, PROCESSED_PATH);
                     // Move files with errors to the errors folder
                     MoveToFolder(processedFiles.failedFiles, ERROR_PATH);
                 }
@@ -144,6 +144,11 @@ namespace PalMon.Output
                     Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
                 }
             }
+        }
+
+        internal static void MoveToProcessed(IList<string> testFileList)
+        {
+            MoveToFolder(testFileList, PROCESSED_PATH);
         }
     }
 }
