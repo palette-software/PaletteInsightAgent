@@ -36,9 +36,10 @@ namespace PalMon.Output
                 while ((fileList = GetFilesOfSameTable()).Count > 0)
                 {
                     // BULK COPY
-                    output.Write(fileList);
+                    // we return the list of actual files we have successfully processed
+                    var processedFiles = output.Write(fileList);
                     // Move files to processed folder
-                    MoveToProcessed(fileList);
+                    MoveToProcessed(processedFiles);
                 }
             }
             catch (Exception e)

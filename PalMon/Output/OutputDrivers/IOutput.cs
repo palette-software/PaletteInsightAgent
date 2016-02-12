@@ -14,7 +14,12 @@ namespace PalMon.Output
     /// </summary>
     public interface IOutput : IDisposable
     {
-        //void Write(string csvFile, DataTable rows);
-        void Write(IList<string> csvFile);
+        /// <summary>
+        /// Tries to write out the csv files, and returns the list of successfully uploaded
+        /// files.
+        /// </summary>
+        /// <param name="csvFile"></param>
+        /// <returns></returns>
+        IList<string> Write(IList<string> csvFile);
     }
 }
