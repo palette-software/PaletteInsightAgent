@@ -133,7 +133,7 @@ namespace PalMon.Output
                 catch (Exception e)
                 {
                     Log.Error(e, "Error during writing to the database: {0}", e);
-                    // if anything went wrong, we sh
+                    // if anything went wrong, we should roll back the transaction
                     if (copyTransaction != null) copyTransaction.Rollback();
                     // in case of errors we have inserted 0 rows thanks to the transaction
                     return 0;
