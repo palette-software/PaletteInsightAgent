@@ -21,6 +21,7 @@ namespace PalMon
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
+        public int DBWriteInterval { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
         public ICollection<ProcessData> Processes { get; set; }
@@ -62,13 +63,14 @@ namespace PalMon
             // removed the host from here as we arent using that functionality
             return PollInterval >= MinPollInterval
                 && LogPollInterval >= MinPollInterval
-                && ThreadInfoPollInterval >= MinPollInterval;
+                && ThreadInfoPollInterval >= MinPollInterval
+                && DBWriteInterval >= MinPollInterval;
         }
 
         public override string ToString()
         {
-            return String.Format("[PollInterval='{1}', LogPollInterval='{2}', ThreadInfoPollInterval='{3}']",
-                                   PollInterval, LogPollInterval, ThreadInfoPollInterval);
+            return String.Format("[PollInterval='{0}', LogPollInterval='{1}', ThreadInfoPollInterval='{2}'], DBWriteInterval='{3}'",
+                                   PollInterval, LogPollInterval, ThreadInfoPollInterval, DBWriteInterval);
         }
 
         #endregion

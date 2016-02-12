@@ -15,7 +15,7 @@ namespace PalMon.Sampler
     {
         private const bool USE_STATIC_COLUMN_NAMES = true;
         public static readonly string InProgressLock = "Counter Sampler";
-        private static readonly string TableName = "countersamples";
+        public static readonly string TABLE_NAME = "countersamples";
 
         private readonly ICollection<ICounter> counters;
         private readonly DataTable schema;
@@ -85,7 +85,7 @@ namespace PalMon.Sampler
         /// <returns>DataTable that can accomodate both metadata and sample results of all counters managed by this sampler.</returns>
         private DataTable GenerateSchema()
         {
-            var generatedSchema = new DataTable(TableName);
+            var generatedSchema = new DataTable(TABLE_NAME);
 
             generatedSchema.Columns.Add(BuildColumnMetadata("timestamp", "System.DateTime", false));
             generatedSchema.Columns.Add(BuildColumnMetadata("machine", "System.String", false, 16));
@@ -102,7 +102,7 @@ namespace PalMon.Sampler
             generatedSchema.Columns.Add(BuildColumnMetadata("instance", "System.String", true, 64));
 
             Log.Debug("Dynamically built result schema '{0}'. [{1} {2}]",
-                      TableName, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
+                      TABLE_NAME, generatedSchema.Columns.Count, "column".Pluralize(generatedSchema.Columns.Count));
             return generatedSchema;
         }
 
@@ -166,7 +166,7 @@ namespace PalMon.Sampler
         public static DataTable makeCounterSamplesTable()
         {
 
-            var table = new DataTable(TableName);
+            var table = new DataTable(TABLE_NAME);
 
             //TableHelper.addColumn(table, "id", "System.Int32", true, true);
             TableHelper.addColumn(table, "timestamp", "System.DateTime");

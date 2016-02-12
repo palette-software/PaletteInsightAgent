@@ -3,6 +3,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,7 +71,7 @@ namespace PalMon.Output
         /// </summary>
         /// <param name="queue"></param>
         /// <param name="csvWriter"></param>
-        public static void WriteCSVBody(DataTable queue, CsvWriter csvWriter)
+        public static void WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter)
         {
             var columnCount = queue.Columns.Count;
 
@@ -82,7 +83,18 @@ namespace PalMon.Output
                     {
                         if (row[i] != null)
                         {
-                            csvWriter.WriteField(row[i]);
+                            if (row[i].GetType() == typeof(DateTime))
+                            {
+                                // In order to have milliseconds instead of only seconds in the string representation
+                                // of the timestamp, we need to use a custom ToString() method instead of the
+                                // default one. This is a kind-of-ugly workaround.
+                                DateTime timestamp = (DateTime)row[i];
+                                csvWriter.WriteField(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture));
+                            }
+                            else
+                            {
+                                csvWriter.WriteField(row[i]);
+                            }
                         }
                         else
                         {
@@ -103,7 +115,7 @@ namespace PalMon.Output
         /// </summary>
         /// <param name="queue"></param>
         /// <param name="csvWriter"></param>
-        public static void WriteCSVHeader(DataTable queue, CsvWriter csvWriter)
+        public static void WriteCSVHeader(DataTable queue, CsvHelper.CsvWriter csvWriter)
         {
             foreach (DataColumn column in queue.Columns)
             {

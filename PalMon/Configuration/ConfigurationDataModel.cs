@@ -58,6 +58,9 @@ namespace PaletteInsight
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
 
+            [YamlMember(Alias = "DBWriteInterval")]
+            public int DBWriteInterval { get; set; }
+
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }
 
