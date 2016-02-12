@@ -40,7 +40,7 @@ namespace PalMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(CachingOutput writer, object writeLock, String filename, String[] jsonStringLines)
+        public void processServerLogLines(String filename, String[] jsonStringLines)
         {
             // Create the datatable
             var serverLogsTable = LogTables.makeServerLogsTable();
@@ -63,18 +63,12 @@ namespace PalMon.LogPoller
 
                 if (filterStateCount > 0)
                 {
-                    lock (writeLock)
-                    {
-                        writer.Write(filterStateTable);
-                    }
+                    CsvOutput.Write(filterStateTable);
                 }
 
                 if (serverLogsTableCount > 0)
                 {
-                    lock (writeLock)
-                    {
-                        writer.Write(serverLogsTable);
-                    }
+                    CsvOutput.Write(serverLogsTable);
                 }
 
                 Log.Info("Sent off {0}", statusLine);

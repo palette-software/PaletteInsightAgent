@@ -29,20 +29,17 @@ namespace PalMon
         private Timer timer;
         private Timer logPollTimer;
         private Timer threadInfoTimer;
+        private Timer dbWriterTimer;
         private LogPollerAgent logPollerAgent;
         private ThreadInfoAgent threadInfoAgent;
         private CounterSampler sampler;
         private readonly PalMonOptions options;
         private bool disposed;
         private const string PathToCountersYaml = @"Config\Counters.yml";
-        private const int WriteLockAcquisitionTimeout = 10; // In seconds.
-        private static readonly object WriteLock = new object();
+        private const int DBWriteLockAcquisitionTimeout = 10; // In seconds.
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-
-        private IOutput output;
-        private CachingOutput cachingOutput;
         private const bool USE_COUNTERSAMPLES = true;
         private const bool USE_LOGPOLLER = true;
         private const bool USE_THREADINFO = true;
@@ -66,14 +63,10 @@ namespace PalMon
             string version = fvi.FileVersion;
             Log.Info("Palette Insight Agent version: " + version);
 
-            output = new PostgresOutput(options.ResultDatabase);
-            // initialize the output
-            cachingOutput = new CachingOutput(output);
-
             if (USE_LOGPOLLER)
             {
                 // Load the log poller config & start the agent
-	            logPollerAgent = new LogPollerAgent(options.LogFolders,
+                logPollerAgent = new LogPollerAgent(options.LogFolders,
                     options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
             }
 
@@ -186,6 +179,10 @@ namespace PalMon
                 // Kick off the thread polling timer
                 threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
             }
+
+            // Start the DB Writer
+            IOutput output = new PostgresOutput(options.ResultDatabase);
+            dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
         }
 
 
@@ -195,15 +192,6 @@ namespace PalMon
         public void Stop()
         {
             Log.Info("Shutting down PalMon..");
-            // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
-            if (!Monitor.TryEnter(WriteLock, WriteLockAcquisitionTimeout * 1000))
-            {
-                Log.Error("Could not acquire write lock; forcing exit..");
-            }
-            else
-            {
-                Log.Debug("Acquired write lock gracefully..");
-            }
 
             if (USE_COUNTERSAMPLES)
             {
@@ -233,6 +221,21 @@ namespace PalMon
                 }
             }
 
+            if (dbWriterTimer != null)
+            {
+                dbWriterTimer.Dispose();
+            }
+
+            // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
+            if (!Monitor.TryEnter(DBWriter.DBWriteLock, DBWriteLockAcquisitionTimeout * 1000))
+            {
+                Log.Error("Could not acquire DB write lock; forcing exit..");
+            }
+            else
+            {
+                Log.Debug("Acquired DB write lock gracefully..");
+            }
+
             Log.Info("PalMon stopped.");
         }
 
@@ -246,6 +249,7 @@ namespace PalMon
             if (USE_COUNTERSAMPLES) running = running && (sampler != null && timer != null);
             if (USE_LOGPOLLER) running = running && (logPollTimer != null);
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
+            running = running && (dbWriterTimer != null);
             return running;
         }
 
@@ -262,11 +266,7 @@ namespace PalMon
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
-                lock (WriteLock)
-                {
-                    cachingOutput.Write(sampleResults);
-                    cachingOutput.Tick();
-                }
+                CsvOutput.Write(sampleResults);
             });
         }
 
@@ -279,8 +279,7 @@ namespace PalMon
         {
             tryStartIndividualPoll(LogPollerAgent.InProgressLock, PollWaitTimeout, () =>
             {
-                logPollerAgent.pollLogs(cachingOutput, WriteLock);
-                TickOutput();
+                logPollerAgent.pollLogs();
             });
         }
 
@@ -293,20 +292,14 @@ namespace PalMon
             tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
             {
                 Log.Info("Polling threadinfo");
-                threadInfoAgent.poll(options.Processes, cachingOutput, WriteLock);
-                TickOutput();
+                threadInfoAgent.poll(options.Processes);
             });
         }
 
-        /// <summary>
-        /// Tick the output while locking the write lock so its actually safe
-        /// </summary>
-        private void TickOutput()
+        private void WriteToDB(object stateInfo)
         {
-            lock (WriteLock)
-            {
-                cachingOutput.Tick();
-            }
+            // Stateinfo contains an IOutput object
+            DBWriter.Start((IOutput)stateInfo);
         }
 
         /// <summary>
@@ -352,13 +345,6 @@ namespace PalMon
             if (disposed)
                 return;
 
-            if (disposing)
-            {
-                if (cachingOutput != null)
-                {
-                    cachingOutput.Dispose();
-                }
-            }
             disposed = true;
         }
 

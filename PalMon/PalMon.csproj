@@ -166,11 +166,10 @@
     <Compile Include="Configuration\ConfigurationLoader.cs" />
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
-    <Compile Include="Output\DelayedAction.cs" />
-    <Compile Include="Output\CachingOutput.cs" />
+    <Compile Include="Output\DBWriter.cs" />
+    <Compile Include="Output\CsvOutput.cs" />
     <Compile Include="Output\Connection\DbConnectionInfo.cs" />
     <Compile Include="Output\Connection\IDbConnectionInfo.cs" />
-    <Compile Include="Output\DataTableCache.cs" />
     <Compile Include="Output\DataTableUtils.cs" />
     <Compile Include="Output\OutputDrivers\IOutput.cs" />
     <Compile Include="Helpers\LoggingHelpers.cs" />
@@ -208,6 +207,7 @@
     </None>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="NLog_forService.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

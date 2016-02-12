@@ -10,9 +10,11 @@ namespace PalMon.ThreadInfoPoller
 {
     class ThreadTables
     {
+        public static readonly string TABLE_NAME = "threadinfo";
+
         public static DataTable makeThreadInfoTable()
         {
-            var table = new DataTable("threadinfo");
+            var table = new DataTable(TABLE_NAME);
 
             TableHelper.addColumn(table, "host_name");
             TableHelper.addColumn(table, "instance");
