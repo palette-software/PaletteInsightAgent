@@ -41,47 +41,17 @@ namespace PalMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(String filename, String[] jsonStringLines)
+        public void processServerLogLines(String filename, String[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
-            // Create the datatable
-            var serverLogsTable = LogTables.makeServerLogsTable();
-            var filterStateTable = LogTables.makeFilterStateAuditTable();
-
             try
             {
                 addServerLogs(filename, jsonStringLines, serverLogsTable, filterStateTable);
-
-                var filterStateCount = filterStateTable.Rows.Count;
-                var serverLogsTableCount = serverLogsTable.Rows.Count;
-
-                var statusLine = String.Format("{0} filter {1} and {2} server log {3}",
-                    filterStateCount, "row".Pluralize(filterStateCount),
-                     serverLogsTableCount, "row".Pluralize(serverLogsTableCount));
-
-
-                Log.Info("Sending off " + statusLine);
-
-
-                if (filterStateCount > 0)
-                {
-                    CsvOutput.Write(filterStateTable);
-                }
-
-                if (serverLogsTableCount > 0)
-                {
-                    CsvOutput.Write(serverLogsTable);
-                }
-
-                Log.Info("Sent off {0}", statusLine);
-
-
             }
             catch (Exception e)
             {
                 Log.Fatal(e, "Error while adding to server logs. {0}", e);
                 throw;
             }
-
         }
 
         private void addServerLogs(string filename, string[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
