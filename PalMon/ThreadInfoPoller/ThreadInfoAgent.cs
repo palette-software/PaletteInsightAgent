@@ -100,6 +100,10 @@ namespace PalMon.ThreadInfoPoller
                     }
                 }
             }
+            catch (InvalidOperationException)
+            {
+                // This can happen when a process exits while we try to get info from it. It is normal operation so nothing to do here.
+            }
             catch (Exception ex)
             {
                 Log.Error("Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message);
