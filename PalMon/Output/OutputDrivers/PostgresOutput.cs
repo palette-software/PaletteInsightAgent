@@ -100,7 +100,6 @@ namespace PalMon.Output
                 // we wrap the copy in a try/catch block so we can roll back the transaction in case of errors
                 try
                 {
-
                     using (var writer = connection.BeginTextImport(copyString))
                     {
                         // Files contents for the same table are sent in one bulk
@@ -111,6 +110,7 @@ namespace PalMon.Output
                                 Log.Error("Skipping file since CSV header is not matching with others in file: {0}", fileName);
                                 continue;
                             }
+
 
                             using (var reader = new StreamReader(fileName))
                             {
@@ -149,6 +149,16 @@ namespace PalMon.Output
                     // connectivity issues), we dont add any files to either
                     // the successful or the error list, so the files
                     // will be re-tried on next invocation
+
+                    if (e is NpgsqlException && e.Message.Contains("invalid input syntax"))
+                    {
+                        // except if the NpgSql exception message contains "invalid input syntax",
+                        // we can be pretty sure that this CSV file is not written in the way, we
+                        // could handle it. So there is no point in re-trying that file.
+                        // Unfortunately I didn't find any way to figure out the exact file
+                        // that caused the error, so I add all files of this round.
+                        outputResult.failedFiles.AddRange(fileNames);
+                    }
                     return 0;
                 }
             });
