@@ -60,18 +60,50 @@ namespace PalMon.LogPoller
 
         public void pollLogs()
         {
+            var serverLogsTable = LogTables.makeServerLogsTable();
+            var filterStateTable = LogTables.makeFilterStateAuditTable();
+
             foreach (var watcher in watchers)
             { 
                 watcher.watchChangeCycle((filename, lines) =>
                 {
                     Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
-                    logsToDbConverter.processServerLogLines(filename, lines);
+                    logsToDbConverter.processServerLogLines(filename, lines, serverLogsTable, filterStateTable);
                 }, () =>
                 {
                     // if no change, just flush if needed
                     Log.Debug("No changes detected folder={0} filter={1} -- flushing if needed", watcher.watchedFolderPath, watcher.filter);
                 });
             }
+
+            var filterStateCount = filterStateTable.Rows.Count;
+            var serverLogsTableCount = serverLogsTable.Rows.Count;
+
+            if (filterStateCount == 0 && serverLogsTableCount == 0)
+            {
+                // There is nothing collected.
+                return;
+            }
+
+            var statusLine = String.Format("{0} filter {1} and {2} server log {3}",
+                filterStateCount, "row".Pluralize(filterStateCount),
+                 serverLogsTableCount, "row".Pluralize(serverLogsTableCount));
+
+
+            Log.Info("Sending off " + statusLine);
+
+
+            if (filterStateCount > 0)
+            {
+                CsvOutput.Write(filterStateTable);
+            }
+
+            if (serverLogsTableCount > 0)
+            {
+                CsvOutput.Write(serverLogsTable);
+            }
+
+            Log.Info("Sent off {0}", statusLine);
         }
 
     }
