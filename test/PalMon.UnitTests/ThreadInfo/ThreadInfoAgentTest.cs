@@ -79,6 +79,7 @@ namespace PalMonTests.ThreadInfo
 
             var agent = new ThreadInfoAgent();
             Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
+            Assert.AreEqual(count.Value, 1);
         }
 
         [TestMethod, Isolated]
