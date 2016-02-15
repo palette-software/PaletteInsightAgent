@@ -74,14 +74,14 @@ namespace PalMon.ThreadInfoPoller
             ThreadTables.addToTable(table, threadInfo);
         }
 
-        protected void pollThreadCountersOfProcess(Process process, bool threadLevel, DataTable table, ref long serverLogsTableCount)
+        protected void pollThreadCountersOfProcess(Process process, bool threadLevel, DataTable table, ref long threadInfoTableCount)
         {
             try
             {
                 // Store the total processor time of the whole process so that we can do sanity checks on the sum of thread cpu times
                 var pollCycleTimeStamp = DateTimeOffset.Now.UtcDateTime;
                 addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime());
-                serverLogsTableCount++;
+                threadInfoTableCount++;
 
                 if (threadLevel)
                 {
@@ -90,7 +90,7 @@ namespace PalMon.ThreadInfoPoller
                         try
                         {
                             addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime());
-                            serverLogsTableCount++;
+                            threadInfoTableCount++;
                         }
                         catch (InvalidOperationException)
                         {
@@ -99,6 +99,10 @@ namespace PalMon.ThreadInfoPoller
                         }
                     }
                 }
+            }
+            catch (InvalidOperationException)
+            {
+                // This can happen when a process exits while we try to get info from it. It is normal operation so nothing to do here.
             }
             catch (Exception ex)
             {
