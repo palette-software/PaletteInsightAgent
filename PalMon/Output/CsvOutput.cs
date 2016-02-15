@@ -2,6 +2,7 @@
 using System.IO;
 using System.Data;
 using NLog;
+using System.Globalization;
 
 namespace PalMon.Output
 {
@@ -81,7 +82,7 @@ namespace PalMon.Output
             var fileExists = File.Exists(fileName);
 
             using (var streamWriter = File.AppendText(fileName))
-            using (var csvWriter = new CsvHelper.CsvWriter(streamWriter))
+            using (var csvWriter = new CsvHelper.CsvWriter(streamWriter, new CsvHelper.Configuration.CsvConfiguration { CultureInfo = CultureInfo.InvariantCulture }))
             {
                 // only write the header if the file does not exists
                 if (!fileExists)
