@@ -68,7 +68,7 @@ namespace PalMon.LogPoller
                 watcher.watchChangeCycle((filename, lines) =>
                 {
                     Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
-                    logsToDbConverter.processServerLogLines(filename, lines, ref serverLogsTable, ref filterStateTable);
+                    logsToDbConverter.processServerLogLines(filename, lines, serverLogsTable, filterStateTable);
                 }, () =>
                 {
                     // if no change, just flush if needed
