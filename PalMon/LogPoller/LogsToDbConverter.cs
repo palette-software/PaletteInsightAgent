@@ -41,7 +41,7 @@ namespace PalMon.LogPoller
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
-        public void processServerLogLines(String filename, String[] jsonStringLines, ref DataTable serverLogsTable, ref DataTable filterStateTable)
+        public void processServerLogLines(String filename, String[] jsonStringLines, DataTable serverLogsTable, DataTable filterStateTable)
         {
             try
             {
