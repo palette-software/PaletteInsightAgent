@@ -14,7 +14,7 @@ namespace PalMon.ThreadInfoPoller
     struct ThreadInfo
     {
         public string host;
-        public string instance;
+        public string process;
         public long processId;
         public long threadId;
         public long cpuTime;
@@ -63,7 +63,7 @@ namespace PalMon.ThreadInfoPoller
             threadInfo.pollCycleTimeStamp = pollCycleTimeStamp;
             threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
-            threadInfo.instance = process.ProcessName;
+            threadInfo.process = process.ProcessName;
 
             // When on process level add threadCount as well
             if (threadId == -1)
