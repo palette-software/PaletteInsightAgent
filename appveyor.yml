@@ -58,11 +58,11 @@ test_script:
     - SET WATCHED_FOLDER_2=c:\watched_folder_2
     - md %WATCHED_FOLDER_1%
     - md %WATCHED_FOLDER_2%
-    - ps: | 
-      SET CONFIG_YML_PATH="C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
-      (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content %CONFIG_YML_PATH%
-      (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs', '%WATCHED_FOLDER_1%' } | Set-Content %CONFIG_YML_PATH%
-      (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver', '%WATCHED_FOLDER_2%' } | Set-Content %CONFIG_YML_PATH%
+    - ps: >-
+        SET CONFIG_YML_PATH="C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+        (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content %CONFIG_YML_PATH%
+        (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs', '%WATCHED_FOLDER_1%' } | Set-Content %CONFIG_YML_PATH%
+        (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver', '%WATCHED_FOLDER_2%' } | Set-Content %CONFIG_YML_PATH%
     - copy "c:\projects\blackboxrecorder\PalMon\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
 
     # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
