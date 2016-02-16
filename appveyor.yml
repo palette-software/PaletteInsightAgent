@@ -39,7 +39,7 @@ test_script:
     # Setup target database
     - createdb "PalMon"
     - psql -a -c "create user palmon with password 'password';"
-    - psql -a -c "grant all on database PalMon to palmon;"
+    - psql -a -c "grant all on database 'PalMon' to palmon;"
     # Setup fake Tableau database
     - psql -a -c "create user readonly with password 'onlyread';"
     - psql -a -c "grant all on database workgroup to readonly;"
@@ -95,15 +95,15 @@ deploy:
   prerelease: true
   on:
     branch: production
-# notifications:
-# - provider: Slack
-#   incoming_webhook: https://hooks.slack.com/services/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
-#   auth_token:
-#     secure: YID5KzjUO9Nx2GlLOibJMA==
-#   channel: dev-robots
-#   on_build_success: true
-#   on_build_failure: true
-#   on_build_status_changed: true
+notifications:
+- provider: Slack
+  incoming_webhook: https://hooks.slack.com/services/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
+  auth_token:
+    secure: YID5KzjUO9Nx2GlLOibJMA==
+  channel: dev-robots
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: true
 
 on_finish:
 - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
