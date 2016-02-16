@@ -39,12 +39,19 @@ test_script:
     # - createuser readonly -e
     - psql -a -c "create user readonly with password 'onlyread';"
     - psql -a -c "grant all on database workgroup to readonly;"
-    # - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
+    - SET PGUSER=readonly
+    - SET PGPASSWORD=onlyread
+    - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
+    - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
+
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
     - cd PalMonServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     - msiexec.exe /qn /i %PALIN_MSI%
+    # Set the Postgres port in Config.yml
+    - ps: (Get-Content "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml") | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+
     # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
     - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
 #    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
@@ -55,10 +62,9 @@ test_script:
     - echo "Started PalMon service"
     - sleep 15
     - echo "Sleeping for 15 seconds"
-    # - windows_amd64\agentrunner.exe stop
-    # - echo "Stopped PalMon service"
+    - windows_amd64\agentrunner.exe stop
     - echo "Contents of the PalMon log"
-    - type "C:\Program Files (x86)\PalMon\Logs\PalMon.nlog.txt"
+    - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PalMon.nlog.txt"
     - echo "End of PalMon log"
     - echo "Installed Palette Insight successfully"
     - msiexec.exe /qn /x %PALIN_MSI%
