@@ -14,6 +14,8 @@ assembly_info:
   assembly_version: '{version}'
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
+services:
+  - postgresql93
 build_script:
 - cmd: >-
     nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
@@ -29,6 +31,15 @@ test_script:
     # Runt TypeMock unit tests
     - C:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "C:\projects\blackboxrecorder\test\PalMon.UnitTests\bin\Release\PalMon.UnitTests.dll"
 
+    # Setup Postgres 9.3 on the worker
+    - SET PGUSER=postgres
+    - SET PGPASSWORD=Password12!
+    - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+    - createdb workgroup
+    # - createuser readonly -e
+    - psql -a -c "create user readonly with password 'onlyread';"
+    - psql -a -c "grant all on database workgroup to readonly;"
+    # - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
     - cd PalMonServiceInstaller\bin\Release\
@@ -44,8 +55,8 @@ test_script:
     - echo "Started PalMon service"
     - sleep 15
     - echo "Sleeping for 15 seconds"
-    - windows_amd64\agentrunner.exe stop
-    - echo "Stopped PalMon service"
+    # - windows_amd64\agentrunner.exe stop
+    # - echo "Stopped PalMon service"
     - echo "Contents of the PalMon log"
     - type "C:\Program Files (x86)\PalMon\Logs\PalMon.nlog.txt"
     - echo "End of PalMon log"
@@ -76,5 +87,5 @@ deploy:
 #   on_build_failure: true
 #   on_build_status_changed: true
 
-# on_finish:
-# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
