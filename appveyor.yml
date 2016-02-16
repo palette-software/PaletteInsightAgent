@@ -26,23 +26,32 @@ build_script:
 
     move PalMonServiceInstaller\bin\Release\PalMon.msi PalMonServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 test_script:
-- cmd: >-
-    C:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "C:\projects\blackboxrecorder\test\PalMon.UnitTests\bin\Release\PalMon.UnitTests.dll"
+    # Runt TypeMock unit tests
+    - C:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "C:\projects\blackboxrecorder\test\PalMon.UnitTests\bin\Release\PalMon.UnitTests.dll"
 
-
-    echo "Try a Palette Insight install and uninstall"
-
-    cd PalMonServiceInstaller\bin\Release\
-
-    set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
-
-    msiexec.exe /qn /i %PALIN_MSI%
-
-    echo "Installed Palette Insight successfully"
-
-    msiexec.exe /qn /x %PALIN_MSI%
-
-    echo "Uninstalled Palette Insight successfully"
+    # Make a sample run of Palette Insight Agent
+    - echo "Try a Palette Insight install and uninstall"
+    - cd PalMonServiceInstaller\bin\Release\
+    - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+    - msiexec.exe /qn /i %PALIN_MSI%
+    # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
+    - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
+#    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
+    - echo "Downloaded insight-tester"
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release');
+    - echo "Unzipped insight tester"
+    - windows_amd64\agentrunner.exe start
+    - echo "Started PalMon service"
+    - sleep 15
+    - echo "Sleeping for 15 seconds"
+    - windows_amd64\agentrunner.exe stop
+    - echo "Stopped PalMon service"
+    - echo "Contents of the PalMon log"
+    - type "C:\Program Files (x86)\PalMon\Logs\PalMon.nlog.txt"
+    - echo "End of PalMon log"
+    - echo "Installed Palette Insight successfully"
+    - msiexec.exe /qn /x %PALIN_MSI%
+    - echo "Uninstalled Palette Insight successfully"
 artifacts:
 - path: PalMonServiceInstaller\bin\Release\*.msi
   name: Github
@@ -57,12 +66,15 @@ deploy:
   prerelease: true
   on:
     branch: production
-notifications:
-- provider: Slack
-  incoming_webhook: https://hooks.slack.com/services/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
-  auth_token:
-    secure: YID5KzjUO9Nx2GlLOibJMA==
-  channel: dev-robots
-  on_build_success: true
-  on_build_failure: true
-  on_build_status_changed: true
+# notifications:
+# - provider: Slack
+#   incoming_webhook: https://hooks.slack.com/services/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
+#   auth_token:
+#     secure: YID5KzjUO9Nx2GlLOibJMA==
+#   channel: dev-robots
+#   on_build_success: true
+#   on_build_failure: true
+#   on_build_status_changed: true
+
+# on_finish:
+# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
