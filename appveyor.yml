@@ -36,7 +36,11 @@ test_script:
     - SET PGPASSWORD=Password12!
     - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
     - createdb workgroup
-    # - createuser readonly -e
+    # Setup target database
+    - createdb "PalMon"
+    - psql -a -c "create user palmon with password 'password';"
+    - psql -a -c "grant all on database PalMon to palmon;"
+    # Setup fake Tableau database
     - psql -a -c "create user readonly with password 'onlyread';"
     - psql -a -c "grant all on database workgroup to readonly;"
     - SET PGUSER=readonly
@@ -50,7 +54,15 @@ test_script:
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     - msiexec.exe /qn /i %PALIN_MSI%
     # Set the Postgres port in Config.yml
-    - ps: (Get-Content "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml") | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    - SET CONFIG_YML_PATH="C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    - ps: (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content %CONFIG_YML_PATH%
+    - SET WATCHED_FOLDER_1='c:\watched_folder_1'
+    - SET WATCHED_FOLDER_2='c:\watched_folder_2'
+    - md %WATCHED_FOLDER_1%
+    - md %WATCHED_FOLDER_2%
+    - ps: (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs', %WATCHED_FOLDER_1% } | Set-Content %CONFIG_YML_PATH%
+    - ps: (Get-Content %CONFIG_YML_PATH%) | ForEach-Object { $_ -replace 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver', %WATCHED_FOLDER_2% } | Set-Content %CONFIG_YML_PATH%
+    - copy "c:\projects\blackboxrecorder\PalMon\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
 
     # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
     - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
