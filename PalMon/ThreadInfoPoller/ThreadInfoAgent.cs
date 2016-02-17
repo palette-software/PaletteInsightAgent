@@ -49,7 +49,6 @@ namespace PalMon.ThreadInfoPoller
                     processList.AddRange(Process.GetProcessesByName(processName));
                 }
             }
-            // bool threadLevel = processData.Granularity == "Thread";
             pollProcessList(processList, processData, threadInfoTable, ref threadInfoTableCount);
 
 
