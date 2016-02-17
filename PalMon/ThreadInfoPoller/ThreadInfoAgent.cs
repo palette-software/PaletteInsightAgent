@@ -31,24 +31,40 @@ namespace PalMon.ThreadInfoPoller
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
 
-        public void poll(ICollection<ProcessData> processes)
+        public void poll(IDictionary<string, ProcessData> processData, bool allProcesses)
         {
             var threadInfoTable = ThreadTables.makeThreadInfoTable();
             long threadInfoTableCount = 0;
+            ICollection<Process> processList;
 
-            foreach (ProcessData processData in processes)
+            if (allProcesses)
             {
-                bool threadLevel = processData.Granularity == "Thread";
-                var processList = Process.GetProcessesByName(processData.Name);
-                foreach (var process in processList)
+                processList = Process.GetProcesses();
+            }
+            else
+            {
+                processList = new List<Process>();
+                foreach (string processName in processData.Keys)
                 {
-                    pollThreadCountersOfProcess(process, threadLevel, threadInfoTable, ref threadInfoTableCount);
+                    processList.AddRange(Process.GetProcessesByName(processName));
                 }
             }
+            // bool threadLevel = processData.Granularity == "Thread";
+            pollProcessList(processList, processData, threadInfoTable, ref threadInfoTableCount);
+
 
             if (threadInfoTableCount > 0)
             {
                 CsvOutput.Write(threadInfoTable);
+            }
+        }
+
+        protected void pollProcessList(ICollection<Process> processList, IDictionary<string, ProcessData> processData, DataTable threadInfoTable, ref long threadInfoTableCount)
+        {
+            foreach (var process in processList)
+            {
+                var threadLevel = processData.ContainsKey(process.ProcessName) && processData[process.ProcessName].Granularity == "Thread";
+                pollThreadCountersOfProcess(process, threadLevel, threadInfoTable, ref threadInfoTableCount);
             }
         }
 
@@ -103,6 +119,10 @@ namespace PalMon.ThreadInfoPoller
             catch (InvalidOperationException)
             {
                 // This can happen when a process exits while we try to get info from it. It is normal operation so nothing to do here.
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // This happens when we get acccess denied for a process. That's normal so nothing to do here
             }
             catch (Exception ex)
             {

@@ -22,9 +22,10 @@ namespace PalMon
         public int LogPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
         public int DBWriteInterval { get; set; }
+        public bool AllProcesses { get; set; }
         private static PalMonOptions instance;
         private const int MinPollInterval = 1; // In seconds.
-        public ICollection<ProcessData> Processes { get; set; }
+        public IDictionary<string, ProcessData> Processes { get; set; }
 
         public ICollection<LogFolderInfo> LogFolders { get; set; }
 

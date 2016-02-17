@@ -61,6 +61,9 @@ namespace PaletteInsight
             [YamlMember(Alias = "DBWriteInterval")]
             public int DBWriteInterval { get; set; }
 
+            [YamlMember(Alias = "AllProcesses")]
+            public bool AllProcesses { get; set; } = false;
+
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }
 
