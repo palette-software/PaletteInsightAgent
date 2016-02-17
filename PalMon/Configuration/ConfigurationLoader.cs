@@ -42,15 +42,17 @@ namespace PaletteInsight
                 // Load DBWriterInterval
                 options.DBWriteInterval = config.DBWriteInterval;
 
+                options.AllProcesses = config.AllProcesses;
+
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
 
 
                 // Load thread monitoring configuration
-                options.Processes = new System.Collections.Generic.List<ProcessData>();
+                options.Processes = new System.Collections.Generic.Dictionary<string, ProcessData>();
                 foreach (var process in LoadProcessData())
                 {
-                    options.Processes.Add(process);
+                    options.Processes.Add(process.Name, process);
                 }
 
                 // Add the log folders based on the Tableau Data path from the registry
