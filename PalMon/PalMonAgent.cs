@@ -292,7 +292,7 @@ namespace PalMon
             tryStartIndividualPoll(ThreadInfoAgent.InProgressLock, PollWaitTimeout, () =>
             {
                 Log.Info("Polling threadinfo");
-                threadInfoAgent.poll(options.Processes);
+                threadInfoAgent.poll(options.Processes, options.AllProcesses);
             });
         }
 
