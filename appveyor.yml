@@ -37,7 +37,7 @@ test_script:
     - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
     - createdb workgroup
     # Setup target database
-    - createdb "PaletteInsightAgent"
+    - createdb palette
     - psql -a -c "create user palette with password 'password';"
     - psql -a -c "grant all on database palette to palette;"
     # Setup fake Tableau database
