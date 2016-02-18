@@ -2,21 +2,21 @@
 		   BlackBoxRecorder Developer Notes
 ----------------------------------------------
 
-* Building using the "Release" configuration will also build the installers.  The primary generated installer of interest is the "InstallPalMon.exe" file which is built in the PalMonServiceInstallerBootstrapper project.  This deploys the main application and also bundles in Postgres and manages dependencies.
+* Building using the "Release" configuration will also build the installers.  The primary generated installer of interest is the "InstallPaletteInsightAgent.exe" file which is built in the PaletteInsightAgentServiceInstallerBootstrapper project.  This deploys the main application and also bundles in Postgres and manages dependencies.
 * The application can be directly executed in console mode by selecting "Start" in Visual Studio.  This is extremely handy for debugging or testing changes.
 * Application logs are stored in the Logs\ folder alongside the executing assembly.
-* The required .NET (v4.5) and VC 2013 C++ runtimes are automatically installed by the installer if not already present.  The only external dependency required to install the application is Windows Management Framework 3.0.  Attempts to install PalMon without WMF3 will issue a warning.
+* The required .NET (v4.5) and VC 2013 C++ runtimes are automatically installed by the installer if not already present.  The only external dependency required to install the application is Windows Management Framework 3.0.  Attempts to install PaletteInsightAgent without WMF3 will issue a warning.
 
 ----------------------------------------------
 			Project Descriptions
 ----------------------------------------------
 
 * DataTableWriter - Library that handles writing DataTable objects.
-* PalMon - Core PalMon performance monitoring library.
-* PalMonService - A thin service wrapper around PalMon.  Uses TopShelf as a service harness.
-* PalMonServiceInstaller - Generates an MSI installer for PalMonService.
-* PalMonServiceInstallerBootstrapper - Generates the main EXE installer that bundles PalMonService along with Postgres and the PalMonServiceInstallerDBInitializer.
-* PalMonServiceInstallerDBInitializer - Generates an MSI installer that uses a powershell script to initialize & configure Postgres.  Required to support the Postgres silent installation.
+* PaletteInsightAgent - Core PaletteInsightAgent performance monitoring library.
+* PaletteInsightAgentService - A thin service wrapper around PaletteInsightAgent.  Uses TopShelf as a service harness.
+* PaletteInsightAgentServiceInstaller - Generates an MSI installer for PaletteInsightAgentService.
+* PaletteInsightAgentServiceInstallerBootstrapper - Generates the main EXE installer that bundles PaletteInsightAgentService along with Postgres and the PaletteInsightAgentServiceInstallerDBInitializer.
+* PaletteInsightAgentServiceInstallerDBInitializer - Generates an MSI installer that uses a powershell script to initialize & configure Postgres.  Required to support the Postgres silent installation.
 
 ----------------------------------------------
 	     Manual Service Installation
@@ -28,11 +28,11 @@ It is better to just use the generated installer to deploy the service, but in c
 	1. Build solution
 	2. Open a Command Prompt
 	3. Navigate to the service project's build output directory
-	4. Run "PalMon.exe install" to install as a Windows service
-	5. Open Services.msc and start PalMon service
+	4. Run "PaletteInsightAgent.exe install" to install as a Windows service
+	5. Open Services.msc and start PaletteInsightAgent service
 
 * To Manually Uninstall Service:
 
 	1. Open Command Prompt
 	2. Navigate to the service project's build output directory
-	3. Run "PalMon.exe uninstall"
+	3. Run "PaletteInsightAgent.exe uninstall"

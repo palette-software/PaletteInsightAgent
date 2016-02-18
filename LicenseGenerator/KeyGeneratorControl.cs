@@ -96,7 +96,7 @@ namespace LicenseGenerator
                 .Select((b) => "0x" + b.ToString("X2"))
                 .Join(", ");
 
-            var csharpOut = @"namespace PalMon { public class LicensePublicKey {
+            var csharpOut = @"namespace PaletteInsightAgent { public class LicensePublicKey {
                 public static byte[] PUBLIC_KEY = new byte[] { " + keyData + @" }; } } ";
 
             File.WriteAllText(

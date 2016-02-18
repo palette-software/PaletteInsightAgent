@@ -1,20 +1,20 @@
-# PalMon #
+# PaletteInsightAgent #
 
-## What is PalMon?
+## What is PaletteInsightAgent?
 
-PalMon is a performance monitoring agent that periodically samples target hosts for a set of Perfmon and MBean counters and writes out the results to a database in a Tableau-friendly format.  This information can then be used to monitor & analyze performance of a Tableau Server installation, in order to detect potential issues or assess scalabiliy & sizing.
+PaletteInsightAgent is a performance monitoring agent that periodically samples target hosts for a set of Perfmon and MBean counters and writes out the results to a database in a Tableau-friendly format.  This information can then be used to monitor & analyze performance of a Tableau Server installation, in order to detect potential issues or assess scalabiliy & sizing.
 
-PalMon can be run as both a console app and a Windows service.
+PaletteInsightAgent can be run as both a console app and a Windows service.
 
-## How do I set up PalMon?
+## How do I set up PaletteInsightAgent?
 
-PalMon is deployed via a custom installer, which manages dependencies and also bundles Postgres for ease of setup for new users.  To get up and running, follow the instructions in the [installation guide](https://github.com/palette-software/BlackBoxRecorder/blob/master/PalMonService/Documentation/UserGuide.pdf).
+PaletteInsightAgent is deployed via a custom installer, which manages dependencies and also bundles Postgres for ease of setup for new users.  To get up and running, follow the instructions in the [installation guide](https://github.com/palette-software/BlackBoxRecorder/blob/master/PaletteInsightAgentService/Documentation/UserGuide.pdf).
 
-## How do I analyze results from PalMon?
+## How do I analyze results from PaletteInsightAgent?
 
-The best way is to explore your results in Tableau!  A [sample workbook](https://github.com/palette-software/BlackBoxRecorder/blob/master/Sample%20Workbooks/PalMon%20Workbook.twb) has been created with some example dashboards & views to get you started.
+The best way is to explore your results in Tableau!  A [sample workbook](https://github.com/palette-software/BlackBoxRecorder/blob/master/Sample%20Workbooks/PaletteInsightAgent%20Workbook.twb) has been created with some example dashboards & views to get you started.
 
-## What do I need to build PalMon from source?
+## What do I need to build PaletteInsightAgent from source?
 
 The current development requirements are:
 
@@ -48,10 +48,10 @@ The current development requirements are:
 
 See [Developer Notes.txt](https://github.com/palette-software/BlackBoxRecorder/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
 
-## Is PalMon supported?
+## Is PaletteInsightAgent supported?
 
-PalMon is made available AS-IS with no support. This is intended to be a self service tool and includes a user guide.  Any bugs discovered should be filed in the [PalMon Git issue tracker](https://github.com/palette-software/BlackBoxRecorder/issues).
+PaletteInsightAgent is made available AS-IS with no support. This is intended to be a self service tool and includes a user guide.  Any bugs discovered should be filed in the [PaletteInsightAgent Git issue tracker](https://github.com/palette-software/BlackBoxRecorder/issues).
 
-## How can I contribute to PalMon?
+## How can I contribute to PaletteInsightAgent?
 
 Code contributions & improvements by the community are welcomed & encouraged!  See [the LICENSE file](https://github.com/palette-software/BlackBoxRecorder/blob/master/LICENSE) for current open-source licensing & use information.
