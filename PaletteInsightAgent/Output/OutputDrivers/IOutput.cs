@@ -22,7 +22,7 @@ namespace PaletteInsightAgent.Output
         /// <param name="parts"></param>
         public static OutputWriteResult Combine(params OutputWriteResult[] parts)
         {
-            return parts.Aggregate(new OutpuWriteResult(), (memo,part)=>{
+            return parts.Aggregate(new OutputWriteResult(), (memo,part)=>{
                 memo.failedFiles.AddRange(part.failedFiles);
                 memo.successfullyWrittenFiles.AddRange(part.successfullyWrittenFiles);
                 return memo;
