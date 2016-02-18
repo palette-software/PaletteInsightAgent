@@ -189,8 +189,11 @@ namespace PalMon.LogPoller
         /// <returns></returns>
         private string HashOfString(string str)
         {
+            // if the given string is null, get the hash of an empty string
+            var s = (str == null ? "" : str);
+
             // byte array representation of that string
-            var encodedPassword = defaultStringEncoding.GetBytes(str);
+            var encodedPassword = defaultStringEncoding.GetBytes(s);
 
             // need MD5 to calculate the hash
             var hash = signatureHasher.ComputeHash(encodedPassword);
