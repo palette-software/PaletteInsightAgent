@@ -7,9 +7,9 @@
 /test/**/bin/**
 /test/**/obj/**
 
-PalMonServiceInstallerBootstrapper/Installers/PalMon.msi
-PalMonServiceInstallerBootstrapper/Installers/PalMonServiceInstallerDBInitializer.msi
-PalMon.v12.suo
+PaletteInsightAgentServiceInstallerBootstrapper/Installers/PaletteInsightAgent.msi
+PaletteInsightAgentServiceInstallerBootstrapper/Installers/PaletteInsightAgentServiceInstallerDBInitializer.msi
+PaletteInsightAgent.v12.suo
 
 *.csproj.FileListAbsolute.txt
 
