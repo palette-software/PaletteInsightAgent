@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?define ApplicationName = "Palette Insight Agent"?>
+<?define Manufacturer = "Palette Software"?>
+<?define HelpLink = "http://www.palette-software.com"?>
+<?define UrlInfoAbout = "http://www.palette-software.com"?>
+<?define ProductUpgradeCode = "8c39f7f6-ad31-4efd-96ae-1f6f1a5e4f3a"?>
+<?define IconFile = "..\PaletteInsightAgentService\Resources\palette_symbol.ico"?>
+<?define BinFolder = "..\PaletteInsightAgentService\bin\Release"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+  <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Manufacturer="$(var.Manufacturer)" />
+    <Media Id="1" Cabinet="PaletteInsightAgent.cab" EmbedCab="yes" />
+    <UIRef Id="CustomInstallDir" />
+    <Icon Id="ProductIcon" SourceFile="$(var.IconFile)" />
+    
+    <!-- Properties -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Property Id="ARPHELPLINK" Value="$(var.HelpLink)" />
+    <Property Id="ARPURLINFOABOUT" Value="$(var.UrlInfoAbout)" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+    <Property Id="INSTALLSHORTCUTS" Value="1" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
+    <Property Id="WixShellExecTarget" Value="[#UserGuide]" />
+    
+    <!-- Dependency management -->
+    <PropertyRef Id="NETFRAMEWORK45" />
+    <Condition Message="This application requires .NET Framework 4.5 or later. Please install the .NET Framework and then run this installer again.">
+      <![CDATA[Installed OR NETFRAMEWORK45]]>
+    </Condition>
+
+    <!-- Upgrade parameters -->
+    <Upgrade Id="$(var.ProductUpgradeCode)">
+      <UpgradeVersion Minimum="$(var.ProductVersion)" OnlyDetect="yes" Property="NEWERVERSIONDETECTED"/>
+      <UpgradeVersion Minimum="0.0.0" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" IncludeMaximum="no" Property="OLDERVERSIONBEINGUPGRADED"/>
+    </Upgrade>
+    <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
+
+    <!-- Main directory structure -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="$(var.ApplicationName)">
+          <Directory Id="CONFIGFOLDER" Name="Config" />
+          <Directory Id="RESOURCESFOLDER" Name="Resources" />
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="$(var.ApplicationName)" />
+      </Directory>
+    </Directory>
+
+    <!-- Main Application Folder -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="Executable" Guid="9fd4a8c4-6da6-49a8-91ab-e40db98efcde">
+        <!-- Main EXE file -->
+        <File Id="PaletteInsightAgentExe" Name="PaletteInsightAgent.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe" />
+        <File Id="AppConfig" Name="PaletteInsightAgent.exe.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe.config" />
+      </Component>
+      <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
+        <!-- Required Libraries -->
+        <File Id="PaletteInsightAgentLibDLL" Name="PaletteInsightAgentLib.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgentLib.dll" />
+        <File Id="CsvHelperDLL" Name="CsvHelper.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\CsvHelper.dll" />
+        <File Id="NLogDLL" Name="NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.dll" />
+        <File Id="NLogXML" Name="NLog.xml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.xml" />
+        <File Id="PaletteAlertsCoreDLL" Name="PaletteAlertsCore.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteAlertsCore.dll" />
+        <File Id="PaletteAlertsNLogDLL" Name="PaletteAlertsNLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteAlertsNLog.dll" />
+        <File Id="NpgsqlDLL" Name="Npgsql.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Npgsql.dll" />
+        <File Id="TopshelfDLL" Name="Topshelf.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.dll" />
+        <File Id="TopshelfNLogDLL" Name="Topshelf.NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.NLog.dll" />
+        <File Id="NewtonsoftJSONDLL" Name="Newtonsoft.Json.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Newtonsoft.Json.dll" />
+        <File Id="SodiumNetDLL" Name="libsodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium.dll" />
+        <File Id="SodiumNet64DLL" Name="libsodium-64.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium-64.dll" />
+        <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
+        <File Id="LicensingDLL" Name="Licensing.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Licensing.dll" />
+        <File Id="YamlDotNetDLL" Name="YamlDotNet.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\YamlDotNet.dll" />
+      </Component>
+      <Component Id="Utilities" Guid="93dd2c94-e909-4b30-a2ed-80e78d53ed5b">
+        <!-- Helper Utilities -->
+        <File Id="StartPaletteInsightAgentScript" Name="StartPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StartPaletteInsightAgentService.bat" />
+        <File Id="StopPaletteInsightAgentScript" Name="StopPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StopPaletteInsightAgentService.bat" />
+      </Component>
+      <Component Id="Documentation" Guid="c50f5944-a820-45e9-b5aa-edbc6330503a">
+        <!-- User Documentation -->
+        <File Id="UserGuide" Name="PaletteInsightAgent User Guide.pdf" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Documentation\UserGuide.pdf" />
+      </Component>
+      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03" Permanent="yes">
+        <!-- NLog configuration -->
+        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config"/>
+      </Component>
+    </DirectoryRef>
+
+    <!-- Config Files -->
+    <DirectoryRef Id="CONFIGFOLDER">
+      <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes">
+        <File Id="CountersConfig" Name="Counters.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.yml" />
+        <File Id="PaletteInsightAgentConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />
+        <File Id="LogFolderDefaultsYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" />
+        <File Id="ProcessesDefaultsYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" />
+      </Component>
+    </DirectoryRef>
+    
+    <!-- Start Menu Shortcuts -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ProgramFilesShortcut" Guid="*">
+        <Condition>(INSTALLSHORTCUTS = 1)</Condition>
+        <Shortcut Id="StartApplicationStartMenuShortcut"
+                  Name="Start $(var.ApplicationName)"
+                  Description="Start Palette Insight Agent"
+                  Target="[#StartPaletteInsightAgentScript]"
+                  Icon="ProductIcon"
+                  WorkingDirectory="INSTALLFOLDER"/>
+        <Shortcut Id="StopApplicationStartMenuShortcut"
+                  Name="Stop $(var.ApplicationName)"
+                  Description="Stop Palette Insight Agent"
+                  Target="[#StopPaletteInsightAgentScript]"
+                  Icon="ProductIcon"
+                  WorkingDirectory="INSTALLFOLDER"/>
+        <Shortcut Id="UserGuideStartMenuShortcut"
+                  Name="How to use Palette Insight Agent"
+                  Description="Documentation on how to use Palette Insight Agent."
+                  Target="[#UserGuide]"
+                  WorkingDirectory="INSTALLFOLDER"/>
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\$(var.Manufacturer)\$(var.ApplicationName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <!-- Feature Definitions -->
+    <Feature Id='Complete' Title='$(var.ApplicationName)' Description='The complete package.' Display='expand' Level='1' ConfigurableDirectory='TARGETDIR'>
+      <Feature Id='MainProgram' Title="$(var.ApplicationName)" Description='$(var.ApplicationName) main program.' Level='1'>
+        <ComponentRef Id='Executable' />
+        <ComponentRef Id='Libraries' />
+        <ComponentRef Id='LogConfig' />
+        <ComponentRef Id='ConfigFiles' />
+        <ComponentRef Id='Utilities' />
+        <ComponentRef Id='Documentation' />
+        <ComponentRef Id='ProgramFilesShortcut' />
+      </Feature>
+    </Feature>
+
+    <!-- Custom Actions-->
+    <!-- Install/uninstall as a Windows service -->
+    <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
+    <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
+    <!-- Prompt user to launch user manual after installing -->
+    <CustomAction Id="LaunchUserGuide"
+                  BinaryKey="WixCA"
+                  DllEntry="WixShellExec"
+                  Impersonate="yes" />
+
+    <!-- Install Sequence -->
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After="InstallValidate"/>
+      <Custom Action="RunTopShelfServiceInstall" After="InstallFiles">NOT Installed</Custom>
+      <Custom Action="RunTopShelfServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+    </InstallExecuteSequence>
+  </Product>
+</Wix>
