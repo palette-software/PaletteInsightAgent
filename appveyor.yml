@@ -1,0 +1,68 @@
+version: 1.7.{build}
+pull_requests:
+  do_not_increment_build_number: true
+branches:
+  only:
+  - master
+  - production
+os: Visual Studio 2015
+configuration: Release
+platform: Any CPU
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+build_script:
+- cmd: >-
+    nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
+
+    nuget.exe restore
+
+    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+    move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+test_script:
+- cmd: >-
+    C:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "C:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
+
+
+    echo "Try a Palette Insight install and uninstall"
+
+    cd PaletteInsightAgentServiceInstaller\bin\Release\
+
+    set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+
+    msiexec.exe /qn /i %PALIN_MSI%
+
+    echo "Installed Palette Insight successfully"
+
+    msiexec.exe /qn /x %PALIN_MSI%
+
+    echo "Uninstalled Palette Insight successfully"
+artifacts:
+- path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
+  name: Github
+deploy:
+- provider: GitHub
+  tag: v$(appveyor_build_version)
+  release: Palette Insight v$(appveyor_build_version)
+  auth_token:
+    secure: Y8zvK91qR+RxmrmqdSPNYGAoLJFytPzX6cVSnHv4LY358RJfTrpzwiWuDumqYNps
+  artifact: '*.msi'
+  draft: true
+  prerelease: true
+  on:
+    branch: production
+notifications:
+- provider: Slack
+  <HOOK>
+  auth_token:
+    <TOKEN>
+  channel: dev-robots
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: true

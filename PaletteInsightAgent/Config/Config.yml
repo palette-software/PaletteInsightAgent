@@ -1,0 +1,26 @@
+﻿PollInterval: 30
+ThreadInfoPollInterval: 15
+LogPollInterval: 300
+DBWriteInterval: 60
+AllProcesses: false
+
+Database: 
+  Host: localhost
+  Port: 5432
+  Database: palette
+  User: palette
+  Password: password
+  CommandTimeout: 600
+Logs: 
+  - 
+    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'
+    Filter: '*.txt'
+  - 
+    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
+    Filter: 'tabprotosrv*.txt'
+TableauRepo: 
+  Host: localhost
+  Port: 8060
+  Database: workgroup
+  User: readonly
+  Password: onlyread
