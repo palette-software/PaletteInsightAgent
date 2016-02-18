@@ -38,8 +38,8 @@ test_script:
     - createdb workgroup
     # Setup target database
     - createdb "PalMon"
-    - psql -a -c "create user palmon with password 'password';"
-    - psql -a -c "grant all on database \"PalMon\" to palmon;"
+    - psql -a -c "create user palette with password 'password';"
+    - psql -a -c "grant all on database palette to palette;"
     # Setup fake Tableau database
     - psql -a -c "create user readonly with password 'onlyread';"
     - psql -a -c "grant all on database workgroup to readonly;"
