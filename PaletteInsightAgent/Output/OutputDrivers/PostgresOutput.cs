@@ -56,6 +56,82 @@ namespace PaletteInsightAgent.Output
 
         #region datatable bulk ops
 
+        private OutputWriteResult DoBulkCopyWrapper(IList<string> fileNames)
+        {
+            // first try to copy all files in a batch
+            try
+            {
+                return DoBulkCopy(fileNames);
+            }
+            catch(Exception e)
+            {
+                // check if the exception is one that makes us unable to continue
+                if (PostgresExceptionChecker.ExceptionIsFatalForBatch(e))
+                {
+                    // We have to add all files to the failed file list.
+                    // We make a copy of the list here just to be on the safe side
+                    // and the original list gets modified along the way
+                    return new OutputWriteResult { failedFiles = new List<string>(fileNames) };
+                }
+
+                // check if we have to re-try the whole batch later
+                if (PostgresExceptionChecker.ExceptionIsTemporaryForBatch(e))
+                {
+                    return new OutputWriteResult();
+                }
+
+
+                // we should be able to retry the files if the exception isnt fatal
+                // for the whole batch
+                var output = new OutputWriteResult();
+                // try each file
+                foreach(var fileName in fileNames)
+                {
+                    // Add the results of trying to upload a single file
+                    output = OutputWriteResult.Combine(output, DoSingleFileCopy(fileName));
+                }
+
+                return output;
+
+            }
+
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns>true if the file was successfully copied to the database, or false if it failed</returns>
+        private OutputWriteResult DoSingleFileCopy(string fileName)
+        {
+            var fileNameList = new List<string> { fileName };
+            try
+            {
+                return DoBulkCopy(fileNameList);
+            }
+            catch (Exception e)
+            {
+                // if the exception is fatal, add the file to the failed list
+                if (PostgresExceptionChecker.ExceptionIsFatalForFile(e))
+                {
+                    Log.Error(e, "Fatal exception encountered while trying to send '{0}' to the database", fileName);
+                    return new OutputWriteResult{failedFiles = fileNameList };
+                }
+
+                // if the exception is temporary, do not add to any lists, so we may
+                // re-try it later
+                if (PostgresExceptionChecker.ExceptionIsTemporaryForFile(e))
+                {
+                    return new OutputWriteResult();
+                }
+
+                Log.Error(e, "Unable to determine if exception is fatal for the file '{0}' or not", fileName);
+                // dont do anything here
+                return new OutputWriteResult { };
+            }
+        }
+
         /// <summary>
         /// Helper to do a bulk copy
         /// </summary>
@@ -305,5 +381,62 @@ namespace PaletteInsightAgent.Output
             // GC.SuppressFinalize(this);
         }
         #endregion
+    }
+
+    class PostgresExceptionChecker
+    {
+
+        /// <summary>
+        /// Checks if an exception stops a complete batch
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static bool ExceptionIsFatalForBatch(Exception e)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if an exception can hinder the whole batch but can maybe re-uploaded later
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static bool ExceptionIsTemporaryForBatch(Exception e)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Checks if the exception can be resolved by re-trying later
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static bool ExceptionIsTemporaryForFile(Exception e)
+        {
+            // TODO: implement me!
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if the exception cannot be resolved by re-trying later.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static bool ExceptionIsFatalForFile(Exception e)
+        {
+            if (e is NpgsqlException && e.Message.Contains("invalid input syntax"))
+            {
+                // except if the NpgSql exception message contains "invalid input syntax",
+                // we can be pretty sure that this CSV file is not written in the way, we
+                // could handle it. So there is no point in re-trying that file.
+                // Unfortunately I didn't find any way to figure out the exact file
+                // that caused the error, so I add all files of this round.
+                return true;
+            }
+            // TODO: implement the rest
+            return false;
+        }
+
+
     }
 }

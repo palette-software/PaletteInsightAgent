@@ -15,6 +15,23 @@ namespace PaletteInsightAgent.Output
     {
         public IList<string> successfullyWrittenFiles = new List<string>();
         public IList<string> failedFiles = new List<string>();
+
+        /// <summary>
+        /// Combines the contents of two output results
+        /// </summary>
+        /// <param name="parts"></param>
+        public static OutputWriteResult Combine(params OutputWriteResult[] parts)
+        {
+            var o = new OutputWriteResult();
+
+            foreach(var part in parts)
+            {
+                o.failedFiles.AddRange(part.failedFiles);
+                o.successfullyWrittenFiles.AddRange(part.successfullyWrittenFiles);
+            }
+
+            return o;
+        }
     }
 
     /// <summary>
