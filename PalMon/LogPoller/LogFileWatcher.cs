@@ -163,11 +163,18 @@ namespace PalMon.LogPoller
         /// <returns>the file signature</returns>
         string getFileSignature(string fileName, StreamReader sr)
         {
-            // return null if we cannot read anything
+            // return null if we cannot read anything as a C string
             if (sr.Peek() == 0) return null;
 
+            // return on end of stream
+            if (sr.EndOfStream) return null;
+
+            // if we read null, we return null
+            var line = sr.ReadLine();
+            if (line == null) return null;
+
             // The signature should consist of the WATCHED_FOLDER|WATCH_MASK|HASH_CODE_OF_FIRST_LINE
-            return String.Format("{0}|{1}|{2}", watchedFolderPath, filter, HashOfString(sr.ReadLine()));
+            return String.Format("{0}|{1}|{2}", watchedFolderPath, filter, HashOfString(line));
         }
 
         /// <summary>
