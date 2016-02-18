@@ -218,22 +218,11 @@ namespace PaletteInsightAgent.Output
                     Log.Error(e, "Error during writing to the database: {0}", e);
                     // if anything went wrong, we should roll back the transaction
                     if (copyTransaction != null) copyTransaction.Rollback();
-                    // in case of errors we have inserted 0 rows thanks to the transaction
-                    // but since we have errors in the insertion (which may come from
-                    // connectivity issues), we dont add any files to either
-                    // the successful or the error list, so the files
-                    // will be re-tried on next invocation
-
-                    if (e is NpgsqlException && e.Message.Contains("invalid input syntax"))
-                    {
-                        // except if the NpgSql exception message contains "invalid input syntax",
-                        // we can be pretty sure that this CSV file is not written in the way, we
-                        // could handle it. So there is no point in re-trying that file.
-                        // Unfortunately I didn't find any way to figure out the exact file
-                        // that caused the error, so I add all files of this round.
-                        outputResult.failedFiles.AddRange(fileNames);
-                    }
-                    return 0;
+                    // Re-throw the exception here, so DoBulkCopyWrapper() can pick up the error
+                    // we encountered.
+                    // Since LoggingHelpers contains no try-catch blocks, the exception should fall
+                    // right through.
+                    throw;
                 }
             });
             // return the list of processed files, which should for now be either empty or
@@ -383,6 +372,9 @@ namespace PaletteInsightAgent.Output
         #endregion
     }
 
+    /// <summary>
+    /// A class wrapping the exception handling policy of the Postgres Output
+    /// </summary>
     class PostgresExceptionChecker
     {
 
