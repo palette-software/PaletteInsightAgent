@@ -83,23 +83,17 @@ namespace PaletteInsightAgent.Output
 
                 // we should be able to retry the files if the exception isnt fatal
                 // for the whole batch
-                var output = new OutputWriteResult();
-                // try each file
-                foreach(var fileName in fileNames)
-                {
-                    // Add the results of trying to upload a single file
-                    output = OutputWriteResult.Combine(output, DoSingleFileCopy(fileName));
-                }
-
-                return output;
-
+                return fileNames.Aggregate(new OutputWriteResult(), (memo,fileName)=>{
+                     // Add the results of trying to upload a single file
+                    return OutputWriteResult.Combine(memo, DoSingleFileCopy(fileName));
+                });
             }
 
         }
 
 
         /// <summary>
-        /// 
+        /// Do a single file copy, but this time catch all errors (this method calls DoBulkCopy()
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>true if the file was successfully copied to the database, or false if it failed</returns>
@@ -116,7 +110,7 @@ namespace PaletteInsightAgent.Output
                 if (PostgresExceptionChecker.ExceptionIsFatalForFile(e))
                 {
                     Log.Error(e, "Fatal exception encountered while trying to send '{0}' to the database", fileName);
-                    return new OutputWriteResult{failedFiles = fileNameList };
+                    return new OutputWriteResult{ failedFiles = fileNameList };
                 }
 
                 // if the exception is temporary, do not add to any lists, so we may
@@ -143,7 +137,6 @@ namespace PaletteInsightAgent.Output
                 // There are no files to process.
                 return new OutputWriteResult();
             }
-
 
             ReconnectoToDbIfNeeded();
             var tableName = DBWriter.GetTableName(fileNames[0]);
@@ -385,7 +378,7 @@ namespace PaletteInsightAgent.Output
         /// <returns></returns>
         public static bool ExceptionIsFatalForBatch(Exception e)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -405,8 +398,7 @@ namespace PaletteInsightAgent.Output
         /// <returns></returns>
         public static bool ExceptionIsTemporaryForFile(Exception e)
         {
-            // TODO: implement me!
-            return false;
+            throw new NotImplementedException();
         }
 
         /// <summary>
