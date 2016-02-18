@@ -7,8 +7,8 @@ AllProcesses: false
 Database: 
   Host: localhost
   Port: 5432
-  Database: PaletteInsightAgent
-  User: paletteinsightagent
+  Database: palette
+  User: palette
   Password: password
   CommandTimeout: 600
 Logs: 
