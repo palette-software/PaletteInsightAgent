@@ -22,14 +22,14 @@ build_script:
 
     nuget.exe restore
 
-    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PalMon.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
-    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PalMon.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
-    move PalMonServiceInstaller\bin\Release\PalMon.msi PalMonServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+    move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 test_script:
     # Runt TypeMock unit tests
-    - C:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "C:\projects\blackboxrecorder\test\PalMon.UnitTests\bin\Release\PalMon.UnitTests.dll"
+    - C:\projects\paletteinsightagent\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "C:\projects\paletteinsightagent\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
 
     # Setup Postgres 9.3 on the worker
     - SET PGUSER=postgres
@@ -37,7 +37,7 @@ test_script:
     - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
     - createdb workgroup
     # Setup target database
-    - createdb "PalMon"
+    - createdb "PaletteInsightAgent"
     - psql -a -c "create user palette with password 'password';"
     - psql -a -c "grant all on database palette to palette;"
     # Setup fake Tableau database
@@ -50,7 +50,7 @@ test_script:
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
-    - cd PalMonServiceInstaller\bin\Release\
+    - cd PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     - msiexec.exe /qn /i %PALIN_MSI%
     # Set the Postgres port in Config.yml
@@ -63,27 +63,27 @@ test_script:
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content $env:CONFIG_YML_PATH;
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\vizqlserver\\Logs", $watched_folder_1 } | Set-Content $env:CONFIG_YML_PATH;
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\vizqlserver", $watched_folder_2 } | Set-Content $env:CONFIG_YML_PATH;
-    - copy "c:\projects\blackboxrecorder\PalMon\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
+    - copy "c:\projects\paletteinsightagent\PaletteInsightAgent\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
 
     # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
-    - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
-#    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip')
+    - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'C:\projects\paletteinsightagent\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
+#    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0/windows_amd64.zip', 'C:\projects\paletteinsightagent\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
     - echo "Downloaded insight-tester"
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release\insight-tester.zip', 'C:\projects\blackboxrecorder\PalMonServiceInstaller\bin\Release');
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('C:\projects\paletteinsightagent\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip', 'C:\projects\paletteinsightagent\PaletteInsightAgentServiceInstaller\bin\Release');
     - echo "Unzipped insight tester"
     - windows_amd64\agentrunner.exe start
-    - echo "Started PalMon service"
+    - echo "Started PaletteInsightAgent service"
     - sleep 15
     - echo "Sleeping for 15 seconds"
     - windows_amd64\agentrunner.exe stop
-    - echo "Contents of the PalMon log"
-    - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PalMon.nlog.txt"
-    - echo "End of PalMon log"
+    - echo "Contents of the PaletteInsightAgent log"
+    - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
+    - echo "End of PaletteInsightAgent log"
     - echo "Installed Palette Insight successfully"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
 artifacts:
-- path: PalMonServiceInstaller\bin\Release\*.msi
+- path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
   name: Github
 deploy:
 - provider: GitHub
