@@ -177,7 +177,7 @@ namespace PaletteInsight
             private static List<LogFolder> LoadDefaultLogFolders()
             {
                 // load the defaults from the application
-                // since PaletteInsightAgentAgent always sets the current directory to its location,
+                // since PaletteInsightAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(LOGFOLDER_DEFAULTS_FILE))
                 {
@@ -313,7 +313,7 @@ namespace PaletteInsight
             /// <returns></returns>
             private static List<ProcessData> LoadProcessData()
             {
-                // since PaletteInsightAgentAgent always sets the current directory to its location,
+                // since PaletteInsightAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {

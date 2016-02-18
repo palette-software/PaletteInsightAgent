@@ -24,7 +24,7 @@ namespace PaletteInsightAgent
     /// <summary>
     /// A timer-based performance monitoring agent.  Loads a set of counters from a config file and polls them periodically, passing the results to a writer object.
     /// </summary>
-    public class PaletteInsightAgentAgent : IDisposable
+    public class PaletteInsightAgent : IDisposable
     {
         private Timer timer;
         private Timer logPollTimer;
@@ -45,7 +45,7 @@ namespace PaletteInsightAgent
         private const bool USE_THREADINFO = true;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
-        public PaletteInsightAgentAgent(bool loadOptionsFromConfig = true)
+        public PaletteInsightAgent(bool loadOptionsFromConfig = true)
         {
             // Set the working directory
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -123,7 +123,7 @@ namespace PaletteInsightAgent
             }
         }
 
-        ~PaletteInsightAgentAgent()
+        ~PaletteInsightAgent()
         {
             Dispose(false);
         }

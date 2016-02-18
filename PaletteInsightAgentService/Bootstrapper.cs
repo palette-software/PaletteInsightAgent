@@ -6,13 +6,13 @@ using NLog;
 namespace PaletteInsightAgentService
 {
     /// <summary>
-    /// Serves as a thin bootstrapper for the PaletteInsightAgentAgent class and adapts underlying Stop/Start methods to the service context.
+    /// Serves as a thin bootstrapper for the PaletteInsightAgent class and adapts underlying Stop/Start methods to the service context.
     /// </summary>
     public class PaletteInsightAgentServiceBootstrapper : ServiceControl, IDisposable
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private PaletteInsightAgentAgent agent;
+        private PaletteInsightAgent.PaletteInsightAgent agent;
         private bool disposed;
 
         ~PaletteInsightAgentServiceBootstrapper()
@@ -23,7 +23,7 @@ namespace PaletteInsightAgentService
         #region Public Methods
 
         /// <summary>
-        /// Creates an instance of the PaletteInsightAgentAgent and starts it.
+        /// Creates an instance of the PaletteInsightAgent and starts it.
         /// </summary>
         /// <param name="hostControl">Service HostControl object</param>
         /// <returns>Indicator that service succesfully started</returns>
@@ -35,7 +35,7 @@ namespace PaletteInsightAgentService
             // Initialize and start service.
             try
             {
-                agent = new PaletteInsightAgentAgent();
+                agent = new PaletteInsightAgent.PaletteInsightAgent();
                 // move starting the agent here, so exceptions get properly logged not only on construction,
                 // but on start  also
                 agent.Start();
@@ -49,7 +49,7 @@ namespace PaletteInsightAgentService
         }
 
         /// <summary>
-        /// Stops the PaletteInsightAgentAgent service.
+        /// Stops the PaletteInsightAgent service.
         /// </summary>
         /// <param name="hostControl">Service HostControl object</param>
         /// <returns>Indicator that service succesfully stopped</returns>
