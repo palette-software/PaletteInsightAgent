@@ -172,7 +172,7 @@
     <Compile Include="Output\OutputDrivers\IOutput.cs" />
     <Compile Include="Helpers\LoggingHelpers.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
-    <Compile Include="PaletteInsightAgentAgent.cs" />
+    <Compile Include="PaletteInsightAgent.cs" />
     <Compile Include="PaletteInsightAgentOptions.cs" />
     <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />

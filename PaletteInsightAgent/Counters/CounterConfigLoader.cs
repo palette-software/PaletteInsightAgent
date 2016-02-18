@@ -17,7 +17,7 @@ namespace PaletteInsightAgent.CounterConfig
         public static ICollection<ICounter> Load(string pathToConfig)
         {
             // load the defaults from the application
-            // since PaletteInsightAgentAgent always sets the current directory to its location,
+            // since PaletteInsightAgent always sets the current directory to its location,
             // we should always be in the correct folder for this to work
             using (var reader = File.OpenText(pathToConfig))
             {
