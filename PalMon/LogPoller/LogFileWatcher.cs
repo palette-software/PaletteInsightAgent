@@ -163,11 +163,18 @@ namespace PalMon.LogPoller
         /// <returns>the file signature</returns>
         string getFileSignature(string fileName, StreamReader sr)
         {
-            // return null if we cannot read anything
+            // return null if we cannot read anything as a C string
             if (sr.Peek() == 0) return null;
 
+            // return on end of stream
+            if (sr.EndOfStream) return null;
+
+            // if we read null, we return null
+            var line = sr.ReadLine();
+            if (line == null) return null;
+
             // The signature should consist of the WATCHED_FOLDER|WATCH_MASK|HASH_CODE_OF_FIRST_LINE
-            return String.Format("{0}|{1}|{2}", watchedFolderPath, filter, HashOfString(sr.ReadLine()));
+            return String.Format("{0}|{1}|{2}", watchedFolderPath, filter, HashOfString(line));
         }
 
         /// <summary>
@@ -189,8 +196,11 @@ namespace PalMon.LogPoller
         /// <returns></returns>
         private string HashOfString(string str)
         {
+            // if the given string is null, get the hash of an empty string
+            var s = (str == null ? "" : str);
+
             // byte array representation of that string
-            var encodedPassword = defaultStringEncoding.GetBytes(str);
+            var encodedPassword = defaultStringEncoding.GetBytes(s);
 
             // need MD5 to calculate the hash
             var hash = signatureHasher.ComputeHash(encodedPassword);
