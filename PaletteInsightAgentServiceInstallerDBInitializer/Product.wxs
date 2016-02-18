@@ -5,9 +5,9 @@
 <?define Manufacturer = "Tableau"?>
 <?define ProductUpgradeCode = "0bb96ca5-a8db-4156-bcd4-276f362ee46c"?>
 <?define PostgresFolder = "C:\Postgres"?>
-<?define PostgresUser = "paletteinsightagent"?>
+<?define PostgresUser = "palette"?>
 <?define PostgresPortNumber = "5432"?>
-<?define DatabaseName = "PaletteInsightAgent"?>
+<?define DatabaseName = "palette"?>
 <?define PostgresServiceName = "PaletteInsightAgent-Postgres"?>
 <?define UserPassword = "password"?>
 <?define MergeFilePath = "Dependencies\Microsoft_VC120_CRT_x86.msm"?>
@@ -16,8 +16,8 @@
   xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension"
   xmlns:powershell="http://schemas.gardiner.net.au/PowerShellWixExtensionSchema">     
 
-	<Product Id="*" Name="$(var.ApplicationName)" Language="1033" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
-		<Package InstallerVersion="405" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Manufacturer="$(var.Manufacturer)" />
+  <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
+    <Package InstallerVersion="405" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Manufacturer="$(var.Manufacturer)" />
 
     <!-- Upgrade parameters -->
     <Upgrade Id="$(var.ProductUpgradeCode)">
@@ -28,9 +28,9 @@
 
     <MediaTemplate EmbedCab="yes" />
     
-		<Feature Id="ProductFeature" Title="PaletteInsightAgentServiceInstallerDBInitializer" Level="1">
-			<ComponentGroupRef Id="ProductComponents" />
-		</Feature>
+    <Feature Id="ProductFeature" Title="PaletteInsightAgentServiceInstallerDBInitializer" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
@@ -68,5 +68,5 @@
     <Property Id="DBNAME" Value="$(var.DatabaseName)" />
     <Property Id="PASSWORD" Value="$(var.UserPassword)" />
 
-	</Product>
+  </Product>
 </Wix>
