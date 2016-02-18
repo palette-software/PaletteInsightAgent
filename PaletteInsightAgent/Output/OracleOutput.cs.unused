@@ -1,0 +1,196 @@
+﻿using DataTableWriter.Connection;
+using Oracle.DataAccess.Client;
+using Oracle.DataAccess.Types;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PaletteInsightAgent.Output
+{
+    public class OracleOutput : IOutput
+    {
+
+
+        private IDbConnectionInfo resultDatabase;
+        private string connectionString;
+
+        private OracleConnection connection;
+
+        public OracleOutput(IDbConnectionInfo connectionInfo)
+        {
+            this.resultDatabase = connectionInfo;
+
+            if (connectionInfo.Port == null)
+            {
+                throw new ArgumentException("Port cannot be null!");
+            }
+
+            connectionString = String.Format("Data Source=(DESCRIPTION="
+                + "(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT={1})))"
+                + "(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={4})));"
+                + "User Id={2};Password={3};",
+                    connectionInfo.Server,
+                    connectionInfo.Port.Value,
+                    connectionInfo.Username,
+                    connectionInfo.Password,
+                    connectionInfo.DatabaseName
+                );
+
+            connection = new OracleConnection(connectionString);
+
+        }
+
+        #region IOutput implementation
+        public void Write(string csvFile, DataTable rows)
+        {
+            DoBulkCopy(rows);
+        }
+
+        #endregion
+
+        #region datatable bluk ops
+
+        /// <summary>
+        /// Helper to do a bulk copy
+        /// </summary>
+        /// <param name="conversionResult"></param>
+        private void DoBulkCopy(DataTable rows)
+        {
+            ReconnectoToDbIfNeeded();
+
+            var statusLine = String.Format("BULK COPY of {0} - {1} rows", rows.TableName, rows.Rows.Count);
+
+
+            LoggingHelpers.TimedLog(statusLine, () =>
+            {
+                using (var copier = new OracleBulkCopy(connection))
+                {
+                    try
+                    {
+                        var fixedTable = FixDatatableForOracle(rows);
+                        // set the table
+                        copier.DestinationTableName = rows.TableName;
+                        copier.WriteToServer(fixedTable);
+                        copier.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Error.WriteLine(String.Format("Exception during bulk copy to oracle:{0}", e.ToString()));
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// Do some necessary datatype conversions for oracle (gyulalaszlo: ORA s**** a**)
+        /// </summary>
+        /// <param name="rows"></param>
+        private static DataTable FixDatatableForOracle(DataTable rows)
+        {
+            // convert any wrong types...
+            var columnCount = rows.Columns.Count;
+            var convertedTable = new DataTable(rows.TableName);
+            var dateTimeConvertedColIndexes = new List<int>();
+
+            // re-add the columns
+            foreach (DataColumn col in rows.Columns)
+            {
+                var colIndex = convertedTable.Columns.Count;
+                var colName = col.ColumnName;
+                var colType = col.DataType;
+
+                // if its a date type
+                if (colType == typeof(System.DateTime))
+                {
+                    colType = typeof(OracleTimeStampTZ);
+                    dateTimeConvertedColIndexes.Add(colIndex);
+                }
+
+                // Re-add the column
+                convertedTable.Columns.Add(new DataColumn
+                {
+                    ColumnName = colName,
+                    DataType = colType
+                });
+            }
+
+
+            // re-add the rows and convert any necessary ones
+            foreach (DataRow row in rows.Rows)
+            {
+                var outRow = convertedTable.NewRow();
+
+                // copy the data over first
+                for (int i = 0; i < columnCount; ++i)
+                {
+                    var val = row[i];
+                    // if we need to convert...
+                    if (dateTimeConvertedColIndexes.Contains(i))
+                    {
+                        outRow[i] = new OracleTimeStampTZ((System.DateTime)val);
+                    }
+                    else
+                    {
+                        outRow[i] = val;
+                    }
+                }
+
+                // add to the output
+                convertedTable.Rows.Add(outRow);
+            }
+
+            return convertedTable;
+        }
+
+        private void ReconnectoToDbIfNeeded()
+        {
+            // connect to the db if needed
+            if (connection.State == System.Data.ConnectionState.Closed)
+            {
+                connection.Open();
+                Console.Out.WriteLine(String.Format("Reconnecting to results database."));
+            }
+        }
+
+        #endregion
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    connection.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~OracleOutput() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
+}
