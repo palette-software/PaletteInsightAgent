@@ -7,7 +7,7 @@ using PaletteInsight.Configuration;
 namespace PaletteInsightAgent
 {
     /// <summary>
-    /// Encapsulates runtime options for PaletteInsightAgentAgent.
+    /// Encapsulates runtime options for PaletteInsightAgent.
     /// </summary>
     public class PaletteInsightAgentOptions
     {
