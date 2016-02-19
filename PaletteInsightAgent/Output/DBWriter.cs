@@ -84,6 +84,11 @@ namespace PaletteInsightAgent.Output
                     return output.Write(GetFilesOfTable(csvPath, table));
                 }));
             }
+            catch (DirectoryNotFoundException)
+            {
+                // This means that the CSV folder does not exist, which also means that
+                // there are no CSV files to process.
+            }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to write CSV files to database! Exception message: {0}", e);
