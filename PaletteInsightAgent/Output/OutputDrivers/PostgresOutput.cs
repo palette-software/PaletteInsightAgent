@@ -88,13 +88,9 @@ namespace PaletteInsightAgent.Output
                 }
 
 
+                // we should be able to retry the files if the exception isnt fatal
+                // for the whole batch
                 return OutputWriteResult.Aggregate( fileNames,(fileName) => DoSingleFileCopy(fileName));
-                //// we should be able to retry the files if the exception isnt fatal
-                //// for the whole batch
-                //return fileNames.Aggregate(new OutputWriteResult(), (resultsMemo,fileName)=>{
-                //     // Add the results of trying to upload a single file
-                //    return OutputWriteResult.Combine(resultsMemo, DoSingleFileCopy(fileName));
-                //});
             }
 
         }
@@ -226,8 +222,7 @@ namespace PaletteInsightAgent.Output
                     Log.Error(e, "Error during writing to the database: {0}", e);
                     // if anything went wrong, we should roll back the transaction
                     if (copyTransaction != null) copyTransaction.Rollback();
-                    // Re-throw the exception here, so DoBulkCopyWrapper() can pick up the error
-                    // we encountered.
+                    // Re-throw the exception here, we can pick up the error later.
                     // Since LoggingHelpers contains no try-catch blocks, the exception should fall
                     // right through.
                     throw;
