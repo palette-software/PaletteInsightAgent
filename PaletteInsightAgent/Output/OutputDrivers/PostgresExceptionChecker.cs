@@ -95,7 +95,7 @@ namespace PaletteInsightAgent.Output
 
         private static bool ExceptionIsTemporary(Exception e)
         {
-            // For now we know of no exceptions fatal for the whole batch
+            // For now we know of no exceptions that are fatal for the whole batch
             // TODO: network down may be one of these
             return false;
         }
