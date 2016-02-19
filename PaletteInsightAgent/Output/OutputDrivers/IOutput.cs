@@ -13,8 +13,39 @@ namespace PaletteInsightAgent.Output
     /// </summary>
     public class OutputWriteResult
     {
+        /// <summary>
+        /// Files that were successfully written to the database
+        /// </summary>
         public IList<string> successfullyWrittenFiles = new List<string>();
+        /// <summary>
+        /// Files that failed with unrecoverable errors
+        /// </summary>
         public IList<string> failedFiles = new List<string>();
+        /// <summary>
+        /// Files failed with unrecoverable configuration errors, but
+        /// may be later resent when the configuration is corrected
+        /// </summary>
+        public IList<string> unsentFiles = new List<string>();
+
+        /// <summary>
+        /// Combines the contents of two output results
+        /// </summary>
+        /// <param name="parts"></param>
+        public static OutputWriteResult Combine(params OutputWriteResult[] parts)
+        {
+            return parts.Aggregate(new OutputWriteResult(), (memo,part)=>{
+                memo.failedFiles.AddRange(part.failedFiles);
+                memo.successfullyWrittenFiles.AddRange(part.successfullyWrittenFiles);
+                memo.unsentFiles.AddRange(part.unsentFiles);
+                return memo;
+            });
+        }
+
+
+        public static OutputWriteResult Aggregate<T>(IEnumerable<T> seq, Func<T, OutputWriteResult> fn )
+        {
+            return seq.Aggregate(new OutputWriteResult(), (memo, res) => Combine(memo, fn(res)));
+        }
     }
 
     /// <summary>
