@@ -171,6 +171,7 @@
     <Compile Include="Output\DataTableUtils.cs" />
     <Compile Include="Output\OutputDrivers\IOutput.cs" />
     <Compile Include="Helpers\LoggingHelpers.cs" />
+    <Compile Include="Output\OutputDrivers\PostgresExceptionChecker.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PaletteInsightAgent.cs" />
     <Compile Include="PaletteInsightAgentOptions.cs" />

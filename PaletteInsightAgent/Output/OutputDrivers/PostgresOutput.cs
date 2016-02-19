@@ -49,7 +49,7 @@ namespace PaletteInsightAgent.Output
 
         public OutputWriteResult Write(IList<string> csvFiles)
         {
-            return DoBulkCopy(csvFiles);
+            return DoBulkCopyWrapper(csvFiles);
         }
 
         #endregion
@@ -80,13 +80,21 @@ namespace PaletteInsightAgent.Output
                     return new OutputWriteResult();
                 }
 
+                // if the exception is session fatal, move the unsent files to the unsent list
+                // as we may recover them on next launch
+                if (PostgresExceptionChecker.ExceptionIsSessionFatalForBatch(e))
+                {
+                    return new OutputWriteResult { unsentFiles = new List<string>(fileNames) };
+                }
 
-                // we should be able to retry the files if the exception isnt fatal
-                // for the whole batch
-                return fileNames.Aggregate(new OutputWriteResult(), (memo,fileName)=>{
-                     // Add the results of trying to upload a single file
-                    return OutputWriteResult.Combine(memo, DoSingleFileCopy(fileName));
-                });
+
+                return OutputWriteResult.Aggregate( fileNames,(fileName) => DoSingleFileCopy(fileName));
+                //// we should be able to retry the files if the exception isnt fatal
+                //// for the whole batch
+                //return fileNames.Aggregate(new OutputWriteResult(), (resultsMemo,fileName)=>{
+                //     // Add the results of trying to upload a single file
+                //    return OutputWriteResult.Combine(resultsMemo, DoSingleFileCopy(fileName));
+                //});
             }
 
         }
@@ -120,7 +128,14 @@ namespace PaletteInsightAgent.Output
                     return new OutputWriteResult();
                 }
 
-                Log.Error(e, "Unable to determine if exception is fatal for the file '{0}' or not", fileName);
+                // if the exception is session fatal, move the unsent file to the unsent list
+                // as we may recover them on next launch
+                if (PostgresExceptionChecker.ExceptionIsSessionFatalForFile(e))
+                {
+                    return new OutputWriteResult { unsentFiles = fileNameList };
+                }
+
+                Log.Error(e, "Unable to determine if exception is fatal for the file '{0}' or not: {1}", fileName, e);
                 // remove this file from the errors liest
                 return new OutputWriteResult { failedFiles = fileNameList };
             }
@@ -363,64 +378,5 @@ namespace PaletteInsightAgent.Output
             // GC.SuppressFinalize(this);
         }
         #endregion
-    }
-
-    /// <summary>
-    /// A class wrapping the exception handling policy of the Postgres Output
-    /// </summary>
-    class PostgresExceptionChecker
-    {
-
-        /// <summary>
-        /// Checks if an exception stops a complete batch
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public static bool ExceptionIsFatalForBatch(Exception e)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Checks if an exception can hinder the whole batch but can maybe re-uploaded later
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public static bool ExceptionIsTemporaryForBatch(Exception e)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Checks if the exception can be resolved by re-trying later
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public static bool ExceptionIsTemporaryForFile(Exception e)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Checks if the exception cannot be resolved by re-trying later.
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public static bool ExceptionIsFatalForFile(Exception e)
-        {
-            if (e is NpgsqlException && e.Message.Contains("invalid input syntax"))
-            {
-                // except if the NpgSql exception message contains "invalid input syntax",
-                // we can be pretty sure that this CSV file is not written in the way, we
-                // could handle it. So there is no point in re-trying that file.
-                // Unfortunately I didn't find any way to figure out the exact file
-                // that caused the error, so I add all files of this round.
-                return true;
-            }
-            // TODO: implement the rest
-            return false;
-        }
-
-
     }
 }
