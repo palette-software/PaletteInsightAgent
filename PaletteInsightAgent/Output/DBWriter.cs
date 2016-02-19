@@ -15,7 +15,8 @@ namespace PaletteInsightAgent.Output
     class DBWriter
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        private const string csvPath = @"csv/";
+        private const string CSV_PATH = @"csv/";
+        private const string CSV_PATTERN = @"*.csv";
         /// <summary>
         /// The directory we store the succesfully uploaded files
         /// </summary>
@@ -24,12 +25,50 @@ namespace PaletteInsightAgent.Output
         /// The directory where the files that have errors (invalid names, etc.)
         /// </summary>
         private const string ERROR_PATH = @"csv/errors/";
-        private const string csvPattern = @"*.csv";
+        /// <summary>
+        /// The path where files to be re-sent later are stored.
+        /// TODO: try these files on start
+        /// </summary>
+        private const string UNSENT_PATH = @"csv/unsent/";
 
-        public  static readonly object DBWriteLock = new object();
+        /// <summary>
+        /// A list of table names we actually care about.
+        /// </summary>
+        private static readonly List<string> TABLE_NAMES = new List<string> {
+            Sampler.CounterSampler.TABLE_NAME,
+            LogPoller.LogTables.SERVERLOGS_TABLE_NAME,
+            LogPoller.LogTables.FILTER_STATE_AUDIT_TABLE_NAME,
+            ThreadInfoPoller.ThreadTables.TABLE_NAME,
+        };
+
+        public static readonly object DBWriteLock = new object();
         private static readonly int waitLockTimeout = 1000;
 
+        /// <summary>
+        /// Helper method that is usually called on startup to check the unsent folder
+        /// for unsent files and tries to send them
+        /// </summary>
+        /// <param name="output"></param>
+        public static void TryToSendUnsentFiles(IOutput output)
+        {
+            DoUpload(output, UNSENT_PATH);
+        }
+
+        /// <summary>
+        /// Start a single write loop
+        /// </summary>
+        /// <param name="output"></param>
         public static void Start(IOutput output)
+        {
+            DoUpload(output, CSV_PATH);
+        }
+
+        /// <summary>
+        /// Implementation of sending all CSV files from a directory
+        /// </summary>
+        /// <param name="output"></param>
+        /// <param name="csvPath"></param>
+        private static void DoUpload(IOutput output, string csvPath)
         {
             if (!Monitor.TryEnter(DBWriteLock, waitLockTimeout))
             {
@@ -39,17 +78,11 @@ namespace PaletteInsightAgent.Output
 
             try
             {
-                IList<string> fileList;
-                while ((fileList = GetFilesOfSameTable()).Count > 0)
-                {
-                    // BULK COPY
-                    // we return the list of actual files we have successfully processed
-                    var processedFiles = output.Write(fileList);
-                    // Move files to processed folder
-                    MoveToFolder(processedFiles.successfullyWrittenFiles, PROCESSED_PATH);
-                    // Move files with errors to the errors folder
-                    MoveToFolder(processedFiles.failedFiles, ERROR_PATH);
-                }
+                // The old code (a while loop) gets stuck if we use the 'unsent' folder
+                // as a source.
+                MoveAllFiles(OutputWriteResult.Aggregate( TABLE_NAMES, (table) => {
+                    return output.Write(GetFilesOfTable(csvPath, table));
+                }));
             }
             catch (DirectoryNotFoundException)
             {
@@ -58,7 +91,7 @@ namespace PaletteInsightAgent.Output
             }
             catch (Exception e)
             {
-                Log.Error("Failed to write CSV files to database! Exception message: {0}", e.Message);
+                Log.Error(e, "Failed to write CSV files to database! Exception message: {0}", e);
             }
             finally
             {
@@ -66,11 +99,53 @@ namespace PaletteInsightAgent.Output
             }
         }
 
+        /// <summary>
+        /// Moves all files of an output write to their proper locations
+        /// </summary>
+        /// <param name="processedFiles"></param>
+        private static void MoveAllFiles(OutputWriteResult processedFiles)
+        {
+            // Move files to processed folder
+            MoveToFolder(processedFiles.successfullyWrittenFiles, PROCESSED_PATH);
+            // Move files with errors to the errors folder
+            MoveToFolder(processedFiles.failedFiles, ERROR_PATH);
+            // Move files with errors to the errors folder
+            MoveToFolder(processedFiles.unsentFiles, UNSENT_PATH);
+        }
 
-        // Gives back a list of files for the same table, empty list otherwise
+        /// <summary>
+        /// Gets all CSV files from a csvPath with the prefix specified by table.
+        /// </summary>
+        /// <param name="csvPath"></param>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        private static IList<string> GetFilesOfTable(string csvPath, string table)
+        {
+            // Remove those files that are still being written.
+            return Directory.GetFiles(csvPath, table + "-" + CSV_PATTERN)
+                            .Where(fileName => !fileName.Contains(CsvOutput.IN_PROGRESS_FILE_POSTFIX))
+                            .ToList();
+        }
+
+        #region Deprecated, but used in tests
+
+        /// <summary>
+        /// DbWriterTests uses this function with this signature.
+        /// </summary>
+        /// <returns></returns>
         public static IList<string> GetFilesOfSameTable()
         {
-            var allFiles = Directory.GetFiles(csvPath, csvPattern);
+            return GetFilesOfSameTable(CSV_PATH);
+        }
+
+        /// <summary>
+        /// Gives back a list of files for the same table, empty list otherwise 
+        /// </summary>
+        /// <param name="csvPath">The directory of CSV files</param>
+        /// <returns></returns>
+        public static IList<string> GetFilesOfSameTable(string csvPath)
+        {
+            var allFiles = Directory.GetFiles(csvPath, CSV_PATTERN);
             if (allFiles.Length == 0)
             {
                 return new List<string>();
@@ -82,7 +157,7 @@ namespace PaletteInsightAgent.Output
             }
 
             // Remove those files that are still being written.
-            return Directory.GetFiles(csvPath, pattern + "-" + csvPattern)
+            return Directory.GetFiles(csvPath, pattern + "-" + CSV_PATTERN)
                             .Where(fileName => !fileName.Contains(CsvOutput.IN_PROGRESS_FILE_POSTFIX))
                             .ToList();
         }
@@ -116,6 +191,8 @@ namespace PaletteInsightAgent.Output
             return tokens[0];
         }
 
+        #endregion
+
         /// <summary>
         /// Helper method to move a list of files to a new folder
         /// </summary>
@@ -134,6 +211,14 @@ namespace PaletteInsightAgent.Output
                     var fileName = GetFileName(fullFileName);
                     Log.Debug("Trying to move: {0}", fileName);
                     var targetFile = Path.Combine(outputFolder, fileName);
+
+                    // If we are trying to move from unsent to unsent we may find
+                    // that we have the same filename twice
+                    if (Path.GetFullPath(targetFile) == Path.GetFullPath(fullFileName))
+                    {
+                        Log.Debug("Skipping moving a file to itself: {0}", fullFileName);
+                        continue;
+                    }
                     
                     // Delete the output if it already exists
                     // TODO: shouldnt we rename the old file here?
@@ -155,5 +240,6 @@ namespace PaletteInsightAgent.Output
         {
             MoveToFolder(testFileList, PROCESSED_PATH);
         }
+
     }
 }

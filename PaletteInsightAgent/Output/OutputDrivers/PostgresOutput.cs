@@ -49,12 +49,93 @@ namespace PaletteInsightAgent.Output
 
         public OutputWriteResult Write(IList<string> csvFiles)
         {
-            return DoBulkCopy(csvFiles);
+            return DoBulkCopyWrapper(csvFiles);
         }
 
         #endregion
 
         #region datatable bulk ops
+
+        private OutputWriteResult DoBulkCopyWrapper(IList<string> fileNames)
+        {
+            // first try to copy all files in a batch
+            try
+            {
+                return DoBulkCopy(fileNames);
+            }
+            catch(Exception e)
+            {
+                // check if the exception is one that makes us unable to continue
+                if (PostgresExceptionChecker.ExceptionIsFatalForBatch(e))
+                {
+                    // We have to add all files to the failed file list.
+                    // We make a copy of the list here just to be on the safe side
+                    // and the original list gets modified along the way
+                    return new OutputWriteResult { failedFiles = new List<string>(fileNames) };
+                }
+
+                // check if we have to re-try the whole batch later
+                if (PostgresExceptionChecker.ExceptionIsTemporaryForBatch(e))
+                {
+                    return new OutputWriteResult();
+                }
+
+                // if the exception is session fatal, move the unsent files to the unsent list
+                // as we may recover them on next launch
+                if (PostgresExceptionChecker.ExceptionIsSessionFatalForBatch(e))
+                {
+                    return new OutputWriteResult { unsentFiles = new List<string>(fileNames) };
+                }
+
+
+                // we should be able to retry the files if the exception isnt fatal
+                // for the whole batch
+                return OutputWriteResult.Aggregate( fileNames,(fileName) => DoSingleFileCopy(fileName));
+            }
+
+        }
+
+
+        /// <summary>
+        /// Do a single file copy, but this time catch all errors (this method calls DoBulkCopy()
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns>true if the file was successfully copied to the database, or false if it failed</returns>
+        private OutputWriteResult DoSingleFileCopy(string fileName)
+        {
+            var fileNameList = new List<string> { fileName };
+            try
+            {
+                return DoBulkCopy(fileNameList);
+            }
+            catch (Exception e)
+            {
+                // if the exception is fatal, add the file to the failed list
+                if (PostgresExceptionChecker.ExceptionIsFatalForFile(e))
+                {
+                    Log.Error(e, "Fatal exception encountered while trying to send '{0}' to the database", fileName);
+                    return new OutputWriteResult{ failedFiles = fileNameList };
+                }
+
+                // if the exception is temporary, do not add to any lists, so we may
+                // re-try it later
+                if (PostgresExceptionChecker.ExceptionIsTemporaryForFile(e))
+                {
+                    return new OutputWriteResult();
+                }
+
+                // if the exception is session fatal, move the unsent file to the unsent list
+                // as we may recover them on next launch
+                if (PostgresExceptionChecker.ExceptionIsSessionFatalForFile(e))
+                {
+                    return new OutputWriteResult { unsentFiles = fileNameList };
+                }
+
+                Log.Error(e, "Unable to determine if exception is fatal for the file '{0}' or not: {1}", fileName, e);
+                // remove this file from the errors liest
+                return new OutputWriteResult { failedFiles = fileNameList };
+            }
+        }
 
         /// <summary>
         /// Helper to do a bulk copy
@@ -67,7 +148,6 @@ namespace PaletteInsightAgent.Output
                 // There are no files to process.
                 return new OutputWriteResult();
             }
-
 
             ReconnectoToDbIfNeeded();
             var tableName = DBWriter.GetTableName(fileNames[0]);
@@ -142,22 +222,10 @@ namespace PaletteInsightAgent.Output
                     Log.Error(e, "Error during writing to the database: {0}", e);
                     // if anything went wrong, we should roll back the transaction
                     if (copyTransaction != null) copyTransaction.Rollback();
-                    // in case of errors we have inserted 0 rows thanks to the transaction
-                    // but since we have errors in the insertion (which may come from
-                    // connectivity issues), we dont add any files to either
-                    // the successful or the error list, so the files
-                    // will be re-tried on next invocation
-
-                    if (e is NpgsqlException && e.Message.Contains("invalid input syntax"))
-                    {
-                        // except if the NpgSql exception message contains "invalid input syntax",
-                        // we can be pretty sure that this CSV file is not written in the way, we
-                        // could handle it. So there is no point in re-trying that file.
-                        // Unfortunately I didn't find any way to figure out the exact file
-                        // that caused the error, so I add all files of this round.
-                        outputResult.failedFiles.AddRange(fileNames);
-                    }
-                    return 0;
+                    // Re-throw the exception here, we can pick up the error later.
+                    // Since LoggingHelpers contains no try-catch blocks, the exception should fall
+                    // right through.
+                    throw;
                 }
             });
             // return the list of processed files, which should for now be either empty or
