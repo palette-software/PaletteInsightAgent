@@ -1,4 +1,4 @@
-CREATE TABLE pstableau.countersamples
+CREATE TABLE countersamples
 (
    timestamp TIMESTAMP,
    machine VARCHAR,
@@ -11,7 +11,7 @@ CREATE TABLE pstableau.countersamples
 WITH (appendonly=true, orientation=column, compresstype=quicklz)
 DISTRIBUTED BY (timestamp);
 
-CREATE TABLE pstableau.filter_state_audit
+CREATE TABLE filter_state_audit
 (
    ts TIMESTAMP,
    pid BIGINT,
@@ -30,7 +30,7 @@ CREATE TABLE pstableau.filter_state_audit
 WITH (appendonly=true, orientation=column, compresstype=quicklz)
 DISTRIBUTED BY (ts);
 
-CREATE TABLE pstableau.serverlogs
+CREATE TABLE serverlogs
 (
    filename VARCHAR,
    host_name VARCHAR,
@@ -43,12 +43,12 @@ CREATE TABLE pstableau.serverlogs
    site VARCHAR,
    username VARCHAR,
    k VARCHAR, --json key
-   v VARCHAR -- jason value
+   v VARCHAR -- json value
 )
 WITH (appendonly=true, orientation=column, compresstype=quicklz)
 DISTRIBUTED BY (ts);
 
-CREATE TABLE pstableau.threadinfo
+CREATE TABLE threadinfo
 (
    host_name VARCHAR,
    process VARCHAR,
