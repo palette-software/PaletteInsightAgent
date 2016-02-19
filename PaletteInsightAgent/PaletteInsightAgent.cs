@@ -182,6 +182,10 @@ namespace PaletteInsightAgent
 
             // Start the DB Writer
             IOutput output = new PostgresOutput(options.ResultDatabase);
+
+            // On start try to send all unsent files
+            DBWriter.TryToSendUnsentFiles(output);
+
             dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
         }
 
