@@ -115,6 +115,8 @@ namespace PaletteInsightAgent.Output
                             .ToList();
         }
 
+        #region Deprecated, but used in tests
+
         /// <summary>
         /// DbWriterTests uses this function with this signature.
         /// </summary>
@@ -176,6 +178,8 @@ namespace PaletteInsightAgent.Output
             }
             return tokens[0];
         }
+
+        #endregion
 
         /// <summary>
         /// Helper method to move a list of files to a new folder
