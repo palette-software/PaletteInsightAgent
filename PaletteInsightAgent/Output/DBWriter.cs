@@ -34,9 +34,14 @@ namespace PaletteInsightAgent.Output
         /// <summary>
         /// A list of table names we actually care about.
         /// </summary>
-        private static readonly List<string> TABLE_NAMES = new List<string> { "countersamples", "serverlogs", "threadinfo", "filter_state_audit" };
+        private static readonly List<string> TABLE_NAMES = new List<string> {
+            Sampler.CounterSampler.TABLE_NAME,
+            LogPoller.LogTables.SERVERLOGS_TABLE_NAME,
+            LogPoller.LogTables.FILTER_STATE_AUDIT_TABLE_NAME,
+            ThreadInfoPoller.ThreadTables.TABLE_NAME,
+        };
 
-        public  static readonly object DBWriteLock = new object();
+        public static readonly object DBWriteLock = new object();
         private static readonly int waitLockTimeout = 1000;
 
         /// <summary>
@@ -73,11 +78,9 @@ namespace PaletteInsightAgent.Output
 
             try
             {
-                IList<string> fileList;
-
                 // The old code (a while loop) gets stuck if we use the 'unsent' folder
                 // as a source.
-                MoveAllFiles(OutputWriteResult.Aggregate( TABLE_NAMES,(table) => {
+                MoveAllFiles(OutputWriteResult.Aggregate( TABLE_NAMES, (table) => {
                     return output.Write(GetFilesOfTable(csvPath, table));
                 }));
             }
@@ -91,6 +94,10 @@ namespace PaletteInsightAgent.Output
             }
         }
 
+        /// <summary>
+        /// Moves all files of an output write to their proper locations
+        /// </summary>
+        /// <param name="processedFiles"></param>
         private static void MoveAllFiles(OutputWriteResult processedFiles)
         {
             // Move files to processed folder
