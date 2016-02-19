@@ -121,8 +121,8 @@ namespace PaletteInsightAgent.Output
                 }
 
                 Log.Error(e, "Unable to determine if exception is fatal for the file '{0}' or not", fileName);
-                // dont do anything here
-                return new OutputWriteResult { };
+                // remove this file from the errors liest
+                return new OutputWriteResult { failedFiles = fileNameList };
             }
         }
 
