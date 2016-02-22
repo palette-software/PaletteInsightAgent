@@ -71,6 +71,7 @@ test_script:
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\vizqlserver", $watched_folder_2 } | Set-Content $env:CONFIG_YML_PATH;
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "ThreadInfoPollInterval: 15", "ThreadInfoPollInterval: 5" } | Set-Content $env:CONFIG_YML_PATH;
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "DBWriteInterval: 60", "DBWriteInterval: 7" } | Set-Content $env:CONFIG_YML_PATH;
+        (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "LogPollInterval: 300", "LogPollInterval: 6" } | Set-Content $env:CONFIG_YML_PATH;
         echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
     - echo "Reconfigured config.yml"
@@ -87,7 +88,7 @@ test_script:
     - windows_amd64\agentrunner.exe start
     - echo "Started PaletteInsightAgent service"
     - sleep 2
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', 'c:\watched_folder_1');
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
     - sleep 15
     - echo "Sleeping for 17 seconds"
     - windows_amd64\agentrunner.exe stop
