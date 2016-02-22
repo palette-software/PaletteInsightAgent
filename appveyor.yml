@@ -54,6 +54,7 @@ test_script:
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     - msiexec.exe /qn /i %PALIN_MSI%
+    - echo "Installed Palette Insight successfully"
     # Set the Postgres port in Config.yml
     - ps: >-
         $watched_folder_1 = "c:\watched_folder_1";
@@ -81,7 +82,11 @@ test_script:
     - echo "Contents of the PaletteInsightAgent log"
     - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
     - echo "End of PaletteInsightAgent log"
-    - echo "Installed Palette Insight successfully"
+    - ps: >-
+        If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
+          Write-Host "ERROR or FATAL found in log. Exiting with code 1" 
+          exit 1
+        }
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
 artifacts:
