@@ -83,7 +83,7 @@ test_script:
     - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
     - echo "End of PaletteInsightAgent log"
     - ps: >-
-        If (Select-String -Pattern 'ERROR','FATAL','WARN' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
+        If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
           Write-Host "ERROR or FATAL found in log. Exiting with code 1" 
           exit 1
         }
