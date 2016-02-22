@@ -38,8 +38,7 @@ test_script:
     - createdb workgroup
     # Setup target database
     - createdb palette
-    - psql -a -c "create user palette with password 'password';"
-    - psql -d palette -f create_tables_pg.sql
+    - psql -a -c "create user palette with password 'password';"    
     - psql -a -c "grant all on database palette to palette;"
     # Setup fake Tableau database
     - psql -a -c "create user readonly with password 'onlyread';"
@@ -48,6 +47,10 @@ test_script:
     - SET PGPASSWORD=onlyread
     - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
     - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
+    # And create the target tables, since the agent does not do that anymore on its own
+    - SET PGUSER=palette
+    - SET PGPASSWORD=password
+    - psql -d palette -f create_tables_pg.sql
     - echo "Postgres database setup completed"
 
     # Make a sample run of Palette Insight Agent
