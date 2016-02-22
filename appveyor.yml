@@ -77,7 +77,7 @@ test_script:
 
     # # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
     # - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
-    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.3-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
+    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.4-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
     - echo "Downloaded insight-tester"
     - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
     - echo "Unzipped insight tester"
