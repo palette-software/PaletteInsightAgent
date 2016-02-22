@@ -39,6 +39,7 @@ test_script:
     # Setup target database
     - createdb palette
     - psql -a -c "create user palette with password 'password';"
+    - psql -d palette -f create_tables_pg.sql
     - psql -a -c "grant all on database palette to palette;"
     # Setup fake Tableau database
     - psql -a -c "create user readonly with password 'onlyread';"
