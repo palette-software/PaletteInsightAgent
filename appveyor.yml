@@ -103,15 +103,15 @@ deploy:
   prerelease: true
   on:
     branch: production
-notifications:
-- provider: Slack
-  <HOOK>
-  auth_token:
-    <TOKEN>
-  channel: dev-robots
-  on_build_success: true
-  on_build_failure: true
-  on_build_status_changed: true
+# notifications:
+# - provider: Slack
+#   incoming_webhook: <HOOK>
+#   auth_token:
+#     secure: <TOKEN>
+#   channel: dev-robots
+#   on_build_success: true
+#   on_build_failure: true
+#   on_build_status_changed: true
 
 # on_finish:
 # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
