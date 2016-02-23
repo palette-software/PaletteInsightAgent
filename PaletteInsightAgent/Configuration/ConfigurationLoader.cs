@@ -74,9 +74,10 @@ namespace PaletteInsight
                 Repository repo = null;
                 string workgroupyml = @"tabsvc\config\workgroup.yml";
 
+                var configFilePath = "";
                 try
                 {
-                    var configFilePath = Path.Combine(tableauRoot, workgroupyml);
+                    configFilePath = Path.Combine(tableauRoot, workgroupyml);
                     using (var reader = File.OpenText(configFilePath))
                     {
                         repo = GetRepoFromWorkgroupYaml(reader);
@@ -84,7 +85,7 @@ namespace PaletteInsight
                 }
                 catch (Exception e)
                 {
-                    Log.Warn("Error while trying to load and parse YAML config from {0}/{1} -- {2}", tableauRoot, workgroupyml, e);
+                    Log.Warn("Error while trying to load and parse YAML config from {0} -- {1}", configFilePath, e);
                 }
 
 
@@ -102,6 +103,10 @@ namespace PaletteInsight
                 }
                 else
                 {
+                    if (config.TableauRepo != null)
+                    {
+                        Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                    }
                     options.RepoHost = repo.Host;
                     options.RepoPort = repo.Port0;
                     options.RepoUser = repo.Username;
@@ -131,40 +136,39 @@ namespace PaletteInsight
             /// <param name="tableauRoot"></param>
             private static void AddLogFoldersToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-
-
-                // if tableau server is not installed
-                if (tableauRoot == null)
+                // check and load the log folder paths from the config file, so
+                // the folders listed in there will be definitely watched
+                if (config.Logs != null)
                 {
-                    // check and load the log folder paths from the config file, so
-                    // we can still debug it without installing Tableau Server
-                    if (config.Logs != null)
+                    foreach (LogFolder logFolder in config.Logs)
                     {
-                        foreach (LogFolder logFolder in config.Logs)
+                        // we just blindly add here, as this code path is only for debugging
+                        options.LogFolders.Add(new PaletteInsightAgentOptions.LogFolderInfo
                         {
-                            // we just blindly add here, as this code path is only for debugging
-                            options.LogFolders.Add(new PaletteInsightAgentOptions.LogFolderInfo
-                            {
-                                FolderToWatch = logFolder.Directory,
-                                DirectoryFilter = logFolder.Filter
-                            });
-                        }
+                            FolderToWatch = logFolder.Directory,
+                            DirectoryFilter = logFolder.Filter
+                        });
                     }
-
-                    return;
                 }
 
-                // otherwiser try to add the log folders from the registry setup
-                foreach (var logFolder in LoadDefaultLogFolders())
+                if (tableauRoot != null)
                 {
-                    var fullPath = Path.Combine(tableauRoot, logFolder.Directory);
-                    // we check here so we wont add non-existent folders
-                    if (!Directory.Exists(fullPath)) continue;
-                    options.LogFolders.Add(new PaletteInsightAgentOptions.LogFolderInfo
+                    // otherwiser try to add the log folders from the registry setup
+                    foreach (var logFolder in LoadDefaultLogFolders())
                     {
-                        FolderToWatch = fullPath,
-                        DirectoryFilter = logFolder.Filter,
-                    });
+                        var fullPath = Path.Combine(tableauRoot, logFolder.Directory);
+                        // we check here so we won't add non-existent folders
+                        if (!Directory.Exists(fullPath))
+                        {
+                            Log.Error("Log folder not found: {0}", fullPath);
+                            continue;
+                        }
+                        options.LogFolders.Add(new PaletteInsightAgentOptions.LogFolderInfo
+                        {
+                            FolderToWatch = fullPath,
+                            DirectoryFilter = logFolder.Filter,
+                        });
+                    }    
                 }
             }
 
