@@ -43,7 +43,7 @@ namespace PaletteInsightAgent
 
         private PaletteInsightAgentOptions()
         {
-            LogFolders = new List<LogFolderInfo>();
+            LogFolders = new HashSet<LogFolderInfo>();
         }
 
         public static PaletteInsightAgentOptions Instance
