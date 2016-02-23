@@ -132,7 +132,7 @@ namespace PaletteInsightAgent.Output
                 }
 
                 Log.Error(e, "Unable to determine if exception is fatal for the file '{0}' or not: {1}", fileName, e);
-                // remove this file from the errors liest
+                // remove this file from the errors list
                 return new OutputWriteResult { failedFiles = fileNameList };
             }
         }
