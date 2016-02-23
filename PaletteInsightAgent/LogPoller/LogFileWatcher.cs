@@ -55,7 +55,15 @@ namespace PaletteInsightAgent.LogPoller
 
         private string[] getFileList()
         {
-            return Directory.GetFiles(watchedFolderPath, filter, SearchOption.AllDirectories);
+            try
+            {
+                return Directory.GetFiles(watchedFolderPath, filter, SearchOption.AllDirectories);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to get files from directory: {0}. Exception message: {1}", watchedFolderPath, e.Message);
+                return new string[0];
+            }
         }
 
         public void watchChangeCycle(ChangeDelegate changeDelegate)
