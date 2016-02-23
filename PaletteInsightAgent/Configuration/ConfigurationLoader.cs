@@ -153,7 +153,7 @@ namespace PaletteInsight
 
                 if (tableauRoot != null)
                 {
-                    // otherwiser try to add the log folders from the registry setup
+                    // otherwise try to add the log folders from the registry setup
                     foreach (var logFolder in LoadDefaultLogFolders())
                     {
                         var fullPath = Path.Combine(tableauRoot, logFolder.Directory);
