@@ -62,7 +62,7 @@ try
 
         # Cleanup test
         Write-Host "Cleanup test leftovers"
-        Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
+        #Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
 
         Write-Host "Smoke test finished successfully."
     } 
