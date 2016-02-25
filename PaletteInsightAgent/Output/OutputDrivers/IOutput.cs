@@ -9,7 +9,7 @@ namespace PaletteInsightAgent.Output
 {
 
     /// <summary>
-    /// An output wrapper for the results of an IOutput.Write()
+    /// An output wrapper for the results of an IOutput.Write().
     /// </summary>
     public class OutputWriteResult
     {
@@ -46,6 +46,23 @@ namespace PaletteInsightAgent.Output
         {
             return seq.Aggregate(new OutputWriteResult(), (memo, res) => Combine(memo, fn(res)));
         }
+
+        #region quickcreate
+        public static OutputWriteResult Ok(params string[] files)
+        {
+            return new OutputWriteResult { successfullyWrittenFiles = new List<string>(files) };
+        }
+
+        public static OutputWriteResult Failed(params string[] files)
+        {
+            return new OutputWriteResult { failedFiles = new List<string>(files) };
+        }
+
+        public static OutputWriteResult Unsent(params string[] files)
+        {
+            return new OutputWriteResult { unsentFiles = new List<string>(files) };
+        }
+        #endregion
     }
 
     /// <summary>

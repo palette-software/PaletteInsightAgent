@@ -46,13 +46,10 @@ namespace PaletteInsightAgent
         private const bool USE_LOGPOLLER = true;
         private const bool USE_THREADINFO = true;
 
-        private const bool USE_DB = true;
-
         // use the constant naming convention for now as the mutability
         // of this variable is temporary until the Db output is removed
-        private bool USE_WEBSERVICE = true;
-
-        private IOutput webserviceOutput;
+        private bool USE_DB = true;
+        private bool USE_WEBSERVICE = false;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PaletteInsightAgent(bool loadOptionsFromConfig = true)
@@ -88,6 +85,7 @@ namespace PaletteInsightAgent
 
             // we'll use the webservice if we have the configuration for it
             USE_WEBSERVICE = !(options.WebserviceConfig == null);
+            USE_DB = !USE_WEBSERVICE;
 
         }
 
@@ -207,15 +205,7 @@ namespace PaletteInsightAgent
 
             if (USE_WEBSERVICE)
             {
-                var config = options.WebserviceConfig;
-                var webserviceOutput = WebserviceOutput.MakeWebservice(
-                        new WebserviceConfiguration{
-                            Endpoint = config.Endpoint,
-                            Username = config.Username,
-                            Password = config.Password,
-                        },
-                        new BasicErrorHandler { }
-                    );
+                var webserviceOutput = WebserviceOutput.MakeWebservice(options.WebserviceConfig, new BasicErrorHandler { } );
 
                 webserviceTimer = new Timer(callback: WriteToDB, state: webserviceOutput, dueTime: 0, period: 10 * 1000);
             }

@@ -29,6 +29,11 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         public string Password;
 
         /// <summary>
+        /// Should the output use multiple-file-upload (true) or single-file-upload(false)
+        /// </summary>
+        public bool UseMultifile = false;
+
+        /// <summary>
         /// Returns true if the webservice configuration is valid.
         /// TODO: do a proper check of the Endpoint
         /// </summary>
@@ -87,54 +92,74 @@ namespace PaletteInsightAgent.Output.OutputDrivers
 
     #endregion
 
+    public interface WebserviceBackend : IOutput
+    {
+
+    }
+
 
     /// <summary>
-    /// Output class that writes to a web service
+    /// Shared functionality between Single and Multi file backends
     /// </summary>
-    public class WebserviceOutput : IOutput
+    public class WebserviceBackendBase
     {
-        private const string MANIFEST_KEY = "_manifest";
+        public WebserviceConfiguration config;
+        public WebserviceErrorHandler errorHandler;
 
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-        private WebserviceConfiguration config;
-        private WebserviceErrorHandler errorHandler;
 
         /// <summary>
         /// The default encoding for the log files (we use this to read the bytes)
         /// </summary>
-        private static Encoding defaultStringEncoding = new UTF8Encoding();
+        protected static Encoding defaultStringEncoding = new UTF8Encoding();
 
         /// <summary>
         /// The hash algorith to use for the signature
         /// </summary>
-        private HashAlgorithm fileHasher = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5"));
-
-        private WebserviceOutput(WebserviceConfiguration config, WebserviceErrorHandler errorHandler)
-        {
-            this.config = config;
-            this.errorHandler = errorHandler;
-
-            Log.Info("Initialized web service with endpoint '{0}' and user '{1}", config.Endpoint, config.Username);
-        }
+        protected HashAlgorithm fileHasher = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5"));
 
         /// <summary>
-        /// Factory method for WebserviceOutput.
-        /// This method is here because we dont want to throw in the constructor on config errors
+        /// Helper that creates an authenticated httpClient and executes the delegate
+        /// and returns its return value
         /// </summary>
-        /// <param name="config"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sendDelegate"></param>
         /// <returns></returns>
-        public static WebserviceOutput MakeWebservice(WebserviceConfiguration config, WebserviceErrorHandler errorHandler)
+        protected T WithConnection<T>(Func<HttpClient, T> sendDelegate)
         {
-            if (!config.IsValid)
+            // create the httpclient
+            using (var httpClient = new HttpClient())
             {
-                throw new ArgumentException("Invalid webservice configuration provided!");
+                // add the basic authentication data
+                var encoding = new ASCIIEncoding();
+                var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encoding.GetBytes(String.Format("{0}:{1}", config.Username, config.Password))));
+                httpClient.DefaultRequestHeaders.Authorization = authHeader;
+
+                return sendDelegate(httpClient);
             }
-            return new WebserviceOutput(config, errorHandler);
+
         }
 
+        #region IDisposable
+        /// <summary>
+        /// Since this output driver holds no resources that need to be released,
+        /// we dont do anything is Dispose()
+        /// </summary>
+        public void Dispose()
+        {
+        }
 
-        #region IOutput
+        #endregion
+    }
+
+    /// <summary>
+    /// A webservice backend for dealing with multiple file uploads
+    /// </summary>
+    public class MultifileBackend : WebserviceBackendBase, WebserviceBackend
+    {
+        private const string MANIFEST_KEY = "_manifest";
+        private const string UPLOAD_MULTI_ENDPOINT = "/upload-many/testpkg";
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
 
         public OutputWriteResult Write(IList<string> csvFiles)
         {
@@ -151,7 +176,8 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             }
 
             // otherwise retry the files we need to retry
-            return OutputWriteResult.Aggregate(batchSendResult.FilesToRetry, (file) => {
+            return OutputWriteResult.Aggregate(batchSendResult.FilesToRetry, (file) =>
+            {
                 Log.Info("- Retrying file {0}", file);
                 // do the sending, and ignore any files added to the retry list
                 // as we are already in the retry phase
@@ -170,25 +196,17 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// <returns></returns>
         private ResponseResult DoSendFileList(IList<string> csvFiles)
         {
-            ResponseResult batchSendResult;
-            using (var httpClient = new HttpClient())
+            return WithConnection((httpClient) =>
             {
-                var encoding = new ASCIIEncoding();
-                var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encoding.GetBytes(String.Format("{0}:{1}", config.Username, config.Password))));
-                httpClient.DefaultRequestHeaders.Authorization = authHeader;
-
                 // create the form data for upload
                 MultipartFormDataContent form = new MultipartFormDataContent();
                 // try to pack the list of files into the request
                 var packResult = PackFilesIntoRequest(csvFiles, form);
-
-                var uploadUrl = config.Endpoint + "/upload-many/testpkg";
+                var uploadUrl = config.Endpoint + UPLOAD_MULTI_ENDPOINT;
 
                 // try to send the files that packed successfully
-                batchSendResult = DoSendToWebservice(packResult.PackedOk, uploadUrl, httpClient, form);
-            }
-
-            return batchSendResult;
+                return DoSendToWebservice(packResult.PackedOk, uploadUrl, httpClient, form);
+            });
         }
 
         /// <summary>
@@ -306,7 +324,8 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                     if (errorHandler.ErrorDuringPayloadCreation(file, e))
                     {
                         result.FailedToPack.Add(file);
-                    } else {
+                    }
+                    else {
                         // do nothing for now, but:
                         // there may come a time when this exception is needed.
                         //throw;
@@ -322,18 +341,147 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             return result;
         }
 
-        #endregion
+    }
 
-        #region IDisposable
+    /// <summary>
+    /// A webservice backend for dealing with single file uploads
+    /// </summary>
+    public class SinglefileBackend : WebserviceBackendBase, WebserviceBackend
+    {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+
         /// <summary>
-        /// Since this output driver holds no resources that need to be released,
-        /// we dont do anything is Dispose()
+        /// Gets the endpoint url for a file upload.
         /// </summary>
-        public void Dispose()
+        /// <param name="package"></param>
+        /// <param name="filename"></param>
+        /// <param name="md5"></param>
+        /// <returns></returns>
+        private string GetEndpointUrl(string package, string filename, string md5)
         {
+            return String.Format("{0}/upload/{1}/{2}?md5={3}", config.Endpoint, package, filename, md5 );
         }
 
-        #endregion
 
+        public OutputWriteResult Write(IList<string> csvFiles)
+        {
+            // skip empty batches
+            if (csvFiles.Count == 0) return new OutputWriteResult { };
+
+            // otherwise retry the files we need to retry
+            return OutputWriteResult.Aggregate(csvFiles, (file) =>
+            {
+                Log.Info("+ Sending file {0}", file);
+                return DoSendFile(file);
+            });
+        }
+
+        /// <summary>
+        /// Tries to send a list of files (or a single file) to the webservice.
+        /// </summary>
+        /// <param name="csvFiles"></param>
+        /// <param name="uploadUrl"></param>
+        /// <returns></returns>
+        private OutputWriteResult DoSendFile(string file)
+        {
+            return WithConnection((httpClient) =>
+            {
+                // create the form data for upload
+                //MultipartFormDataContent form = new MultipartFormDataContent();
+                // try to pack the list of files into the request
+                //var packResult = PackFilesIntoRequest(csvFiles, form);
+
+                var md5 = GetFileMd5(file);
+                var fileBasename = Path.GetFileName(file);
+                var uploadUrl = GetEndpointUrl("testpkg", file, md5);
+
+                //// try to send the files that packed successfully
+                //return DoSendToWebservice(packResult.PackedOk, GetEndpointUrl("testpkg", , httpClient, form);
+
+                return LoggingHelpers.TimedLog<OutputWriteResult>(Log, String.Format("Uploading to : {0}", uploadUrl), () =>
+                {
+                    // try to send the request, convert the result from JSON
+                    try
+                    {
+                        using (var fs = File.OpenRead(file))
+                        {
+                            // send the request as a file stream
+                            var response = httpClient.PostAsync(uploadUrl, new StreamContent(fs));
+                            // gyulalaszlo: we use response.Wait() here, becuse VS2015 refused to compile await ... for me
+                            response.Wait();
+
+                            var result = response.Result;
+                            switch(result.StatusCode)
+                            {
+                                // if we are ok, we are ok
+                                case HttpStatusCode.OK:
+                                    Log.Debug("-> Sent ok: '{0}'", file);
+                                    return OutputWriteResult.Ok(file);
+                                // On Md5 failiure re-send the file
+                                case HttpStatusCode.Conflict:
+                                    Log.Warn("-> MD5 error in '{0}' -- resending", file);
+                                    return DoSendFile(file);
+                                // otherwise move to the unsent ones, as this most likely is
+                                // a server or auth error
+                                default:
+                                    Log.Warn("-> Unknown status: '{0}' for '{1}' -- moving to unsent", result.StatusCode, file);
+                                    return OutputWriteResult.Unsent(file);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // if we have an error here, that should mean
+                        // we are having some HTTP errors (as this block in the recursive 
+                        // DoSendFile() calls should catch any errors propagating from nested
+                        // sends
+                        Log.Error(e, "Error during sending '{0}' to the webservice: {1}", file, e);
+                        // so we are just adding this file to the unsent ones.
+                        return OutputWriteResult.Unsent(file);
+
+                    }
+                });
+            });
+        }
+
+        private static string GetFileMd5(string file)
+        {
+            // get the MD5
+            using (var fs = File.OpenRead(file))
+            {
+                using (var md5 = MD5.Create())
+                {
+                    return BitConverter.ToString(md5.ComputeHash(fs)).Replace("-", string.Empty);
+                }
+            }
+        }
+
+    }
+
+    /// <summary>
+    /// Output class that writes to a web service
+    /// </summary>
+    public class WebserviceOutput
+    {
+
+        /// <summary>
+        /// Factory method for WebserviceOutput.
+        /// This method is here because we dont want to throw in the constructor on config errors
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static IOutput MakeWebservice(WebserviceConfiguration config, WebserviceErrorHandler errorHandler)
+        {
+            if (!config.IsValid)
+            {
+                throw new ArgumentException("Invalid webservice configuration provided!");
+            }
+            // select which endpoint to use
+            if (config.UseMultifile)
+                return new MultifileBackend { config = config, errorHandler = errorHandler };
+            else
+                return new SinglefileBackend { config = config, errorHandler = errorHandler };
+        }
     }
 }

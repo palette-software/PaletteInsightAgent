@@ -18,6 +18,7 @@ Database:
 #  Endpoint: http://localhost:9000
 #  Username: test
 #  Password: test
+#  UseMultifile: false
 
 Logs: 
   - 
