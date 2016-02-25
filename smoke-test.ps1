@@ -10,6 +10,8 @@ Write-Host "Postgres database setup completed"
 # Make a sample run of Palette Insight Agent
 Write-Host "Installing $PALIN_MSI ..."
 msiexec.exe /qn /i $PALIN_MSI
+# HACK: This is so awkward... On GoCD agent execution does not wait for the install to finish... :(
+sleep 3
 Write-Host "Installed Palette Insight Agent successfully"
 
 # Set the Postgres port in Config.yml
