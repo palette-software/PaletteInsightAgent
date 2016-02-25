@@ -61,6 +61,8 @@ try
 }
 catch
 {
+    write-host "$pid : Error caught - $_"
+
     # Cleanup test
     Write-Host "Cleanup test leftovers"
     msiexec.exe /qn /x $env:PALIN_MSI
@@ -68,8 +70,7 @@ catch
     Write-Host "Uninstalled Palette Insight successfully"
     # Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
 
-
-    write-host "$pid : Error caught - $_"
+    # Exit with error code
     if ($? -and (test-path variable:LastExitCode) -and ($LastExitCode -gt 0))
     {
         exit $LastExitCode

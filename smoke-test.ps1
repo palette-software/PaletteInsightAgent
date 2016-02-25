@@ -17,7 +17,7 @@ md $watched_folder_2;
 $env:CONFIG_YML_PATH = "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml";
 copy "$PSScriptRoot/test/configs/Config_GoCD.yml" $env:CONFIG_YML_PATH
 echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
-copy "$PSScriptRoot\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
+copy "$PSScriptRoot\PaletteInsightAgent\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
 Write-Host "Reconfigured config.yml"
 
 (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.5-lw/windows_amd64.zip', "$PSScriptRoot\insight-tester.zip")
@@ -46,5 +46,5 @@ If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:
 Write-Host "Checking DB contents"
 (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', "$PSScriptRoot\appveyor_tests.json")
 windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
-msiexec.exe /qn /x $PALIN_MSI
+msiexec.exe /qn /x $env:PALIN_MSI
 Write-Host "Uninstalled Palette Insight successfully"
