@@ -54,6 +54,7 @@ namespace PaletteInsight
                         Endpoint = config.Webservice.Endpoint,
                         Username = config.Webservice.Username,
                         Password = config.Webservice.Password,
+                        UseMultifile = config.Webservice.UseMultifile,
                     };
                 }
                 else
