@@ -26,7 +26,12 @@ try
         # Do the preparations for the test
         Write-Host "Download our Github release downloader tool"
         (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/githubrelease.exe/_80d5198eac2d44b7a31f08060eddd5fe', "$PSScriptRoot\githubrelease.exe")
+        sleep 2
         & "$PSScriptRoot\githubrelease.exe" palette-software PaletteInsightAgent $env:GITHUB_ACCESS_TOKEN
+        sleep 2
+
+        Write-Host "Downloaded .msi files:"
+        dir *.msi
 
         # Store the name of the latest Palette Insight Agent .msi
         $Dir = get-childitem $PSScriptRoot
