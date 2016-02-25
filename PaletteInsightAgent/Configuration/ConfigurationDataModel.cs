@@ -47,6 +47,16 @@ namespace PaletteInsight
             public string Granularity { get; set; } = "Process";
         }
 
+        public class Webservice
+        {
+            [YamlMember(Alias = "Endpoint")]
+            public string Endpoint { get; set; }
+            [YamlMember(Alias = "Username")]
+            public string Username { get; set; }
+            [YamlMember(Alias = "Password")]
+            public string Password { get; set; }
+        }
+
         public class PaletteInsightConfiguration
         {
             [YamlMember(Alias = "PollInterval")]
@@ -66,6 +76,9 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }
+
+            [YamlMember(Alias = "Webservice")]
+            public Webservice Webservice { get; set; }
 
             [YamlMember(Alias = "Logs")]
             public List<LogFolder> Logs { get; set; }

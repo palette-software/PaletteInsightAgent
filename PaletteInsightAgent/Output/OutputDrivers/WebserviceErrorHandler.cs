@@ -84,7 +84,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         public ResponseResult OnSendError(Exception e, IList<string> csvFiles, HttpResponseMessage result)
         {
             // errors during an HTTP request generally indicate that we have
-            // some transport errors, so we can re-send the files later
+            // some transport errors, so we can re-send the files later, but should not retry in this round
 
             // log the error
             if (result == null)

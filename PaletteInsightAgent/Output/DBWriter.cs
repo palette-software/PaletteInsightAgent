@@ -60,6 +60,15 @@ namespace PaletteInsightAgent.Output
         /// <param name="output"></param>
         public static void Start(IOutput output)
         {
+            // add some chance (1%) of uploading the unsent files, so once every
+            // ~1500 seconds on average we try to re-upload the stuff we may have missed
+            if (new Random().NextDouble() < 0.01)
+            {
+                Log.Info("+++ LUCKY DRAW: trying to re-send unsent files +++");
+                TryToSendUnsentFiles(output);
+                Log.Info("+++ /LUCKY DRAW: done trying to re-sending unsent files +++");
+            }
+
             DoUpload(output, CSV_PATH);
         }
 
