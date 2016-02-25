@@ -8,6 +8,7 @@ using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NLog;
+using PaletteInsightAgent.Output.OutputDrivers;
 
 namespace PaletteInsight
 {
@@ -46,6 +47,21 @@ namespace PaletteInsight
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
 
+                if (config.Webservice != null)
+                {
+                    options.WebserviceConfig = new WebserviceConfiguration
+                    {
+                        Endpoint = config.Webservice.Endpoint,
+                        Username = config.Webservice.Username,
+                        Password = config.Webservice.Password,
+                    };
+                }
+                else
+                {
+                    // make sure the webservice config is null, so we wont write
+                    // to the webservice if its not configured
+                    options.WebserviceConfig = null;
+                }
 
                 // Load thread monitoring configuration
                 options.Processes = new Dictionary<string, ProcessData>();

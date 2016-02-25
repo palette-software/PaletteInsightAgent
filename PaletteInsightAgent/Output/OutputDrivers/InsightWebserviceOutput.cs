@@ -114,6 +114,8 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         {
             this.config = config;
             this.errorHandler = errorHandler;
+
+            Log.Info("Initialized web service with endpoint '{0}' and user '{1}", config.Endpoint, config.Username);
         }
 
         /// <summary>
@@ -150,6 +152,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
 
             // otherwise retry the files we need to retry
             return OutputWriteResult.Aggregate(batchSendResult.FilesToRetry, (file) => {
+                Log.Info("- Retrying file {0}", file);
                 // do the sending, and ignore any files added to the retry list
                 // as we are already in the retry phase
                 var thisFileResult = DoSendFileList(new List<string> { file });

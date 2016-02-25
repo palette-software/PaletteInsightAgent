@@ -46,12 +46,15 @@ namespace PaletteInsightAgent
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private const bool USE_COUNTERSAMPLES = false;
-        private const bool USE_LOGPOLLER = false;
-        private const bool USE_THREADINFO = false;
+        private const bool USE_COUNTERSAMPLES = true;
+        private const bool USE_LOGPOLLER = true;
+        private const bool USE_THREADINFO = true;
 
-        private const bool USE_DB = false;
-        private const bool USE_WEBSERVICE = true;
+        private const bool USE_DB = true;
+
+        // use the constant naming convention for now as the mutability
+        // of this variable is temporary until the Db output is removed
+        private bool USE_WEBSERVICE = true;
 
         private IOutput webserviceOutput;
 
@@ -87,6 +90,9 @@ namespace PaletteInsightAgent
                 // start the thread info agent
                 threadInfoAgent = new ThreadInfoAgent();
             }
+
+            // we'll use the webservice if we have the configuration for it
+            USE_WEBSERVICE = !(options.WebserviceConfig == null);
 
             repoPollAgent = new RepoPollAgent();
         }
@@ -208,11 +214,12 @@ namespace PaletteInsightAgent
 
             if (USE_WEBSERVICE)
             {
+                var config = options.WebserviceConfig;
                 var webserviceOutput = WebserviceOutput.MakeWebservice(
                         new WebserviceConfiguration{
-                            Endpoint = "http://test:test@localhost:9000",
-                            Username = "test",
-                            Password = "test",
+                            Endpoint = config.Endpoint,
+                            Username = config.Username,
+                            Password = config.Password,
                         },
                         new BasicErrorHandler { }
                     );
