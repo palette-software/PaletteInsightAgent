@@ -62,7 +62,10 @@ try
 
         # Cleanup test
         Write-Host "Cleanup test leftovers"
-        #Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
+        msiexec.exe /qn /x $env:PALIN_MSI
+        sleep 3
+        Write-Host "Uninstalled Palette Insight successfully"
+        Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
 
         Write-Host "Smoke test finished successfully."
     } 
@@ -76,7 +79,7 @@ catch
     msiexec.exe /qn /x $env:PALIN_MSI
     sleep 3
     Write-Host "Uninstalled Palette Insight successfully"
-    # Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
+    Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
 
     # Exit with error code
     if ($? -and (test-path variable:LastExitCode) -and ($LastExitCode -gt 0))
