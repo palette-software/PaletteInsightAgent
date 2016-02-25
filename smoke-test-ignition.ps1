@@ -33,6 +33,13 @@ try
         $env:PALIN_MSI = $Dir | where {$_.extension -eq ".msi"}
         $env:PALIN_MSI | format-table name
 
+        # Make a sample run of Palette Insight Agent
+        Write-Host "Installing $env:PALIN_MSI ..."
+        msiexec.exe /qn /i $env:PALIN_MSI
+        # HACK: This is so awkward... On GoCD agent execution does not wait for the install to finish... :(
+        sleep 3
+        Write-Host "Installed Palette Insight Agent successfully"
+
         # Setup the target database credentials
         $env:PGUSER="palette"
         $env:PGPASSWORD="L0fasz1234"
