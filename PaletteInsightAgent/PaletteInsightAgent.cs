@@ -16,6 +16,7 @@ using System.Diagnostics;
 using PaletteInsight.Configuration;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
 
 [assembly: CLSCompliant(true)]
@@ -31,6 +32,7 @@ namespace PaletteInsightAgent
         private Timer logPollTimer;
         private Timer threadInfoTimer;
         private Timer dbWriterTimer;
+        private Timer webserviceTimer;
         private Timer repoTablesPollTimer;
         private LogPollerAgent logPollerAgent;
         private ThreadInfoAgent threadInfoAgent;
@@ -44,9 +46,14 @@ namespace PaletteInsightAgent
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private const bool USE_COUNTERSAMPLES = true;
-        private const bool USE_LOGPOLLER = true;
-        private const bool USE_THREADINFO = true;
+        private const bool USE_COUNTERSAMPLES = false;
+        private const bool USE_LOGPOLLER = false;
+        private const bool USE_THREADINFO = false;
+
+        private const bool USE_DB = false;
+        private const bool USE_WEBSERVICE = true;
+
+        private IOutput webserviceOutput;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PaletteInsightAgent(bool loadOptionsFromConfig = true)
@@ -181,19 +188,37 @@ namespace PaletteInsightAgent
                 threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
             }
 
-            // Start the DB Writer
-            IOutput output = new PostgresOutput(options.ResultDatabase);
-
-            // On start try to send all unsent files
-            DBWriter.TryToSendUnsentFiles(output);
-
             // On start get the schema of the repository tables
             var table = tableauRepo.GetSchemaTable();
             OutputSerializer.Write(table);
             table = tableauRepo.GetIndices();
             OutputSerializer.Write(table);
 
-            dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
+            if (USE_DB)
+            {
+                // Start the DB Writer
+                IOutput output = new PostgresOutput(options.ResultDatabase);
+
+                // On start try to send all unsent files
+                DBWriter.TryToSendUnsentFiles(output);
+
+                dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
+            }
+
+
+            if (USE_WEBSERVICE)
+            {
+                var webserviceOutput = WebserviceOutput.MakeWebservice(
+                        new WebserviceConfiguration{
+                            Endpoint = "http://test:test@localhost:9000",
+                            Username = "test",
+                            Password = "test",
+                        },
+                        new BasicErrorHandler { }
+                    );
+
+                webserviceTimer = new Timer(callback: WriteToDB, state: webserviceOutput, dueTime: 0, period: 10 * 1000);
+            }
 
             // Poll Tableau repository data as well
             repoTablesPollTimer = new Timer(callback: PollRepoTables, state: null, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
@@ -268,7 +293,8 @@ namespace PaletteInsightAgent
             if (USE_COUNTERSAMPLES) running = running && (sampler != null && timer != null);
             if (USE_LOGPOLLER) running = running && (logPollTimer != null);
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
-            running = running && (dbWriterTimer != null);
+            if (USE_WEBSERVICE) running = running && (webserviceTimer != null);
+            if (USE_DB) running = running && (dbWriterTimer != null);
             running = running && (repoTablesPollTimer != null);
             return running;
         }

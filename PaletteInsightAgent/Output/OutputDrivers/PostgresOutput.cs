@@ -214,7 +214,9 @@ namespace PaletteInsightAgent.Output
                     // we store every file name in case we ever want to add by-file-error-handling later
                     outputResult.successfullyWrittenFiles.AddRange(fileNames);
 
-                    return rowsWritten;
+                    // Log the number of rows written here instead of spilling this aspect
+                    // to LoggingHelpers
+                    Log.Info("Total rows written: {0}", rowsWritten);
                 }
                 catch (Exception e)
                 {
