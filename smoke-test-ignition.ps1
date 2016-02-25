@@ -30,8 +30,8 @@ try
 
         # Store the name of the latest Palette Insight Agent .msi
         $Dir = get-childitem $PSScriptRoot
-        $PALIN_MSI = $Dir | where {$_.extension -eq ".msi"}
-        $PALIN_MSI | format-table name
+        $env:PALIN_MSI = $Dir | where {$_.extension -eq ".msi"}
+        $env:PALIN_MSI | format-table name
 
         # Setup the target database credentials
         $env:PGUSER="palette"
