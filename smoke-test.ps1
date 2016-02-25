@@ -8,9 +8,9 @@ psql -h 52.90.169.216 -d paletterobot -f create_tables.sql
 Write-Host "Postgres database setup completed"
 
 # Make a sample run of Palette Insight Agent
-Write-Host "Try a Palette Insight install and uninstall"
+Write-Host "Installing $PALIN_MSI ..."
 msiexec.exe /qn /i $PALIN_MSI
-Write-Host "Installed Palette Insight successfully"
+Write-Host "Installed Palette Insight Agent successfully"
 
 # Set the Postgres port in Config.yml
 $watched_folder_1 = "c:\watched_folder_1";
