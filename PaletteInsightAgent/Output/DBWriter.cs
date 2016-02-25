@@ -25,6 +25,12 @@ namespace PaletteInsightAgent.Output
         private const string UNSENT_PREFIX = @"unsent/";
 
         /// <summary>
+        /// The chance (as fraction) that a call to Start() will also result in a call
+        /// to TryToSendUnsentFiles()
+        /// </summary>
+        private const double UNSENT_FILES_RESEND_CHANCE = 0.01;
+
+        /// <summary>
         /// A list of table names we actually care about.
         /// </summary>
         private static readonly List<string> TABLE_NAMES = new List<string> {
@@ -85,7 +91,7 @@ namespace PaletteInsightAgent.Output
         {
             // add some chance (1%) of uploading the unsent files, so once every
             // ~1500 seconds on average we try to re-upload the stuff we may have missed
-            if (new Random().NextDouble() < 0.01)
+            if (ShouldTryResendingData())
             {
                 Log.Info("+++ LUCKY DRAW: trying to re-send unsent files +++");
                 TryToSendUnsentFiles(output);
@@ -102,6 +108,11 @@ namespace PaletteInsightAgent.Output
                 .Where(f => f.CreationTime < DateTime.Now.AddSeconds(-ttl))
                 .ToList()
                 .ForEach(f => f.Delete());
+        }
+
+        private static bool ShouldTryResendingData()
+        {
+            return new Random().NextDouble() < PaletteInsightAgent.Output.DBWriter.V;
         }
 
         /// <summary>
