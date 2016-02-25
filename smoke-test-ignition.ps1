@@ -25,7 +25,7 @@ try
     execute-externaltool "Launch smoke test" {
         Write-Host "Let's get ready to rumbleeee!!!"
 
-        & ".\smoke-test.ps1"
+        & "$PSScriptRoot\smoke-test.ps1"
 
         Write-Host "Aaaaand it's gone."
     } 
