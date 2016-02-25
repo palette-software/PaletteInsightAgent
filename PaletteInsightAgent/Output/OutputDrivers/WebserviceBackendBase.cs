@@ -56,7 +56,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
-        private static string GetFileMd5(string file)
+        protected static string GetFileMd5(string file)
         {
             // get the MD5
             using (var fs = File.OpenRead(file))

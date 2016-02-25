@@ -186,7 +186,10 @@
     <Compile Include="Helpers\LoggingHelpers.cs" />
     <Compile Include="Output\OutputDrivers\PostgresExceptionChecker.cs" />
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
+    <Compile Include="Output\OutputDrivers\WebserviceBackendBase.cs" />
     <Compile Include="Output\OutputDrivers\WebserviceErrorHandler.cs" />
+    <Compile Include="Output\OutputDrivers\WebserviceMultifileBackend.cs" />
+    <Compile Include="Output\OutputDrivers\WebserviceSinglefileBackend.cs" />
     <Compile Include="PaletteInsightAgent.cs" />
     <Compile Include="PaletteInsightAgentOptions.cs" />
     <Compile Include="Tableau\RepoPollAgent.cs" />
