@@ -9,7 +9,7 @@ $watched_folder_2 = "c:\watched_folder_2";
 md $watched_folder_1;
 md $watched_folder_2;
 $env:CONFIG_YML_PATH = "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml";
-copy /y "$PSScriptRoot/test/configs/Config_GoCD.yml" $env:CONFIG_YML_PATH
+copy "$PSScriptRoot/test/configs/Config_GoCD.yml" $env:CONFIG_YML_PATH
 echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
 copy "$PSScriptRoot\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
 Write-Host "Reconfigured config.yml"
