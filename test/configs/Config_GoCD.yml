@@ -1,0 +1,26 @@
+﻿PollInterval: 30
+ThreadInfoPollInterval: 5
+LogPollInterval: 6
+DBWriteInterval: 7
+AllProcesses: false
+
+Database: 
+  Host: 52.90.169.216
+  Port: 5432
+  Database: paletterobot
+  User: palette
+  Password: L0fasz1234
+  CommandTimeout: 600
+Logs: 
+  - 
+    Directory: 'c:\watched_folder_1'
+    Filter: '*.txt'
+  - 
+    Directory: 'c:\watched_folder_2'
+    Filter: 'tabprotosrv*.txt'
+TableauRepo: 
+  Host: 88.151.101.150
+  Port: 8060
+  Database: workgroup
+  User: readonly
+  Password: onlyr3ad
