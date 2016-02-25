@@ -227,7 +227,7 @@ namespace PaletteInsightAgent.Output
 
                     // Do the actual move
                     File.Move(fullFileName, targetFile);
-                    Log.Info("Processed file: {0}", fileName);
+                    Log.Info("Moved file: {0} to {1}", fileName, outputFolder);
                 }
                 catch (Exception ex)
                 {
