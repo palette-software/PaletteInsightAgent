@@ -29,7 +29,8 @@ try
         (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/githubrelease.exe/_80d5198eac2d44b7a31f08060eddd5fe', "$PSScriptRoot\githubrelease.exe")
         #md github-assets
         #cd github-assets
-        .\githubrelease.exe palette-software PaletteInsightAgent $env:GITHUB_ACCESS_TOKEN
+        Write-Host "Github access token:  " $env:GITHUB_ACCESS_TOKEN
+        & "$PSScriptRoot\githubrelease.exe" palette-software PaletteInsightAgent $env:GITHUB_ACCESS_TOKEN
 
         $Dir = get-childitem $PSScriptRoot
         $PALIN_MSI = $Dir | where {$_.extension -eq ".msi"}
