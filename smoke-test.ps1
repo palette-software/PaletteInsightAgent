@@ -2,8 +2,8 @@
 cd $PSScriptRoot
 
 # Prepare tables in the target database
-$env:PGUSER=palette
-$env:PGPASSWORD=L0fasz1234
+$env:PGUSER="palette"
+$env:PGPASSWORD="L0fasz1234"
 psql -h 52.90.169.216 -d paletterobot -f create_tables.sql
 Write-Host "Postgres database setup completed"
 
