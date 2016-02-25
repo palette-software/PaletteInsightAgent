@@ -63,7 +63,7 @@ catch
 {
     # Cleanup test
     Write-Host "Cleanup test leftovers"
-    msiexec.exe /qn /x $PALIN_MSI
+    msiexec.exe /qn /x $env:PALIN_MSI
     sleep 3
     Write-Host "Uninstalled Palette Insight successfully"
     # Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
