@@ -23,6 +23,9 @@ try
 
     # Launch the smoke test
     execute-externaltool "Launch smoke test" {
+        # Make sure we are in the right folder
+        cd $PSScriptRoot
+
         # Do the preparations for the test
         Write-Host "Download our Github release downloader tool"
         (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/githubrelease.exe/_80d5198eac2d44b7a31f08060eddd5fe', "$PSScriptRoot\githubrelease.exe")
