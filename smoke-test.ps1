@@ -1,4 +1,13 @@
-﻿# Make a sample run of Palette Insight Agent
+﻿# Make sure we are in the right folder
+cd $PSScriptRoot
+
+# Prepare tables in the target database
+$env:PGUSER=palette
+$env:PGPASSWORD=L0fasz1234
+psql -h 52.90.169.216 -d paletterobot -f create_tables.sql
+Write-Host "Postgres database setup completed"
+
+# Make a sample run of Palette Insight Agent
 Write-Host "Try a Palette Insight install and uninstall"
 msiexec.exe /qn /i $PALIN_MSI
 Write-Host "Installed Palette Insight successfully"
@@ -6,6 +15,8 @@ Write-Host "Installed Palette Insight successfully"
 # Set the Postgres port in Config.yml
 $watched_folder_1 = "c:\watched_folder_1";
 $watched_folder_2 = "c:\watched_folder_2";
+Remove-Item -Path $watched_folder_1 -Recurse
+Remove-Item -Path $watched_folder_2 -Recurse
 md $watched_folder_1;
 md $watched_folder_2;
 $env:CONFIG_YML_PATH = "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml";
