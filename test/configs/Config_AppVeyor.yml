@@ -1,0 +1,26 @@
+﻿PollInterval: 30
+ThreadInfoPollInterval: 5
+LogPollInterval: 6
+DBWriteInterval: 7
+AllProcesses: false
+
+Database: 
+  Host: localhost
+  Port: 5432
+  Database: palette
+  User: palette
+  Password: password
+  CommandTimeout: 600
+Logs: 
+  - 
+    Directory: 'c:\watched_folder_1'
+    Filter: '*.txt'
+  - 
+    Directory: 'c:\watched_folder_2'
+    Filter: 'tabprotosrv*.txt'
+TableauRepo: 
+  Host: localhost
+  Port: 5432
+  Database: workgroup
+  User: readonly
+  Password: onlyread
