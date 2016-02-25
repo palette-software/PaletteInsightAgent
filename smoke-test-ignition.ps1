@@ -23,31 +23,45 @@ try
 
     # Launch the smoke test
     execute-externaltool "Launch smoke test" {
-        Write-Host "Let's get ready to rumbleeee!!!"
-
         # Do the preparations for the test
+        Write-Host "Download our Github release downloader tool"
         (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/githubrelease.exe/_80d5198eac2d44b7a31f08060eddd5fe', "$PSScriptRoot\githubrelease.exe")
-        #md github-assets
-        #cd github-assets
-        Write-Host "Github access token:  " $env:GITHUB_ACCESS_TOKEN
         & "$PSScriptRoot\githubrelease.exe" palette-software PaletteInsightAgent $env:GITHUB_ACCESS_TOKEN
 
+        # Store the name of the latest Palette Insight Agent .msi
         $Dir = get-childitem $PSScriptRoot
         $PALIN_MSI = $Dir | where {$_.extension -eq ".msi"}
         $PALIN_MSI | format-table name
 
+        # Setup the target database credentials
+        $env:PGUSER="palette"
+        $env:PGPASSWORD="L0fasz1234"
+        psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE countersamples;"
+        psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE threadinfo;"
+        psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE serverlogs;"
+        psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE filter_state_audit;"
+
         # Do the smoke test
+        Write-Host "Launching smoke test"
         & "$PSScriptRoot\smoke-test.ps1"
 
         # Cleanup test
+        Write-Host "Cleanup test leftovers"
         Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
 
-
-        Write-Host "Aaaaand it's gone."
+        Write-Host "Smoke test finished successfully."
     } 
 }
 catch
 {
+    # Cleanup test
+    Write-Host "Cleanup test leftovers"
+    msiexec.exe /qn /x $PALIN_MSI
+    sleep 3
+    Write-Host "Uninstalled Palette Insight successfully"
+    # Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
+
+
     write-host "$pid : Error caught - $_"
     if ($? -and (test-path variable:LastExitCode) -and ($LastExitCode -gt 0))
     {
