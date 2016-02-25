@@ -80,7 +80,7 @@ namespace PaletteInsightAgent.Output
 
         private static bool ShouldTryResendingData()
         {
-            return new Random().NextDouble() < PaletteInsightAgent.Output.DBWriter.V;
+            return new Random().NextDouble() < UNSENT_FILES_RESEND_CHANCE;
         }
 
         /// <summary>
