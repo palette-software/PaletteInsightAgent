@@ -29,10 +29,10 @@ Write-Host "Downloaded example_serverlogs.zip"
 Write-Host "Unzipped insight tester"
 windows_amd64\agentrunner.exe start
 Write-Host "Started PaletteInsightAgent service"
-sleep 2
+sleep 5
 Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory("$PSScriptRoot\example_serverlogs.zip", $watched_folder_1);
-sleep 15
-Write-Host "Sleeping for 17 seconds"
+sleep 25
+Write-Host "Sleeping for 30 seconds"
 windows_amd64\agentrunner.exe stop
 Write-Host "Contents of the PaletteInsightAgent log"
 type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
