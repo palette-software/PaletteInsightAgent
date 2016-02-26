@@ -46,5 +46,3 @@ If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:
 Write-Host "Checking DB contents"
 (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', "$PSScriptRoot\appveyor_tests.json")
 & "$PSScriptRoot\windows_amd64\dbcheck.exe" appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
-msiexec.exe /qn /x $env:PALIN_MSI
-Write-Host "Uninstalled Palette Insight successfully"
