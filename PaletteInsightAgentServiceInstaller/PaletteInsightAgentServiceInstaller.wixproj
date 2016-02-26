@@ -53,18 +53,17 @@
     <WixTasksPath>wixtasks.dll</WixTasksPath>
   </PropertyGroup>
   <Import Project="$(WixTargetsPath)" />
+  <Target Name="BeforeBuild">
+    <!-- Get the programs assembly version from the .exe file -->
+    <GetAssemblyIdentity AssemblyFiles="..\PaletteInsightAgentService\bin\$(Configuration)\PaletteInsightAgent.exe">
+      <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
+    </GetAssemblyIdentity>
+    <!-- Store the assembly version number in ProductVersion preprocessor variable -->
+    <CreateProperty Value="$(DefineConstants);ProductVersion=%(AsmInfo.Version)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
+  </Target>
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(SolutionDir)PaletteInsightAgentServiceInstallerBootstrapper\Installers\" mkdir "$(SolutionDir)PaletteInsightAgentServiceInstallerBootstrapper\Installers\"
-copy "$(ProjectDir)$(OutDir)%2a.msi" "$(SolutionDir)PaletteInsightAgentServiceInstallerBootstrapper\Installers\" /y</PostBuildEvent>
+    <PostBuildEvent />
   </PropertyGroup>
-    <Target Name="BeforeBuild">
-      <!-- Get the programs assembly version from the .exe file -->
-      <GetAssemblyIdentity AssemblyFiles="..\PaletteInsightAgentService\bin\$(Configuration)\PaletteInsightAgent.exe">
-        <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
-      </GetAssemblyIdentity>
-      <!-- Store the assembly version number in ProductVersion preprocessor variable -->
-      <CreateProperty Value="$(DefineConstants);ProductVersion=%(AsmInfo.Version)">
-        <Output TaskParameter="Value" PropertyName="DefineConstants" />
-      </CreateProperty>
-    </Target>
 </Project>
