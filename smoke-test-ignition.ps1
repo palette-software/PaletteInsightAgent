@@ -29,7 +29,7 @@ try
         # Do the preparations for the test
         Write-Host "Download our Github release downloader tool"
         (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/githubrelease.exe/_80d5198eac2d44b7a31f08060eddd5fe', "$PSScriptRoot\githubrelease.exe")
-        & "$PSScriptRoot\githubrelease.exe" palette-software PaletteInsightAgent d7557c77fc1492c6810274fdb8c55b2455d2687f
+        & "$PSScriptRoot\githubrelease.exe" palette-software PaletteInsightAgent $env:GITHUB_ACCESS_TOKEN
 
         Write-Host "Downloaded .msi files:"
         dir *.msi
@@ -53,8 +53,6 @@ try
         psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE threadinfo;"
         psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE serverlogs;"
         psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE filter_state_audit;"
-
-        Remove-Item -Path "$PSScriptRoot\windows_amd64" -Recurse
 
         # Do the smoke test
         Write-Host "Launching smoke test"
