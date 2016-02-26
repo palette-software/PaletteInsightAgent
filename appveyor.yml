@@ -129,8 +129,7 @@ deploy:
 #   on_build_failure: true
 #   on_build_status_changed: true
 
-# on_finish:
-# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_finish:
   - echo "Starting SMOKE test"
-  - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u 'gocd-admin:%GOCDPASS%' -X POST
+  - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST
+# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
