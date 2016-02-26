@@ -22,15 +22,18 @@ Write-Host "Reconfigured config.yml"
 
 (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.5-lw/windows_amd64.zip', "$PSScriptRoot\insight-tester.zip")
 Write-Host "Downloaded insight-tester"
+sleep 3
 Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory("$PSScriptRoot\insight-tester.zip", "$PSScriptRoot");
 Write-Host "Unzipped insight tester"
+sleep 3
 (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', "$PSScriptRoot\example_serverlogs.zip")
 Write-Host "Downloaded example_serverlogs.zip"
-Write-Host "Unzipped insight tester"
+Write-Host "Unzipped example serverlogs"
 & "$PSScriptRoot\windows_amd64\agentrunner.exe" start
 Write-Host "Started PaletteInsightAgent service"
 sleep 5
 Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory("$PSScriptRoot\example_serverlogs.zip", $watched_folder_1);
+Write-Host "Populated $watched_folder_1"
 sleep 25
 Write-Host "Sleeping for 30 seconds"
 & "$PSScriptRoot\windows_amd64\agentrunner.exe" stop
