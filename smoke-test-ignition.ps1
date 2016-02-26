@@ -45,7 +45,7 @@ try
         Write-Host "Installing $env:PALIN_MSI ..."
         & msiexec.exe /qn /i $env:PALIN_MSI
         # HACK: This is so awkward... On GoCD agent execution does not wait for the install to finish... :(
-        sleep 3
+        sleep 13
         Write-Host "Installed Palette Insight Agent successfully"
 
         # Setup the target database credentials
