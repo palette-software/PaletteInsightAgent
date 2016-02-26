@@ -43,7 +43,7 @@ try
 
         # Make a sample run of Palette Insight Agent
         Write-Host "Installing $env:PALIN_MSI ..."
-        msiexec.exe /qn /i $env:PALIN_MSI
+        & msiexec.exe /qn /i $env:PALIN_MSI
         # HACK: This is so awkward... On GoCD agent execution does not wait for the install to finish... :(
         sleep 3
         Write-Host "Installed Palette Insight Agent successfully"
@@ -62,8 +62,8 @@ try
 
         # Cleanup test
         Write-Host "Cleanup test leftovers"
-        msiexec.exe /qn /x $env:PALIN_MSI
-        sleep 3
+        & msiexec.exe /qn /x $env:PALIN_MSI
+        sleep 6
         Write-Host "Uninstalled Palette Insight successfully"
         Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
 
@@ -76,8 +76,8 @@ catch
 
     # Cleanup test
     Write-Host "Cleanup test leftovers"
-    msiexec.exe /qn /x $env:PALIN_MSI
-    sleep 3
+    & msiexec.exe /qn /x $env:PALIN_MSI
+    sleep 6
     Write-Host "Uninstalled Palette Insight successfully"
     Remove-Item -Path "C:\Program Files (x86)\Palette Insight Agent" -Recurse
 
