@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Licensing
@@ -19,12 +20,33 @@ namespace Licensing
         /// <returns></returns>
         public static string toWrappedString(byte[] bytes, int wrapWidth=60)
         {
-            return LicenseSerializer.toWrapped(Convert.ToBase64String(bytes), wrapWidth);
+            return toWrapped(Convert.ToBase64String(bytes), wrapWidth);
         }
 
         public static byte[] fromWrappedString(string data)
         {
-            return Convert.FromBase64String(LicenseSerializer.fromWrapped(data));
+            return Convert.FromBase64String(fromWrapped(data));
         }
+
+        #region width-wrapping
+
+
+        public static string toWrapped(string source, int width = 60)
+        {
+            return source
+                .ToList<char>()
+                .Partition(width)
+                .Select((line) => new String(line.ToArray()))
+                .Join("\n");
+        }
+
+        const string WRAP_SPLIT_PATTERN = @"\s+";
+
+        public static string fromWrapped(string source)
+        {
+            return Regex.Split(source, WRAP_SPLIT_PATTERN).Join("");
+        }
+
+        #endregion
     }
 }
