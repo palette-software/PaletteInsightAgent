@@ -29,9 +29,7 @@ try
         # Do the preparations for the test
         Write-Host "Download our Github release downloader tool"
         (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/githubrelease.exe/_80d5198eac2d44b7a31f08060eddd5fe', "$PSScriptRoot\githubrelease.exe")
-        sleep 2
-        & "$PSScriptRoot\githubrelease.exe" palette-software PaletteInsightAgent $env:GITHUB_ACCESS_TOKEN
-        sleep 2
+        & "$PSScriptRoot\githubrelease.exe" palette-software PaletteInsightAgent d7557c77fc1492c6810274fdb8c55b2455d2687f
 
         Write-Host "Downloaded .msi files:"
         dir *.msi
@@ -45,7 +43,7 @@ try
         Write-Host "Installing $env:PALIN_MSI ..."
         & msiexec.exe /qn /i $env:PALIN_MSI
         # HACK: This is so awkward... On GoCD agent execution does not wait for the install to finish... :(
-        sleep 13
+        sleep 3
         Write-Host "Installed Palette Insight Agent successfully"
 
         # Setup the target database credentials
@@ -55,6 +53,8 @@ try
         psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE threadinfo;"
         psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE serverlogs;"
         psql -h 52.90.169.216 -d paletterobot -c "DROP TABLE filter_state_audit;"
+
+        Remove-Item -Path "$PSScriptRoot\windows_amd64" -Recurse
 
         # Do the smoke test
         Write-Host "Launching smoke test"
