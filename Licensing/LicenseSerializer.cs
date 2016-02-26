@@ -7,43 +7,76 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
+using Microsoft.Hadoop.Avro;
+using Microsoft.Hadoop.Avro.Schema;
 
 namespace Licensing
 {
     public class LicenseSerializer
     {
-        public static string licenseToString(License license)
+
+        private const string LicenseAvroSchema = @"{
+                            ""type"":""record"",
+                            ""name"":""License"",
+                            ""fields"":
+                                [
+                                    { ""name"":""seed"", ""type"":""int"" },
+                                    { ""name"":""owner"", ""type"":""string"" },
+                                    { ""name"":""licenseId"", ""type"":""string"" },
+                                    { ""name"":""coreCount"", ""type"":""int"" },
+                                    { ""name"":""token"", ""type"":""bytes"" },
+                                    { ""name"":""validUntilUTC"", ""type"":""long"" }
+                                ]
+                        }";
+
+        #region Avro serialization of license
+
+        public static byte[] licenseToAvroBytes(License license)
         {
-            XmlSerializer writer = new XmlSerializer(license.GetType());
-            using (var memoryStream = new MemoryStream())
+            var serializer = AvroSerializer.CreateGeneric(LicenseAvroSchema);
+            var rootSchema = serializer.WriterSchema as RecordSchema;
+            //Create a memory stream buffer
+            using (var buffer = new MemoryStream())
             {
-                writer.Serialize(memoryStream, license);
-                return Encoding.UTF8.GetString(memoryStream.ToArray());
+                dynamic output = new AvroRecord(serializer.WriterSchema);
+                output.seed = license.seed;
+                output.owner = license.owner;
+                output.licenseId = license.licenseId;
+                output.coreCount = license.coreCount;
+                output.token = license.token;
+
+                // convert the datetime to a timestamp
+                output.validUntilUTC = DateTimeConverter.ToTimestamp(license.validUntilUTC);
+
+
+                //Serialize the data to the specified stream
+                serializer.Serialize(buffer, output);
+
+                return buffer.ToArray();
             }
         }
 
-        public static byte[] licenseToBytes(License license)
+
+        public static License avroBytesToLicense(byte[] avroBytes)
         {
-            XmlSerializer writer = new XmlSerializer(license.GetType());
-            using (var memoryStream = new MemoryStream())
+            var serializer = AvroSerializer.CreateGeneric(LicenseAvroSchema);
+            var rootSchema = serializer.WriterSchema as RecordSchema;
+            using (var buffer = new MemoryStream(avroBytes))
             {
-                writer.Serialize(memoryStream, license);
-                return memoryStream.ToArray();
+                dynamic o = serializer.Deserialize(buffer);
+                return new License
+                {
+                    seed = o.seed,
+                    owner = o.owner,
+                    licenseId = o.licenseId,
+                    coreCount = o.coreCount,
+                    token = o.token,
+                    validUntilUTC = DateTimeConverter.ToDateTime(o.validUntilUTC),
+                };
             }
         }
 
-        public static License stringToLicense(string licenseText)
-        {
-            return stringToLicense(System.Text.Encoding.UTF8.GetBytes(licenseText));
-        }
-
-
-        public static License stringToLicense(byte[] bytes)
-        {
-            XmlSerializer reader = new XmlSerializer(typeof(License));
-            using (var memoryStream = new MemoryStream(bytes))
-                return (License)reader.Deserialize(memoryStream);
-        }
+        #endregion
 
 
         #region Keypairs
@@ -55,9 +88,7 @@ namespace Licensing
             using (StreamWriter file = new StreamWriter(memoryStream))
             {
                 writer.Serialize(file, keyPair);
-                //return memoryStream.ToArray();
                 return Encoding.UTF8.GetString(memoryStream.ToArray());
-                //return Encoding.UTF8.GetString(memoryStream.ToArray());
             }
         }
 
@@ -78,26 +109,6 @@ namespace Licensing
 
         #endregion
 
-        #region width-wrapping
-
-
-        public static string toWrapped(string source, int width = 60)
-        {
-            return source
-                .ToList<char>()
-                .Partition(width)
-                .Select((line) => new String(line.ToArray()))
-                .Join("\n");
-        }
-
-        const string WRAP_SPLIT_PATTERN = @"\s+";
-
-        public static string fromWrapped(string source)
-        {
-            return Regex.Split(source, WRAP_SPLIT_PATTERN).Join("");
-        }
-
-        #endregion
     }
 
     public static class EnumerableHelpers
@@ -115,4 +126,33 @@ namespace Licensing
             return String.Join(joiner, source);
         }
     }
+
+    public class DateTimeConverter
+    {
+
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        /// <summary>
+        /// Converts a datetime to its unix timestamp equivalent (ignores timezones)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static long ToTimestamp(DateTime value)
+        {
+            TimeSpan elapsedTime = value - Epoch;
+            return (long)elapsedTime.TotalSeconds;
+        }
+
+        /// <summary>
+        /// Converts a unix timestamp to its datetime equivalent
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <returns></returns>
+        public static DateTime ToDateTime(long timestamp)
+        {
+            // make sure thee datetime is in UTC
+            return DateTime.SpecifyKind(Epoch + TimeSpan.FromSeconds(timestamp), DateTimeKind.Utc);
+        }
+    }
+
 }
