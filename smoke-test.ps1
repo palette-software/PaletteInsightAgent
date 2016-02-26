@@ -29,14 +29,16 @@ sleep 3
 (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', "$PSScriptRoot\example_serverlogs.zip")
 Write-Host "Downloaded example_serverlogs.zip"
 Write-Host "Unzipped example serverlogs"
-& "$PSScriptRoot\windows_amd64\agentrunner.exe" start
+#& "$PSScriptRoot\windows_amd64\agentrunner.exe" start
+Start-Service -Name PaletteInsightAgent
 Write-Host "Started PaletteInsightAgent service"
 sleep 5
 Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory("$PSScriptRoot\example_serverlogs.zip", $watched_folder_1);
 Write-Host "Populated $watched_folder_1"
 sleep 25
 Write-Host "Sleeping for 30 seconds"
-& "$PSScriptRoot\windows_amd64\agentrunner.exe" stop
+#& "$PSScriptRoot\windows_amd64\agentrunner.exe" stop
+Stop-Service -Name PaletteInsightAgent
 Write-Host "Contents of the PaletteInsightAgent log"
 type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
 Write-Host "End of PaletteInsightAgent log"
