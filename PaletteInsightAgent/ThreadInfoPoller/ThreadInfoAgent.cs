@@ -54,7 +54,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
             if (threadInfoTableCount > 0)
             {
-                CsvOutput.Write(threadInfoTable);
+                OutputSerializer.Write(threadInfoTable);
             }
         }
 
