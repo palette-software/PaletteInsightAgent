@@ -13,16 +13,16 @@ namespace PaletteInsightAgent.Output
         /// <summary>
         /// The directory we store the succesfully uploaded files
         /// </summary>
-        private const string PROCESSED_POSTFIX = @"processed/";
+        private const string PROCESSED_PREFIX = @"processed/";
         /// <summary>
         /// The directory where the files that have errors (invalid names, etc.)
         /// </summary>
-        private const string ERROR_POSTFIX = @"errors/";
+        private const string ERROR_PREFIX = @"errors/";
         /// <summary>
         /// The path where files to be re-sent later are stored.
         /// TODO: try these files on start
         /// </summary>
-        private const string UNSENT_POSTFIX = @"unsent/";
+        private const string UNSENT_PREFIX = @"unsent/";
 
         /// <summary>
         /// A list of table names we actually care about.
@@ -45,7 +45,7 @@ namespace PaletteInsightAgent.Output
         {
             get
             {
-                return Path.Combine(OutputSerializer.DATA_FOLDER, PROCESSED_POSTFIX);
+                return Path.Combine(OutputSerializer.DATA_FOLDER, PROCESSED_PREFIX);
             }
         }
 
@@ -53,7 +53,7 @@ namespace PaletteInsightAgent.Output
         {
             get
             {
-                return Path.Combine(OutputSerializer.DATA_FOLDER, ERROR_POSTFIX);
+                return Path.Combine(OutputSerializer.DATA_FOLDER, ERROR_PREFIX);
             }
         }
 
@@ -61,7 +61,7 @@ namespace PaletteInsightAgent.Output
         {
             get
             {
-                return Path.Combine(OutputSerializer.DATA_FOLDER, UNSENT_POSTFIX);
+                return Path.Combine(OutputSerializer.DATA_FOLDER, UNSENT_PREFIX);
             }
         }
         public static readonly object DBWriteLock = new object();
