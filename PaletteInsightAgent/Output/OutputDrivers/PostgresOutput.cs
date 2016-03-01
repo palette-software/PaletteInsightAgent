@@ -23,7 +23,6 @@ namespace PaletteInsightAgent.Output
         private Dictionary<string, Func<DataTable>> tableCreators = new Dictionary<string, Func<DataTable>>
         {
             { LogTables.SERVERLOGS_TABLE_NAME,          LogTables.makeServerLogsTable },
-            { LogTables.FILTER_STATE_AUDIT_TABLE_NAME,  LogTables.makeFilterStateAuditTable},
             { ThreadTables.TABLE_NAME,                  ThreadTables.makeThreadInfoTable},
             { CounterSampler.TABLE_NAME,                CounterSampler.makeCounterSamplesTable}
         };
@@ -317,8 +316,8 @@ namespace PaletteInsightAgent.Output
             }
 
             // first row contains column names
-            string columnNames = File.ReadLines(fileName).First(); // gets the first line from file.
-            var copyString = String.Format("COPY {0} ({1}) FROM STDIN WITH CSV", tableName, columnNames);
+            string columnNames = File.ReadLines(fileName).First().Replace("\v", ","); // gets the first line from file.
+            var copyString = String.Format("COPY {0} ({1}) FROM STDIN WITH DELIMITER '\v' CSV", tableName, columnNames);
             return copyString;
         }
 
