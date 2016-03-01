@@ -7,71 +7,59 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
-using Microsoft.Hadoop.Avro;
-using Microsoft.Hadoop.Avro.Schema;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+using System.Diagnostics;
 
 namespace Licensing
 {
     public class LicenseSerializer
     {
 
-        private const string LicenseAvroSchema = @"{
-                            ""type"":""record"",
-                            ""name"":""License"",
-                            ""fields"":
-                                [
-                                    { ""name"":""seed"", ""type"":""int"" },
-                                    { ""name"":""owner"", ""type"":""string"" },
-                                    { ""name"":""licenseId"", ""type"":""string"" },
-                                    { ""name"":""coreCount"", ""type"":""int"" },
-                                    { ""name"":""token"", ""type"":""bytes"" },
-                                    { ""name"":""validUntilUTC"", ""type"":""long"" }
-                                ]
-                        }";
+        /// <summary>
+        /// The encoding to use to read the bytes from the serialized license
+        /// </summary>
+        private static readonly Encoding LicenseEncoding = new UTF8Encoding();
 
-        #region Avro serialization of license
+        #region YAML serialization of license
 
-        public static byte[] licenseToAvroBytes(License license)
+        /// <summary>
+        /// Converts a license to its YAML equivalent, and returning it as UTF-8 bytes.
+        /// </summary>
+        /// <param name="license"></param>
+        /// <returns></returns>
+        public static byte[] licenseToYamlBytes(License license)
         {
-            var serializer = AvroSerializer.CreateGeneric(LicenseAvroSchema);
-            var rootSchema = serializer.WriterSchema as RecordSchema;
-            //Create a memory stream buffer
-            using (var buffer = new MemoryStream())
+            using (var writer = new StringWriter())
             {
-                dynamic output = new AvroRecord(serializer.WriterSchema);
-                output.seed = license.seed;
-                output.owner = license.owner;
-                output.licenseId = license.licenseId;
-                output.coreCount = license.coreCount;
-                output.token = license.token;
-
-                // convert the datetime to a timestamp
-                output.validUntilUTC = DateTimeConverter.ToTimestamp(license.validUntilUTC);
-
-
-                //Serialize the data to the specified stream
-                serializer.Serialize(buffer, output);
-
-                return buffer.ToArray();
+                var serializableLicense = YamlLicense.FromLicense(license);
+                var yamlSerializer = new Serializer(namingConvention: new NullNamingConvention());
+                yamlSerializer.Serialize(writer, serializableLicense);
+                var licenseYaml = writer.ToString();
+                Debug.WriteLine(licenseYaml);
+                return LicenseEncoding.GetBytes(licenseYaml);
             }
         }
 
-
-        public static License avroBytesToLicense(byte[] avroBytes)
+        /// <summary>
+        /// Converts a list of UTF-8 bytes to a license
+        /// </summary>
+        /// <param name="avroBytes"></param>
+        /// <returns></returns>
+        public static License yamlBytesToLicense(byte[] avroBytes)
         {
-            var serializer = AvroSerializer.CreateGeneric(LicenseAvroSchema);
-            var rootSchema = serializer.WriterSchema as RecordSchema;
-            using (var buffer = new MemoryStream(avroBytes))
+            using (var reader = new StringReader(LicenseEncoding.GetString(avroBytes)))
             {
-                dynamic o = serializer.Deserialize(buffer);
+                var deserializer = new Deserializer(namingConvention: new NullNamingConvention());
+                var serializedLicense = deserializer.Deserialize<YamlLicense>(reader);
                 return new License
                 {
-                    seed = o.seed,
-                    owner = o.owner,
-                    licenseId = o.licenseId,
-                    coreCount = o.coreCount,
-                    token = o.token,
-                    validUntilUTC = DateTimeConverter.ToDateTime(o.validUntilUTC),
+                    seed = serializedLicense.seed,
+                    owner = serializedLicense.owner,
+                    coreCount = serializedLicense.coreCount,
+                    licenseId = serializedLicense.licenseId,
+                    token = Convert.FromBase64String(serializedLicense.token),
+                    validUntilUTC = serializedLicense.validUntilUTC,
                 };
             }
         }
@@ -108,6 +96,50 @@ namespace Licensing
         }
 
         #endregion
+
+    }
+
+    /// <summary>
+    /// The serialized format of the license (differs from the actual license in handling the validity date
+    /// and the token byte array)
+    /// </summary>
+    class YamlLicense
+    {
+        [YamlMember(Alias = "seed")]
+        public int seed { get; set; }
+
+        [YamlMember(Alias = "owner")]
+        public string owner { get; set; }
+
+        [YamlMember(Alias = "licenseId")]
+        public string licenseId { get; set; }
+
+        [YamlMember(Alias = "coreCount")]
+        public int coreCount { get; set; }
+
+        [YamlMember(Alias = "token")]
+        public string token { get; set; }
+
+        [YamlMember(Alias = "validUntilUTC")]
+        public DateTime validUntilUTC { get; set; }
+
+        /// <summary>
+        /// Factory method for the serializable license
+        /// </summary>
+        /// <param name="license"></param>
+        /// <returns></returns>
+        public static YamlLicense FromLicense(License license)
+        {
+            return new YamlLicense
+            {
+                seed = license.seed,
+                owner = license.owner,
+                licenseId = license.licenseId,
+                token = Convert.ToBase64String(license.token),
+                coreCount = license.coreCount,
+                validUntilUTC = license.validUntilUTC,
+            };
+        }
 
     }
 
