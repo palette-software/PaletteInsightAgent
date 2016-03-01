@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Hadoop.Avro.Container;
 
 namespace Licensing
 {
     /// <summary>
     /// The license to be submitted
     /// </summary>
-    [Serializable]
     public class License
     {
         // Add some random data here, so that each license generated differs in some
