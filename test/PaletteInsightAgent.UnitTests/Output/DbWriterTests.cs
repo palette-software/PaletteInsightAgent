@@ -74,7 +74,7 @@ namespace PaletteInsightAgentTests.Output
             var resultFiles = DBWriter.GetFilesOfSameTable();
 
             // Assert
-            Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("csv/", "serverlog-*.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("data/", "serverlog-*.csv"));
         }
 
         [TestMethod, Isolated]
@@ -85,13 +85,13 @@ namespace PaletteInsightAgentTests.Output
                                    "threadinfo-2016-01-28-15-06-00.csv", "serverlog-2016-01-28-15-06-30.csv.writing" };
             string[] serverLogs = { testFiles[0], testFiles[1], testFiles[3] };
             Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(testFiles);
-            Isolate.WhenCalled(() => Directory.GetFiles("csv/", "serverlog-*.csv")).WithExactArguments().WillReturn(serverLogs);
+            Isolate.WhenCalled(() => Directory.GetFiles("data/", "serverlog-*.csv")).WithExactArguments().WillReturn(serverLogs);
 
             // Act
             var resultFiles = DBWriter.GetFilesOfSameTable();
 
             // Assert
-            Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("csv/", "serverlog-*.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("data/", "serverlog-*.csv"));
             List<string> expectedFiles = new List<string>();
             expectedFiles.Add(testFiles[0]);
             expectedFiles.Add(testFiles[1]);
@@ -157,7 +157,7 @@ namespace PaletteInsightAgentTests.Output
         public void TestGetFileName()
         {
             // Arrange
-            var fullFileName = "csv/" + testFile;
+            var fullFileName = "data/" + testFile;
 
             // Act
             var fileName = DBWriter.GetFileName(fullFileName);
@@ -235,9 +235,9 @@ namespace PaletteInsightAgentTests.Output
         public void MyTestInitialize()
         {
             testFileList = new List<string>();
-            testFileList.Add("csv/serverlog-2016-01-28-15-06-00.csv");
-            testFileList.Add("csv/serverlog-2016-01-28-15-06-30.csv");
-            testFileList.Add("csv/threadinfo-2016-01-28-15-06-00.csv");
+            testFileList.Add("data/serverlog-2016-01-28-15-06-00.csv");
+            testFileList.Add("data/serverlog-2016-01-28-15-06-30.csv");
+            testFileList.Add("data/threadinfo-2016-01-28-15-06-00.csv");
 
             fakeLog = Isolate.Fake.AllInstances<Logger>();
             Isolate.WhenCalled(() => LogManager.GetCurrentClassLogger()).WillReturn(fakeLog);
@@ -263,9 +263,9 @@ namespace PaletteInsightAgentTests.Output
 
             // Assert
             Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[0], "csv/processed/serverlog-2016-01-28-15-06-00.csv"));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[1], "csv/processed/serverlog-2016-01-28-15-06-30.csv"));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[2], "csv/processed/threadinfo-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[0], "data/processed/serverlog-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[1], "data/processed/serverlog-2016-01-28-15-06-30.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[2], "data/processed/threadinfo-2016-01-28-15-06-00.csv"));
         }
 
         [TestMethod, Isolated]
@@ -280,14 +280,14 @@ namespace PaletteInsightAgentTests.Output
 
             // Assert
             Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Delete("anyfile")));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("csv/processed/serverlog-2016-01-28-15-06-00.csv"));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("csv/processed/serverlog-2016-01-28-15-06-30.csv"));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("csv/processed/threadinfo-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("data/processed/serverlog-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("data/processed/serverlog-2016-01-28-15-06-30.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Delete("data/processed/threadinfo-2016-01-28-15-06-00.csv"));
 
             Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[0], "csv/processed/serverlog-2016-01-28-15-06-00.csv"));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[1], "csv/processed/serverlog-2016-01-28-15-06-30.csv"));
-            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[2], "csv/processed/threadinfo-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[0], "data/processed/serverlog-2016-01-28-15-06-00.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[1], "data/processed/serverlog-2016-01-28-15-06-30.csv"));
+            Isolate.Verify.WasCalledWithExactArguments(() => File.Move(testFileList[2], "data/processed/threadinfo-2016-01-28-15-06-00.csv"));
         }
 
         [TestMethod, Isolated]
@@ -295,7 +295,7 @@ namespace PaletteInsightAgentTests.Output
         {
             // Arrange
             Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
-            var destinationFolder = "csv/processed/";
+            var destinationFolder = "data/processed/";
             Isolate.WhenCalled(() => Directory.Exists(destinationFolder)).WithExactArguments().WillReturn(false);
             // Only report in the first round that the destination folder is missing
             Isolate.WhenCalled(() => Directory.Exists(destinationFolder)).WithExactArguments().WillReturn(true);

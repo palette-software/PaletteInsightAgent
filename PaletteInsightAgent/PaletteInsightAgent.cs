@@ -270,7 +270,7 @@ namespace PaletteInsightAgent
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
-                CsvOutput.Write(sampleResults);
+                OutputSerializer.Write(sampleResults);
             });
         }
 
