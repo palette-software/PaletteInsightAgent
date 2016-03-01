@@ -40,7 +40,7 @@ namespace Licensing
 
         public string serializeLicense(License license, byte[] privateKey)
         {
-            return LicenseFormatting.toWrappedString( PublicKeyAuth.Sign( LicenseSerializer.licenseToAvroBytes(license), privateKey));
+            return LicenseFormatting.toWrappedString( PublicKeyAuth.Sign( LicenseSerializer.licenseToYamlBytes(license), privateKey));
         }
 
         public ValidatedLicense isValidLicense(string licenseString, int coreCount, byte[] publicKey)
@@ -50,7 +50,7 @@ namespace Licensing
                 // verify the signature
                 var licenseText = PublicKeyAuth.Verify(LicenseFormatting.fromWrappedString(licenseString), publicKey);
                 // deserialize the license
-                var license = LicenseSerializer.avroBytesToLicense(licenseText);
+                var license = LicenseSerializer.yamlBytesToLicense(licenseText);
                 Console.WriteLine(String.Format("Checking license: {0} / {1} cores / valid until {2}", license.owner, license.coreCount, license.validUntilUTC));
                 // a license is valid if the core count is within limits and the time is ok
                 var isValid = (license.coreCount >= coreCount) && (license.validUntilUTC > DateTime.UtcNow);
