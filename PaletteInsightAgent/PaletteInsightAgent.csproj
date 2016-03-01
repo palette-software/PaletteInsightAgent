@@ -165,7 +165,9 @@
     <Compile Include="LicenseChecker\LicenseChecker.cs" />
     <Compile Include="LicensePublicKey.cs" />
     <Compile Include="Output\DBWriter.cs" />
-    <Compile Include="Output\CsvOutput.cs" />
+    <Compile Include="Output\IWriter.cs" />
+    <Compile Include="Output\OutputSerializer.cs" />
+    <Compile Include="Output\CsvSerializer.cs" />
     <Compile Include="Output\Connection\DbConnectionInfo.cs" />
     <Compile Include="Output\Connection\IDbConnectionInfo.cs" />
     <Compile Include="Output\DataTableUtils.cs" />
