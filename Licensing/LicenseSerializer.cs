@@ -7,43 +7,64 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.IO.Compression;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
+using System.Diagnostics;
 
 namespace Licensing
 {
     public class LicenseSerializer
     {
-        public static string licenseToString(License license)
+
+        /// <summary>
+        /// The encoding to use to read the bytes from the serialized license
+        /// </summary>
+        private static readonly Encoding LicenseEncoding = new UTF8Encoding();
+
+        #region YAML serialization of license
+
+        /// <summary>
+        /// Converts a license to its YAML equivalent, and returning it as UTF-8 bytes.
+        /// </summary>
+        /// <param name="license"></param>
+        /// <returns></returns>
+        public static byte[] licenseToYamlBytes(License license)
         {
-            XmlSerializer writer = new XmlSerializer(license.GetType());
-            using (var memoryStream = new MemoryStream())
+            using (var writer = new StringWriter())
             {
-                writer.Serialize(memoryStream, license);
-                return Encoding.UTF8.GetString(memoryStream.ToArray());
+                var serializableLicense = YamlLicense.FromLicense(license);
+                var yamlSerializer = new Serializer(namingConvention: new NullNamingConvention());
+                yamlSerializer.Serialize(writer, serializableLicense);
+                var licenseYaml = writer.ToString();
+                Debug.WriteLine(licenseYaml);
+                return LicenseEncoding.GetBytes(licenseYaml);
             }
         }
 
-        public static byte[] licenseToBytes(License license)
+        /// <summary>
+        /// Converts a list of UTF-8 bytes to a license
+        /// </summary>
+        /// <param name="avroBytes"></param>
+        /// <returns></returns>
+        public static License yamlBytesToLicense(byte[] avroBytes)
         {
-            XmlSerializer writer = new XmlSerializer(license.GetType());
-            using (var memoryStream = new MemoryStream())
+            using (var reader = new StringReader(LicenseEncoding.GetString(avroBytes)))
             {
-                writer.Serialize(memoryStream, license);
-                return memoryStream.ToArray();
+                var deserializer = new Deserializer(namingConvention: new NullNamingConvention());
+                var serializedLicense = deserializer.Deserialize<YamlLicense>(reader);
+                return new License
+                {
+                    seed = serializedLicense.seed,
+                    owner = serializedLicense.owner,
+                    coreCount = serializedLicense.coreCount,
+                    licenseId = serializedLicense.licenseId,
+                    token = Convert.FromBase64String(serializedLicense.token),
+                    validUntilUTC = serializedLicense.validUntilUTC,
+                };
             }
         }
 
-        public static License stringToLicense(string licenseText)
-        {
-            return stringToLicense(System.Text.Encoding.UTF8.GetBytes(licenseText));
-        }
-
-
-        public static License stringToLicense(byte[] bytes)
-        {
-            XmlSerializer reader = new XmlSerializer(typeof(License));
-            using (var memoryStream = new MemoryStream(bytes))
-                return (License)reader.Deserialize(memoryStream);
-        }
+        #endregion
 
 
         #region Keypairs
@@ -55,9 +76,7 @@ namespace Licensing
             using (StreamWriter file = new StreamWriter(memoryStream))
             {
                 writer.Serialize(file, keyPair);
-                //return memoryStream.ToArray();
                 return Encoding.UTF8.GetString(memoryStream.ToArray());
-                //return Encoding.UTF8.GetString(memoryStream.ToArray());
             }
         }
 
@@ -78,26 +97,50 @@ namespace Licensing
 
         #endregion
 
-        #region width-wrapping
+    }
 
+    /// <summary>
+    /// The serialized format of the license (differs from the actual license in handling the validity date
+    /// and the token byte array)
+    /// </summary>
+    class YamlLicense
+    {
+        [YamlMember(Alias = "seed")]
+        public int seed { get; set; }
 
-        public static string toWrapped(string source, int width = 60)
+        [YamlMember(Alias = "owner")]
+        public string owner { get; set; }
+
+        [YamlMember(Alias = "licenseId")]
+        public string licenseId { get; set; }
+
+        [YamlMember(Alias = "coreCount")]
+        public int coreCount { get; set; }
+
+        [YamlMember(Alias = "token")]
+        public string token { get; set; }
+
+        [YamlMember(Alias = "validUntilUTC")]
+        public DateTime validUntilUTC { get; set; }
+
+        /// <summary>
+        /// Factory method for the serializable license
+        /// </summary>
+        /// <param name="license"></param>
+        /// <returns></returns>
+        public static YamlLicense FromLicense(License license)
         {
-            return source
-                .ToList<char>()
-                .Partition(width)
-                .Select((line) => new String(line.ToArray()))
-                .Join("\n");
+            return new YamlLicense
+            {
+                seed = license.seed,
+                owner = license.owner,
+                licenseId = license.licenseId,
+                token = Convert.ToBase64String(license.token),
+                coreCount = license.coreCount,
+                validUntilUTC = license.validUntilUTC,
+            };
         }
 
-        const string WRAP_SPLIT_PATTERN = @"\s+";
-
-        public static string fromWrapped(string source)
-        {
-            return Regex.Split(source, WRAP_SPLIT_PATTERN).Join("");
-        }
-
-        #endregion
     }
 
     public static class EnumerableHelpers
@@ -115,4 +158,33 @@ namespace Licensing
             return String.Join(joiner, source);
         }
     }
+
+    public class DateTimeConverter
+    {
+
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        /// <summary>
+        /// Converts a datetime to its unix timestamp equivalent (ignores timezones)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static long ToTimestamp(DateTime value)
+        {
+            TimeSpan elapsedTime = value - Epoch;
+            return (long)elapsedTime.TotalSeconds;
+        }
+
+        /// <summary>
+        /// Converts a unix timestamp to its datetime equivalent
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <returns></returns>
+        public static DateTime ToDateTime(long timestamp)
+        {
+            // make sure thee datetime is in UTC
+            return DateTime.SpecifyKind(Epoch + TimeSpan.FromSeconds(timestamp), DateTimeKind.Utc);
+        }
+    }
+
 }
