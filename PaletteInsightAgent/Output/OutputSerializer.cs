@@ -4,8 +4,6 @@ using System.Data;
 using NLog;
 using System.Globalization;
 using System.Collections.Generic;
-using Microsoft.Hadoop.Avro;
-using Microsoft.Hadoop.Avro.Schema;
 
 namespace PaletteInsightAgent.Output
 {
