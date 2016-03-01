@@ -87,11 +87,12 @@ test_script:
     - echo "Unzipped insight tester"
     - windows_amd64\agentrunner.exe start
     - echo "Started PaletteInsightAgent service"
-    - sleep 2
+    - sleep 4
     - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
-    - sleep 15
+    - sleep 13
     - echo "Sleeping for 17 seconds"
-    - windows_amd64\agentrunner.exe stop
+    # - windows_amd64\agentrunner.exe stop
+    - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
     - echo "Contents of the PaletteInsightAgent log"
     - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
     - echo "End of PaletteInsightAgent log"
