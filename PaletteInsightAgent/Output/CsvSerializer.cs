@@ -96,11 +96,10 @@ namespace PaletteInsightAgent.Output
 
         public static string EscapeForCsv(string field)
         {
-            var first = field.Replace("\r", "\\015");
-            var second = first.Replace("\n", "\\012");
-            var third =  second.Replace("\0", "");
-            return third;
-
+            return field.Replace("\r", "\\015")
+                .Replace("\n", "\\012")
+                .Replace("\0", "")
+                .Replace("\v", "\\013");
         }
     }
 }
