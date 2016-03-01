@@ -1,5 +1,6 @@
 ﻿using Licensing;
 using System;
+using System.Linq;
 using System.IO;
 using System.Windows.Forms;
 
@@ -37,7 +38,9 @@ namespace LicenseGenerator
                 licenseName.Text,
                 licenseId.Text,
                 Decimal.ToInt32(coreCount.Value),
-                validUntilPicker.Value);
+                // force the license datetime to be UTC
+                DateTime.SpecifyKind(validUntilPicker.Value, DateTimeKind.Utc)
+                );
         }
 
         private void button1_Click(object sender, EventArgs e)
