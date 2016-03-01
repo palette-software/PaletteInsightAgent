@@ -26,12 +26,11 @@ namespace Licensing
 
         public License generateLicense(string owner, string licenseId, int coreCount, DateTime validUntilUTC)
         {
-            var getrandom = new Random();
+            var seed = new Random().Next(0, 2147483647);
             return new License
             {
-                // The maximum number available for SoudimCore.GetRandomNumber is 2147483647
-                //seed = SodiumCore.GetRandomNumber(2147483647),
-                seed = getrandom.Next(0, 2147483647),
+                token = generateBuffer(seed, License.TOKEN_LENGTH),
+                seed = seed,
                 owner = owner,
                 licenseId = licenseId,
                 coreCount = coreCount,
@@ -41,7 +40,7 @@ namespace Licensing
 
         public string serializeLicense(License license, byte[] privateKey)
         {
-            return LicenseFormatting.toWrappedString( PublicKeyAuth.Sign( LicenseSerializer.licenseToString(license), privateKey));
+            return LicenseFormatting.toWrappedString( PublicKeyAuth.Sign( LicenseSerializer.licenseToYamlBytes(license), privateKey));
         }
 
         public ValidatedLicense isValidLicense(string licenseString, int coreCount, byte[] publicKey)
@@ -51,7 +50,7 @@ namespace Licensing
                 // verify the signature
                 var licenseText = PublicKeyAuth.Verify(LicenseFormatting.fromWrappedString(licenseString), publicKey);
                 // deserialize the license
-                var license = LicenseSerializer.stringToLicense(licenseText);
+                var license = LicenseSerializer.yamlBytesToLicense(licenseText);
                 Console.WriteLine(String.Format("Checking license: {0} / {1} cores / valid until {2}", license.owner, license.coreCount, license.validUntilUTC));
                 // a license is valid if the core count is within limits and the time is ok
                 var isValid = (license.coreCount >= coreCount) && (license.validUntilUTC > DateTime.UtcNow);
@@ -61,6 +60,20 @@ namespace Licensing
             {
                 return new ValidatedLicense { isValid = false, license = License.Invalid };
             }
+        }
+
+
+        /// <summary>
+        /// Generates a buffer full of random bytes.
+        /// </summary>
+        /// <param name="seed"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        private static byte[] generateBuffer(int seed, int size)
+        {
+            var o = new byte[size];
+            new Random(seed).NextBytes(o);
+            return o;
         }
     }
 }
