@@ -52,8 +52,7 @@ namespace PaletteInsight
                     // Do not add the username or password here, as they come from the license
                     options.WebserviceConfig = new WebserviceConfiguration
                     {
-                        Endpoint = config.Webservice.Endpoint,
-                        UseMultifile = config.Webservice.UseMultifile,
+                        Endpoint = config.Webservice.Endpoint
                     };
                 }
                 else
