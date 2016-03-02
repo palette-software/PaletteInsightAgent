@@ -303,7 +303,7 @@ namespace PaletteInsightAgent
         private void WriteToDB(object stateInfo)
         {
             // Stateinfo contains an IOutput object
-            DBWriter.Start((IOutput)stateInfo);
+            DBWriter.Start((IOutput)stateInfo, options.ProcessedFilestTTL);
         }
 
         /// <summary>
