@@ -1,0 +1,16 @@
+- sites
+- projects
+- users
+- workbooks
+- views
+- system_users
+- core_licenses
+- data_connections
+- datasources
+- monitoring_postgresql
+- monitoring_dataengine
+- extracts
+- groups
+- group_users
+- tasks
+- schedules

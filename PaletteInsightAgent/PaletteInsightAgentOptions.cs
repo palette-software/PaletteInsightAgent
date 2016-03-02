@@ -20,6 +20,7 @@ namespace PaletteInsightAgent
         public IDbConnectionInfo ResultDatabase { get; set; }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
+        public int RepoTablesPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
         public int DBWriteInterval { get; set; }
         public int ProcessedFilestTTL { get; set; }
@@ -27,16 +28,13 @@ namespace PaletteInsightAgent
         private static PaletteInsightAgentOptions instance;
         private const int MinPollInterval = 1; // In seconds.
         public IDictionary<string, ProcessData> Processes { get; set; }
+        public ICollection<string> RepositoryTables { get; set; }
 
         public ICollection<LogFolderInfo> LogFolders { get; set; }
 
         #region Repo properties
 
-        public string RepoHost { get; set; }
-        public Int32 RepoPort { get; set; }
-        public string RepoUser { get; set; }
-        public string RepoPass { get; set; }
-        public string RepoDb { get; set; }
+        public IDbConnectionInfo RepositoryDatabase { get; set; }
 
         #endregion Repo properties
 
