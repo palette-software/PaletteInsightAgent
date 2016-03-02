@@ -69,7 +69,10 @@ namespace PaletteInsightAgent
             tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
             // check the license after the configuration has been loaded.
-            CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
+            var license = CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
+
+            // Add the webservice username/auth token from the license
+            PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options, license);
 
             // Showing the current version in the log
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -114,25 +117,28 @@ namespace PaletteInsightAgent
             }
         }
 
-        private void CheckLicense(string pathToCheck)
+        private Licensing.License CheckLicense(string pathToCheck)
         {
             try
             {
                 Log.Info("Checking for licenses in: {0}", pathToCheck);
-                // get the core count
                 var coreCount = tableauRepo.getCoreCount();
+                var license = LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount);
                 // check for license.
-                if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount))
+                if (license == null)
                 {
                     Log.Fatal("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
                     Environment.Exit(-1);
                 }
+
+                return license;
             }
             catch (Exception e)
             {
                 Log.Fatal(e, "Error during license check. Exception: {0}", e);
                 Environment.Exit(-1);
             }
+            return null;
         }
 
         ~PaletteInsightAgent()
