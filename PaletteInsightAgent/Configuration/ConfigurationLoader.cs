@@ -42,6 +42,8 @@ namespace PaletteInsight
                 // Load DBWriterInterval
                 options.DBWriteInterval = config.DBWriteInterval;
 
+                options.ProcessedFilestTTL = config.ProcessedFilesTTL;
+
                 options.AllProcesses = config.AllProcesses;
 
                 // store the result database details
