@@ -41,14 +41,30 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             // create the httpclient
             using (var httpClient = new HttpClient())
             {
-                // add the basic authentication data
-                var encoding = new ASCIIEncoding();
-                var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encoding.GetBytes(String.Format("{0}:{1}", config.Username, config.Password))));
+                // pack it into a base64 encoded header and use it as the basic http auth
+                var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
                 httpClient.DefaultRequestHeaders.Authorization = authHeader;
 
                 return sendDelegate(httpClient);
             }
 
+        }
+
+        private byte[] CreateAuthHeader()
+        {
+            // add the basic authentication data
+            var encoding = new ASCIIEncoding();
+
+            var usernameBytes = encoding.GetBytes(String.Format("{0}:", config.Username));
+
+            var authLen = config.AuthToken.Length;
+            var usernameLen = usernameBytes.Length;
+
+            var authBytes = new byte[usernameLen + authLen];
+
+            System.Buffer.BlockCopy(usernameBytes, 0, authBytes, 0, usernameLen);
+            System.Buffer.BlockCopy(config.AuthToken, 0, authBytes, usernameLen, authLen);
+            return authBytes;
         }
 
         /// <summary>
