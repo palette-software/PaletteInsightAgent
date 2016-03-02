@@ -8,6 +8,7 @@ using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NLog;
+using PaletteInsightAgent.Output.OutputDrivers;
 
 namespace PaletteInsight
 {
@@ -47,6 +48,20 @@ namespace PaletteInsight
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
 
+                if (config.Webservice != null)
+                {
+                    // Do not add the username or password here, as they come from the license
+                    options.WebserviceConfig = new WebserviceConfiguration
+                    {
+                        Endpoint = config.Webservice.Endpoint
+                    };
+                }
+                else
+                {
+                    // make sure the webservice config is null, so we wont write
+                    // to the webservice if its not configured
+                    options.WebserviceConfig = null;
+                }
 
                 // Load thread monitoring configuration
                 options.Processes = new System.Collections.Generic.Dictionary<string, ProcessData>();
@@ -61,6 +76,15 @@ namespace PaletteInsight
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
 
+            }
+
+            public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
+            {
+                // skip if we arent using the webservice
+                if (options.WebserviceConfig == null) return;
+
+                options.WebserviceConfig.Username = license.licenseId;
+                options.WebserviceConfig.AuthToken = license.token;
             }
 
             /// <summary>

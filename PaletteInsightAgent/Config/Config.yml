@@ -11,6 +11,12 @@ Database:
   User: palette
   Password: password
   CommandTimeout: 600
+
+# To use the webservice output, uncomment the following lines:
+ 
+# Webservice:
+#  Endpoint: http://localhost:9000
+
 Logs: 
   - 
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'

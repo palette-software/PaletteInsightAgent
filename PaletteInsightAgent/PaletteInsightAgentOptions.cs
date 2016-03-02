@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output;
 using PaletteInsight.Configuration;
+using PaletteInsightAgent.Output.OutputDrivers;
 
 namespace PaletteInsightAgent
 {
@@ -28,6 +29,8 @@ namespace PaletteInsightAgent
         public IDictionary<string, ProcessData> Processes { get; set; }
 
         public ICollection<LogFolderInfo> LogFolders { get; set; }
+
+        public WebserviceConfiguration WebserviceConfig { get; set; }
 
         #region Repo properties
 
