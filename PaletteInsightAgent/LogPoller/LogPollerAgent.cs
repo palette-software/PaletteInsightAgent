@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using PaletteInsightAgent.Output;
-using PaletteInsightAgent.RepoTablesPoller;
 
 namespace PaletteInsightAgent.LogPoller
 {
@@ -19,7 +18,7 @@ namespace PaletteInsightAgent.LogPoller
         private ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch;
 
 
-        public LogPollerAgent(ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch, IDbConnectionInfo repositoryDB)
+        public LogPollerAgent(ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch)
         {
             Log.Info("Initializing LogPollerAgent with number of folders: {0}.", foldersToWatch.Count);
             this.foldersToWatch = foldersToWatch;

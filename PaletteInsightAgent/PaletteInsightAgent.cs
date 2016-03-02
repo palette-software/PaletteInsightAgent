@@ -72,7 +72,7 @@ namespace PaletteInsightAgent
             if (USE_LOGPOLLER)
             {
                 // Load the log poller config & start the agent
-                logPollerAgent = new LogPollerAgent(options.LogFolders, options.RepositoryDatabase);
+                logPollerAgent = new LogPollerAgent(options.LogFolders);
             }
 
             if (USE_THREADINFO)
