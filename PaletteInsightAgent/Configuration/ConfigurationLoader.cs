@@ -50,11 +50,10 @@ namespace PaletteInsight
 
                 if (config.Webservice != null)
                 {
+                    // Do not add the username or password here, as they come from the license
                     options.WebserviceConfig = new WebserviceConfiguration
                     {
                         Endpoint = config.Webservice.Endpoint,
-                        Username = config.Webservice.Username,
-                        Password = config.Webservice.Password,
                         UseMultifile = config.Webservice.UseMultifile,
                     };
                 }
@@ -78,6 +77,15 @@ namespace PaletteInsight
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
 
+            }
+
+            public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
+            {
+                // skip if we arent using the webservice
+                if (options.WebserviceConfig == null) return;
+
+                options.WebserviceConfig.Username = license.licenseId;
+                options.WebserviceConfig.AuthToken = license.token;
             }
 
             /// <summary>

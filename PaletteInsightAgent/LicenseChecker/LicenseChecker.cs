@@ -23,7 +23,7 @@ namespace PaletteInsightAgent.LicenseChecker
         /// <param name="publicKey">The public key to validate the license against</param>
         /// <param name="coreCount">The number of cores (if the license has less then this, the license is invalid)</param>
         /// <returns>true if there is a valid license or false if there is none</returns>
-        public static bool checkForLicensesIn(string baseDirectory, byte[] publicKey, int coreCount)
+        public static License checkForLicensesIn(string baseDirectory, byte[] publicKey, int coreCount)
         {
             var licenseManager = new Ed25519LicenseManager();
 
@@ -52,7 +52,7 @@ namespace PaletteInsightAgent.LicenseChecker
                         Log.Info("  - licensed id is: {0}", license.licenseId);
                         Log.Info("  - license core count: {0}", license.coreCount);
                         Log.Info("  - valid until: {0}", license.validUntilUTC.ToLongDateString());
-                        return true;
+                        return license;
                     } else
                     {
                         Log.Info("License is invalid.");
@@ -67,7 +67,7 @@ namespace PaletteInsightAgent.LicenseChecker
 
             Log.Info("No valid license found");
             // No valid licenses found
-            return false;
+            return null;
         }
 
 

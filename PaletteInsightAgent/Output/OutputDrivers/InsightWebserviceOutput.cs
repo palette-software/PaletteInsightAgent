@@ -23,10 +23,14 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         public string Endpoint;
 
         /// <summary>
-        /// The authentication username for the webservice
+        /// The authentication username for the webservice (the licenseId of the license)
         /// </summary>
         public string Username;
-        public string Password;
+
+        /// <summary>
+        /// The authentication token from the license
+        /// </summary>
+        public byte[] AuthToken;
 
         /// <summary>
         /// Should the output use multiple-file-upload (true) or single-file-upload(false)
@@ -42,7 +46,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         {
             get
             {
-                return Endpoint.Length >= 4 && Endpoint.StartsWith("http") && Username.Length > 0 && Password.Length > 0;
+                return Endpoint.Length >= 4 && Endpoint.StartsWith("http") && Username.Length > 0 && AuthToken.Length > 0;
             }
         }
     }
