@@ -51,12 +51,6 @@ namespace PaletteInsight
         {
             [YamlMember(Alias = "Endpoint")]
             public string Endpoint { get; set; }
-            [YamlMember(Alias = "Username")]
-            public string Username { get; set; }
-            [YamlMember(Alias = "Password")]
-            public string Password { get; set; }
-            [YamlMember(Alias = "UseMultifile")]
-            public bool UseMultifile { get; set; }
         }
 
         public class PaletteInsightConfiguration
