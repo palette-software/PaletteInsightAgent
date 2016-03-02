@@ -1,8 +1,8 @@
 ﻿using NLog;
-using System.Reflection;
 using System;
 using System.Collections.Generic;
 using PaletteInsightAgent.Output;
+using PaletteInsightAgent.RepoTablesPoller;
 
 namespace PaletteInsightAgent.LogPoller
 {
@@ -15,29 +15,16 @@ namespace PaletteInsightAgent.LogPoller
         private ICollection<LogFileWatcher> watchers;
         private LogsToDbConverter logsToDbConverter;
 
-        private ITableauRepoConn tableauRepo;
 
         private ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch;
 
 
-        public LogPollerAgent(ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch, string repoHost, int repoPort, string repoUser, string repoPass, string repoDb)
+        public LogPollerAgent(ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch, IDbConnectionInfo repositoryDB)
         {
             Log.Info("Initializing LogPollerAgent with number of folders: {0}.", foldersToWatch.Count);
             this.foldersToWatch = foldersToWatch;
             logsToDbConverter = new LogsToDbConverter();
-            // 
-            tableauRepo = null;
-            if (ShouldUseRepo(repoHost))
-            {
-                tableauRepo = new Tableau9RepoConn(repoHost, repoPort, repoUser, repoPass, repoDb);
-            }
         }
-
-        private static bool ShouldUseRepo(string repoHost)
-        {
-            return !String.IsNullOrEmpty(repoHost);
-        }
-
 
         // Start the log file watchers
         public void start()
