@@ -10,8 +10,9 @@ using NLog;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.IO;
+using PaletteInsightAgent.Output;
 
-namespace PaletteInsightAgent.LogPoller
+namespace PaletteInsightAgent.RepoTablesPoller
 {
 
     public struct ViewPath
@@ -41,7 +42,10 @@ namespace PaletteInsightAgent.LogPoller
     public interface ITableauRepoConn : IDisposable
     {
         ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp);
-
+        DataTable GetTable(string tableName);
+        DataTable GetIndices();
+        DataTable GetSchemaTable();
+        int getCoreCount();
     }
 
     public class Tableau9RepoConn : ITableauRepoConn
@@ -52,19 +56,19 @@ namespace PaletteInsightAgent.LogPoller
         private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();
 
-        public Tableau9RepoConn(string host, int port, string username, string password, string database)
+        public Tableau9RepoConn(IDbConnectionInfo db)
         {
             connectionStringBuilder =
                 new NpgsqlConnectionStringBuilder()
                 {
-                    Host = host,
-                    Port = port,
-                    Username = username,
-                    Password = password,
-                    Database = database
+                    Host = db.Server,
+                    Port = db.Port,
+                    Username = db.Username,
+                    Password = db.Password,
+                    Database = db.DatabaseName
                 };
 
-            Log.Info("Connecting to Tableau Repo PostgreSQL:" + host);
+            Log.Info("Connecting to Tableau Repo PostgreSQL:" + db.Server);
             OpenConnection();
             Log.Info("Connected to Tableau Repo...");
 
@@ -130,6 +134,107 @@ namespace PaletteInsightAgent.LogPoller
             OpenConnection();
         }
 
+        /// <summary>
+        /// Returns the total number of cores allocated to the Tableau cluster represented by the repository.
+        /// </summary>
+        public int getCoreCount()
+        {
+            // connect to the repo
+            if (!IsConnectionOpen())
+            {
+                reconnect();
+            }
+            using (var cmd = new NpgsqlCommand())
+            {
+                cmd.Connection = connection;
+                // Insert some data
+                cmd.CommandText = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
+                long coreCount = (long)cmd.ExecuteScalar();
+                Log.Info("Tableau total allocated cores: {0}", coreCount);
+                return (int)coreCount;
+            };
+        }
+
+        private DataTable runQuery(string query)
+        {
+            DataTable table = new DataTable();
+            if (!IsConnectionOpen())
+            {
+                reconnect();
+            }
+            try
+            {
+                using (var adapter = new NpgsqlDataAdapter(query, connection))
+                {
+                    adapter.Fill(table);
+                }
+            }
+            catch (Npgsql.NpgsqlException e)
+            {
+                Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+            }
+            return table;
+        }
+
+        public DataTable GetSchemaTable()
+        {
+            var query = @"
+                    SELECT n.nspname as schemaname, c.relname as tablename,
+                    a.attname as columnname,
+                    format_type(a.atttypid, a.atttypmod),
+                    a.attnum
+                    FROM pg_namespace n
+                      JOIN pg_class c ON (n.oid = c.relnamespace)
+                      JOIN pg_attribute a ON (c.oid = a.attrelid)
+                      JOIN pg_type t ON (a.atttypid = t.oid)
+                    WHERE 1 = 1
+                    AND   nspname = 'public'
+                    AND a.attnum > 0 /*filter out the internal columns*/
+                    ORDER BY n.nspname,c.relname,a.attnum ASC";
+            var table = runQuery(query);
+            table.TableName = "metadata";
+            return table;
+        }
+
+        public DataTable GetIndices()
+        {
+            var query = @"
+                select
+                   n.nspname as schema_name,
+                   t.relname as table_name,
+                   i.relname as index_name,
+                   a.attname as column_name,
+                  pg_get_indexdef(ix.indexrelid)
+                from
+                   pg_class t,
+                   pg_class i,
+                   pg_index ix,
+                   pg_attribute a,
+                   pg_namespace n
+                where
+                   t.oid = ix.indrelid
+                   and i.oid = ix.indexrelid
+                   and a.attrelid = t.oid
+                   and a.attnum = ANY(ix.indkey)
+                   and t.relkind = 'r'
+                   and t.relnamespace = n.oid
+                   and n.nspname = 'public'
+                order by
+                   t.relname,
+                   i.relname
+                ";
+            var table = runQuery(query);
+            table.TableName = "index";
+            return table;
+        }
+
+        public DataTable GetTable(string tableName)
+        {
+            var query = String.Format("select * from {0}", tableName);
+            var table = runQuery(query);
+            table.TableName = tableName;
+            return table;
+        }
 
         public ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp)
         {
