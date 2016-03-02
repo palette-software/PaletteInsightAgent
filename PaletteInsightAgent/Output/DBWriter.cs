@@ -81,9 +81,19 @@ namespace PaletteInsightAgent.Output
         /// Start a single write loop
         /// </summary>
         /// <param name="output"></param>
-        public static void Start(IOutput output)
+        public static void Start(IOutput output, int processedFilesTTL)
         {
             DoUpload(output, OutputSerializer.DATA_FOLDER);
+            DeleteOldFiles(ProcessedPath, processedFilesTTL);
+        }
+
+        private static void DeleteOldFiles(string from, int ttl)
+        {
+            Directory.EnumerateFiles(from)
+                .Select(f => new FileInfo(f))
+                .Where(f => f.CreationTime < DateTime.Now.AddSeconds(-ttl))
+                .ToList()
+                .ForEach(f => f.Delete());
         }
 
         /// <summary>
