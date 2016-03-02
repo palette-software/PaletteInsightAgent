@@ -26,10 +26,11 @@ namespace PaletteInsightAgent.Output
             using (var streamWriter = File.AppendText(fileName))
             using (var csvWriter = new CsvHelper.CsvWriter(streamWriter, CsvConfig))
             {
-                // only write the header if the file does not exists
+                // only write the header if the file does not exist
                 if (!fileExists)
                 {
                     WriteCSVHeader(table, csvWriter);
+                    SchemaStore.InitSchema(table);
                 }
 
                 WriteCSVBody(table, csvWriter);
