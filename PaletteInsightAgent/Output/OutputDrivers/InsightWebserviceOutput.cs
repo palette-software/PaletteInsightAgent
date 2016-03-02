@@ -121,11 +121,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             {
                 throw new ArgumentException("Invalid webservice configuration provided!");
             }
-            // select which endpoint to use
-            if (config.UseMultifile)
-                return new MultifileBackend { config = config, errorHandler = errorHandler };
-            else
-                return new SinglefileBackend { config = config, errorHandler = errorHandler };
+            return new SinglefileBackend { config = config, errorHandler = errorHandler };
         }
     }
 }

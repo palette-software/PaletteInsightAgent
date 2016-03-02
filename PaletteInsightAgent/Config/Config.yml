@@ -16,7 +16,6 @@ Database:
  
 # Webservice:
 #  Endpoint: http://localhost:9000
-#  UseMultifile: false
 
 Logs: 
   - 
