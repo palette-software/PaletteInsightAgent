@@ -55,6 +55,9 @@ namespace PaletteInsight
             [YamlMember(Alias = "ThreadInfoPollInterval")]
             public int ThreadInfoPollInterval { get; set; }
 
+            [YamlMember(Alias = "RepoTablesPollInterval")]
+            public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
+
             [YamlMember(Alias = "ProcessedFilesTTL")]
             public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
 
