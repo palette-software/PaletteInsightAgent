@@ -30,15 +30,6 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         private const double UNSENT_FILES_RESEND_CHANCE = 0.01;
 
-        /// <summary>
-        /// A list of table names we actually care about.
-        /// </summary>
-        private static readonly List<string> TABLE_NAMES = new List<string> {
-            Sampler.CounterSampler.TABLE_NAME,
-            LogPoller.LogTables.SERVERLOGS_TABLE_NAME,
-            ThreadInfoPoller.ThreadTables.TABLE_NAME,
-        };
-
         private static string DataFilePattern
         {
             get
@@ -115,6 +106,17 @@ namespace PaletteInsightAgent.Output
             return new Random().NextDouble() < UNSENT_FILES_RESEND_CHANCE;
         }
 
+        private static IList<string> GetPendingTables(string from)
+        {
+            return Directory.EnumerateFiles(from)
+                .Select(f => new FileInfo(f).Name)
+                .Where(fileName => fileName.Contains('-'))
+                .Select(fileName => fileName.Split('-')[0])
+                .Where(tableName => tableName.Length > 0)
+                .Distinct()
+                .ToList();
+        }
+
         /// <summary>
         /// Implementation of sending all data files from a directory
         /// </summary>
@@ -132,7 +134,8 @@ namespace PaletteInsightAgent.Output
             {
                 // The old code (a while loop) gets stuck if we use the 'unsent' folder
                 // as a source.
-                MoveAllFiles(OutputWriteResult.Aggregate( TABLE_NAMES, (table) => {
+                var tableNames = GetPendingTables(dataPath);
+                MoveAllFiles(OutputWriteResult.Aggregate( tableNames, (table) => {
                     return output.Write(GetFilesOfTable(dataPath, table));
                 }));
             }
