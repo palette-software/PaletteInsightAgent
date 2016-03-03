@@ -54,6 +54,7 @@ namespace PaletteInsightAgent
         // of this variable is temporary until the Db output is removed
         private bool USE_DB = true;
         private bool USE_WEBSERVICE = false;
+        private bool USE_TABLEAU_REPO = true;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PaletteInsightAgent(bool loadOptionsFromConfig = true)
@@ -218,13 +219,16 @@ namespace PaletteInsightAgent
 
             if (USE_WEBSERVICE)
             {
-                var webserviceOutput = WebserviceOutput.MakeWebservice(options.WebserviceConfig, new BasicErrorHandler { } );
-
+                var webserviceOutput = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
                 webserviceTimer = new Timer(callback: WriteToDB, state: webserviceOutput, dueTime: 0, period: 10 * 1000);
             }
 
-            // Poll Tableau repository data as well
-            repoTablesPollTimer = new Timer(callback: PollRepoTables, state: null, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
+            if (USE_TABLEAU_REPO)
+            {
+                // Poll Tableau repository data as well
+                repoTablesPollTimer = new Timer(callback: PollRepoTables, state: null, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
+            }
+
         }
 
 
@@ -298,7 +302,7 @@ namespace PaletteInsightAgent
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
             if (USE_WEBSERVICE) running = running && (webserviceTimer != null);
             if (USE_DB) running = running && (dbWriterTimer != null);
-            running = running && (repoTablesPollTimer != null);
+            if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null);
             return running;
         }
 

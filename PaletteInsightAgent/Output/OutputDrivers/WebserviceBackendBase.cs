@@ -16,8 +16,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
     public class WebserviceBackendBase
     {
         public WebserviceConfiguration config;
-        public WebserviceErrorHandler errorHandler;
-
 
         /// <summary>
         /// The default encoding for the log files (we use this to read the bytes)

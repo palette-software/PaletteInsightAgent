@@ -50,52 +50,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             }
         }
     }
-
-    #region REST API Models
-
-
-    /// <summary>
-    /// An element for a single file in the manifest
-    /// </summary>
-    public class UploadInfo
-    {
-        public string Name { get; set; }
-        public string Md5 { get; set; }
-    }
-
-    /// <summary>
-    /// The manifest packed with each multi-upload
-    /// </summary>
-    public class UploadManifest
-    {
-        public List<UploadInfo> Files { get; set; }
-    }
-
-    /// <summary>
-    /// The servers response to a single uploaded file.
-    /// </summary>
-    public class UploadResponse
-    {
-        public string Name { get; set; }
-        public string Md5 { get; set; }
-
-        public string UploadPath { get; set; }
-        public DateTime UploadTime { get; set; }
-
-        public int Status { get; set; }
-        public string Error { get; set; }
-    }
-
-    /// <summary>
-    /// The response to an upload-many request
-    /// </summary>
-    public class UploadManyResponse
-    {
-        public List<UploadResponse> Files;
-    }
-
-    #endregion
-
     public interface WebserviceBackend : IOutput
     {
 
@@ -115,13 +69,13 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static IOutput MakeWebservice(WebserviceConfiguration config, WebserviceErrorHandler errorHandler)
+        public static IOutput MakeWebservice(WebserviceConfiguration config)
         {
             if (!config.IsValid)
             {
                 throw new ArgumentException("Invalid webservice configuration provided!");
             }
-            return new SinglefileBackend { config = config, errorHandler = errorHandler };
+            return new SinglefileBackend { config = config };
         }
     }
 }
