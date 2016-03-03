@@ -30,7 +30,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// <returns></returns>
         private string GetEndpointUrl(string package)
         {
-            return String.Format("{0}/upload-with-meta/{1}", config.Endpoint, package );
+            return String.Format("{0}/upload-with-meta?pkg={1}", config.Endpoint, package );
         }
 
 
