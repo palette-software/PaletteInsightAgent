@@ -151,17 +151,6 @@ namespace PaletteInsightAgent.Output
             ReconnectoToDbIfNeeded();
             var tableName = DBWriter.GetTableName(fileNames[0]);
 
-            // Make sure we have the proper table
-            if (!tableCreators.ContainsKey(tableName))
-            {
-                Log.Error("Unexpected table name: {0}", tableName);
-                // return with all files as failed files
-                return new OutputWriteResult { failedFiles = new List<string>(fileNames) };
-            }
-
-            // at this point we should have a nice table
-            var table = tableCreators[tableName]();
-
             var statusLine = String.Format("BULK COPY of {0} (Number of files: {1})", tableName, fileNames.Count);
             string copyString = CopyStatementFor(fileNames[0]);
 
