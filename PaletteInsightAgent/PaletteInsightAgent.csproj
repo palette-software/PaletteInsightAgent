@@ -177,13 +177,14 @@
     <Compile Include="Output\OutputDrivers\PostgresOutput.cs" />
     <Compile Include="PaletteInsightAgent.cs" />
     <Compile Include="PaletteInsightAgentOptions.cs" />
+    <Compile Include="Tableau\RepoPollAgent.cs" />
+    <Compile Include="Tableau\TableauRepo.cs" />
     <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />
     <Compile Include="LogPoller\LogFileWatcher.cs" />
     <Compile Include="LogPoller\LogPollerAgent.cs" />
     <Compile Include="LogPoller\LogsToDbConverter.cs" />
     <Compile Include="LogPoller\LogTables.cs" />
-    <Compile Include="LogPoller\TableauRepo.cs" />
     <Compile Include="Sampler\ICounterSample.cs" />
     <Compile Include="Counters\ICounter.cs" />
     <Compile Include="Counters\Perfmon\PerfmonCounter.cs" />
@@ -200,6 +201,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Config\LogFolders.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\Repository.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Config\Processes.yml">

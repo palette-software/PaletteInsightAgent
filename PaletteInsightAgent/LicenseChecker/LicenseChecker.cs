@@ -1,13 +1,7 @@
 ﻿using Licensing;
 using NLog;
-using Npgsql;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.LicenseChecker
 {
@@ -68,32 +62,6 @@ namespace PaletteInsightAgent.LicenseChecker
             Log.Info("No valid license found");
             // No valid licenses found
             return false;
-        }
-
-
-        /// <summary>
-        /// Returns the total number of cores allocated to the Tableau cluster represented by the repository.
-        /// </summary>
-        public static int getCoreCount(string repoHost, int repoPort, string repoUser, string repoPass, string repoDb)
-        {
-            // The postgres connection string
-            var connectionString = String.Format("Host={0};Port={1};Username={2};Password={3};Database={4}",
-                repoHost, repoPort, repoUser, repoPass, repoDb);
-
-            // connect to the repo
-            using (var conn = new NpgsqlConnection(connectionString))
-            {
-                conn.Open();
-                using (var cmd = new NpgsqlCommand())
-                {
-                    cmd.Connection = conn;
-                    // Insert some data
-                    cmd.CommandText = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
-                    long coreCount = (long)cmd.ExecuteScalar();
-                    Log.Info("Tableau total allocated cores: {0}", coreCount);
-                    return (int)coreCount;
-                }
-            }
         }
     }
 }
