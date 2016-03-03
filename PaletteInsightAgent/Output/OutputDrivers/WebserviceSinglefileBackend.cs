@@ -55,7 +55,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// <param name="metadata">The contents of the metadata</param>
         /// <param name="package">the name of the package this </param>
         /// <returns></returns>
-        private OutputWriteResult DoSendFile(string file, string metadata = "", string package = "public")
+        private OutputWriteResult DoSendFile(string file, string package = "public")
         {
             // skip working if the file does not exist
             if (!File.Exists(file)) return OutputWriteResult.Failed(file);
@@ -73,7 +73,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                     try
                     {
                         // send the request as a file stream
-                        var response = httpClient.PostAsync(uploadUrl, CreateRequestContents(file, metadata));
+                        var response = httpClient.PostAsync(uploadUrl, CreateRequestContents(file));
                         // gyulalaszlo: we use response.Wait() here, becuse VS2015 refused to compile await ... for me
                         response.Wait();
 
@@ -110,7 +110,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             });
         }
 
-        private static MultipartFormDataContent CreateRequestContents(string file, string metadata)
+        private static MultipartFormDataContent CreateRequestContents(string file)
         {
             // create the form data for upload
             MultipartFormDataContent form = new MultipartFormDataContent();
@@ -132,7 +132,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             // we encode the md5 as a base64 value, so we dont have to do tricks on
             // go's side to get this value
             form.Add(new StringContent(Convert.ToBase64String(fileHash)), "_md5");
-            form.Add(new StringContent(metadata), "_meta", String.Format("{0}.meta", fileBaseName));
             return form;
         }
     }
