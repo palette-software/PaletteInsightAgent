@@ -51,6 +51,11 @@ namespace PaletteInsightAgent.Output
             return DoBulkCopyWrapper(csvFiles);
         }
 
+        public bool IsInProgress(string tableName)
+        {
+            return false;
+        }
+
         #endregion
 
         #region datatable bulk ops

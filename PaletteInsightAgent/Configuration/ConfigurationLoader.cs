@@ -357,12 +357,12 @@ namespace PaletteInsight
                 }
             }
 
-            private static List<string> LoadRepositoryTables()
+            private static List<RepoTable> LoadRepositoryTables()
             {
                 using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
                 {
                     var deserializer = new Deserializer(namingConvention: new NullNamingConvention());
-                    return deserializer.Deserialize<List<string>>(reader);
+                    return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }
 

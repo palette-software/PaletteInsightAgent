@@ -43,6 +43,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
     {
         ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp);
         DataTable GetTable(string tableName);
+        DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax);
         DataTable GetIndices();
         DataTable GetSchemaTable();
         int getCoreCount();
@@ -139,41 +140,61 @@ namespace PaletteInsightAgent.RepoTablesPoller
         /// </summary>
         public int getCoreCount()
         {
-            // connect to the repo
-            if (!IsConnectionOpen())
-            {
-                reconnect();
-            }
-            using (var cmd = new NpgsqlCommand())
-            {
-                cmd.Connection = connection;
-                // Insert some data
-                cmd.CommandText = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
-                long coreCount = (long)cmd.ExecuteScalar();
-                Log.Info("Tableau total allocated cores: {0}", coreCount);
-                return (int)coreCount;
-            };
+            var query = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
+            long coreCount = runScalarQuery(query);
+            Log.Info("Tableau total allocated cores: {0}", coreCount);
+            return (int)coreCount;
         }
 
         private DataTable runQuery(string query)
         {
             DataTable table = new DataTable();
-            if (!IsConnectionOpen())
+            lock (readLock)
             {
-                reconnect();
-            }
-            try
-            {
-                using (var adapter = new NpgsqlDataAdapter(query, connection))
+                if (!IsConnectionOpen())
                 {
-                    adapter.Fill(table);
+                    reconnect();
+                }
+                try
+                {
+                    using (var adapter = new NpgsqlDataAdapter(query, connection))
+                    {
+                        adapter.Fill(table);
+                    }
+                }
+                catch (Npgsql.NpgsqlException e)
+                {
+                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
                 }
             }
-            catch (Npgsql.NpgsqlException e)
-            {
-                Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
-            }
             return table;
+        }
+
+        private long runScalarQuery(string query)
+        {
+            long max = 0;
+            lock (readLock)
+            {
+                if (!IsConnectionOpen())
+                {
+                    reconnect();
+                }
+                try
+                {
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        // Insert some data
+                        cmd.CommandText = query;
+                        max = (long)cmd.ExecuteScalar();
+                    };
+                }
+                catch (Npgsql.NpgsqlException e)
+                {
+                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                }
+            }
+            return max;
         }
 
         public DataTable GetSchemaTable()
@@ -235,6 +256,50 @@ namespace PaletteInsightAgent.RepoTablesPoller
             table.TableName = tableName;
             return table;
         }
+
+        private string GetMax(string tableName, string field, string filter)
+        {
+            var query = String.Format("select max({0}) from {1}", field, tableName);
+            if (filter != null)
+            {
+                query = String.Format("{0} where {1}", query, filter);
+            }
+            var table = runQuery(query);
+            // This query should return one field
+            if (table.Rows.Count == 1 && table.Columns.Count == 1)
+            {
+                return table.Rows[0][0].ToString();
+            }
+            return null;
+        }
+
+        public DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax)
+        {
+            // At first determine the max until we can query
+            newMax = GetMax(tableName, field, filter);
+
+            // If we don't quit here we risk data being created before 
+            // actually asking for it and not having maxId set correctly
+            if (newMax == null || newMax == "")
+            {
+                return null;
+            }
+
+            var query = String.Format("select * from {0} where {1} <= '{2}'", tableName, field, newMax);
+                
+            if (from != null)
+            {
+                query += String.Format(" and {0} > '{1}'", field, from);
+            }
+            if (filter != null)
+            {
+                query += String.Format(" and {0}", filter);
+            }
+            var table = runQuery(query);
+            table.TableName = tableName;
+            return table;
+        }
+
 
         public ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp)
         {
