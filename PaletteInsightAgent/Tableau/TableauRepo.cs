@@ -43,7 +43,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
     {
         ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp);
         DataTable GetTable(string tableName);
-        DataTable GetStreamingTable(string tableName, string field, string from, out string newMax);
+        DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax);
         DataTable GetIndices();
         DataTable GetSchemaTable();
         int getCoreCount();
@@ -269,7 +269,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return null;
         }
 
-        public DataTable GetStreamingTable(string tableName, string field, string from, out string newMax)
+        public DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax)
         {
             // At first determine the max until we can query
             newMax = GetMax(tableName, field);
@@ -278,6 +278,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
             if (from != null)
             {
                 query += String.Format(" and {0} > {1}", field, from);
+            }
+            if (filter != null)
+            {
+                query += String.Format(" and {0}", filter);
             }
             var table = runQuery(query);
             table.TableName = tableName;
