@@ -18,6 +18,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
+using PaletteInsightAgent.Helpers;
 
 [assembly: CLSCompliant(true)]
 
@@ -34,11 +35,13 @@ namespace PaletteInsightAgent
         private Timer dbWriterTimer;
         private Timer webserviceTimer;
         private Timer repoTablesPollTimer;
+        private Timer streamingTablesPollTimer;
         private LogPollerAgent logPollerAgent;
         private ThreadInfoAgent threadInfoAgent;
         private RepoPollAgent repoPollAgent;
         private CounterSampler sampler;
         private ITableauRepoConn tableauRepo;
+        private IOutput output;
         private readonly PaletteInsightAgentOptions options;
         private bool disposed;
         private const string PathToCountersYaml = @"Config\Counters.yml";
@@ -205,28 +208,28 @@ namespace PaletteInsightAgent
             table = tableauRepo.GetIndices();
             OutputSerializer.Write(table);
 
-            if (USE_DB)
+            if (USE_WEBSERVICE)
+            {
+                APIClient.Init(options.WebserviceConfig);
+                output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
+                webserviceTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: 10 * 1000);
+            }
+            else
             {
                 // Start the DB Writer
-                IOutput output = new PostgresOutput(options.ResultDatabase);
+                output = new PostgresOutput(options.ResultDatabase);
 
                 // On start try to send all unsent files
                 DBWriter.TryToSendUnsentFiles(output);
 
                 dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
-            }
-
-
-            if (USE_WEBSERVICE)
-            {
-                var webserviceOutput = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
-                webserviceTimer = new Timer(callback: WriteToDB, state: webserviceOutput, dueTime: 0, period: 10 * 1000);
-            }
+            } 
 
             if (USE_TABLEAU_REPO)
             {
                 // Poll Tableau repository data as well
-                repoTablesPollTimer = new Timer(callback: PollRepoTables, state: null, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
+                repoTablesPollTimer = new Timer(callback: PollFullTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
+                streamingTablesPollTimer = new Timer(callback: PollStreamingTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
             }
 
         }
@@ -272,6 +275,11 @@ namespace PaletteInsightAgent
                 dbWriterTimer.Dispose();
             }
 
+            if (streamingTablesPollTimer != null)
+            {
+                streamingTablesPollTimer.Dispose();
+            }
+
             if (repoTablesPollTimer != null)
             {
                 repoTablesPollTimer.Dispose();
@@ -302,7 +310,7 @@ namespace PaletteInsightAgent
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
             if (USE_WEBSERVICE) running = running && (webserviceTimer != null);
             if (USE_DB) running = running && (dbWriterTimer != null);
-            if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null);
+            if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null && streamingTablesPollTimer != null);
             return running;
         }
 
@@ -353,14 +361,28 @@ namespace PaletteInsightAgent
         /// Get Tableau repository tables from the database
         /// </summary>
         /// <param name="stateInfo"></param>
-        private void PollRepoTables(object stateInfo)
+        private void PollFullTables(object stateInfo)
         {
-            tryStartIndividualPoll(RepoPollAgent.InProgressLock, PollWaitTimeout, () =>
+            tryStartIndividualPoll(RepoPollAgent.FullTablesInProgressLock, PollWaitTimeout, () =>
             {
                 Log.Info("Polling Repostoriy tables");
-                repoPollAgent.Poll(tableauRepo, options.RepositoryTables);
+                repoPollAgent.PollFullTables(tableauRepo, options.RepositoryTables);
             });
         }
+
+        /// <summary>
+        /// Get Tableau repository streaming tables from the database
+        /// </summary>
+        /// <param name="stateInfo"></param>
+        private void PollStreamingTables(object stateInfo)
+        {
+            tryStartIndividualPoll(RepoPollAgent.StreamingTablesInProgressLock, PollWaitTimeout, () =>
+            {
+                Log.Info("Polling streaming tables");
+                repoPollAgent.PollStreamingTables(tableauRepo, options.RepositoryTables, (IOutput)stateInfo);
+            });
+        }
+
 
         private void WriteToDB(object stateInfo)
         {
