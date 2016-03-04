@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -16,6 +17,7 @@ namespace PaletteInsightAgent.Helpers
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static WebserviceConfiguration config = null;
+        private static readonly string HostName = Uri.EscapeDataString(Dns.GetHostName());
 
         public static void Init(WebserviceConfiguration webConfig)
         {
@@ -31,7 +33,11 @@ namespace PaletteInsightAgent.Helpers
 
                 using (var response = await httpClient.GetAsync(GetMaxIdUrl(tableName)))
                 {
-                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    if (response.StatusCode == HttpStatusCode.NoContent)
+                    {
+                        return null;
+                    }
+                    if (response.StatusCode != HttpStatusCode.OK)
                     {
                         throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
                     }
@@ -62,7 +68,7 @@ namespace PaletteInsightAgent.Helpers
 
         private static string UploadUrl(string package, string maxId)
         {
-            var url = String.Format("{0}/upload-with-meta?pkg={1}", config.Endpoint, package);
+            var url = String.Format("{0}/upload?pkg={1}&host={2}", config.Endpoint, package, HostName);
             if (maxId != null)
             {
                 url = String.Format("{0}&maxid={1}", url, maxId);
@@ -72,7 +78,7 @@ namespace PaletteInsightAgent.Helpers
 
         private static string GetMaxIdUrl(string tableName)
         {
-            return String.Format("{0}/maxId?table={1}", config.Endpoint, tableName);
+            return String.Format("{0}/maxid?table={1}", config.Endpoint, tableName);
         }
 
         private static MultipartFormDataContent CreateRequestContents(string file)

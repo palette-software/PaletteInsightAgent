@@ -257,9 +257,13 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return table;
         }
 
-        private string GetMax(string tableName, string field)
+        private string GetMax(string tableName, string field, string filter)
         {
             var query = String.Format("select max({0}) from {1}", field, tableName);
+            if (filter != null)
+            {
+                query = String.Format("{0} where {1}", query, filter);
+            }
             var table = runQuery(query);
             // This query should return one field
             if (table.Rows.Count == 1 && table.Columns.Count == 1)
@@ -272,12 +276,20 @@ namespace PaletteInsightAgent.RepoTablesPoller
         public DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax)
         {
             // At first determine the max until we can query
-            newMax = GetMax(tableName, field);
+            newMax = GetMax(tableName, field, filter);
 
-            var query = String.Format("select * from {0} where {1} <= {2}", tableName, field, newMax);
+            // If we don't quit here we risk data being created before 
+            // actually asking for it and not having maxId set correctly
+            if (newMax == null || newMax == "")
+            {
+                return null;
+            }
+
+            var query = String.Format("select * from {0} where {1} <= '{2}'", tableName, field, newMax);
+                
             if (from != null)
             {
-                query += String.Format(" and {0} > {1}", field, from);
+                query += String.Format(" and {0} > '{1}'", field, from);
             }
             if (filter != null)
             {

@@ -57,7 +57,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         // Get data from that max id
                         string newMax;
                         DataTable table = connection.GetStreamingTable(tableName, t.Field, t.Filter, maxId, out newMax);
-                        OutputSerializer.Write(table, newMax);
+                        if (table != null)
+                        {
+                            OutputSerializer.Write(table, newMax);
+                        }
                     }
                     catch (Exception e)
                     {
