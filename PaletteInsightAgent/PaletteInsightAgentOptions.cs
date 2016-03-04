@@ -29,7 +29,7 @@ namespace PaletteInsightAgent
         private static PaletteInsightAgentOptions instance;
         private const int MinPollInterval = 1; // In seconds.
         public IDictionary<string, ProcessData> Processes { get; set; }
-        public ICollection<string> RepositoryTables { get; set; }
+        public ICollection<RepoTable> RepositoryTables { get; set; }
 
         public ICollection<LogFolderInfo> LogFolders { get; set; }
 
