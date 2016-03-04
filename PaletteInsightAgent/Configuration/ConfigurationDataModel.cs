@@ -57,6 +57,9 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "Field")]
             public string Field { get; set; }
+
+            [YamlMember(Alias = "Filter")]
+            public string Filter { get; set; }
         }
 
         public class Webservice
