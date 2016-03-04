@@ -1,16 +1,46 @@
-- sites
-- projects
-- users
-- workbooks
-- views
-- system_users
-- core_licenses
-- data_connections
-- datasources
-- monitoring_postgresql
-- monitoring_dataengine
-- extracts
-- groups
-- group_users
-- tasks
-- schedules
+- 
+    Name: sites
+- 
+    Name: projects
+- 
+    Name: users
+- 
+    Name: workbooks
+- 
+    Name: views
+- 
+    Name: system_users
+- 
+    Name: core_licenses
+- 
+    Name: data_connections
+- 
+    Name: datasources
+- 
+    Name: monitoring_postgresql
+- 
+    Name: monitoring_dataengine
+- 
+    Name: extracts
+- 
+    Name: groups
+- 
+    Name: group_users
+- 
+    Name: tasks
+- 
+    Name: schedules
+-
+    Name: http_requests
+    Full: false
+    Field: id
+-
+    Name: background_jobs
+    Full: false
+    Field: updated_at
+    Filter: 'progress = 100'
+-
+    Name: async_jobs
+    Full: false
+    Field: updated_at
+    Filter: 'progress = 100'

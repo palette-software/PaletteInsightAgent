@@ -79,5 +79,13 @@ namespace PaletteInsightAgent.Output
         /// <param name="csvFile"></param>
         /// <returns></returns>
         OutputWriteResult Write(IList<string> csvFile);
+
+        /// <summary>
+        /// Returns true if an upload is in progress for the given table.
+        /// files.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        bool IsInProgress(string tableName);
     }
 }

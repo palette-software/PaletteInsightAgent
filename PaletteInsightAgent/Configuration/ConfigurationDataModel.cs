@@ -47,6 +47,21 @@ namespace PaletteInsight
             public string Granularity { get; set; } = "Process";
         }
 
+        public class RepoTable
+        {
+            [YamlMember(Alias = "Name")]
+            public string Name { get; set; }
+
+            [YamlMember(Alias = "Full")]
+            public bool Full { get; set; } = true;
+
+            [YamlMember(Alias = "Field")]
+            public string Field { get; set; }
+
+            [YamlMember(Alias = "Filter")]
+            public string Filter { get; set; }
+        }
+
         public class Webservice
         {
             [YamlMember(Alias = "Endpoint")]
