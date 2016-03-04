@@ -149,20 +149,23 @@ namespace PaletteInsightAgent.RepoTablesPoller
         private DataTable runQuery(string query)
         {
             DataTable table = new DataTable();
-            if (!IsConnectionOpen())
+            lock (readLock)
             {
-                reconnect();
-            }
-            try
-            {
-                using (var adapter = new NpgsqlDataAdapter(query, connection))
+                if (!IsConnectionOpen())
                 {
-                    adapter.Fill(table);
+                    reconnect();
                 }
-            }
-            catch (Npgsql.NpgsqlException e)
-            {
-                Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                try
+                {
+                    using (var adapter = new NpgsqlDataAdapter(query, connection))
+                    {
+                        adapter.Fill(table);
+                    }
+                }
+                catch (Npgsql.NpgsqlException e)
+                {
+                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                }
             }
             return table;
         }
@@ -170,23 +173,26 @@ namespace PaletteInsightAgent.RepoTablesPoller
         private long runScalarQuery(string query)
         {
             long max = 0;
-            if (!IsConnectionOpen())
+            lock (readLock)
             {
-                reconnect();
-            }
-            try
-            {
-                using (var cmd = new NpgsqlCommand())
+                if (!IsConnectionOpen())
                 {
-                    cmd.Connection = connection;
-                    // Insert some data
-                    cmd.CommandText = query;
-                    max = (long)cmd.ExecuteScalar();
-                };
-            }
-            catch (Npgsql.NpgsqlException e)
-            {
-                Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                    reconnect();
+                }
+                try
+                {
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        // Insert some data
+                        cmd.CommandText = query;
+                        max = (long)cmd.ExecuteScalar();
+                    };
+                }
+                catch (Npgsql.NpgsqlException e)
+                {
+                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                }
             }
             return max;
         }

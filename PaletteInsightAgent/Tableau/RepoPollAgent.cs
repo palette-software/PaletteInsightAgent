@@ -38,25 +38,33 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 .ToList()
                 .ForEach(async (t) =>
                 {
-                    var tableName = t.Name;
-
-                    // Delete all pending files for that streaming table
-                    OutputSerializer.Delete(tableName);
-
-                    // If we have a pending request for this table, then just skip this iteration
-                    if (output.IsInProgress(tableName))
+                    try
                     {
-                        return;
+                        var tableName = t.Name;
+
+                        // Delete all pending files for that streaming table
+                        OutputSerializer.Delete(tableName);
+
+                        // If we have a pending request for this table, then just skip this iteration
+                        if (output.IsInProgress(tableName))
+                        {
+                            return;
+                        }
+
+                        // Ask web service what is the max id
+                        var maxId = await APIClient.GetMaxId(tableName);
+
+                        // Get data from that max id
+                        string newMax;
+                        DataTable table = connection.GetStreamingTable(tableName, t.Field, maxId, out newMax);
+                        OutputSerializer.Write(table, newMax);
                     }
-
-                    // Ask web service what is the max id
-                    var maxId = await APIClient.GetMaxId(tableName);
-
-                    // Get data from that max id
-                    string newMax;
-                    DataTable table = connection.GetStreamingTable(tableName, t.Field, maxId, out newMax);
-                    OutputSerializer.Write(table, newMax);
+                    catch (Exception e)
+                    {
+                        Log.Error(e, String.Format("Error while polling streaming table: Message: {0}", e.Message));
+                    }
                 });
+
         }
     }
 }

@@ -30,10 +30,16 @@ namespace PaletteInsightAgent.Helpers
                 httpClient.DefaultRequestHeaders.Authorization = authHeader;
 
                 using (var response = await httpClient.GetAsync(GetMaxIdUrl(tableName)))
-                using (HttpContent content = response.Content)
                 {
-                    string result = await content.ReadAsStringAsync();
-                    return result;
+                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
+                    }
+                    using (HttpContent content = response.Content)
+                    {
+                        string result = await content.ReadAsStringAsync();
+                        return result;
+                    }
                 }
             }
         }
