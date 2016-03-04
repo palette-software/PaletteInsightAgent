@@ -71,7 +71,7 @@ namespace PaletteInsightAgent.Helpers
             var url = String.Format("{0}/upload?pkg={1}&host={2}", config.Endpoint, package, HostName);
             if (maxId != null)
             {
-                url = String.Format("{0}&maxid={1}", url, maxId);
+                url = String.Format("{0}&maxid={1}", url, Uri.EscapeDataString(maxId));
             }
             return url;
         }
