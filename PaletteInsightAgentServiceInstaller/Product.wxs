@@ -96,6 +96,7 @@
         <File Id="PaletteInsightAgentConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />
         <File Id="LogFolderDefaultsYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" />
         <File Id="ProcessesDefaultsYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" />
+        <File Id="RepositoryDefaultsYAML" Name="Repository.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Repository.yml" />
       </Component>
     </DirectoryRef>
     
