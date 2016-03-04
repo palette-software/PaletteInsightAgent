@@ -34,9 +34,13 @@
     Name: http_requests
     Full: false
     Field: id
-#-
-#    Name: background_jobs
-#    Full: false
-#-
-#    Name: async_jobs
-#    Full: false
+-
+    Name: background_jobs
+    Full: false
+    Field: updated_at
+    Filter: 'progress = 100'
+-
+    Name: async_jobs
+    Full: false
+    Field: updated_at
+    Filter: 'progress = 100'
