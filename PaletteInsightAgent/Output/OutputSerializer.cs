@@ -4,6 +4,7 @@ using System.Data;
 using NLog;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PaletteInsightAgent.Output
 {
@@ -11,7 +12,8 @@ namespace PaletteInsightAgent.Output
     {
         public const string DATA_FOLDER = "data/";
         private const string FILENAME_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss";
-        public  const string IN_PROGRESS_FILE_POSTFIX = ".writing";
+        public const string IN_PROGRESS_FILE_POSTFIX = ".writing";
+        public const string MAX_ID_PREFIX = "maxid";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static IWriter Writer = new CsvSerializer();
         public static string Extension
@@ -22,7 +24,7 @@ namespace PaletteInsightAgent.Output
             }
         }
 
-        public static void Write(DataTable table)
+        public static void Write(DataTable table, string maxId = null)
         {
             // skip writing if no data
             var rowCount = table.Rows.Count;
@@ -46,6 +48,13 @@ namespace PaletteInsightAgent.Output
                 // remove any rows from the csv queue
                 table.Rows.Clear();
 
+                // write the maxid file if it is not null
+                if (maxId != null)
+                {
+                    var maxIdFileName = dataFileName + MAX_ID_PREFIX;
+                    File.AppendAllText(maxIdFileName, maxId);
+                }
+
                 // Remove the postfix to signal that the file write is done.
                 File.Move(inProgressFileName, dataFileName);
                 Log.Info("{0} {1} written to CSV file: {2}", rowCount, "row".Pluralize(rowCount), dataFileName);
@@ -54,6 +63,14 @@ namespace PaletteInsightAgent.Output
             {
                 Log.Error("Failed to write {0} table contents to CSV file! Exception message: {1}", table.TableName, e.Message);
             }
+        }
+
+        public static void Delete(string tableName)
+        {
+            Directory.EnumerateFiles(DATA_FOLDER, tableName + "*.csv*")
+                .Select(f => new FileInfo(f))
+                .ToList()
+                .ForEach(f => f.Delete());
         }
 
         /// <summary>
