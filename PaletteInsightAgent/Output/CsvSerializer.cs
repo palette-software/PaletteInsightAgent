@@ -61,9 +61,13 @@ namespace PaletteInsightAgent.Output
                                 DateTime timestamp = (DateTime)row[i];
                                 csvWriter.WriteField(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture));
                             }
-                            else
+                            else if (row[i].GetType() == typeof(string))
                             {
                                 csvWriter.WriteField(EscapeForCsv(row[i].ToString()));
+                            }
+                            else
+                            {
+                                csvWriter.WriteField(row[i]);
                             }
                         }
                         else

@@ -18,15 +18,33 @@ namespace PaletteInsightAgent.Helpers
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static WebserviceConfiguration config = null;
         private static readonly string HostName = Uri.EscapeDataString(Dns.GetHostName());
+        private static IWebProxy proxy = null;
 
         public static void Init(WebserviceConfiguration webConfig)
         {
             config = webConfig;
+            if (webConfig.UseProxy)
+            {
+                proxy = new WebProxy(webConfig.ProxyAddress, false, new string[]{}, new NetworkCredential(webConfig.ProxyUsername, webConfig.ProxyPassword));
+            }
+
+        }
+
+        public static HttpClientHandler GetHttpClientHandler()
+        {
+            var handler = new HttpClientHandler();
+            if (proxy != null)
+            {
+                handler.UseProxy = true;
+                handler.Proxy = proxy;
+            }
+            return handler;
         }
 
         public static async Task<string> GetMaxId(string tableName)
         {
-            using (var httpClient = new HttpClient())
+            using (var handler = GetHttpClientHandler())
+            using (var httpClient = new HttpClient(handler))
             {
                 var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
                 httpClient.DefaultRequestHeaders.Authorization = authHeader;
@@ -52,7 +70,8 @@ namespace PaletteInsightAgent.Helpers
 
         public static async Task<HttpResponseMessage> UploadFile(string file, string maxId)
         {
-            using (var httpClient = new HttpClient())
+            using (var handler = GetHttpClientHandler())
+            using (var httpClient = new HttpClient(handler))
             {
                 var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
                 httpClient.DefaultRequestHeaders.Authorization = authHeader;
