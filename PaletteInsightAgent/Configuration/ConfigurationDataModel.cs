@@ -66,6 +66,18 @@ namespace PaletteInsight
         {
             [YamlMember(Alias = "Endpoint")]
             public string Endpoint { get; set; }
+
+            [YamlMember(Alias = "UseProxy")]
+            public bool UseProxy { get; set; } = false;
+
+            [YamlMember(Alias = "ProxyAddress")]
+            public string ProxyAddress { get; set; } = "";
+
+            [YamlMember(Alias = "ProxyUsername")]
+            public string ProxyUsername { get; set; } = "";
+
+            [YamlMember(Alias = "ProxyPassword")]
+            public string ProxyPassword { get; set; } = "";
         }
 
         public class PaletteInsightConfiguration
