@@ -39,6 +39,22 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             return false;
         }
 
+        // prepare array for results operation
+        // this is needed so that we move the .maxid files as well as the csvs 
+        private string[] PrepareResultArray(string file, string maxId)
+        {
+            string[] results;
+            if (maxId != null)
+            {
+                results = new string[] { file, file + "maxid" };
+            }
+            else
+            {
+                results = new string[] { file };
+            }
+            return results;
+        }
+
         /// <summary>
         /// Tries to send a list of files (or a single file) to the webservice.
         /// </summary>
@@ -47,8 +63,10 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// <returns></returns>
         private OutputWriteResult DoSendFile(string file, string maxId)
         {
+            var results = PrepareResultArray(file, maxId);
+
             // skip working if the file does not exist
-            if (!File.Exists(file)) return OutputWriteResult.Failed(file);
+            if (!File.Exists(file)) return OutputWriteResult.Failed(results);
 
             return LoggingHelpers.TimedLog<OutputWriteResult>(Log, String.Format("Uploading file : {0}", file), () =>
             {
@@ -64,7 +82,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                         // if we are ok, we are ok
                         case HttpStatusCode.OK:
                             Log.Debug("-> Sent ok: '{0}'", file);
-                            return OutputWriteResult.Ok(file);
+                            return OutputWriteResult.Ok(results);
                         // On Md5 failiure re-send the file
                         case HttpStatusCode.Conflict:
                             Log.Warn("-> MD5 error in '{0}' -- resending", file);
@@ -73,7 +91,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                         // a server or auth error
                         default:
                             Log.Warn("-> Unknown status: '{0}' for '{1}' -- moving to unsent", result.StatusCode, file);
-                            return OutputWriteResult.Unsent(file);
+                            return OutputWriteResult.Unsent(results);
                     }
                 }
                 catch (Exception e)
@@ -84,7 +102,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                     // sends
                     Log.Error(e, "Error during sending '{0}' to the webservice: {1}", file, e);
                     // so we are just adding this file to the unsent ones.
-                    return OutputWriteResult.Unsent(file);
+                    return OutputWriteResult.Unsent(results);
 
                 }
             });
