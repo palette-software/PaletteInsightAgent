@@ -29,7 +29,7 @@ build_script:
 
     "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
-    signtool.exe sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"
+    "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"
 
     move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 test_script:
