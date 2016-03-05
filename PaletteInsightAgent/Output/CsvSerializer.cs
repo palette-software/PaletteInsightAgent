@@ -51,7 +51,7 @@ namespace PaletteInsightAgent.Output
                 {
                     for (var i = 0; i < columnCount; i++)
                     {
-                        if (row[i] != null)
+                        if (row[i] != null && !row.IsNull(i))
                         {
                             if (row[i].GetType() == typeof(DateTime))
                             {
@@ -68,7 +68,7 @@ namespace PaletteInsightAgent.Output
                         }
                         else
                         {
-                            csvWriter.WriteField("");
+                            csvWriter.WriteField("\0");
                         }
                     }
                     csvWriter.NextRecord();
