@@ -52,7 +52,11 @@ namespace PaletteInsight
                     // Do not add the username or password here, as they come from the license
                     options.WebserviceConfig = new WebserviceConfiguration
                     {
-                        Endpoint = config.Webservice.Endpoint
+                        Endpoint = config.Webservice.Endpoint,
+                        UseProxy = config.Webservice.UseProxy,
+                        ProxyAddress = config.Webservice.ProxyAddress,
+                        ProxyUsername = config.Webservice.ProxyUsername,
+                        ProxyPassword = config.Webservice.ProxyPassword
                     };
                 }
                 else

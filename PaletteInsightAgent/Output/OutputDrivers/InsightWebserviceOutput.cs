@@ -37,6 +37,26 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         public bool UseMultifile = false;
 
         /// <summary>
+        /// Use HTTP Proxy or not
+        /// </summary>
+        public bool UseProxy = false;
+
+        /// <summary>
+        /// HTTP Proxy address
+        /// </summary>
+        public string ProxyAddress = "";
+
+        /// <summary>
+        /// HTTP Proxy username
+        /// </summary>
+        public string ProxyUsername = "";
+
+        /// <summary>
+        /// HTTP Proxy password
+        /// </summary>
+        public string ProxyPassword = "";
+
+        /// <summary>
         /// Returns true if the webservice configuration is valid.
         /// TODO: do a proper check of the Endpoint
         /// </summary>
