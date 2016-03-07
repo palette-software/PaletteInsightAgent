@@ -99,7 +99,14 @@ namespace PaletteInsightAgent
             USE_WEBSERVICE = !(options.WebserviceConfig == null);
             USE_DB = !USE_WEBSERVICE;
 
-            repoPollAgent = new RepoPollAgent();
+            // If the repo poll interval is set to 0, then do not poll the
+            // tableau repo
+            USE_TABLEAU_REPO = !(options.RepoTablesPollInterval == 0);
+
+            if (USE_TABLEAU_REPO)
+            {
+                repoPollAgent = new RepoPollAgent();
+            }
         }
 
         private PaletteInsightConfiguration LoadConfigFile(string filename)
@@ -202,18 +209,24 @@ namespace PaletteInsightAgent
                 threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
             }
 
-            // On start get the schema of the repository tables
-            var table = tableauRepo.GetSchemaTable();
+            // send the metadata if there is a tableau repo behind us
+            if (USE_TABLEAU_REPO)
+            {
 
-            // Add the metadata of the agent table to the schema table
-            DataTableUtils.AddAgentMetadata(table);
+                // On start get the schema of the repository tables
+                var table = tableauRepo.GetSchemaTable();
 
-            // Serialize schema table so that it gets uploaded with all other tables
-            OutputSerializer.Write(table);
+                // Add the metadata of the agent table to the schema table
+                DataTableUtils.AddAgentMetadata(table);
 
-            // Do the same for index data
-            table = tableauRepo.GetIndices();
-            OutputSerializer.Write(table);
+                // Serialize schema table so that it gets uploaded with all other tables
+                OutputSerializer.Write(table);
+
+                // Do the same for index data
+                table = tableauRepo.GetIndices();
+                OutputSerializer.Write(table);
+
+            }
 
             if (USE_WEBSERVICE)
             {
