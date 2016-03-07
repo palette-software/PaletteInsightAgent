@@ -68,7 +68,6 @@
         <File Id="NpgsqlDLL" Name="Npgsql.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Npgsql.dll" />
         <File Id="TopshelfDLL" Name="Topshelf.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.dll" />
         <File Id="TopshelfNLogDLL" Name="Topshelf.NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.NLog.dll" />
-        <File Id="NewtonsoftJSONDLL" Name="Newtonsoft.Json.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Newtonsoft.Json.dll" />
         <File Id="SodiumNetDLL" Name="libsodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium.dll" />
         <File Id="SodiumNet64DLL" Name="libsodium-64.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\libsodium-64.dll" />
         <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
@@ -97,6 +96,7 @@
         <File Id="PaletteInsightAgentConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />
         <File Id="LogFolderDefaultsYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" />
         <File Id="ProcessesDefaultsYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" />
+        <File Id="RepositoryDefaultsYAML" Name="Repository.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Repository.yml" />
       </Component>
     </DirectoryRef>
     

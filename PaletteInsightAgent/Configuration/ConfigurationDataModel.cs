@@ -47,6 +47,39 @@ namespace PaletteInsight
             public string Granularity { get; set; } = "Process";
         }
 
+        public class RepoTable
+        {
+            [YamlMember(Alias = "Name")]
+            public string Name { get; set; }
+
+            [YamlMember(Alias = "Full")]
+            public bool Full { get; set; } = true;
+
+            [YamlMember(Alias = "Field")]
+            public string Field { get; set; }
+
+            [YamlMember(Alias = "Filter")]
+            public string Filter { get; set; }
+        }
+
+        public class Webservice
+        {
+            [YamlMember(Alias = "Endpoint")]
+            public string Endpoint { get; set; }
+
+            [YamlMember(Alias = "UseProxy")]
+            public bool UseProxy { get; set; } = false;
+
+            [YamlMember(Alias = "ProxyAddress")]
+            public string ProxyAddress { get; set; } = "";
+
+            [YamlMember(Alias = "ProxyUsername")]
+            public string ProxyUsername { get; set; } = "";
+
+            [YamlMember(Alias = "ProxyPassword")]
+            public string ProxyPassword { get; set; } = "";
+        }
+
         public class PaletteInsightConfiguration
         {
             [YamlMember(Alias = "PollInterval")]
@@ -54,6 +87,12 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "ThreadInfoPollInterval")]
             public int ThreadInfoPollInterval { get; set; }
+
+            [YamlMember(Alias = "RepoTablesPollInterval")]
+            public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
+
+            [YamlMember(Alias = "ProcessedFilesTTL")]
+            public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
 
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
@@ -66,6 +105,9 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }
+
+            [YamlMember(Alias = "Webservice")]
+            public Webservice Webservice { get; set; }
 
             [YamlMember(Alias = "Logs")]
             public List<LogFolder> Logs { get; set; }
