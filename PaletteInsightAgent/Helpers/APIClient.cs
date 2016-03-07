@@ -27,7 +27,11 @@ namespace PaletteInsightAgent.Helpers
             {
                 proxy = new WebProxy(webConfig.ProxyAddress, false, new string[]{}, new NetworkCredential(webConfig.ProxyUsername, webConfig.ProxyPassword));
             }
-
+            ServicePointManager
+                .ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => {
+                    return true;
+                    };
         }
 
         public static HttpClientHandler GetHttpClientHandler()
