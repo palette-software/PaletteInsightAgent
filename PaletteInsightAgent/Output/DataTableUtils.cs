@@ -92,6 +92,7 @@ namespace PaletteInsightAgent.Output
             AddColumnInfo(table, "threadinfo", "start_ts", 8, "timestamp without time zone");
             AddColumnInfo(table, "threadinfo", "thread_count", 9, "integer");
             AddColumnInfo(table, "threadinfo", "working_set", 10, "bigint");
+            AddColumnInfo(table, "threadinfo", "thread_level", 11, "boolean");
 
             AddColumnInfo(table, "countersamples",  "timestamp", 1, "timestamp without time zone");
             AddColumnInfo(table, "countersamples",  "machine", 2);
