@@ -2,6 +2,7 @@
 ThreadInfoPollInterval: 15
 LogPollInterval: 300
 DBWriteInterval: 60
+RepoTablesPollInterval: 3600
 AllProcesses: false
 
 Database: 
@@ -11,6 +12,12 @@ Database:
   User: palette
   Password: password
   CommandTimeout: 600
+
+# To use the webservice output, uncomment the following lines:
+ 
+# Webservice:
+#  Endpoint: http://localhost:9000
+
 Logs: 
   - 
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'

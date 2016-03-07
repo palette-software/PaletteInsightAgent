@@ -7,40 +7,60 @@ using System.Threading;
 
 namespace PaletteInsightAgent.Output
 {
-    // CSV Folder:
-    // serverlog-2016-01-28-15-06-00.csv
-    // serverlog-2016-01-28-15-06-30.csv
-    // threadinfo-2016-01-28-15-06-00.csv
-
     class DBWriter
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        private const string CSV_PATH = @"csv/";
-        private const string CSV_PATTERN = @"*.csv";
         /// <summary>
         /// The directory we store the succesfully uploaded files
         /// </summary>
-        private const string PROCESSED_PATH = @"csv/processed/";
+        private const string PROCESSED_PREFIX = @"processed/";
         /// <summary>
         /// The directory where the files that have errors (invalid names, etc.)
         /// </summary>
-        private const string ERROR_PATH = @"csv/errors/";
+        private const string ERROR_PREFIX = @"errors/";
         /// <summary>
         /// The path where files to be re-sent later are stored.
         /// TODO: try these files on start
         /// </summary>
-        private const string UNSENT_PATH = @"csv/unsent/";
+        private const string UNSENT_PREFIX = @"unsent/";
 
         /// <summary>
-        /// A list of table names we actually care about.
+        /// The chance (as fraction) that a call to Start() will also result in a call
+        /// to TryToSendUnsentFiles()
         /// </summary>
-        private static readonly List<string> TABLE_NAMES = new List<string> {
-            Sampler.CounterSampler.TABLE_NAME,
-            LogPoller.LogTables.SERVERLOGS_TABLE_NAME,
-            LogPoller.LogTables.FILTER_STATE_AUDIT_TABLE_NAME,
-            ThreadInfoPoller.ThreadTables.TABLE_NAME,
-        };
+        private const double UNSENT_FILES_RESEND_CHANCE = 0.01;
 
+        private static string DataFilePattern
+        {
+            get
+            {
+                return "*" + OutputSerializer.Extension;
+            }
+        }
+
+        private static string ProcessedPath
+        {
+            get
+            {
+                return Path.Combine(OutputSerializer.DATA_FOLDER, PROCESSED_PREFIX);
+            }
+        }
+
+        private static string ErrorPath
+        {
+            get
+            {
+                return Path.Combine(OutputSerializer.DATA_FOLDER, ERROR_PREFIX);
+            }
+        }
+
+        private static string UnsentPath
+        {
+            get
+            {
+                return Path.Combine(OutputSerializer.DATA_FOLDER, UNSENT_PREFIX);
+            }
+        }
         public static readonly object DBWriteLock = new object();
         private static readonly int waitLockTimeout = 1000;
 
@@ -51,24 +71,58 @@ namespace PaletteInsightAgent.Output
         /// <param name="output"></param>
         public static void TryToSendUnsentFiles(IOutput output)
         {
-            DoUpload(output, UNSENT_PATH);
+            DoUpload(output, UnsentPath);
         }
 
         /// <summary>
         /// Start a single write loop
         /// </summary>
         /// <param name="output"></param>
-        public static void Start(IOutput output)
+        public static void Start(IOutput output, int processedFilesTTL)
         {
-            DoUpload(output, CSV_PATH);
+            // add some chance (1%) of uploading the unsent files, so once every
+            // ~1500 seconds on average we try to re-upload the stuff we may have missed
+            if (ShouldTryResendingData())
+            {
+                Log.Info("+++ LUCKY DRAW: trying to re-send unsent files +++");
+                TryToSendUnsentFiles(output);
+                Log.Info("+++ /LUCKY DRAW: done trying to re-sending unsent files +++");
+            }
+            DoUpload(output, OutputSerializer.DATA_FOLDER);
+            DeleteOldFiles(ProcessedPath, processedFilesTTL);
+        }
+
+        private static void DeleteOldFiles(string from, int ttl)
+        {
+            Directory.EnumerateFiles(from)
+                .Select(f => new FileInfo(f))
+                .Where(f => f.CreationTime < DateTime.Now.AddSeconds(-ttl))
+                .ToList()
+                .ForEach(f => f.Delete());
+        }
+
+        private static bool ShouldTryResendingData()
+        {
+            return new Random().NextDouble() < UNSENT_FILES_RESEND_CHANCE;
+        }
+
+        private static IList<string> GetPendingTables(string from)
+        {
+            return Directory.EnumerateFiles(from)
+                .Select(f => new FileInfo(f).Name)
+                .Where(fileName => fileName.Contains('-'))
+                .Select(fileName => fileName.Split('-')[0])
+                .Where(tableName => tableName.Length > 0)
+                .Distinct()
+                .ToList();
         }
 
         /// <summary>
-        /// Implementation of sending all CSV files from a directory
+        /// Implementation of sending all data files from a directory
         /// </summary>
         /// <param name="output"></param>
-        /// <param name="csvPath"></param>
-        private static void DoUpload(IOutput output, string csvPath)
+        /// <param name="dataPath"></param>
+        private static void DoUpload(IOutput output, string dataPath)
         {
             if (!Monitor.TryEnter(DBWriteLock, waitLockTimeout))
             {
@@ -80,18 +134,19 @@ namespace PaletteInsightAgent.Output
             {
                 // The old code (a while loop) gets stuck if we use the 'unsent' folder
                 // as a source.
-                MoveAllFiles(OutputWriteResult.Aggregate( TABLE_NAMES, (table) => {
-                    return output.Write(GetFilesOfTable(csvPath, table));
+                var tableNames = GetPendingTables(dataPath);
+                MoveAllFiles(OutputWriteResult.Aggregate( tableNames, (table) => {
+                    return output.Write(GetFilesOfTable(dataPath, table));
                 }));
             }
             catch (DirectoryNotFoundException)
             {
-                // This means that the CSV folder does not exist, which also means that
-                // there are no CSV files to process.
+                // This means that the data folder does not exist, which also means that
+                // there are no data files to process.
             }
             catch (Exception e)
             {
-                Log.Error(e, "Failed to write CSV files to database! Exception message: {0}", e);
+                Log.Error(e, "Failed to write data files to database! Exception message: {0}", e);
             }
             finally
             {
@@ -106,24 +161,24 @@ namespace PaletteInsightAgent.Output
         private static void MoveAllFiles(OutputWriteResult processedFiles)
         {
             // Move files to processed folder
-            MoveToFolder(processedFiles.successfullyWrittenFiles, PROCESSED_PATH);
+            MoveToFolder(processedFiles.successfullyWrittenFiles, ProcessedPath);
             // Move files with errors to the errors folder
-            MoveToFolder(processedFiles.failedFiles, ERROR_PATH);
+            MoveToFolder(processedFiles.failedFiles, ErrorPath);
             // Move files with errors to the errors folder
-            MoveToFolder(processedFiles.unsentFiles, UNSENT_PATH);
+            MoveToFolder(processedFiles.unsentFiles, UnsentPath);
         }
 
         /// <summary>
-        /// Gets all CSV files from a csvPath with the prefix specified by table.
+        /// Gets all data files from a dataPath with the prefix specified by table.
         /// </summary>
-        /// <param name="csvPath"></param>
+        /// <param name="dataPath"></param>
         /// <param name="table"></param>
         /// <returns></returns>
-        private static IList<string> GetFilesOfTable(string csvPath, string table)
+        private static IList<string> GetFilesOfTable(string dataPath, string table)
         {
             // Remove those files that are still being written.
-            return Directory.GetFiles(csvPath, table + "-" + CSV_PATTERN)
-                            .Where(fileName => !fileName.Contains(CsvOutput.IN_PROGRESS_FILE_POSTFIX))
+            return Directory.GetFiles(dataPath, table + "-" + DataFilePattern)
+                            .Where(fileName => !fileName.Contains(OutputSerializer.IN_PROGRESS_FILE_POSTFIX))
                             .ToList();
         }
 
@@ -135,17 +190,17 @@ namespace PaletteInsightAgent.Output
         /// <returns></returns>
         public static IList<string> GetFilesOfSameTable()
         {
-            return GetFilesOfSameTable(CSV_PATH);
+            return GetFilesOfSameTable(OutputSerializer.DATA_FOLDER);
         }
 
         /// <summary>
         /// Gives back a list of files for the same table, empty list otherwise 
         /// </summary>
-        /// <param name="csvPath">The directory of CSV files</param>
+        /// <param name="dataPath">The directory of data files</param>
         /// <returns></returns>
-        public static IList<string> GetFilesOfSameTable(string csvPath)
+        public static IList<string> GetFilesOfSameTable(string dataPath)
         {
-            var allFiles = Directory.GetFiles(csvPath, CSV_PATTERN);
+            var allFiles = Directory.GetFiles(dataPath, DataFilePattern);
             if (allFiles.Length == 0)
             {
                 return new List<string>();
@@ -157,8 +212,8 @@ namespace PaletteInsightAgent.Output
             }
 
             // Remove those files that are still being written.
-            return Directory.GetFiles(csvPath, pattern + "-" + CSV_PATTERN)
-                            .Where(fileName => !fileName.Contains(CsvOutput.IN_PROGRESS_FILE_POSTFIX))
+            return Directory.GetFiles(dataPath, pattern + "-" + DataFilePattern)
+                            .Where(fileName => !fileName.Contains(OutputSerializer.IN_PROGRESS_FILE_POSTFIX))
                             .ToList();
         }
 
@@ -227,7 +282,7 @@ namespace PaletteInsightAgent.Output
 
                     // Do the actual move
                     File.Move(fullFileName, targetFile);
-                    Log.Info("Processed file: {0}", fileName);
+                    Log.Info("Moved file: {0} to {1}", fileName, outputFolder);
                 }
                 catch (Exception ex)
                 {
@@ -238,7 +293,7 @@ namespace PaletteInsightAgent.Output
 
         internal static void MoveToProcessed(IList<string> testFileList)
         {
-            MoveToFolder(testFileList, PROCESSED_PATH);
+            MoveToFolder(testFileList, ProcessedPath);
         }
 
     }
