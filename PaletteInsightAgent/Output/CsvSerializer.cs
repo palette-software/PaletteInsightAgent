@@ -72,7 +72,7 @@ namespace PaletteInsightAgent.Output
                         }
                         else
                         {
-                            csvWriter.WriteField("\0");
+                            csvWriter.WriteField(@"\N");
                         }
                     }
                     csvWriter.NextRecord();
