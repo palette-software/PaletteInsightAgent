@@ -6,7 +6,7 @@
     public class DbConnectionInfo : IDbConnectionInfo
     {
         public string Server { get; set; }
-        public int? Port { get; set; }
+        public int Port { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string DatabaseName { get; set; }
@@ -19,7 +19,6 @@
         public bool Valid()
         {
             return Server != null &&
-                   Port != null &&
                    Port > 0 &&
                    Port <= 65535 &&
                    Username != null &&

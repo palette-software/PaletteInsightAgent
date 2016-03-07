@@ -23,7 +23,6 @@ namespace PaletteInsightAgent.Output
         private Dictionary<string, Func<DataTable>> tableCreators = new Dictionary<string, Func<DataTable>>
         {
             { LogTables.SERVERLOGS_TABLE_NAME,          LogTables.makeServerLogsTable },
-            { LogTables.FILTER_STATE_AUDIT_TABLE_NAME,  LogTables.makeFilterStateAuditTable},
             { ThreadTables.TABLE_NAME,                  ThreadTables.makeThreadInfoTable},
             { CounterSampler.TABLE_NAME,                CounterSampler.makeCounterSamplesTable}
         };
@@ -50,6 +49,11 @@ namespace PaletteInsightAgent.Output
         public OutputWriteResult Write(IList<string> csvFiles)
         {
             return DoBulkCopyWrapper(csvFiles);
+        }
+
+        public bool IsInProgress(string tableName)
+        {
+            return false;
         }
 
         #endregion
@@ -152,17 +156,6 @@ namespace PaletteInsightAgent.Output
             ReconnectoToDbIfNeeded();
             var tableName = DBWriter.GetTableName(fileNames[0]);
 
-            // Make sure we have the proper table
-            if (!tableCreators.ContainsKey(tableName))
-            {
-                Log.Error("Unexpected table name: {0}", tableName);
-                // return with all files as failed files
-                return new OutputWriteResult { failedFiles = new List<string>(fileNames) };
-            }
-
-            // at this point we should have a nice table
-            var table = tableCreators[tableName]();
-
             var statusLine = String.Format("BULK COPY of {0} (Number of files: {1})", tableName, fileNames.Count);
             string copyString = CopyStatementFor(fileNames[0]);
 
@@ -215,7 +208,9 @@ namespace PaletteInsightAgent.Output
                     // we store every file name in case we ever want to add by-file-error-handling later
                     outputResult.successfullyWrittenFiles.AddRange(fileNames);
 
-                    return rowsWritten;
+                    // Log the number of rows written here instead of spilling this aspect
+                    // to LoggingHelpers
+                    Log.Info("Total rows written: {0}", rowsWritten);
                 }
                 catch (Exception e)
                 {
@@ -317,8 +312,8 @@ namespace PaletteInsightAgent.Output
             }
 
             // first row contains column names
-            string columnNames = File.ReadLines(fileName).First(); // gets the first line from file.
-            var copyString = String.Format("COPY {0} ({1}) FROM STDIN WITH CSV", tableName, columnNames);
+            string columnNames = File.ReadLines(fileName).First().Replace("\v", ","); // gets the first line from file.
+            var copyString = String.Format("COPY {0} ({1}) FROM STDIN WITH DELIMITER '\v' CSV", tableName, columnNames);
             return copyString;
         }
 

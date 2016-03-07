@@ -16,6 +16,9 @@ using System.Diagnostics;
 using PaletteInsight.Configuration;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using PaletteInsightAgent.Output.OutputDrivers;
+using PaletteInsightAgent.RepoTablesPoller;
+using PaletteInsightAgent.Helpers;
 
 [assembly: CLSCompliant(true)]
 
@@ -30,9 +33,15 @@ namespace PaletteInsightAgent
         private Timer logPollTimer;
         private Timer threadInfoTimer;
         private Timer dbWriterTimer;
+        private Timer webserviceTimer;
+        private Timer repoTablesPollTimer;
+        private Timer streamingTablesPollTimer;
         private LogPollerAgent logPollerAgent;
         private ThreadInfoAgent threadInfoAgent;
+        private RepoPollAgent repoPollAgent;
         private CounterSampler sampler;
+        private ITableauRepoConn tableauRepo;
+        private IOutput output;
         private readonly PaletteInsightAgentOptions options;
         private bool disposed;
         private const string PathToCountersYaml = @"Config\Counters.yml";
@@ -43,6 +52,12 @@ namespace PaletteInsightAgent
         private const bool USE_COUNTERSAMPLES = true;
         private const bool USE_LOGPOLLER = true;
         private const bool USE_THREADINFO = true;
+
+        // use the constant naming convention for now as the mutability
+        // of this variable is temporary until the Db output is removed
+        private bool USE_DB = true;
+        private bool USE_WEBSERVICE = false;
+        private bool USE_TABLEAU_REPO = true;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PaletteInsightAgent(bool loadOptionsFromConfig = true)
@@ -55,8 +70,13 @@ namespace PaletteInsightAgent
             options = PaletteInsightAgentOptions.Instance;
             PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/Config.yml"), options );
 
+            tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
+
             // check the license after the configuration has been loaded.
-            CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
+            var license = CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
+
+            // Add the webservice username/auth token from the license
+            PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options, license);
 
             // Showing the current version in the log
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -66,8 +86,7 @@ namespace PaletteInsightAgent
             if (USE_LOGPOLLER)
             {
                 // Load the log poller config & start the agent
-                logPollerAgent = new LogPollerAgent(options.LogFolders,
-                    options.RepoHost, options.RepoPort, options.RepoUser, options.RepoPass, options.RepoDb);
+                logPollerAgent = new LogPollerAgent(options.LogFolders);
             }
 
             if (USE_THREADINFO)
@@ -75,6 +94,12 @@ namespace PaletteInsightAgent
                 // start the thread info agent
                 threadInfoAgent = new ThreadInfoAgent();
             }
+
+            // we'll use the webservice if we have the configuration for it
+            USE_WEBSERVICE = !(options.WebserviceConfig == null);
+            USE_DB = !USE_WEBSERVICE;
+
+            repoPollAgent = new RepoPollAgent();
         }
 
         private PaletteInsightConfiguration LoadConfigFile(string filename)
@@ -96,31 +121,28 @@ namespace PaletteInsightAgent
             }
         }
 
-        private void CheckLicense(string pathToCheck)
+        private Licensing.License CheckLicense(string pathToCheck)
         {
             try
             {
                 Log.Info("Checking for licenses in: {0}", pathToCheck);
-                // get the core count
-                var coreCount = LicenseChecker.LicenseChecker.getCoreCount(
-                    options.RepoHost,
-                    options.RepoPort,
-                    options.RepoUser,
-                    options.RepoPass,
-                    options.RepoDb
-                    );
+                var coreCount = tableauRepo.getCoreCount();
+                var license = LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount);
                 // check for license.
-                if (!LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount))
+                if (license == null)
                 {
                     Log.Fatal("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
                     Environment.Exit(-1);
                 }
+
+                return license;
             }
             catch (Exception e)
             {
                 Log.Fatal(e, "Error during license check. Exception: {0}", e);
                 Environment.Exit(-1);
             }
+            return null;
         }
 
         ~PaletteInsightAgent()
@@ -180,13 +202,43 @@ namespace PaletteInsightAgent
                 threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
             }
 
-            // Start the DB Writer
-            IOutput output = new PostgresOutput(options.ResultDatabase);
+            // On start get the schema of the repository tables
+            var table = tableauRepo.GetSchemaTable();
 
-            // On start try to send all unsent files
-            DBWriter.TryToSendUnsentFiles(output);
+            // Add the metadata of the agent table to the schema table
+            DataTableUtils.AddAgentMetadata(table);
 
-            dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
+            // Serialize schema table so that it gets uploaded with all other tables
+            OutputSerializer.Write(table);
+
+            // Do the same for index data
+            table = tableauRepo.GetIndices();
+            OutputSerializer.Write(table);
+
+            if (USE_WEBSERVICE)
+            {
+                APIClient.Init(options.WebserviceConfig);
+                output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
+                webserviceTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: 10 * 1000);
+            }
+            else
+            {
+                // Start the DB Writer
+                output = new PostgresOutput(options.ResultDatabase);
+
+                // On start try to send all unsent files
+                DBWriter.TryToSendUnsentFiles(output);
+
+                dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
+            } 
+
+            if (USE_TABLEAU_REPO)
+            {
+                // Poll Tableau repository data as well
+                repoTablesPollTimer = new Timer(callback: PollFullTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
+                streamingTablesPollTimer = new Timer(callback: PollStreamingTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
+            }
+
         }
 
 
@@ -230,6 +282,16 @@ namespace PaletteInsightAgent
                 dbWriterTimer.Dispose();
             }
 
+            if (streamingTablesPollTimer != null)
+            {
+                streamingTablesPollTimer.Dispose();
+            }
+
+            if (repoTablesPollTimer != null)
+            {
+                repoTablesPollTimer.Dispose();
+            }
+
             // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
             if (!Monitor.TryEnter(DBWriter.DBWriteLock, DBWriteLockAcquisitionTimeout * 1000))
             {
@@ -253,7 +315,9 @@ namespace PaletteInsightAgent
             if (USE_COUNTERSAMPLES) running = running && (sampler != null && timer != null);
             if (USE_LOGPOLLER) running = running && (logPollTimer != null);
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
-            running = running && (dbWriterTimer != null);
+            if (USE_WEBSERVICE) running = running && (webserviceTimer != null);
+            if (USE_DB) running = running && (dbWriterTimer != null);
+            if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null && streamingTablesPollTimer != null);
             return running;
         }
 
@@ -270,7 +334,7 @@ namespace PaletteInsightAgent
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
-                CsvOutput.Write(sampleResults);
+                OutputSerializer.Write(sampleResults);
             });
         }
 
@@ -300,10 +364,37 @@ namespace PaletteInsightAgent
             });
         }
 
+        /// <summary>
+        /// Get Tableau repository tables from the database
+        /// </summary>
+        /// <param name="stateInfo"></param>
+        private void PollFullTables(object stateInfo)
+        {
+            tryStartIndividualPoll(RepoPollAgent.FullTablesInProgressLock, PollWaitTimeout, () =>
+            {
+                Log.Info("Polling Repostoriy tables");
+                repoPollAgent.PollFullTables(tableauRepo, options.RepositoryTables);
+            });
+        }
+
+        /// <summary>
+        /// Get Tableau repository streaming tables from the database
+        /// </summary>
+        /// <param name="stateInfo"></param>
+        private void PollStreamingTables(object stateInfo)
+        {
+            tryStartIndividualPoll(RepoPollAgent.StreamingTablesInProgressLock, PollWaitTimeout, () =>
+            {
+                Log.Info("Polling streaming tables");
+                repoPollAgent.PollStreamingTables(tableauRepo, options.RepositoryTables, (IOutput)stateInfo);
+            });
+        }
+
+
         private void WriteToDB(object stateInfo)
         {
             // Stateinfo contains an IOutput object
-            DBWriter.Start((IOutput)stateInfo);
+            DBWriter.Start((IOutput)stateInfo, options.ProcessedFilestTTL);
         }
 
         /// <summary>

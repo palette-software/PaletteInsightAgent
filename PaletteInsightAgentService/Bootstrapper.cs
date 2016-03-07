@@ -39,7 +39,14 @@ namespace PaletteInsightAgentService
                 // move starting the agent here, so exceptions get properly logged not only on construction,
                 // but on start  also
                 agent.Start();
-                return agent.IsRunning();
+
+                // check the isRunning flag as this place stopped the execution numerous times
+                // without logging that the IsRunning() call returned false
+                var isRunning = agent.IsRunning();
+                if (!isRunning)
+                    Log.Error("The agent seems to be not running: IsRunning() returned false right after .Start()");
+
+                return isRunning;
             }
             catch (Exception e)
             {
