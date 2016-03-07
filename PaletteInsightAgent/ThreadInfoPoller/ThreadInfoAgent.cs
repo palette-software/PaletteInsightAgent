@@ -23,6 +23,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
         public DateTime pollTimeStamp;
         public DateTime pollCycleTimeStamp;
         public DateTime startTimeStamp;
+        public bool threadLevel;
     }
 
     class ThreadInfoAgent
@@ -68,7 +69,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
         }
 
         protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks, DateTime pollCycleTimeStamp, 
-                                        DateTime startTimeStamp)
+                                        DateTime startTimeStamp, bool threadLevel)
         {
             ThreadInfo threadInfo = new ThreadInfo();
             threadInfo.processId = process.Id;
@@ -78,6 +79,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             threadInfo.pollCycleTimeStamp = pollCycleTimeStamp;
             threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
+            threadInfo.threadLevel = threadLevel;
             threadInfo.process = process.ProcessName;
 
             // When on process level add threadCount as well
@@ -95,7 +97,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             {
                 // Store the total processor time of the whole process so that we can do sanity checks on the sum of thread cpu times
                 var pollCycleTimeStamp = DateTimeOffset.Now.UtcDateTime;
-                addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime());
+                addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime(), threadLevel);
                 threadInfoTableCount++;
 
                 if (threadLevel)
@@ -104,7 +106,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
                     {
                         try
                         {
-                            addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime());
+                            addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime(), threadLevel);
                             threadInfoTableCount++;
                         }
                         catch (InvalidOperationException)
