@@ -6,6 +6,38 @@
     Name: users
 - 
     Name: workbooks
+-
+    Name: historical_events
+-
+    Name: hist_capabilities
+-
+    Name: hist_comments
+-
+    Name: hist_configs
+-
+    Name: hist_data_connections
+-
+    Name: hist_datasources
+-
+    Name: hist_groups
+-
+    Name: hist_licensing_roles
+-
+    Name: hist_projects
+-
+    Name: hist_schedules
+-
+    Name: hist_sites
+-
+    Name: hist_tags   
+-
+    Name: hist_tasks
+-
+    Name: hist_users
+-
+    Name: hist_views
+-
+    Name: hist_workbooks
 - 
     Name: views
 - 
