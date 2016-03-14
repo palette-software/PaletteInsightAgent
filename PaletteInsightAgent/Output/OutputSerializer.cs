@@ -39,11 +39,7 @@ namespace PaletteInsightAgent.Output
                 // write out if any
                 var dataFileName = GetDataFile(table.TableName);
 
-                // First create the file name with a postfix, so that the bulk copy
-                // loader won't touch this file, until it is being written.
-                var inProgressFileName = dataFileName + IN_PROGRESS_FILE_POSTFIX;
-
-                Writer.WriteDataFile(inProgressFileName, table);
+                Writer.WriteDataFile(dataFileName, table);
 
                 // remove any rows from the csv queue
                 table.Rows.Clear();
@@ -54,10 +50,6 @@ namespace PaletteInsightAgent.Output
                     var maxIdFileName = dataFileName + MAX_ID_PREFIX;
                     File.AppendAllText(maxIdFileName, maxId);
                 }
-
-                // Remove the postfix to signal that the file write is done.
-                File.Move(inProgressFileName, dataFileName);
-                Log.Info("{0} {1} written to CSV file: {2}", rowCount, "row".Pluralize(rowCount), dataFileName);
             }
             catch (Exception e)
             {
