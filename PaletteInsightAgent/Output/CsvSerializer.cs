@@ -22,7 +22,7 @@ namespace PaletteInsightAgent.Output
         /// The maximum file size per part in bytes (this is a lower limit, the actual files will be
         /// ~ this size + one line + the quotation and separator overhead).
         /// </summary>
-        public static int MaxFileSize { get; set; } = 15 * 1024 * 1024;
+        public static int MaxFileSize = 15 * 1024 * 1024;
 
         public string Extension { get { return ".csv"; } }
 
@@ -47,7 +47,7 @@ namespace PaletteInsightAgent.Output
             {
                 // get the output file path
                 var fileNameWithPart = String.Format("{0}--part{1:0000}{2}", Path.GetFileNameWithoutExtension(fileName), filePartIdx, Path.GetExtension(fileName));
-                var filePathWithPart = Path.Combine( baseDir, fileNameWithPart);
+                var filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
 
                 // First create the file name with a postfix, so that the bulk copy
                 // loader won't touch this file, until it is being written.
@@ -74,9 +74,6 @@ namespace PaletteInsightAgent.Output
                 Log.Info("[CSV] written final part '{0}' -- {1}/{2} rows", fileNameWithPart, lastRow, table.Rows.Count);
                 // if the last row is -1, the write function has finished the whole table
                 if (lastRow == -1) return;
-
-                //File.Move(inProgressFileName, filePathWithPart);
-                //Log.Info("[CSV] written part '{0}' -- {1}/{2} rows", fileNameWithPart, lastRow, table.Rows.Count);
 
                 // increment the part idx
                 filePartIdx++;
