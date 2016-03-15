@@ -66,14 +66,17 @@ namespace PaletteInsightAgent.Output
 
                     // update the last output
                     lastRow = WriteCSVBody(table, csvWriter, lastRow, MaxFileSize);
-                    // if the last row is -1, the write function has finished the whole table
-                    if (lastRow == -1) return;
                 }
 
                 // After writing the file, move it to its final destination, and 
                 // remove the postfix to signal that the file write is done.
                 File.Move(inProgressFileName, filePathWithPart);
-                Log.Info("[CSV] written part '{0}' -- {1}/{2} rows", fileNameWithPart, lastRow, table.Rows.Count);
+                Log.Info("[CSV] written final part '{0}' -- {1}/{2} rows", fileNameWithPart, lastRow, table.Rows.Count);
+                // if the last row is -1, the write function has finished the whole table
+                if (lastRow == -1) return;
+
+                //File.Move(inProgressFileName, filePathWithPart);
+                //Log.Info("[CSV] written part '{0}' -- {1}/{2} rows", fileNameWithPart, lastRow, table.Rows.Count);
 
                 // increment the part idx
                 filePartIdx++;
