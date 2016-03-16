@@ -36,7 +36,7 @@ build_script:
     - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\githubrelease palette-software palette-updater %GITHUB_TOKEN%
     
     # Actually build stuff
-    - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe PaletteInsightAgent.sln /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
 
     - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
