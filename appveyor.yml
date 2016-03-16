@@ -29,7 +29,7 @@ build_script:
   # Get insight-tester and unzip it. It is needed for the github-downlaoder
   - mkdir %INSTALLER_DIR%
   - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0.6-lw/windows_amd64.zip', $env:INSTALLER_DIR+'\insight-tester.zip')
-  - dir $env:INSTALLER_DIR
+  - ps: dir $env:INSTALLER_DIR
   - echo "Downloaded insight-tester"
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\insight_tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
   - echo "Unzipped insight tester"
