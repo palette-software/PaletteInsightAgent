@@ -33,7 +33,7 @@ build_script:
   - echo "Unzipped insight tester"
 
   # Use github downloader to get latest palette-updater release
-  - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\githubrelease palette-software palette-updater %GITHUB_TOKEN%
+  - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\githubrelease palette-software palette-updater %GITHUB_TOKEN%
     
   # Unzip palette-updater to the appropriate place
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\palette-updater*.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
