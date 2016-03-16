@@ -33,7 +33,7 @@ build_script:
   - echo "Downloaded insight-tester"
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
   - echo "Unzipped insight tester"
-  - del %INSTALLER_DIR%/insight-tester.zip
+  - del %INSTALLER_DIR%\insight-tester.zip
 
   # Use github downloader to get latest palette-updater release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
@@ -46,7 +46,7 @@ build_script:
       $Dir = get-childitem $env:INSTALLER_DIR
       $env:UPDATER_ZIP = $Dir | where {$_.extension -eq ".zip"}
       $env:UPDATER_ZIP | format-table name
-  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('$env:UPDATER_ZIP', 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:UPDATER_ZIP, 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
 
   # Actually build Palette Insight Agent
