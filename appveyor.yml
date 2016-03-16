@@ -33,8 +33,8 @@ build_script:
   - echo "Unzipped insight tester"
 
   # Use github downloader to get latest palette-updater release
-  - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
-  - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release\windows_amd64
+  - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
+  - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
   - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\githubrelease.exe palette-software palette-updater %GITHUB_TOKEN%
     
   # Unzip palette-updater to the appropriate place
