@@ -23,8 +23,8 @@ services:
   - postgresql93
 build_script:
 - cmd: 
-    - nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
-    - nuget.exe restore
+    - 'nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe'
+    - 'nuget.exe restore'
       
     # Get insight-tester and unzip it. It is needed for the github-downlaoder
     - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.5-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
