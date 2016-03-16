@@ -15,6 +15,7 @@ assembly_info:
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
 environment:
+    installer_dir: C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
     pfx_pass:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
@@ -26,11 +27,12 @@ build_script:
   - nuget.exe restore
       
   # Get insight-tester and unzip it. It is needed for the github-downlaoder
-  - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
+  - mkdir %INSTALLER_DIR%
   - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0.6-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
   - echo "Downloaded insight-tester"
-  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('$env:INSTALLER_DIR\insight_tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
   - echo "Unzipped insight tester"
+  - del %INSTALLER_DIR%/insight_tester.zip
 
   # Use github downloader to get latest palette-updater release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
@@ -39,7 +41,11 @@ build_script:
     
   # Unzip palette-updater to the appropriate place
   - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
-  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\palette-updater*.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
+  - ps: >-
+      $Dir = get-childitem $env:INSTALLER_DIR
+      $env:UPDATER_ZIP = $Dir | where {$_.extension -eq ".zip"}
+      $env:UPDATER_ZIP | format-table name
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('$env:UPDATER_ZIP', 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
 
   # Actually build Palette Insight Agent
