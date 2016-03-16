@@ -39,11 +39,11 @@ build_script:
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
   - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\githubrelease.exe palette-software palette-updater %GITHUB_TOKEN%
+  - copy *.zip %INSTALLER_DIR%
     
   # Unzip palette-updater to the appropriate place
   - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
-  - ps: $env:UpdaterDir = $env:INSTALLER_DIR + '\windows_amd64'
-  - ps: $env:Dir = get-childitem $env:UpdaterDir
+  - ps: $env:Dir = get-childitem $env:installer_dir
   - ps: echo $env:Dir
   - ps: $env:UPDATER_ZIP = $env:Dir | where {$_.extension -eq ".zip"}
   - ps: echo $env:UPDATER_ZIP
