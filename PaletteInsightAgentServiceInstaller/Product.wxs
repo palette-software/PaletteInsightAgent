@@ -7,7 +7,7 @@
 <?define IconFile = "..\PaletteInsightAgentService\Resources\palette_symbol.ico"?>
 <?define BinFolder = "..\PaletteInsightAgentService\bin\Release"?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" >
   <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Manufacturer="$(var.Manufacturer)" />
     <Media Id="1" Cabinet="PaletteInsightAgent.cab" EmbedCab="yes" />
@@ -53,9 +53,33 @@
     <!-- Main Application Folder -->
     <DirectoryRef Id="INSTALLFOLDER">
       <Component Id="Executable" Guid="9fd4a8c4-6da6-49a8-91ab-e40db98efcde">
-        <!-- Main EXE file -->
+        <!-- Agent EXE and service config -->
         <File Id="PaletteInsightAgentExe" Name="PaletteInsightAgent.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe" />
+        <ServiceControl Id="StartAgentService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightAgent" Wait="yes" />
         <File Id="AppConfig" Name="PaletteInsightAgent.exe.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe.config" />
+        
+        <!-- Updater EXE -->
+        <File Id="PaletteUpdaterExe" Name="updater.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\updater.exe" />
+      
+        <!-- Watchdog EXE and service config -->
+        <File Id='PaletteWatchdogEXE' Name='watchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
+        <ServiceControl Id="StartWatchdogService" Start="install" Stop="both" Remove="uninstall" Name="PaletteWatchdog" Wait="yes" />
+        <ServiceConfig 
+          Id="PaletteWatchdogServiceConfig"
+          ServiceName="PaletteWatchdog"
+          OnInstall="yes"
+          OnReinstall="yes"
+          DelayedAutoStart="yes"
+          FailureActionsWhen="failedToStopOrReturnedError"          
+          />
+        <util:ServiceConfig
+          ServiceName="PaletteWatchdog"
+          FirstFailureActionType="restart"
+          SecondFailureActionType="restart"
+          ThirdFailureActionType="restart"
+          RestartServiceDelayInSeconds="10"
+          ResetPeriodInDays="1"
+          />
       </Component>
       <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
         <!-- Required Libraries -->
@@ -139,21 +163,20 @@
       </Feature>
     </Feature>
 
-    <!-- Custom Actions-->
-    <!-- Install/uninstall as a Windows service -->
+    <!-- Custom Actions -->
+    <!-- Install/uninstall as a Windows service --> 
+    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe install"/>
+    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe remove"/>
     <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
     <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
-    <!-- Prompt user to launch user manual after installing -->
-    <CustomAction Id="LaunchUserGuide"
-                  BinaryKey="WixCA"
-                  DllEntry="WixShellExec"
-                  Impersonate="yes" />
 
-    <!-- Install Sequence -->
+    <!-- Install Sequence --> 
     <InstallExecuteSequence>
       <RemoveExistingProducts After="InstallValidate"/>
+      <Custom Action="RunWatchdogServiceInstall" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="RunTopShelfServiceInstall" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="RunTopShelfServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+      <Custom Action="RunWatchdogServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
     </InstallExecuteSequence>
   </Product>
 </Wix>
