@@ -38,6 +38,7 @@ build_script:
   - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\githubrelease.exe palette-software palette-updater %GITHUB_TOKEN%
     
   # Unzip palette-updater to the appropriate place
+  - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\palette-updater*.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
 
