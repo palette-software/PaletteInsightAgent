@@ -81,7 +81,7 @@
           />
       </Component>
       <Component Id="PossibleLicenseFile" Guid="91736be3-5119-46d7-9bb8-ecb6659124fc">
-        <File Id="PaletteLicense" Name="palette.license" DiskId="2" Vital="no" Source="path\to\default\palette.license" Compressed="no" />
+        <CopyFile Id="PaletteLicense" DestinationDirectory="INSTALLFOLDER" SourceName="*.license" SourceProperty="SOURCEDIR" />
       </Component>
       <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
         <!-- Required Libraries -->
@@ -152,6 +152,7 @@
         <ComponentRef Id='ConfigFiles' />
         <ComponentRef Id='Utilities' />
         <ComponentRef Id='ProgramFilesShortcut' />
+        <ComponentRef Id='PossibleLicenseFile'/>
       </Feature>
     </Feature>
 
