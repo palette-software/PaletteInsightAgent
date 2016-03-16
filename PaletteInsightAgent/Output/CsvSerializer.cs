@@ -100,7 +100,10 @@ namespace PaletteInsightAgent.Output
 
         public static string EscapeForCsv(string field)
         {
-            return field.Replace("\r", "\\015")
+            return field
+                // escpe the backslash first
+                .Replace("\\", "\\\\")
+                .Replace("\r", "\\015")
                 .Replace("\n", "\\012")
                 .Replace("\0", "")
                 .Replace("\v", "\\013");
