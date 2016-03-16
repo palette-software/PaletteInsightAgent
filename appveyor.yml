@@ -42,7 +42,8 @@ build_script:
     
   # Unzip palette-updater to the appropriate place
   - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
-  - ps: $env:Dir = get-childitem $env:INSTALLER_DIR + '\windows_amd64'
+  - ps: $env:UpdaterDir = $env:INSTALLER_DIR + '\windows_amd64'
+  - ps: $env:Dir = get-childitem $env:UpdaterDir
   - ps: echo $env:Dir
   - ps: $env:UPDATER_ZIP = $env:Dir | where {$_.extension -eq ".zip"}
   - ps: echo $env:UPDATER_ZIP
@@ -115,8 +116,8 @@ test_script:
     - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
     - echo "Downloaded example_serverlogs.zip"
     - echo "Unzipped insight tester"
-    - windows_amd64\agentrunner.exe start
-    - echo "Started PaletteInsightAgent service"
+    # - windows_amd64\agentrunner.exe start
+    # - echo "Started PaletteInsightAgent service"
     - sleep 4
     - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
     - sleep 13
