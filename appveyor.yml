@@ -36,22 +36,22 @@ build_script:
     - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\githubrelease palette-software palette-updater %GITHUB_TOKEN%
     
     # Actually build stuff
-    - "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
-    - "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe' "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
     # Unzip palette-updater to the appropriate place
     - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\palette-updater*.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
     - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
 
     # Sign the installer
-    - "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"
+    - 'C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe' sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"
 
     - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
     # Runt TypeMock unit tests
-    - c:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
+    - c:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor 'c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll'
 
     # Setup Postgres 9.3 on the worker
     - SET PGUSER=postgres
