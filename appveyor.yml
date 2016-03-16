@@ -44,9 +44,7 @@ build_script:
   # Unzip palette-updater to the appropriate place
   - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
   - ps: $env:UPDATER_ZIP = get-childitem $env:installer_dir | where {$_.extension -eq ".zip"} 
-  - ps: echo $env:UPDATER_ZIP
-  - ps: $env:UPDATER_ZIP | format-table name
-  - ps: echo $env:UPDATER_ZIP
+  - ps: $env:UPDATER_ZIP = $env:INSTALLER_DIR + '\' + $env:UPDATER_ZIP
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:UPDATER_ZIP, 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
 
