@@ -26,6 +26,7 @@ build_script:
   - nuget.exe restore
       
   # Get insight-tester and unzip it. It is needed for the github-downlaoder
+  - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
   - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.5-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
   - echo "Downloaded insight-tester"
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
@@ -34,14 +35,14 @@ build_script:
   # Use github downloader to get latest palette-updater release
   - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\githubrelease palette-software palette-updater %GITHUB_TOKEN%
     
-  # Actually build stuff
-  - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe PaletteInsightAgent.sln /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
-
-  - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
-
   # Unzip palette-updater to the appropriate place
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\palette-updater*.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
+
+  # Actually build Palette Insight Agent
+  - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe PaletteInsightAgent.sln /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
+
+  - 'C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
 
   # Sign the installer
   - 'C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
