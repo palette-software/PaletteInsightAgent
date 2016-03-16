@@ -89,7 +89,9 @@ test_script:
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
-    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
+    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" "c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release\palette.license"
+    # REMOVE the following line!!!
+    - copy "c:\intentinally\bad\path.txt" ".\right.ok"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
     # Set the Postgres port in Config.yml
