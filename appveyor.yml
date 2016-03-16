@@ -88,6 +88,8 @@ test_script:
     - echo "Try a Palette Insight install and uninstall"
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+    # Prepare the license file for the installer to use
+    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
     # Set the Postgres port in Config.yml
@@ -104,7 +106,6 @@ test_script:
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "DBWriteInterval: 60", "DBWriteInterval: 7" } | Set-Content $env:CONFIG_YML_PATH;
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "LogPollInterval: 300", "LogPollInterval: 6" } | Set-Content $env:CONFIG_YML_PATH;
         echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
-    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
     - echo "Reconfigured config.yml"
 
     # # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private

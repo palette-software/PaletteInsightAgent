@@ -11,6 +11,7 @@
   <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Manufacturer="$(var.Manufacturer)" />
     <Media Id="1" Cabinet="PaletteInsightAgent.cab" EmbedCab="yes" />
+    <Media Id='2'/>
     <UIRef Id="CustomInstallDir" />
     <Icon Id="ProductIcon" SourceFile="$(var.IconFile)" />
     
@@ -78,6 +79,9 @@
           RestartServiceDelayInSeconds="10"
           ResetPeriodInDays="1"
           />
+      </Component>
+      <Component Id="PossibleLicenseFile" Guid="91736be3-5119-46d7-9bb8-ecb6659124fc">
+        <File Id="PaletteLicense" Name="palette.license" DiskId="2" Vital="no" Source="path\to\default\palette.license" Compressed="no" />
       </Component>
       <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
         <!-- Required Libraries -->
