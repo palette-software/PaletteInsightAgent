@@ -26,7 +26,7 @@ build_script:
   - nuget.exe restore
       
   # Get insight-tester and unzip it. It is needed for the github-downlaoder
- - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.5-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
+  - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.5-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
   - echo "Downloaded insight-tester"
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
   - echo "Unzipped insight tester"
