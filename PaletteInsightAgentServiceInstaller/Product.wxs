@@ -11,7 +11,6 @@
   <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Manufacturer="$(var.Manufacturer)" />
     <Media Id="1" Cabinet="PaletteInsightAgent.cab" EmbedCab="yes" />
-    <Media Id='2'/>
     <UIRef Id="CustomInstallDir" />
     <Icon Id="ProductIcon" SourceFile="$(var.IconFile)" />
     
