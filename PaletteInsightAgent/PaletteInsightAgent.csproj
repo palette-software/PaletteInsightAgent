@@ -115,6 +115,7 @@
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Heartbeat\HeartbeatAgent.cs" />
     <Compile Include="Helpers\APIClient.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="Configuration\ConfigurationLoader.cs" />

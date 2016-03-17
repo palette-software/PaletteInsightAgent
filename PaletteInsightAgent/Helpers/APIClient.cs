@@ -89,6 +89,36 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
+        /// <summary>
+        /// Sends a heartbeat to the service.
+        /// Since this is an async method with a void return type, it represents a top-level async operation.
+        /// An exception that leaves a top-level asynchronous method is simply treated like any other unhandled exception,
+        /// so we can handle HTTP exceptions outside of this method
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="maxId"></param>
+        /// <returns></returns>
+        public static async void SendHeartbeat()
+        {
+            // since this is a top-level async method, we need to catch exceptions
+            try
+            {
+                using (var handler = GetHttpClientHandler())
+                using (var httpClient = new HttpClient(handler))
+                {
+                    var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
+                    httpClient.DefaultRequestHeaders.Authorization = authHeader;
+
+                    var heartbeatUrrl = String.Format("{0}/heartbeat?host={1}", config.Endpoint, HostName);
+                    var result = await httpClient.GetAsync(heartbeatUrrl);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error while sending heartbeat: {0}", e);
+            }
+        }
+
         private static string UploadUrl(string package, string maxId)
         {
             var url = String.Format("{0}/upload?pkg={1}&host={2}", config.Endpoint, package, HostName);
