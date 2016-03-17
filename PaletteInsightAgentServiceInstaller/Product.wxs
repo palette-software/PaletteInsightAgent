@@ -7,7 +7,7 @@
 <?define IconFile = "..\PaletteInsightAgentService\Resources\palette_symbol.ico"?>
 <?define BinFolder = "..\PaletteInsightAgentService\bin\Release"?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" >
   <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated" Manufacturer="$(var.Manufacturer)" />
     <Media Id="1" Cabinet="PaletteInsightAgent.cab" EmbedCab="yes" />
@@ -21,8 +21,6 @@
     <Property Id="ARPURLINFOABOUT" Value="$(var.UrlInfoAbout)" />
     <Property Id="ARPNOREPAIR" Value="1" />
     <Property Id="INSTALLSHORTCUTS" Value="1" />
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
-    <Property Id="WixShellExecTarget" Value="[#UserGuide]" />
     
     <!-- Dependency management -->
     <PropertyRef Id="NETFRAMEWORK45" />
@@ -53,9 +51,37 @@
     <!-- Main Application Folder -->
     <DirectoryRef Id="INSTALLFOLDER">
       <Component Id="Executable" Guid="9fd4a8c4-6da6-49a8-91ab-e40db98efcde">
-        <!-- Main EXE file -->
+        <!-- Agent EXE and service config -->
         <File Id="PaletteInsightAgentExe" Name="PaletteInsightAgent.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe" />
+        <!--<ServiceControl Id="StartAgentService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightAgent" Wait="yes" />-->
         <File Id="AppConfig" Name="PaletteInsightAgent.exe.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe.config" />
+        
+        <!-- Updater EXE -->
+        <File Id="PaletteUpdaterExe" Name="updater.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\updater.exe" />
+      
+        <!-- Watchdog EXE and service config -->
+        <File Id='PaletteWatchdogEXE' Name='watchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
+        <ServiceControl Id="StartWatchdogService" Start="install" Stop="both" Remove="uninstall" Name="PaletteWatchdog" Wait="yes" />
+        <ServiceConfig 
+          Id="PaletteWatchdogServiceConfig"
+          ServiceName="PaletteWatchdog"
+          OnInstall="yes"
+          OnReinstall="yes"
+          DelayedAutoStart="yes"
+          FailureActionsWhen="failedToStopOrReturnedError"          
+          />
+        <util:ServiceConfig
+          ServiceName="PaletteWatchdog"
+          FirstFailureActionType="restart"
+          SecondFailureActionType="restart"
+          ThirdFailureActionType="restart"
+          RestartServiceDelayInSeconds="10"
+          ResetPeriodInDays="1"
+          />
+      </Component>
+      <Component Id="PossibleLicenseFile" Guid="91736be3-5119-46d7-9bb8-ecb6659124fc" NeverOverwrite="yes">
+        <CopyFile Id="PaletteLicense" DestinationDirectory="INSTALLFOLDER" SourceName="*.license" SourceProperty="SOURCEDIR" />
+        <!--<CopyFile Id="ConfigFiles" DestinationDirectory="CONFIGFOLDER"  SourceName="*.yml" SourceProperty="SOURCEDIR" />-->
       </Component>
       <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
         <!-- Required Libraries -->
@@ -78,10 +104,6 @@
         <!-- Helper Utilities -->
         <File Id="StartPaletteInsightAgentScript" Name="StartPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StartPaletteInsightAgentService.bat" />
         <File Id="StopPaletteInsightAgentScript" Name="StopPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StopPaletteInsightAgentService.bat" />
-      </Component>
-      <Component Id="Documentation" Guid="c50f5944-a820-45e9-b5aa-edbc6330503a">
-        <!-- User Documentation -->
-        <File Id="UserGuide" Name="PaletteInsightAgent User Guide.pdf" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Documentation\UserGuide.pdf" />
       </Component>
       <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03" Permanent="yes">
         <!-- NLog configuration -->
@@ -116,11 +138,6 @@
                   Target="[#StopPaletteInsightAgentScript]"
                   Icon="ProductIcon"
                   WorkingDirectory="INSTALLFOLDER"/>
-        <Shortcut Id="UserGuideStartMenuShortcut"
-                  Name="How to use Palette Insight Agent"
-                  Description="Documentation on how to use Palette Insight Agent."
-                  Target="[#UserGuide]"
-                  WorkingDirectory="INSTALLFOLDER"/>
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
         <RegistryValue Root="HKCU" Key="Software\$(var.Manufacturer)\$(var.ApplicationName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
@@ -134,26 +151,25 @@
         <ComponentRef Id='LogConfig' />
         <ComponentRef Id='ConfigFiles' />
         <ComponentRef Id='Utilities' />
-        <ComponentRef Id='Documentation' />
         <ComponentRef Id='ProgramFilesShortcut' />
+        <ComponentRef Id='PossibleLicenseFile' />
       </Feature>
     </Feature>
 
-    <!-- Custom Actions-->
-    <!-- Install/uninstall as a Windows service -->
+    <!-- Custom Actions -->
+    <!-- Install/uninstall as a Windows service --> 
+    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe install"/>
+    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe remove"/>
     <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
     <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
-    <!-- Prompt user to launch user manual after installing -->
-    <CustomAction Id="LaunchUserGuide"
-                  BinaryKey="WixCA"
-                  DllEntry="WixShellExec"
-                  Impersonate="yes" />
 
-    <!-- Install Sequence -->
+    <!-- Install Sequence --> 
     <InstallExecuteSequence>
       <RemoveExistingProducts After="InstallValidate"/>
+      <Custom Action="RunWatchdogServiceInstall" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="RunTopShelfServiceInstall" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="RunTopShelfServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+      <Custom Action="RunWatchdogServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
     </InstallExecuteSequence>
   </Product>
 </Wix>
