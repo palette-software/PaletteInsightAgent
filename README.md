@@ -8,7 +8,7 @@ Palette Insight Agent can be run as both a console app and a Windows service.
 
 ## How do I set up Palette Insight Agent?
 
-Palette Insight Agent is deployed via a custom installer, which manages dependencies and also bundles Postgres for ease of setup for new users.  To get up and running, follow the instructions in the [installation guide](https://github.com/palette-software/BlackBoxRecorder/blob/master/PaletteInsightAgentService/Documentation/UserGuide.pdf).
+Palette Insight Agent is zero configured and remotely updated.
 
 ## How do I analyze results from Palette Insight Agent?
 
@@ -50,7 +50,7 @@ See [Developer Notes.txt](https://github.com/palette-software/BlackBoxRecorder/b
 
 ## Is Palette Insight Agent supported?
 
-Palette Insight Agent is made available AS-IS with no support. This is intended to be a self service tool and includes a user guide.  Any bugs discovered should be filed in the [Palette Insight Agent Git issue tracker](https://github.com/palette-software/BlackBoxRecorder/issues).
+Palette Insight Agent is made available AS-IS with licensed support. Any bugs discovered should be filed in the [Palette Insight Agent Git issue tracker](https://github.com/palette-software/BlackBoxRecorder/issues).
 
 ## How can I contribute to Palette Insight Agent?
 
