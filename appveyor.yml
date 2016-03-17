@@ -89,9 +89,7 @@ test_script:
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
-    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" "c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release\palette.license"
-    # REMOVE the following line!!!
-    - copy "c:\intentinally\bad\path.txt" ".\right.ok"
+    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
     # Set the Postgres port in Config.yml
@@ -115,8 +113,8 @@ test_script:
     - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
     - echo "Downloaded example_serverlogs.zip"
     - echo "Unzipped insight tester"
-    # - windows_amd64\agentrunner.exe start
-    # - echo "Started PaletteInsightAgent service"
+    - windows_amd64\agentrunner.exe start
+    - echo "Started PaletteInsightAgent service"
     - sleep 4
     - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
     - sleep 13
@@ -160,5 +158,5 @@ deploy:
 #   on_build_failure: true
 #   on_build_status_changed: true
 
-on_finish:
-- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# on_finish:
+# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
