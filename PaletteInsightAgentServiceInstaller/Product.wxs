@@ -54,7 +54,7 @@
       <Component Id="Executable" Guid="9fd4a8c4-6da6-49a8-91ab-e40db98efcde">
         <!-- Agent EXE and service config -->
         <File Id="PaletteInsightAgentExe" Name="PaletteInsightAgent.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe" />
-        <ServiceControl Id="StartAgentService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightAgent" Wait="yes" />
+        <!--<ServiceControl Id="StartAgentService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightAgent" Wait="yes" />-->
         <File Id="AppConfig" Name="PaletteInsightAgent.exe.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe.config" />
         
         <!-- Updater EXE -->
@@ -82,7 +82,7 @@
       </Component>
       <Component Id="PossibleLicenseFile" Guid="91736be3-5119-46d7-9bb8-ecb6659124fc" NeverOverwrite="yes">
         <CopyFile Id="PaletteLicense" DestinationDirectory="INSTALLFOLDER" SourceName="*.license" SourceProperty="SOURCEDIR" />
-        <CopyFile Id="ConfigFiles" DestinationDirectory="CONFIGFOLDER"  SourceName="*.yml" SourceProperty="SOURCEDIR" />
+        <!--<CopyFile Id="ConfigFiles" DestinationDirectory="CONFIGFOLDER"  SourceName="*.yml" SourceProperty="SOURCEDIR" />-->
       </Component>
       <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
         <!-- Required Libraries -->
