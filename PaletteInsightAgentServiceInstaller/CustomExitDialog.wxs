@@ -7,7 +7,6 @@
    LICENSE.TXT at the root directory of the distribution.
  </copyright>
 -->
-<?define LaunchUserGuideText = "Launch User Manual after setup exits."?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
     <UI>
@@ -19,9 +18,6 @@
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
         <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="40" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogDescription)" />
         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes" Text="!(loc.ExitDialogTitle)" />
-        <!--<Control Id="LaunchCheckBox" Type="CheckBox" X="10" Y="243" Width="170" Height="17" Property="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Hidden="yes" CheckBoxValue="1" Text="$(var.LaunchUserGuideText)">
-          <Condition Action="show">NOT Installed</Condition>
-        </Control>-->
       </Dialog>
 
       <InstallUISequence>
