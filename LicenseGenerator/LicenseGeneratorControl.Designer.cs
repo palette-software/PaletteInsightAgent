@@ -128,6 +128,11 @@
             // coreCount
             // 
             this.coreCount.Location = new System.Drawing.Point(126, 64);
+            this.coreCount.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
             this.coreCount.Name = "coreCount";
             this.coreCount.Size = new System.Drawing.Size(120, 20);
             this.coreCount.TabIndex = 18;
