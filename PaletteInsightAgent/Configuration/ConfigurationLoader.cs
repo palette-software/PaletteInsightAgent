@@ -323,9 +323,6 @@ namespace PaletteInsight
                 public string ConnectionsFile { get; set; }
 
                 public TableauConnectionInfo Connection { get; set; }
-
-                // [YamlMember(Alias = "datacollector.postgres.tablename")]
-                // public string DatabaseName { get; set; }
             }
 
             public class TableauConnectionInfo
