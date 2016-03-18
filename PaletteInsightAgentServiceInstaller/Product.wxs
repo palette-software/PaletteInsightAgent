@@ -60,7 +60,7 @@
         <File Id="PaletteUpdaterExe" Name="updater.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\updater.exe" />
       
         <!-- Watchdog EXE and service config -->
-        <File Id='PaletteInsightWatchdogEXE' Name='watchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
+        <File Id='PaletteInsightWatchdogEXE' Name='PaletteInsightWatchdog.exe' DiskId='1' Source="$(var.BinFolder)\PaletteInsightWatchdog.exe" KeyPath='yes' />         
         <ServiceControl Id="StartWatchdogService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightWatchdog" Wait="yes" />
         <ServiceConfig 
           Id="PaletteInsightWatchdogServiceConfig"
@@ -159,8 +159,8 @@
 
     <!-- Custom Actions -->
     <!-- Install/uninstall as a Windows service --> 
-    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe install"/>
-    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe remove"/>
+    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe install"/>
+    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe remove"/>
     <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
     <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
 
