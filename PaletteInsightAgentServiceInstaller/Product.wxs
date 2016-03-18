@@ -60,7 +60,7 @@
         <File Id="PaletteUpdaterExe" Name="updater.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\updater.exe" />
       
         <!-- Watchdog EXE and service config -->
-        <File Id='PaletteInsightWatchdogEXE' Name='PaletteInsightWatchdog.exe' DiskId='1' Source="$(var.BinFolder)\PaletteInsightWatchdog.exe" KeyPath='yes' />         
+        <File Id='PaletteInsightWatchdogEXE' Name='PaletteInsightWatchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
         <ServiceControl Id="StartWatchdogService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightWatchdog" Wait="yes" />
         <ServiceConfig 
           Id="PaletteInsightWatchdogServiceConfig"
