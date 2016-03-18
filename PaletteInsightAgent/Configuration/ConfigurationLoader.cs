@@ -77,7 +77,6 @@ namespace PaletteInsight
 
                 // Add the log folders based on the Tableau Data path from the registry
                 var tableauRoot = GetTableauRegistryString("Data");
-                tableauRoot = "";
 
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
