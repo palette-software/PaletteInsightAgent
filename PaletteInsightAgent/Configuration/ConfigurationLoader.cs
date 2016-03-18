@@ -100,7 +100,7 @@ namespace PaletteInsight
             /// <param name="tableauRoot"></param>
             private static void AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-                Repository repo = null;
+                Workgroup repo = null;
                 string workgroupyml = @"tabsvc\config\workgroup.yml";
 
                 var configFilePath = "";
@@ -109,7 +109,7 @@ namespace PaletteInsight
                     configFilePath = Path.Combine(tableauRoot, workgroupyml);
                     using (var reader = File.OpenText(configFilePath))
                     {
-                        repo = GetRepoFromWorkgroupYaml(reader);
+                        repo = GetRepoFromWorkgroupYaml(tableauRoot);
                     }
                 }
                 catch (Exception e)
@@ -141,11 +141,11 @@ namespace PaletteInsight
                     }
                     options.RepositoryDatabase = new DbConnectionInfo
                     {
-                        Server = repo.Host,
-                        Port = repo.Port0,
+                        Server = repo.Connection.Host,
+                        Port = repo.Connection.Port,
                         Username = repo.Username,
                         Password = repo.Password,
-                        DatabaseName = repo.DatabaseName
+                        DatabaseName = repo.Connection.DatabaseName
                     };
                 }
             }
@@ -308,10 +308,10 @@ namespace PaletteInsight
             /// <summary>
             /// Deserialization struct for the repo config from the workgroup.yml
             /// </summary>
-            public class Repository
+            public class Workgroup
             {
-                [YamlMember(Alias = "datacollector.postgres.host")]
-                public string Host { get; set; }
+                [YamlMember(Alias = "pgsql.readonly.enabled")]
+                public bool ReadonlyEnabled { get; set; }
 
                 [YamlMember(Alias = "pgsql.readonly_username")]
                 public string Username { get; set; }
@@ -319,24 +319,54 @@ namespace PaletteInsight
                 [YamlMember(Alias = "pgsql.readonly_password")]
                 public string Password { get; set; }
 
-                [YamlMember(Alias = "datacollector.postgres.tablename")]
-                public string DatabaseName { get; set; }
+                [YamlMember(Alias = "pgsql.connections.yml")]
+                public string ConnectionsFile { get; set; }
 
-                [YamlMember(Alias = "pgsql0.port")]
-                public int Port0 { get; set; }
-
-                // The testing tableau server had two ports in the workgroup.yml, hence this one
-                [YamlMember(Alias = "pgsql1.port")]
-                public int Port1 { get; set; }
-
-
+                public TableauConnectionInfo Connection { get; set; }
             }
 
-            private static Repository GetRepoFromWorkgroupYaml(TextReader input)
+            public class TableauConnectionInfo
             {
+                [YamlMember(Alias = "pgsql.host")]
+                public string Host { get; set; }
+
+                [YamlMember(Alias = "pgsql.port")]
+                public int Port { get; set; }
+
+                // It is not possible to change it @Tableau so we hardcode it for now
+                public readonly string DatabaseName = "workgroup";
+            }
+
+            private static bool IsValidRepoData(Workgroup workgroup)
+            {
+                return workgroup.ReadonlyEnabled
+                    && workgroup.Username != null
+                    && workgroup.Password != null
+                    && workgroup.Connection.Host != null;
+            }
+
+            private static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot)
+            {
+                // Get basic info from workgroup yml. Everything else from connections.yml
                 var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
-                var result = deserializer.Deserialize<Repository>(input);
-                return result;
+
+                string workgroupyml = @"tabsvc\config\workgroup.yml";
+                var configFilePath = Path.Combine(tableauRoot, workgroupyml);
+                Workgroup workgroup = null;
+                using (var workgroupFile = File.OpenText(configFilePath))
+                {
+                    workgroup = deserializer.Deserialize<Workgroup>(workgroupFile);
+                    using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
+                    {
+                        workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
+                    }
+                    if (!IsValidRepoData(workgroup))
+                    {
+                        return null;
+                    }
+                }
+
+                return workgroup;
             }
 
             #endregion
