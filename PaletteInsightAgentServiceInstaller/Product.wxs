@@ -56,8 +56,8 @@
         <!--<ServiceControl Id="StartAgentService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightAgent" Wait="yes" />-->
         <File Id="AppConfig" Name="PaletteInsightAgent.exe.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe.config" />
         
-        <!-- Updater EXE -->
-        <File Id="PaletteUpdaterExe" Name="updater.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\updater.exe" />
+        <!-- Manager EXE -->
+        <File Id="PaletteManagerExe" Name="manager.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\manager.exe" />
       
         <!-- Watchdog EXE and service config -->
         <File Id='PaletteInsightWatchdogEXE' Name='PaletteInsightWatchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
