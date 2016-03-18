@@ -349,7 +349,6 @@ namespace PaletteInsight
                     && workgroup.Connection.Host != null;
             }
 
-            // TODO: If we can't get everything from ymls, fallback to our config
             private static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot)
             {
                 // Get basic info from workgroup yml. Everything else from connections.yml
