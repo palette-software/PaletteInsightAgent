@@ -22,7 +22,7 @@ namespace PaletteInsightAgent.Output
         /// The maximum file size per part in bytes (this is a lower limit, the actual files will be
         /// ~ this size + one line + the quotation and separator overhead).
         /// </summary>
-        public static int MaxFileSize = 15 * 1024 * 1024;
+        public static int MaxFileSize = 50 * 1024 * 1024;
 
         public string Extension { get { return ".csv"; } }
 
@@ -91,7 +91,7 @@ namespace PaletteInsightAgent.Output
         ///     We have seen log lines of up to 5Mb in length, so using 15 here should almost guarantee us a request size of under 20Mb.
         /// </param>
         /// <returns>The index of the last written row, or -1 if the whole table has been written out</returns>
-        public static int WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter, int startRowIdx = 0, Int64 maxSize = 15 * 1024 * 1024)
+        public static int WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter, int startRowIdx, Int64 maxSize)
         {
             var columnCount = queue.Columns.Count;
             var byteCount = 0;
@@ -109,9 +109,11 @@ namespace PaletteInsightAgent.Output
                     // wont contain the bytes of the not written lines
                     byteCount += WriteCsvLine(csvWriter, columnCount, queue.Rows[rowIdx]);
                     // compare the current byte count with the maximum and stop after this line if we are over
+                    // and as we have already written one more file let's just return rowIndex plus 1 instead of rowIndex
+                    // otherwise we could end up with an infinite loop when there is a row that is bigger than our max file size
                     if (byteCount > maxSize)
                     {
-                        return rowIdx;
+                        return rowIdx + 1;
                     }
                 }
                 catch (CsvWriterException ex)
