@@ -106,20 +106,28 @@
         <File Id="StartPaletteInsightAgentScript" Name="StartPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StartPaletteInsightAgentService.bat" />
         <File Id="StopPaletteInsightAgentScript" Name="StopPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StopPaletteInsightAgentService.bat" />
       </Component>
-      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03" Permanent="yes">
+      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03" Permanent="yes" NeverOverwrite="yes">
         <!-- NLog configuration -->
-        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config"/>
+        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config" KeyPath="yes"/>
       </Component>
     </DirectoryRef>
 
     <!-- Config Files -->
     <DirectoryRef Id="CONFIGFOLDER">
-      <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes">
-        <File Id="CountersConfig" Name="Counters.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.yml" />
-        <File Id="PaletteInsightAgentConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />
-        <File Id="LogFolderDefaultsYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" />
-        <File Id="ProcessesDefaultsYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" />
-        <File Id="RepositoryDefaultsYAML" Name="Repository.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Repository.yml" />
+      <Component Id="CountersConfigComponent" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="CountersConfig" Name="Counters.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="PaletteInsightAgentConfigComponent" Guid="3af0ae94-bed1-4df2-b266-fec20977cd84" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="PaletteInsightAgentConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="LogFolderConfigComponent" Guid="cae6c6c9-3b81-4ac1-9aa0-7c7f8c0e0207" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="LogFoldersYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="ProcessesConfigComponent" Guid="24617bd5-e4b4-45a0-9e96-64150bc0e8f1" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="ProcessesYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="RepositoryConfigComponent" Guid="21f282c4-0d38-435d-98f4-e354effc43ec" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="RepositoryYAML" Name="Repository.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Repository.yml" KeyPath="yes" />
       </Component>
     </DirectoryRef>
     
