@@ -158,7 +158,11 @@
         <ComponentRef Id='Executable' />
         <ComponentRef Id='Libraries' />
         <ComponentRef Id='LogConfig' />
-        <ComponentRef Id='ConfigFiles' />
+        <ComponentRef Id='CountersConfigComponent' />
+        <ComponentRef Id='PaletteInsightAgentConfigComponent' />
+        <ComponentRef Id='LogFolderConfigComponent' />
+        <ComponentRef Id='ProcessesConfigComponent' />
+        <ComponentRef Id='RepositoryConfigComponent' />
         <ComponentRef Id='Utilities' />
         <ComponentRef Id='ProgramFilesShortcut' />
         <ComponentRef Id='PossibleLicenseFile' />
