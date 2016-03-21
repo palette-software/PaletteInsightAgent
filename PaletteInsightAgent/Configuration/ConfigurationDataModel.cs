@@ -92,7 +92,8 @@ namespace PaletteInsight
             public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
 
             [YamlMember(Alias = "ProcessedFilesTTL")]
-            public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
+            // public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
+            public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
 
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
