@@ -100,8 +100,13 @@ namespace PaletteInsight
             [YamlMember(Alias = "DBWriteInterval")]
             public int DBWriteInterval { get; set; }
 
+            // Became outdated as it was misconfigured at clients
             [YamlMember(Alias = "AllProcesses")]
             public bool AllProcesses { get; set; } = false;
+
+            // This is a hack and as such I chose very ugly name intentionally so that we don't leave it this way.
+            [YamlMember(Alias = "AllProcesses2")]
+            public bool AllProcesses2 { get; set; } = true;
 
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }
