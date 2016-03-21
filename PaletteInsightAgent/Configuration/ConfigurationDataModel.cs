@@ -94,6 +94,9 @@ namespace PaletteInsight
             [YamlMember(Alias = "ProcessedFilesTTL")]
             public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
 
+            [YamlMember(Alias = "StorageLimit")]
+            public int StorageLimit { get; set; } = 1 * 1024; // Default is 1 Gb. This value is given in megabytes.
+
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
 
@@ -101,7 +104,7 @@ namespace PaletteInsight
             public int DBWriteInterval { get; set; }
 
             [YamlMember(Alias = "AllProcesses")]
-            public bool AllProcesses { get; set; } = false;
+            public bool AllProcesses { get; set; } = true;
 
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }

@@ -78,7 +78,7 @@ namespace PaletteInsightAgent.Output
         /// Start a single write loop
         /// </summary>
         /// <param name="output"></param>
-        public static void Start(IOutput output, int processedFilesTTL)
+        public static void Start(IOutput output, int processedFilesTTL, long storageLimit)
         {
             // add some chance (1%) of uploading the unsent files, so once every
             // ~1500 seconds on average we try to re-upload the stuff we may have missed
@@ -90,6 +90,7 @@ namespace PaletteInsightAgent.Output
             }
             DoUpload(output, OutputSerializer.DATA_FOLDER);
             DeleteOldFiles(ProcessedPath, processedFilesTTL);
+            ApplyStorageLimit(storageLimit);
         }
 
         private static void DeleteOldFiles(string from, int ttl)
@@ -99,6 +100,66 @@ namespace PaletteInsightAgent.Output
                 .Where(f => f.CreationTime < DateTime.Now.AddSeconds(-ttl))
                 .ToList()
                 .ForEach(f => f.Delete());
+        }
+
+        public static void ApplyStorageLimit(long storageLimit)
+        {
+            // FIXME: Do these checks in a more proper place
+            if (!Directory.Exists(ProcessedPath))
+                Directory.CreateDirectory(ProcessedPath);
+
+            if (!Directory.Exists(UnsentPath))
+                Directory.CreateDirectory(UnsentPath);
+
+            if (!Directory.Exists(ErrorPath))
+                Directory.CreateDirectory(ErrorPath);
+
+            // Create a universal list of files
+            IList<FileInfo> storedFiles = Directory.EnumerateFiles(ProcessedPath)
+                .Union(Directory.EnumerateFiles(ErrorPath))
+                .Union(Directory.EnumerateFiles(UnsentPath))
+                .Select(f => new FileInfo(f))
+                .OrderBy(f => f.CreationTimeUtc)
+                .ToList();
+
+            long cumulatedSize = 0;
+            foreach (var file in storedFiles)
+            {
+                cumulatedSize += file.Length;
+            }
+
+            // Storage limit is given in megabytes 
+            long storageLimitInBytes = storageLimit * 1024;
+
+            if (storageLimitInBytes >  cumulatedSize)
+            {
+                // We are within limits, no need to do anything this time.
+                return;
+            }
+
+            // Delete files while we are getting well below of the storage limit.
+            // Well below here means the half of the limit.
+            while (cumulatedSize > storageLimitInBytes/2)
+            {
+                // Since the universal list we created is ordered by creation time,
+                // let's delete the first file (the oldest).
+                FileInfo oldestFile = storedFiles.First();
+                storedFiles.Remove(oldestFile);
+
+                try
+                {
+                    File.Delete(oldestFile.FullName);
+                }
+                catch (Exception e)
+                {
+                    Log.Error("Failed to delete file %s while applying storage limit! Error message: %s",
+                        oldestFile.FullName, e.Message);
+                }
+
+                // Decrease the cumulated size, even if the deletion was not successful,
+                // otherwise we could end up in an infinite loop.
+                cumulatedSize -= oldestFile.Length;
+            }
         }
 
         private static bool ShouldTryResendingData()
