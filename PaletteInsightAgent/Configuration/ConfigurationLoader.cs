@@ -42,7 +42,7 @@ namespace PaletteInsight
 
                 options.ProcessedFilestTTL = config.ProcessedFilesTTL;
 
-                options.AllProcesses = config.AllProcesses;
+                options.AllProcesses = config.AllProcesses2;
 
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
