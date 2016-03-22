@@ -62,7 +62,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             string[] results;
             if (maxId != null)
             {
-                results = new string[] { file, file + "maxid" };
+                results = new string[] { file, MaxIdFileName(file) };
             }
             else
             {
