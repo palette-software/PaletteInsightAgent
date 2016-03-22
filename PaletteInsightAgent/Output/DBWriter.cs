@@ -94,6 +94,12 @@ namespace PaletteInsightAgent.Output
 
         private static void DeleteOldFiles(string from, int ttl)
         {
+            if (!Directory.Exists(from))
+            {
+                // No directory, no old files in there.
+                return;
+            }
+
             Directory.EnumerateFiles(from)
                 .Select(f => new FileInfo(f))
                 .Where(f => f.CreationTime < DateTime.Now.AddSeconds(-ttl))
