@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace PaletteInsightAgent.Output.OutputDrivers
 {
@@ -23,14 +24,29 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             return OutputWriteResult.Aggregate(csvFiles, (file) =>
             {
                 Log.Info("+ Sending file {0}", file);
-                bool streaming = File.Exists(file + "maxid");
                 string maxId = null;
-                if (streaming)
+                if (IsStreamingTable(file))
                 {
-                    maxId = File.ReadAllText(file + "maxid");
+                    maxId = File.ReadAllText(MaxIdFileName(file));
                 }
                 return DoSendFile(file, maxId);
             });
+        }
+
+        public static string GetFileNameWithoutPart(string fileName)
+        {
+            var pattern = new Regex("(.*-[0-9]{4}-[0-9]{2}-[0-9]{2}--[0-9]{2}-[0-9]{2}-[0-9]{2})(.*)([.].+)$");
+            return pattern.Replace(fileName, "$1$3");
+        }
+
+        private string MaxIdFileName(string fileName)
+        {
+            return SinglefileBackend.GetFileNameWithoutPart(fileName) + "maxid";
+        }
+
+        private bool IsStreamingTable(string fileName)
+        {
+            return File.Exists(MaxIdFileName(fileName));
         }
 
 
