@@ -285,10 +285,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 return null;
             }
 
-            // This means we have not yet sent anything. In this case we should just send the newest row.
             var query = "";
             if (from == null)
             {
+                // This means we have not yet sent anything. In this case we should just send the newest row.
                 query = String.Format("select * from {0} where {1} = '{2}'", tableName, field, newMax);
             }
             else
