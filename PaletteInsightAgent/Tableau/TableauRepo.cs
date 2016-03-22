@@ -285,12 +285,17 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 return null;
             }
 
-            var query = String.Format("select * from {0} where {1} <= '{2}'", tableName, field, newMax);
-                
-            if (from != null)
+            // This means we have not yet sent anything. In this case we should just send the newest row.
+            var query = "";
+            if (from == null)
             {
-                query += String.Format(" and {0} > '{1}'", field, from);
+                query = String.Format("select * from {0} where {1} = '{2}'", tableName, field, newMax);
             }
+            else
+            {
+                query = String.Format("select * from {0} where {1} > '{2}' and {1} <= '{3}'", tableName, field, from, newMax);
+            }
+
             if (filter != null)
             {
                 query += String.Format(" and {0}", filter);
