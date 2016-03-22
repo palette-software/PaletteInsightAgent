@@ -71,6 +71,7 @@
     <Compile Include="LogPoller\LogPollerTest.cs" />
     <Compile Include="Output\DbWriterTests.cs" />
     <Compile Include="Output\CsvSerializerTests.cs" />
+    <Compile Include="Output\WebserviceSinglefileBackendTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThreadInfo\ThreadInfoAgentTest.cs" />
   </ItemGroup>
