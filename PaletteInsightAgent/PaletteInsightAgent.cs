@@ -407,7 +407,7 @@ namespace PaletteInsightAgent
         private void WriteToDB(object stateInfo)
         {
             // Stateinfo contains an IOutput object
-            DBWriter.Start((IOutput)stateInfo, options.ProcessedFilestTTL);
+            DBWriter.Start((IOutput)stateInfo, options.ProcessedFilestTTL, options.StorageLimit);
         }
 
         /// <summary>
