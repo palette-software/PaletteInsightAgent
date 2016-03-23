@@ -152,7 +152,7 @@ namespace PaletteInsightAgent.Output
                     File.Delete(file.FullName);
 
                     cumulatedSize -= file.Length;
-                    if (cumulatedSize <= storageLimit / 2)
+                    if (cumulatedSize <= storageLimitInBytes / 2)
                     {
                         // We have deleted enough files to get well below the storage limit.
                         break;
