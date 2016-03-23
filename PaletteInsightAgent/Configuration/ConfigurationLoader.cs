@@ -41,6 +41,7 @@ namespace PaletteInsight
                 options.DBWriteInterval = config.DBWriteInterval;
 
                 options.ProcessedFilestTTL = config.ProcessedFilesTTL;
+                options.StorageLimit = config.StorageLimit;
 
                 options.AllProcesses = config.AllProcesses2;
 
