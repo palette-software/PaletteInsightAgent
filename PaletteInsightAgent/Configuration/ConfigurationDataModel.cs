@@ -95,6 +95,9 @@ namespace PaletteInsight
             // public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
             public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
 
+            [YamlMember(Alias = "StorageLimit")]
+            public int StorageLimit { get; set; } = 1 * 1024; // Default is 1 Gb. This value is given in megabytes.
+
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
 
@@ -103,7 +106,7 @@ namespace PaletteInsight
 
             // Became outdated as it was misconfigured at clients
             [YamlMember(Alias = "AllProcesses")]
-            public bool AllProcesses { get; set; } = false;
+            public bool AllProcesses { get; set; } = true;
 
             // This is a hack and as such I chose very ugly name intentionally so that we don't leave it this way.
             [YamlMember(Alias = "AllProcesses2")]
