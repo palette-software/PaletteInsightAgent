@@ -138,33 +138,31 @@ namespace PaletteInsightAgent.Output
 
             // Delete files while we are getting well below of the storage limit.
             // Well below here means the half of the limit.
-            while (cumulatedSize > storageLimitInBytes / 2)
+            foreach (var file in storedFiles)
             {
-                // Since the universal list we created is ordered by creation time,
-                // let's delete the first file (the oldest).
-                FileInfo oldestFile = storedFiles.First();
-                storedFiles.Remove(oldestFile);
-
                 try
                 {
-                    if (!oldestFile.FullName.Contains(ProcessedPath))
+                    if (!file.FullName.Contains(ProcessedPath))
                     {
                         // Deleting an already processed file is not a big deal, but deleting
                         // other files means dataloss.
                         Log.Warn("Deleting unprocessed file because of storage limit: {0} File creation time: {1}",
-                            oldestFile.FullName, oldestFile.CreationTimeUtc);
+                            file.FullName, file.CreationTimeUtc);
                     }
-                    File.Delete(oldestFile.FullName);
+                    File.Delete(file.FullName);
+
+                    cumulatedSize -= file.Length;
+                    if (cumulatedSize <= storageLimit / 2)
+                    {
+                        // We have deleted enough files to get well below the storage limit.
+                        break;
+                    }
                 }
                 catch (Exception e)
                 {
                     Log.Error("Failed to delete file {0} while applying storage limit! Error message: {1}",
-                        oldestFile.FullName, e.Message);
-                }
-
-                // Decrease the cumulated size, even if the deletion was not successful,
-                // otherwise we could end up in an infinite loop.
-                cumulatedSize -= oldestFile.Length;
+                        file.FullName, e.Message);
+                }                
             }
         }
 
@@ -177,10 +175,7 @@ namespace PaletteInsightAgent.Output
         {
             // Collect all the stored files (processed, unsent, error) into an ordered
             // list, where the first item is going to be the oldest file.
-            IList<string> folders = new List<string>();
-            folders.Add(ProcessedPath);
-            folders.Add(ErrorPath);
-            folders.Add(UnsentPath);
+            IList<string> folders = new List<string>(new string[] { ProcessedPath, ErrorPath, UnsentPath });
 
             return folders.Where(folder => Directory.Exists(folder))
                 .SelectMany(folder => Directory.EnumerateFiles(folder))
