@@ -78,7 +78,7 @@ namespace PaletteInsightAgent.Output
         /// Start a single write loop
         /// </summary>
         /// <param name="output"></param>
-        public static void Start(IOutput output, int processedFilesTTL)
+        public static void Start(IOutput output, int processedFilesTTL, long storageLimit)
         {
             // add some chance (1%) of uploading the unsent files, so once every
             // ~1500 seconds on average we try to re-upload the stuff we may have missed
@@ -90,6 +90,9 @@ namespace PaletteInsightAgent.Output
             }
             DoUpload(output, OutputSerializer.DATA_FOLDER);
             DeleteOldFiles(ProcessedPath, processedFilesTTL);
+            // Storage limit is given in megabytes in config, but we will work with
+            // bytes while applying the storage limit
+            ApplyStorageLimit(storageLimit * 1024 * 1024);
         }
 
         private static void DeleteOldFiles(string from, int ttl)
@@ -105,6 +108,79 @@ namespace PaletteInsightAgent.Output
                 .Where(f => f.CreationTime < DateTime.Now.AddSeconds(-ttl))
                 .ToList()
                 .ForEach(f => f.Delete());
+        }
+
+        /// <summary>
+        /// Deletes oldest file so that storage size can fit in the configured
+        /// value. For example if the storage limit is set to 1Gb and the
+        /// size of the stored files are larger than 1Gb, then oldest files
+        /// will be started to be deleted, until the size of the stored files
+        /// are less than half of the configured limit (which is 500 Mb in this
+        /// example).
+        /// </summary>
+        /// <param name="storageLimitInBytes">Given in bytes</param>
+        private static void ApplyStorageLimit(long storageLimitInBytes)
+        {
+            IList<FileInfo> storedFiles = CollectStoredFiles();
+
+            long cumulatedSize = 0;
+            foreach (var file in storedFiles)
+            {
+                cumulatedSize += file.Length;
+            }
+
+            if (storageLimitInBytes > cumulatedSize)
+            {
+                // We are within limits, no need to do anything this time.
+                return;
+            }
+
+            // Delete files while we are getting well below of the storage limit.
+            // Well below here means the half of the limit.
+            foreach (var file in storedFiles)
+            {
+                try
+                {
+                    if (!file.FullName.Contains(ProcessedPath))
+                    {
+                        // Deleting an already processed file is not a big deal, but deleting
+                        // other files means dataloss.
+                        Log.Warn("Deleting unprocessed file because of storage limit: {0} File creation time: {1}",
+                            file.FullName, file.CreationTimeUtc);
+                    }
+                    File.Delete(file.FullName);
+
+                    cumulatedSize -= file.Length;
+                    if (cumulatedSize <= storageLimitInBytes / 2)
+                    {
+                        // We have deleted enough files to get well below the storage limit.
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Error("Failed to delete file {0} while applying storage limit! Error message: {1}",
+                        file.FullName, e.Message);
+                }                
+            }
+        }
+
+        /// <summary>
+        /// Returns an ordered list of files found in "processed", "error"
+        /// and "unsent" folders. The first item of the resulting list
+        /// is the oldest file.
+        /// </summary>
+        private static IList<FileInfo> CollectStoredFiles()
+        {
+            // Collect all the stored files (processed, unsent, error) into an ordered
+            // list, where the first item is going to be the oldest file.
+            IList<string> folders = new List<string>(new string[] { ProcessedPath, ErrorPath, UnsentPath });
+
+            return folders.Where(folder => Directory.Exists(folder))
+                .SelectMany(folder => Directory.EnumerateFiles(folder))
+                .Select(file => new FileInfo(file))
+                .OrderBy(file => file.CreationTimeUtc)
+                .ToList();
         }
 
         private static bool ShouldTryResendingData()

@@ -25,6 +25,7 @@ namespace PaletteInsightAgent
         public int ThreadInfoPollInterval { get; set; }
         public int DBWriteInterval { get; set; }
         public int ProcessedFilestTTL { get; set; }
+        public long StorageLimit { get; set; }
         public bool AllProcesses { get; set; }
         private static PaletteInsightAgentOptions instance;
         private const int MinPollInterval = 1; // In seconds.
