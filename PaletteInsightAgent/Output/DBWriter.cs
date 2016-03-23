@@ -90,7 +90,9 @@ namespace PaletteInsightAgent.Output
             }
             DoUpload(output, OutputSerializer.DATA_FOLDER);
             DeleteOldFiles(ProcessedPath, processedFilesTTL);
-            ApplyStorageLimit(storageLimit);
+            // Storage limit is given in megabytes in config, but we will work with
+            // bytes while applying the storage limit
+            ApplyStorageLimit(storageLimit * 1024 * 1024);
         }
 
         private static void DeleteOldFiles(string from, int ttl)
@@ -116,8 +118,8 @@ namespace PaletteInsightAgent.Output
         /// are less than half of the configured limit (which is 500 Mb in this
         /// example).
         /// </summary>
-        /// <param name="storageLimit">Given in megabytes</param>
-        private static void ApplyStorageLimit(long storageLimit)
+        /// <param name="storageLimitInBytes">Given in bytes</param>
+        private static void ApplyStorageLimit(long storageLimitInBytes)
         {
             IList<FileInfo> storedFiles = CollectStoredFiles();
 
@@ -126,9 +128,6 @@ namespace PaletteInsightAgent.Output
             {
                 cumulatedSize += file.Length;
             }
-
-            // Storage limit is given in megabytes 
-            long storageLimitInBytes = storageLimit * 1024 * 1024;
 
             if (storageLimitInBytes > cumulatedSize)
             {
