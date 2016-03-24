@@ -141,7 +141,8 @@ namespace PaletteInsightAgent.Output
             {
                 try
                 {
-                    if (!file.DirectoryName.EndsWith(ProcessedPath.TrimEnd(new char[] { '\\', '/' })))
+                    // Directory separators are not included in the directory name
+                    if (!file.DirectoryName.EndsWith(PROCESSED_PREFIX.TrimEnd(new char[] { '\\', '/' })))
                     {
                         // Deleting an already processed file is not a big deal, but deleting
                         // other files means dataloss.
