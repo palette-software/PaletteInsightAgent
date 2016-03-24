@@ -141,7 +141,7 @@ namespace PaletteInsightAgent.Output
             {
                 try
                 {
-                    if (!file.FullName.Contains(ProcessedPath))
+                    if (!file.DirectoryName.EndsWith(ProcessedPath.TrimEnd(new char[] { '\\', '/' })))
                     {
                         // Deleting an already processed file is not a big deal, but deleting
                         // other files means dataloss.
