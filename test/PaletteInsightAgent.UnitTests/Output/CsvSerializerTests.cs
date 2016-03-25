@@ -32,7 +32,7 @@ namespace PaletteInsightAgentTests.Output
             Assert.AreEqual(expected, actual);
 
             // replace new lines
-            expected = "\\\\vertical\013";
+            expected = "\\\\vertical\\013";
             source = "\\vertical\v";
             actual = GreenplumCsvEscaper.EscapeField(source);
             Assert.AreEqual(expected, actual);
