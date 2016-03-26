@@ -2,9 +2,9 @@
 ThreadInfoPollInterval: 15
 LogPollInterval: 300
 DBWriteInterval: 60
-RepoTablesPollInterval: 3600
-ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
-StorageLimit: 1024          # Given in megabytes. Default is 1 Gb.
+RepoTablesPollInterval: 5
+ProcessedFilesTTL: 3600		# Given in seconds. Defaul is not to keep processed files.
+StorageLimit: 1			# Given in megabytes. Default is 1 Gb.
 
 
 Database: 
@@ -17,8 +17,8 @@ Database:
 
 # To use the webservice output, uncomment the following lines:
  
-# Webservice:
-#  Endpoint: http://localhost:9000
+Webservice:
+  Endpoint: http://localhost:9000
 
 Logs: 
   - 
@@ -28,8 +28,8 @@ Logs:
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
     Filter: 'tabprotosrv*.txt'
 TableauRepo: 
-  Host: localhost
+  Host: 88.151.101.150
   Port: 8060
   Database: workgroup
   User: readonly
-  Password: onlyread
+  Password: onlyr3ad
