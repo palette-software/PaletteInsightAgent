@@ -1,4 +1,6 @@
 ﻿using Topshelf;
+using SplunkNLog;
+using NLog.Config;
 
 namespace PaletteInsightAgentService
 {
@@ -25,6 +27,9 @@ namespace PaletteInsightAgentService
         /// </summary>
         public static void Main()
         {
+            ConfigurationItemFactory.Default.Targets.RegisterDefinition("SplunkNLog", typeof(SplunkNLog.SplunkNLog));
+
+
             // configure service parameters
             HostFactory.Run(hostConfigurator =>
             {
