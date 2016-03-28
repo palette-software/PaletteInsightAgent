@@ -8,6 +8,7 @@ using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NLog;
+using PaletteInsightAgent.Output.OutputDrivers;
 
 namespace PaletteInsight
 {
@@ -21,6 +22,7 @@ namespace PaletteInsight
         {
             private const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
             private const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
+            private const string REPOSITORY_TABLES_FILE = "Config/Repository.yml";
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
 
@@ -33,27 +35,46 @@ namespace PaletteInsight
             public static void LoadConfigTo(PaletteInsightConfiguration config, PaletteInsightAgent.PaletteInsightAgentOptions options)
             {
                 options.PollInterval = config.PollInterval;
-                // Load LogPollInterval.
                 options.LogPollInterval = config.LogPollInterval;
-
-                // Load ThreadInfoPollInterval.
+                options.RepoTablesPollInterval = config.RepoTablesPollInterval;
                 options.ThreadInfoPollInterval = config.ThreadInfoPollInterval;
-
-                // Load DBWriterInterval
                 options.DBWriteInterval = config.DBWriteInterval;
 
-                options.AllProcesses = config.AllProcesses;
+                options.ProcessedFilestTTL = config.ProcessedFilesTTL;
+                options.StorageLimit = config.StorageLimit;
+
+                options.AllProcesses = config.AllProcesses2;
 
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
 
+                if (config.Webservice != null)
+                {
+                    // Do not add the username or password here, as they come from the license
+                    options.WebserviceConfig = new WebserviceConfiguration
+                    {
+                        Endpoint = config.Webservice.Endpoint,
+                        UseProxy = config.Webservice.UseProxy,
+                        ProxyAddress = config.Webservice.ProxyAddress,
+                        ProxyUsername = config.Webservice.ProxyUsername,
+                        ProxyPassword = config.Webservice.ProxyPassword
+                    };
+                }
+                else
+                {
+                    // make sure the webservice config is null, so we wont write
+                    // to the webservice if its not configured
+                    options.WebserviceConfig = null;
+                }
 
                 // Load thread monitoring configuration
-                options.Processes = new System.Collections.Generic.Dictionary<string, ProcessData>();
+                options.Processes = new Dictionary<string, ProcessData>();
                 foreach (var process in LoadProcessData())
                 {
                     options.Processes.Add(process.Name, process);
                 }
+
+                options.RepositoryTables = LoadRepositoryTables();
 
                 // Add the log folders based on the Tableau Data path from the registry
                 var tableauRoot = GetTableauRegistryString("Data");
@@ -61,6 +82,15 @@ namespace PaletteInsight
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
 
+            }
+
+            public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
+            {
+                // skip if we arent using the webservice
+                if (options.WebserviceConfig == null) return;
+
+                options.WebserviceConfig.Username = license.licenseId;
+                options.WebserviceConfig.AuthToken = license.token;
             }
 
             /// <summary>
@@ -71,7 +101,7 @@ namespace PaletteInsight
             /// <param name="tableauRoot"></param>
             private static void AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-                Repository repo = null;
+                Workgroup repo = null;
                 string workgroupyml = @"tabsvc\config\workgroup.yml";
 
                 var configFilePath = "";
@@ -80,7 +110,7 @@ namespace PaletteInsight
                     configFilePath = Path.Combine(tableauRoot, workgroupyml);
                     using (var reader = File.OpenText(configFilePath))
                     {
-                        repo = GetRepoFromWorkgroupYaml(reader);
+                        repo = GetRepoFromWorkgroupYaml(tableauRoot);
                     }
                 }
                 catch (Exception e)
@@ -95,11 +125,14 @@ namespace PaletteInsight
                 {
                     // load the tableau repo properties
                     var repoProps = config.TableauRepo;
-                    options.RepoHost = repoProps.Host;
-                    options.RepoPort = Convert.ToInt32(repoProps.Port);
-                    options.RepoUser = repoProps.User;
-                    options.RepoPass = repoProps.Password;
-                    options.RepoDb = repoProps.Database;
+                    options.RepositoryDatabase = new DbConnectionInfo
+                    {
+                        Server = repoProps.Host,
+                        Port = Convert.ToInt32(repoProps.Port),
+                        Username = repoProps.User,
+                        Password = repoProps.Password,
+                        DatabaseName = repoProps.Database
+                    };
                 }
                 else
                 {
@@ -107,11 +140,14 @@ namespace PaletteInsight
                     {
                         Log.Warn("Ignoring Tableau repo settings from config.yml.");
                     }
-                    options.RepoHost = repo.Host;
-                    options.RepoPort = repo.Port0;
-                    options.RepoUser = repo.Username;
-                    options.RepoPass = repo.Password;
-                    options.RepoDb = repo.DatabaseName;
+                    options.RepositoryDatabase = new DbConnectionInfo
+                    {
+                        Server = repo.Connection.Host,
+                        Port = repo.Connection.Port,
+                        Username = repo.Username,
+                        Password = repo.Password,
+                        DatabaseName = repo.Connection.DatabaseName
+                    };
                 }
             }
 
@@ -273,10 +309,10 @@ namespace PaletteInsight
             /// <summary>
             /// Deserialization struct for the repo config from the workgroup.yml
             /// </summary>
-            public class Repository
+            public class Workgroup
             {
-                [YamlMember(Alias = "datacollector.postgres.host")]
-                public string Host { get; set; }
+                [YamlMember(Alias = "pgsql.readonly.enabled")]
+                public bool ReadonlyEnabled { get; set; }
 
                 [YamlMember(Alias = "pgsql.readonly_username")]
                 public string Username { get; set; }
@@ -284,24 +320,54 @@ namespace PaletteInsight
                 [YamlMember(Alias = "pgsql.readonly_password")]
                 public string Password { get; set; }
 
-                [YamlMember(Alias = "datacollector.postgres.tablename")]
-                public string DatabaseName { get; set; }
+                [YamlMember(Alias = "pgsql.connections.yml")]
+                public string ConnectionsFile { get; set; }
 
-                [YamlMember(Alias = "pgsql0.port")]
-                public int Port0 { get; set; }
-
-                // The testing tableau server had two ports in the workgroup.yml, hence this one
-                [YamlMember(Alias = "pgsql1.port")]
-                public int Port1 { get; set; }
-
-
+                public TableauConnectionInfo Connection { get; set; }
             }
 
-            private static Repository GetRepoFromWorkgroupYaml(TextReader input)
+            public class TableauConnectionInfo
             {
+                [YamlMember(Alias = "pgsql.host")]
+                public string Host { get; set; }
+
+                [YamlMember(Alias = "pgsql.port")]
+                public int Port { get; set; }
+
+                // It is not possible to change it @Tableau so we hardcode it for now
+                public readonly string DatabaseName = "workgroup";
+            }
+
+            private static bool IsValidRepoData(Workgroup workgroup)
+            {
+                return workgroup.ReadonlyEnabled
+                    && workgroup.Username != null
+                    && workgroup.Password != null
+                    && workgroup.Connection.Host != null;
+            }
+
+            private static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot)
+            {
+                // Get basic info from workgroup yml. Everything else from connections.yml
                 var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
-                var result = deserializer.Deserialize<Repository>(input);
-                return result;
+
+                string workgroupyml = @"tabsvc\config\workgroup.yml";
+                var configFilePath = Path.Combine(tableauRoot, workgroupyml);
+                Workgroup workgroup = null;
+                using (var workgroupFile = File.OpenText(configFilePath))
+                {
+                    workgroup = deserializer.Deserialize<Workgroup>(workgroupFile);
+                    using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
+                    {
+                        workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
+                    }
+                    if (!IsValidRepoData(workgroup))
+                    {
+                        return null;
+                    }
+                }
+
+                return workgroup;
             }
 
             #endregion
@@ -323,6 +389,15 @@ namespace PaletteInsight
                 {
                     var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
                     return deserializer.Deserialize<List<ProcessData>>(reader);
+                }
+            }
+
+            private static List<RepoTable> LoadRepositoryTables()
+            {
+                using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
+                {
+                    var deserializer = new Deserializer(namingConvention: new NullNamingConvention());
+                    return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }
 
