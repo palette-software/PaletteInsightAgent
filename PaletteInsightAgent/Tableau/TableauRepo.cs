@@ -10,8 +10,9 @@ using NLog;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.IO;
+using PaletteInsightAgent.Output;
 
-namespace PaletteInsightAgent.LogPoller
+namespace PaletteInsightAgent.RepoTablesPoller
 {
 
     public struct ViewPath
@@ -41,7 +42,11 @@ namespace PaletteInsightAgent.LogPoller
     public interface ITableauRepoConn : IDisposable
     {
         ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp);
-
+        DataTable GetTable(string tableName);
+        DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax);
+        DataTable GetIndices();
+        DataTable GetSchemaTable();
+        int getCoreCount();
     }
 
     public class Tableau9RepoConn : ITableauRepoConn
@@ -52,19 +57,19 @@ namespace PaletteInsightAgent.LogPoller
         private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();
 
-        public Tableau9RepoConn(string host, int port, string username, string password, string database)
+        public Tableau9RepoConn(IDbConnectionInfo db)
         {
             connectionStringBuilder =
                 new NpgsqlConnectionStringBuilder()
                 {
-                    Host = host,
-                    Port = port,
-                    Username = username,
-                    Password = password,
-                    Database = database
+                    Host = db.Server,
+                    Port = db.Port,
+                    Username = db.Username,
+                    Password = db.Password,
+                    Database = db.DatabaseName
                 };
 
-            Log.Info("Connecting to Tableau Repo PostgreSQL:" + host);
+            Log.Info("Connecting to Tableau Repo PostgreSQL:" + db.Server);
             OpenConnection();
             Log.Info("Connected to Tableau Repo...");
 
@@ -128,6 +133,176 @@ namespace PaletteInsightAgent.LogPoller
             }
 
             OpenConnection();
+        }
+
+        /// <summary>
+        /// Returns the total number of cores allocated to the Tableau cluster represented by the repository.
+        /// </summary>
+        public int getCoreCount()
+        {
+            var query = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
+            long coreCount = runScalarQuery(query);
+            Log.Info("Tableau total allocated cores: {0}", coreCount);
+            return (int)coreCount;
+        }
+
+        private DataTable runQuery(string query)
+        {
+            DataTable table = new DataTable();
+            lock (readLock)
+            {
+                if (!IsConnectionOpen())
+                {
+                    reconnect();
+                }
+                try
+                {
+                    using (var adapter = new NpgsqlDataAdapter(query, connection))
+                    {
+                        adapter.Fill(table);
+                    }
+                }
+                catch (Npgsql.NpgsqlException e)
+                {
+                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                }
+            }
+            return table;
+        }
+
+        private long runScalarQuery(string query)
+        {
+            long max = 0;
+            lock (readLock)
+            {
+                if (!IsConnectionOpen())
+                {
+                    reconnect();
+                }
+                try
+                {
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        // Insert some data
+                        cmd.CommandText = query;
+                        max = (long)cmd.ExecuteScalar();
+                    };
+                }
+                catch (Npgsql.NpgsqlException e)
+                {
+                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                }
+            }
+            return max;
+        }
+
+        public DataTable GetSchemaTable()
+        {
+            var query = @"
+                    SELECT n.nspname as schemaname, c.relname as tablename,
+                    a.attname as columnname,
+                    format_type(a.atttypid, a.atttypmod),
+                    a.attnum
+                    FROM pg_namespace n
+                      JOIN pg_class c ON (n.oid = c.relnamespace)
+                      JOIN pg_attribute a ON (c.oid = a.attrelid)
+                      JOIN pg_type t ON (a.atttypid = t.oid)
+                    WHERE 1 = 1
+                    AND   nspname = 'public'
+                    AND a.attnum > 0 /*filter out the internal columns*/
+                    ORDER BY n.nspname,c.relname,a.attnum ASC";
+            var table = runQuery(query);
+            table.TableName = "metadata";
+            return table;
+        }
+
+        public DataTable GetIndices()
+        {
+            var query = @"
+                select
+                   n.nspname as schema_name,
+                   t.relname as table_name,
+                   i.relname as index_name,
+                   a.attname as column_name,
+                  pg_get_indexdef(ix.indexrelid)
+                from
+                   pg_class t,
+                   pg_class i,
+                   pg_index ix,
+                   pg_attribute a,
+                   pg_namespace n
+                where
+                   t.oid = ix.indrelid
+                   and i.oid = ix.indexrelid
+                   and a.attrelid = t.oid
+                   and a.attnum = ANY(ix.indkey)
+                   and t.relkind = 'r'
+                   and t.relnamespace = n.oid
+                   and n.nspname = 'public'
+                order by
+                   t.relname,
+                   i.relname
+                ";
+            var table = runQuery(query);
+            table.TableName = "index";
+            return table;
+        }
+
+        public DataTable GetTable(string tableName)
+        {
+            var query = String.Format("select * from {0}", tableName);
+            var table = runQuery(query);
+            table.TableName = tableName;
+            return table;
+        }
+
+        private string GetMax(string tableName, string field, string filter)
+        {
+            var query = String.Format("select max({0}) from {1}", field, tableName);
+            if (filter != null)
+            {
+                query = String.Format("{0} where {1}", query, filter);
+            }
+            var table = runQuery(query);
+            // This query should return one field
+            if (table.Rows.Count == 1 && table.Columns.Count == 1)
+            {
+                return table.Rows[0][0].ToString();
+            }
+            return null;
+        }
+
+        public DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax)
+        {
+            // At first determine the max until we can query
+            newMax = GetMax(tableName, field, filter);
+
+            // If we don't quit here we risk data being created before 
+            // actually asking for it and not having maxId set correctly
+            if (newMax == null || newMax == "")
+            {
+                return null;
+            }
+
+            var query = "";
+            if (from == null)
+            {
+                // This means we have not yet sent anything. In this case we should just send the newest row.
+                query = String.Format("select * from {0} where {1} = '{2}'", tableName, field, newMax);
+            }
+            else
+            {
+                query = String.Format("select * from {0} where {1} > '{2}' and {1} <= '{3}'", tableName, field, from, newMax);
+            }
+
+            if (filter != null)
+            {
+                query += String.Format(" and {0}", filter);
+            }
+            var table = runQuery(query);
+            table.TableName = tableName;
+            return table;
         }
 
 

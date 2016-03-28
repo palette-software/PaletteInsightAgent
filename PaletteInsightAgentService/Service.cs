@@ -10,7 +10,7 @@ namespace PaletteInsightAgentService
         // Service name & description.
         private const string ServiceName = "PaletteInsightAgent";
         private const string ServiceDisplayname = "Palette Insight Agent";
-        private const string ServiceDescription = "Tableau Server performance monitor";
+        private const string ServiceDescription = "Performance monitoring for Tableau Server ";
 
         // Service recovery attempt timings, in minutes.
         private const int RecoveryFirstAttempt = 0;

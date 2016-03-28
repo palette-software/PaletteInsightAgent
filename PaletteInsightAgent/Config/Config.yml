@@ -2,7 +2,10 @@
 ThreadInfoPollInterval: 15
 LogPollInterval: 300
 DBWriteInterval: 60
-AllProcesses: false
+RepoTablesPollInterval: 3600
+ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
+StorageLimit: 1024          # Given in megabytes. Default is 1 Gb.
+
 
 Database: 
   Host: localhost
@@ -11,6 +14,12 @@ Database:
   User: palette
   Password: password
   CommandTimeout: 600
+
+# To use the webservice output, uncomment the following lines:
+ 
+# Webservice:
+#  Endpoint: http://localhost:9000
+
 Logs: 
   - 
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'

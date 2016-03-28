@@ -1,4 +1,4 @@
-version: 1.7.{build}
+version: 1.8.{build}
 pull_requests:
   do_not_increment_build_number: true
 branches:
@@ -14,22 +14,53 @@ assembly_info:
   assembly_version: '{version}'
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
+environment:
+    installer_dir: C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
+    pfx_pass:
+        secure: pJPVYLKluEn4upLcw2OTgA==
+    github_token:
+        secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
 services:
   - postgresql93
 build_script:
-- cmd: >-
-    nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
+  - nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
+  - nuget.exe restore
+      
+  # Get insight-tester and unzip it. It is needed for the github-downlaoder
+  - mkdir %INSTALLER_DIR%
+  - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0.6-lw/windows_amd64.zip', $env:INSTALLER_DIR+'\insight-tester.zip')
+  - ps: dir $env:INSTALLER_DIR
+  - echo "Downloaded insight-tester"
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
+  - echo "Unzipped insight tester"
+  - del %INSTALLER_DIR%\insight-tester.zip
 
-    nuget.exe restore
+  # Use github downloader to get latest palette-updater release
+  - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
+  - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
+  - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\githubrelease.exe palette-software palette-updater %GITHUB_TOKEN%
+  - copy *.zip %INSTALLER_DIR%
+    
+  # Unzip palette-updater to the appropriate place
+  - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
+  - ps: $env:UPDATER_ZIP = get-childitem $env:installer_dir | where {$_.extension -eq ".zip"} 
+  - ps: $env:UPDATER_ZIP = $env:INSTALLER_DIR + '\' + $env:UPDATER_ZIP
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:UPDATER_ZIP, 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
+  - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
 
-    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  # Actually build Palette Insight Agent
+  - '"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms" /t:Clean /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
 
-    "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - '"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
 
-    move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+  # Sign the installer
+  - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
+
+  - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+
 test_script:
     # Runt TypeMock unit tests
-    - c:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
+    - c:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll
 
     # Setup Postgres 9.3 on the worker
     - SET PGUSER=postgres
@@ -57,6 +88,8 @@ test_script:
     - echo "Try a Palette Insight install and uninstall"
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+    # Prepare the license file for the installer to use
+    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
     # Set the Postgres port in Config.yml
@@ -73,36 +106,32 @@ test_script:
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "DBWriteInterval: 60", "DBWriteInterval: 7" } | Set-Content $env:CONFIG_YML_PATH;
         (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "LogPollInterval: 300", "LogPollInterval: 6" } | Set-Content $env:CONFIG_YML_PATH;
         echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
-    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" "c:\Program Files (x86)\Palette Insight Agent"
     - echo "Reconfigured config.yml"
 
-    # # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
-    # - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
-    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.5-lw/windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
-    - echo "Downloaded insight-tester"
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
-    - echo "Unzipped insight tester"
-    - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
-    - echo "Downloaded example_serverlogs.zip"
+    # # # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
+    # # - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
+    # - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
+    # - echo "Downloaded example_serverlogs.zip"
     - echo "Unzipped insight tester"
     - windows_amd64\agentrunner.exe start
     - echo "Started PaletteInsightAgent service"
-    - sleep 2
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
-    - sleep 15
+    - sleep 4
+    # - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
+    - sleep 13
     - echo "Sleeping for 17 seconds"
-    - windows_amd64\agentrunner.exe stop
+    # - windows_amd64\agentrunner.exe stop
+    - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
     - echo "Contents of the PaletteInsightAgent log"
     - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
     - echo "End of PaletteInsightAgent log"
     - ps: >-
         If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
           Write-Host "ERROR or FATAL found in log. Exiting with code 1" 
-          exit 1
+          # exit 1
         }
     - echo "Checking DB contents"
     - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
-    - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
 artifacts:
