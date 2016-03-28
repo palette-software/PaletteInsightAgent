@@ -91,7 +91,7 @@ test_script:
     # Prepare the license file for the installer to use
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     # Prepare the config.yml file
-    - copy "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml"
+    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" ".\Config\Config.yml"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
     # # Set the Postgres port in Config.yml
@@ -124,8 +124,6 @@ test_script:
     - echo "Sleeping for 17 seconds"
     # - windows_amd64\agentrunner.exe stop
     - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
-    - echo "Contents of the PaletteInsightAgent log"
-    - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
     - echo "End of PaletteInsightAgent log"
     - ps: >-
         If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
@@ -162,6 +160,8 @@ deploy:
 #   on_build_status_changed: true
 
 on_finish:
+  - echo "Contents of the PaletteInsightAgent log"
+  - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
   - echo "Starting SMOKE test"
   - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST
   # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
