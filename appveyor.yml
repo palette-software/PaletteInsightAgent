@@ -90,10 +90,10 @@ test_script:
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
-    # Prepare the config.yml file
-    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" ".\Config\Config.yml"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
+        # Prepare the config.yml file
+    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     # # Set the Postgres port in Config.yml
     # - ps: >-
     #     $watched_folder_1 = "c:\watched_folder_1";
