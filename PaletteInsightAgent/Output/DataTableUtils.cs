@@ -65,64 +65,42 @@ namespace PaletteInsightAgent.Output
 
         }
 
-
-        /// <summary>
-        /// Writes the rows of a datatable ot a csv file
-        /// </summary>
-        /// <param name="queue"></param>
-        /// <param name="csvWriter"></param>
-        public static void WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter)
+        private static void AddColumnInfo(DataTable table, string tableName, string columnName, int attnum, string type = "text")
         {
-            var columnCount = queue.Columns.Count;
-
-            foreach (DataRow row in queue.Rows)
-            {
-                try
-                {
-                    for (var i = 0; i < columnCount; i++)
-                    {
-                        if (row[i] != null)
-                        {
-                            if (row[i].GetType() == typeof(DateTime))
-                            {
-                                // In order to have milliseconds instead of only seconds in the string representation
-                                // of the timestamp, we need to use a custom ToString() method instead of the
-                                // default one. This is a kind-of-ugly workaround.
-                                DateTime timestamp = (DateTime)row[i];
-                                csvWriter.WriteField(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture));
-                            }
-                            else
-                            {
-                                csvWriter.WriteField(row[i]);
-                            }
-                        }
-                        else
-                        {
-                            csvWriter.WriteField("");
-                        }
-                    }
-                    csvWriter.NextRecord();
-                }
-                catch (CsvWriterException ex)
-                {
-                    Log.Error(ex, "Error writing record to CSV.");
-                }
-            }
+            DataRow row = table.NewRow();
+            row["schemaname"] = "public";
+            row["tablename"] = tableName;
+            row["columnname"] = columnName;
+            row["format_type"] = type;
+            row["attnum"] = attnum;
+            table.Rows.Add(row);
         }
 
-        /// <summary>
-        /// Writes a csv header from a datatable
-        /// </summary>
-        /// <param name="queue"></param>
-        /// <param name="csvWriter"></param>
-        public static void WriteCSVHeader(DataTable queue, CsvHelper.CsvWriter csvWriter)
+        public static void AddAgentMetadata(DataTable table)
         {
-            foreach (DataColumn column in queue.Columns)
-            {
-                csvWriter.WriteField(column.ColumnName);
-            }
-            csvWriter.NextRecord();
-        }
+            AddColumnInfo(table, "serverlogs", "filename", 1);
+            AddColumnInfo(table, "serverlogs", "host_name", 2);
+            AddColumnInfo(table, "serverlogs", "line", 3);
 
+            AddColumnInfo(table, "threadinfo", "host_name", 1);
+            AddColumnInfo(table, "threadinfo", "process", 2);
+            AddColumnInfo(table, "threadinfo", "ts", 3, "timestamp without time zone");
+            AddColumnInfo(table, "threadinfo", "pid", 4, "bigint");
+            AddColumnInfo(table, "threadinfo", "tid", 5, "bigint");
+            AddColumnInfo(table, "threadinfo", "cpu_time", 6, "bigint");
+            AddColumnInfo(table, "threadinfo", "poll_cycle_ts", 7, "timestamp without time zone");
+            AddColumnInfo(table, "threadinfo", "start_ts", 8, "timestamp without time zone");
+            AddColumnInfo(table, "threadinfo", "thread_count", 9, "integer");
+            AddColumnInfo(table, "threadinfo", "working_set", 10, "bigint");
+            AddColumnInfo(table, "threadinfo", "thread_level", 11, "boolean");
+
+            AddColumnInfo(table, "countersamples",  "timestamp", 1, "timestamp without time zone");
+            AddColumnInfo(table, "countersamples",  "machine", 2);
+            AddColumnInfo(table, "countersamples",  "category", 3);
+            AddColumnInfo(table, "countersamples",  "instance", 4);
+
+            AddColumnInfo(table, "countersamples",  "name", 5);
+            AddColumnInfo(table, "countersamples",  "value", 6, "double precision");
+        }
     }
 }
