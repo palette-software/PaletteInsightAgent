@@ -1,8 +1,11 @@
-﻿PollInterval: 30
-ThreadInfoPollInterval: 5
-LogPollInterval: 6
-DBWriteInterval: 7
-AllProcesses: false
+﻿PollInterval: 5
+ThreadInfoPollInterval: 6
+LogPollInterval: 7
+DBWriteInterval: 60
+RepoTablesPollInterval: 3600
+ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
+StorageLimit: 1          # Given in megabytes. Default is 1 Gb.
+
 
 Database: 
   Host: localhost
@@ -11,16 +14,22 @@ Database:
   User: palette
   Password: password
   CommandTimeout: 600
+
+# To use the webservice output, uncomment the following lines:
+ 
+Webservice:
+  Endpoint: http://staging-insight.palette-software.net:9000
+
 Logs: 
   - 
-    Directory: 'c:\watched_folder_1'
+    Directory: 'c:\watched_folder_1\'
     Filter: '*.txt'
   - 
-    Directory: 'c:\watched_folder_2'
+    Directory: 'c:\watched_folder_2\'
     Filter: 'tabprotosrv*.txt'
 TableauRepo: 
-  Host: localhost
-  Port: 5432
+  Host: 88.151.101.150
+  Port: 8060
   Database: workgroup
   User: readonly
-  Password: onlyread
+  Password: onlyr3ad
