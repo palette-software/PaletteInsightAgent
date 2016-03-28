@@ -62,27 +62,27 @@ test_script:
     # Runt TypeMock unit tests
     - c:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll
 
-    # Setup Postgres 9.3 on the worker
-    - SET PGUSER=postgres
-    - SET PGPASSWORD=Password12!
-    - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
-    - createdb workgroup
-    # Setup target database
-    - createdb palette
-    - psql -a -c "create user palette with password 'password';"    
-    - psql -a -c "grant all on database palette to palette;"
-    # Setup fake Tableau database
-    - psql -a -c "create user readonly with password 'onlyread';"
-    - psql -a -c "grant all on database workgroup to readonly;"
-    - SET PGUSER=readonly
-    - SET PGPASSWORD=onlyread
-    - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
-    - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
-    # And create the target tables, since the agent does not do that anymore on its own
-    - SET PGUSER=palette
-    - SET PGPASSWORD=password
-    - psql -d palette -f create_tables_pg.sql
-    - echo "Postgres database setup completed"
+    # # Setup Postgres 9.3 on the worker
+    # - SET PGUSER=postgres
+    # - SET PGPASSWORD=Password12!
+    # - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+    # - createdb workgroup
+    # # Setup target database
+    # - createdb palette
+    # - psql -a -c "create user palette with password 'password';"    
+    # - psql -a -c "grant all on database palette to palette;"
+    # # Setup fake Tableau database
+    # - psql -a -c "create user readonly with password 'onlyread';"
+    # - psql -a -c "grant all on database workgroup to readonly;"
+    # - SET PGUSER=readonly
+    # - SET PGPASSWORD=onlyread
+    # - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
+    # - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
+    # # And create the target tables, since the agent does not do that anymore on its own
+    # - SET PGUSER=palette
+    # - SET PGPASSWORD=password
+    # - psql -d palette -f create_tables_pg.sql
+    # - echo "Postgres database setup completed"
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
@@ -95,11 +95,13 @@ test_script:
         # Prepare the config.yml file
     - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     # Create fake serverlog folders
-    - ps: >-
-        $watched_folder_1 = "c:\watched_folder_1";
-        $watched_folder_2 = "c:\watched_folder_2";
-        md $watched_folder_1;
-        md $watched_folder_2;
+    - md "c:\watched_folder_1";
+    - md "c:\watched_folder_2";
+    # - ps: >-
+    #     $watched_folder_1 = "c:\watched_folder_1";
+    #     $watched_folder_2 = "c:\watched_folder_2";
+    #     md $watched_folder_1;
+    #     md $watched_folder_2;
     #     $env:CONFIG_YML_PATH = "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml";
     #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content $env:CONFIG_YML_PATH;
     #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\vizqlserver\\Logs", $watched_folder_1 } | Set-Content $env:CONFIG_YML_PATH;
@@ -116,6 +118,8 @@ test_script:
     - echo "Downloaded example_serverlogs.zip"
     # - echo "Unzipped insight tester"
     # - windows_amd64\agentrunner.exe start
+    # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
+    - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
     - ps: Start-Service -Name PaletteInsightAgent
     - echo "Started PaletteInsightAgent service"
     - sleep 4
