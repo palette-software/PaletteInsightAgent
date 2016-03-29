@@ -62,27 +62,27 @@ test_script:
     # Runt TypeMock unit tests
     - c:\projects\blackboxrecorder\test\resources\TypeMock\Isolator\8.2\AutoDeploy\TMockRunner.exe -register Starschema DF7E-AE4N-7BAB-EFC4-463B -thisFolder vstest.console.exe /logger:Appveyor c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll
 
-    # Setup Postgres 9.3 on the worker
-    - SET PGUSER=postgres
-    - SET PGPASSWORD=Password12!
-    - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
-    - createdb workgroup
-    # Setup target database
-    - createdb palette
-    - psql -a -c "create user palette with password 'password';"    
-    - psql -a -c "grant all on database palette to palette;"
-    # Setup fake Tableau database
-    - psql -a -c "create user readonly with password 'onlyread';"
-    - psql -a -c "grant all on database workgroup to readonly;"
-    - SET PGUSER=readonly
-    - SET PGPASSWORD=onlyread
-    - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
-    - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
-    # And create the target tables, since the agent does not do that anymore on its own
-    - SET PGUSER=palette
-    - SET PGPASSWORD=password
-    - psql -d palette -f create_tables_pg.sql
-    - echo "Postgres database setup completed"
+    # # Setup Postgres 9.3 on the worker
+    # - SET PGUSER=postgres
+    # - SET PGPASSWORD=Password12!
+    # - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+    # - createdb workgroup
+    # # Setup target database
+    # - createdb palette
+    # - psql -a -c "create user palette with password 'password';"    
+    # - psql -a -c "grant all on database palette to palette;"
+    # # Setup fake Tableau database
+    # - psql -a -c "create user readonly with password 'onlyread';"
+    # - psql -a -c "grant all on database workgroup to readonly;"
+    # - SET PGUSER=readonly
+    # - SET PGPASSWORD=onlyread
+    # - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
+    # - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
+    # # And create the target tables, since the agent does not do that anymore on its own
+    # - SET PGUSER=palette
+    # - SET PGPASSWORD=password
+    # - psql -d palette -f create_tables_pg.sql
+    # - echo "Postgres database setup completed"
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
@@ -92,48 +92,53 @@ test_script:
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
-    # Set the Postgres port in Config.yml
+        # Prepare the config.yml file
+    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    # Create fake serverlog folders
     - ps: >-
         $watched_folder_1 = "c:\watched_folder_1";
         $watched_folder_2 = "c:\watched_folder_2";
         md $watched_folder_1;
         md $watched_folder_2;
-        $env:CONFIG_YML_PATH = "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml";
-        (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content $env:CONFIG_YML_PATH;
-        (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\vizqlserver\\Logs", $watched_folder_1 } | Set-Content $env:CONFIG_YML_PATH;
-        (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\vizqlserver", $watched_folder_2 } | Set-Content $env:CONFIG_YML_PATH;
-        (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "ThreadInfoPollInterval: 15", "ThreadInfoPollInterval: 5" } | Set-Content $env:CONFIG_YML_PATH;
-        (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "DBWriteInterval: 60", "DBWriteInterval: 7" } | Set-Content $env:CONFIG_YML_PATH;
-        (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "LogPollInterval: 300", "LogPollInterval: 6" } | Set-Content $env:CONFIG_YML_PATH;
-        echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
-    - echo "Reconfigured config.yml"
+    #     $env:CONFIG_YML_PATH = "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml";
+    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content $env:CONFIG_YML_PATH;
+    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\vizqlserver\\Logs", $watched_folder_1 } | Set-Content $env:CONFIG_YML_PATH;
+    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\vizqlserver", $watched_folder_2 } | Set-Content $env:CONFIG_YML_PATH;
+    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "ThreadInfoPollInterval: 15", "ThreadInfoPollInterval: 5" } | Set-Content $env:CONFIG_YML_PATH;
+    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "DBWriteInterval: 60", "DBWriteInterval: 7" } | Set-Content $env:CONFIG_YML_PATH;
+    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "LogPollInterval: 300", "LogPollInterval: 6" } | Set-Content $env:CONFIG_YML_PATH;
+    #     echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
+    # - echo "Reconfigured config.yml"
 
     # # # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
     # # - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
-    # - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
-    # - echo "Downloaded example_serverlogs.zip"
-    - echo "Unzipped insight tester"
-    - windows_amd64\agentrunner.exe start
+    - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
+    - echo "Downloaded example_serverlogs.zip"
+    # - echo "Unzipped insight tester"
+    # - windows_amd64\agentrunner.exe start
+    # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
+    - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
+    - ps: Start-Service -Name PaletteInsightAgent
     - echo "Started PaletteInsightAgent service"
     - sleep 4
-    # - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
     - sleep 13
     - echo "Sleeping for 17 seconds"
     # - windows_amd64\agentrunner.exe stop
     - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
-    - echo "Contents of the PaletteInsightAgent log"
-    - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
     - echo "End of PaletteInsightAgent log"
     - ps: >-
         If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
           Write-Host "ERROR or FATAL found in log. Exiting with code 1" 
-          # exit 1
+          exit 1
         }
-    - echo "Checking DB contents"
-    - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
+    # - echo "Checking DB contents"
+    # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
     # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
+    - echo "Starting SMOKE test on GoCD"
+    - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST
 artifacts:
 - path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
   name: Github
@@ -158,5 +163,7 @@ deploy:
 #   on_build_failure: true
 #   on_build_status_changed: true
 
-# on_finish:
-# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+  - echo "Contents of the PaletteInsightAgent log"
+  - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
