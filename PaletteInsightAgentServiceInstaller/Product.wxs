@@ -55,16 +55,13 @@
         <File Id="PaletteInsightAgentExe" Name="PaletteInsightAgent.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe" />
         <!--<ServiceControl Id="StartAgentService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightAgent" Wait="yes" />-->
         <File Id="AppConfig" Name="PaletteInsightAgent.exe.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe.config" />
-      </Component>
-      
-       <!-- Watchdog and Manager -->
-      <Component Id="WatchdogAutoUpdater" Guid="593af868-d6da-43ec-b007-51ce1d68f7b1" Permanent="yes">
-         <!-- Manager EXE --> 
+        
+        <!-- Manager EXE -->
         <File Id="PaletteManagerExe" Name="manager.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\manager.exe" />
       
-         <!-- Watchdog EXE and service config --> 
-        <File Id='PaletteInsightWatchdogEXE' Name='PaletteInsightWatchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />
-        <ServiceControl Id="StartWatchdogService" Start="install" Stop="install" Remove="install" Name="PaletteInsightWatchdog" Wait="yes" />
+        <!-- Watchdog EXE and service config -->
+        <File Id='PaletteInsightWatchdogEXE' Name='PaletteInsightWatchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
+        <ServiceControl Id="StartWatchdogService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightWatchdog" Wait="yes" />
         <ServiceConfig 
           Id="PaletteInsightWatchdogServiceConfig"
           ServiceName="PaletteInsightWatchdog"
@@ -159,7 +156,6 @@
     <Feature Id='Complete' Title='$(var.ApplicationName)' Description='The complete package.' Display='expand' Level='1' ConfigurableDirectory='TARGETDIR'>
       <Feature Id='MainProgram' Title="$(var.ApplicationName)" Description='$(var.ApplicationName) main program.' Level='1'>
         <ComponentRef Id='Executable' />
-        <ComponentRef Id='WatchdogAutoUpdater'/>
         <ComponentRef Id='Libraries' />
         <ComponentRef Id='LogConfig' />
         <ComponentRef Id='CountersConfigComponent' />

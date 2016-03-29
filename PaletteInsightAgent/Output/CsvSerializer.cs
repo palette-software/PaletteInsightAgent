@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using NLog;
+using PaletteInsightAgent.Helpers;
 using System;
 using System.Data;
 using System.Globalization;
@@ -153,7 +154,7 @@ namespace PaletteInsightAgent.Output
                     else if (row[i].GetType() == typeof(string))
                     {
                         // strings need to escaped for postgres-specific characters
-                        fieldValue = EscapeForCsv(row[i].ToString());
+                        fieldValue = GreenplumCsvEscaper.EscapeField(row[i].ToString());
                     }
                     else
                     {
@@ -191,15 +192,5 @@ namespace PaletteInsightAgent.Output
             csvWriter.NextRecord();
         }
 
-        public static string EscapeForCsv(string field)
-        {
-            return field
-                // escpe the backslash first
-                .Replace("\\", "\\\\")
-                .Replace("\r", "\\015")
-                .Replace("\n", "\\012")
-                .Replace("\0", "")
-                .Replace("\v", "\\013");
-        }
     }
 }
