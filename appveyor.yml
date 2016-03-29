@@ -137,6 +137,8 @@ test_script:
     # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
+    - echo "Starting SMOKE test on GoCD"
+    - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST
 artifacts:
 - path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
   name: Github
@@ -164,6 +166,4 @@ deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  - echo "Starting SMOKE test"
-  - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST
   # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
