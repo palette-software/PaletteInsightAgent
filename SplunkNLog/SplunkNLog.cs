@@ -47,7 +47,6 @@ namespace SplunkNLog
         protected override void Write(LogEventInfo logEvent)
         {
             string logMessage = this.Layout.Render(logEvent);
-            Console.WriteLine(logMessage);
 
             WebRequest request = WebRequest.Create(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port));
             request.Credentials = CredentialCache.DefaultCredentials;
