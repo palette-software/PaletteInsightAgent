@@ -39,10 +39,9 @@ namespace PaletteInsightAgent
         // Log polling options
 
         public bool UseCounterSamples { get; set; }
-
         public bool UseThreadInfo { get; set; }
-
         public bool UseLogPolling { get; set; }
+        public bool UseRepoPolling { get; set; }
 
         #region Repo properties
 
