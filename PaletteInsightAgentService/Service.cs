@@ -1,5 +1,5 @@
 ﻿using Topshelf;
-using SplunkNLog;
+//using SplunkNLog;
 using NLog.Config;
 
 namespace PaletteInsightAgentService
