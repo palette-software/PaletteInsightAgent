@@ -27,7 +27,7 @@ namespace PaletteInsightAgentService
         /// </summary>
         public static void Main()
         {
-            ConfigurationItemFactory.Default.Targets.RegisterDefinition("SplunkNLog", typeof(SplunkNLog.SplunkNLog));
+            //ConfigurationItemFactory.Default.Targets.RegisterDefinition("SplunkNLog", typeof(SplunkNLog.SplunkNLog));
 
 
             // configure service parameters

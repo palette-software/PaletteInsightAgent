@@ -5,7 +5,7 @@
 <?define UrlInfoAbout = "http://www.palette-software.com"?>
 <?define ProductUpgradeCode = "8c39f7f6-ad31-4efd-96ae-1f6f1a5e4f3a"?>
 <?define IconFile = "..\PaletteInsightAgentService\Resources\palette_symbol.ico"?>
-<?define BinFolder = "..\PaletteInsightAgentService\bin\Release"?>
+<?define BinFolder = "..\PaletteInsightAgentService\bin\$(var.Configuration)"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" >
   <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
@@ -91,6 +91,7 @@
         <File Id="NLogXML" Name="NLog.xml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.xml" />
         <File Id="PaletteAlertsCoreDLL" Name="PaletteAlertsCore.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteAlertsCore.dll" />
         <File Id="PaletteAlertsNLogDLL" Name="PaletteAlertsNLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteAlertsNLog.dll" />
+        <File Id="SplunkNLogDLL" Name="NLog.SplunkNLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.SplunkNLog.dll" />
         <File Id="NpgsqlDLL" Name="Npgsql.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Npgsql.dll" />
         <File Id="TopshelfDLL" Name="Topshelf.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.dll" />
         <File Id="TopshelfNLogDLL" Name="Topshelf.NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.NLog.dll" />
