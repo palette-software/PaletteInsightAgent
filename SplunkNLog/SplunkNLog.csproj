@@ -61,8 +61,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HttpNetworkSender.cs" />
-    <Compile Include="NetworkSender.cs" />
     <Compile Include="SplunkNLog.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
