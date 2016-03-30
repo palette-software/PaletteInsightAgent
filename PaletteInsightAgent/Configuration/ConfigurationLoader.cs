@@ -82,6 +82,22 @@ namespace PaletteInsight
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
 
+
+                // setup the polling options
+                options.UseCounterSamples = config.UseCounterSamples.HasValue ? config.UseCounterSamples.Value : true;
+                options.UseLogPolling = config.UseLogPolling.HasValue ? config.UseLogPolling.Value : true;
+                options.UseThreadInfo = config.UseThreadInfo.HasValue ? config.UseThreadInfo.Value : true;
+                // If the UseRepoPolling flag is not set,
+                // handle the legacy case of having the repo poll interval set to 0 to
+                // signal that the repo tables should not be polled
+                if (!config.UseRepoPolling.HasValue)
+                {
+                    options.UseRepoPolling = !(options.RepoTablesPollInterval == 0);
+                }
+                else
+                {
+                    options.UseRepoPolling = config.UseRepoPolling.Value;
+                }
             }
 
             public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
