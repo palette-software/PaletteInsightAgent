@@ -1,4 +1,9 @@
-﻿PollInterval: 30
+﻿UseCounterSamples: true
+UseLogPolling: true
+UseRepoPolling: true
+UseThreadInfo: true
+
+PollInterval: 30
 ThreadInfoPollInterval: 15
 LogPollInterval: 300
 DBWriteInterval: 60
@@ -33,8 +38,3 @@ TableauRepo:
   Database: workgroup
   User: readonly
   Password: onlyread
-
-UseCounterSamples: true
-UseLogPolling: true
-UseRepoPolling: true
-UseThreadInfo: true
