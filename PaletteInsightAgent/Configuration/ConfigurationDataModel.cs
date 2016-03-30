@@ -134,6 +134,9 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "UseLogPolling")]
             public bool? UseLogPolling { get; set; }
+
+            [YamlMember(Alias = "UseRepoPolling")]
+            public bool? UseRepoPolling { get; set; }
         }
 
         #endregion
