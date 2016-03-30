@@ -36,6 +36,14 @@ namespace PaletteInsightAgent
 
         public WebserviceConfiguration WebserviceConfig { get; set; }
 
+        // Log polling options
+
+        public bool UseCounterSamples { get; set; }
+
+        public bool UseThreadInfo { get; set; }
+
+        public bool UseLogPolling { get; set; }
+
         #region Repo properties
 
         public IDbConnectionInfo RepositoryDatabase { get; set; }

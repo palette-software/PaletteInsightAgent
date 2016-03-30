@@ -82,6 +82,11 @@ namespace PaletteInsight
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
 
+
+                // setup the polling options
+                options.UseCounterSamples = config.UseCounterSamples.HasValue ? config.UseCounterSamples.Value : true;
+                options.UseLogPolling = config.UseLogPolling.HasValue ? config.UseLogPolling.Value : true;
+                options.UseThreadInfo = config.UseThreadInfo.HasValue ? config.UseThreadInfo.Value : true;
             }
 
             public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
