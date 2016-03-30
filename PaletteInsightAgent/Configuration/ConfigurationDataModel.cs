@@ -123,6 +123,17 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "TableauRepo")]
             public DatabaseConfig TableauRepo { get; set; }
+
+            // Log polling options
+
+            [YamlMember(Alias = "UseCounterSamples")]
+            public bool? UseCounterSamples { get; set; }
+
+            [YamlMember(Alias = "UseThreadInfo")]
+            public bool? UseThreadInfo { get; set; }
+
+            [YamlMember(Alias = "UseLogPolling")]
+            public bool? UseLogPolling { get; set; }
         }
 
         #endregion
