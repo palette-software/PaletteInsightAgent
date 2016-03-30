@@ -33,3 +33,8 @@ TableauRepo:
   Database: workgroup
   User: readonly
   Password: onlyread
+
+UseCounterSamples: true
+UseLogPolling: true
+UseRepoPolling: true
+UseThreadInfo: true
