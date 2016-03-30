@@ -92,6 +92,7 @@
         <File Id="PaletteAlertsCoreDLL" Name="PaletteAlertsCore.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteAlertsCore.dll" />
         <File Id="PaletteAlertsNLogDLL" Name="PaletteAlertsNLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteAlertsNLog.dll" />
         <File Id="SplunkNLogDLL" Name="NLog.SplunkNLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog.SplunkNLog.dll" />
+        <File Id="FastJsonDLL" Name="fastJSON.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\fastJSON.dll" />
         <File Id="NpgsqlDLL" Name="Npgsql.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Npgsql.dll" />
         <File Id="TopshelfDLL" Name="Topshelf.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.dll" />
         <File Id="TopshelfNLogDLL" Name="Topshelf.NLog.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Topshelf.NLog.dll" />
