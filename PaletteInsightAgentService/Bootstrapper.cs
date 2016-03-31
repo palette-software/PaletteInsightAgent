@@ -1,5 +1,4 @@
 ﻿using System;
-using Topshelf;
 using PaletteInsightAgent;
 using NLog;
 
@@ -8,7 +7,7 @@ namespace PaletteInsightAgentService
     /// <summary>
     /// Serves as a thin bootstrapper for the PaletteInsightAgent class and adapts underlying Stop/Start methods to the service context.
     /// </summary>
-    public class PaletteInsightAgentServiceBootstrapper : ServiceControl, IDisposable
+    public class PaletteInsightAgentServiceBootstrapper : Topshelf.ServiceControl, IDisposable
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -27,7 +26,7 @@ namespace PaletteInsightAgentService
         /// </summary>
         /// <param name="hostControl">Service HostControl object</param>
         /// <returns>Indicator that service succesfully started</returns>
-        public bool Start(HostControl hostControl)
+        public bool Start(Topshelf.HostControl hostControl)
         {
             // Request additional time from the service host due to how much initialization has to take place.
             hostControl.RequestAdditionalTime(TimeSpan.FromSeconds(10));
@@ -60,7 +59,7 @@ namespace PaletteInsightAgentService
         /// </summary>
         /// <param name="hostControl">Service HostControl object</param>
         /// <returns>Indicator that service succesfully stopped</returns>
-        public bool Stop(HostControl hostControl)
+        public bool Stop(Topshelf.HostControl hostControl)
         {
             if (agent != null)
             {
