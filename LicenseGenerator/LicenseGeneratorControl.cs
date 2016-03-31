@@ -102,8 +102,5 @@ namespace LicenseGenerator
 
         }
 
-        private void copyLicenseToClipboardBtn_Click(object sender, EventArgs e)
-        {
-        }
     }
 }
