@@ -61,7 +61,15 @@ namespace LicenseGenerator
             if (!result.isValid)
             {
                 MessageBox.Show("Invalid license generated... Please notify the authors of the License Generator Utility.");
+                return;
             }
+
+            var licenseMetadata = String.Format("User: {0} // LicenseId: {1} // Cores: {2} // Valid until: {3}", license.owner, license.licenseId, license.coreCount, license.validUntilUTC );
+
+            // set the metadata
+            metaTextBox.Text = licenseMetadata;
+
+
         }
 
         private static string[] LinesOf(string licenseText)
@@ -92,6 +100,10 @@ namespace LicenseGenerator
         private void keyGeneratorControl_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void copyLicenseToClipboardBtn_Click(object sender, EventArgs e)
+        {
         }
     }
 }
