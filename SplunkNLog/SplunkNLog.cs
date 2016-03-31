@@ -61,5 +61,10 @@ namespace SplunkNLog
             WebResponse response = request.GetResponse();
             response.Close();
         }
+
+        //protected override void CloseTarget()
+        //{
+        //    base.CloseTarget();
+        //}
     }
 }
