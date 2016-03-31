@@ -56,22 +56,22 @@
         <!--<ServiceControl Id="StartAgentService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightAgent" Wait="yes" />-->
         <File Id="AppConfig" Name="PaletteInsightAgent.exe.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgent.exe.config" />
         
-        <!-- Updater EXE -->
-        <File Id="PaletteUpdaterExe" Name="updater.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\updater.exe" />
+        <!-- Manager EXE -->
+        <File Id="PaletteManagerExe" Name="manager.exe" DiskId="1" Vital="yes" Source="$(var.BinFolder)\manager.exe" />
       
         <!-- Watchdog EXE and service config -->
-        <File Id='PaletteWatchdogEXE' Name='watchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
-        <ServiceControl Id="StartWatchdogService" Start="install" Stop="both" Remove="uninstall" Name="PaletteWatchdog" Wait="yes" />
+        <File Id='PaletteInsightWatchdogEXE' Name='PaletteInsightWatchdog.exe' DiskId='1' Source="$(var.BinFolder)\watchdog.exe" KeyPath='yes' />         
+        <ServiceControl Id="StartWatchdogService" Start="install" Stop="both" Remove="uninstall" Name="PaletteInsightWatchdog" Wait="yes" />
         <ServiceConfig 
-          Id="PaletteWatchdogServiceConfig"
-          ServiceName="PaletteWatchdog"
+          Id="PaletteInsightWatchdogServiceConfig"
+          ServiceName="PaletteInsightWatchdog"
           OnInstall="yes"
           OnReinstall="yes"
           DelayedAutoStart="yes"
           FailureActionsWhen="failedToStopOrReturnedError"          
           />
         <util:ServiceConfig
-          ServiceName="PaletteWatchdog"
+          ServiceName="PaletteInsightWatchdog"
           FirstFailureActionType="restart"
           SecondFailureActionType="restart"
           ThirdFailureActionType="restart"
@@ -99,26 +99,35 @@
         <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
         <File Id="LicensingDLL" Name="Licensing.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Licensing.dll" />
         <File Id="YamlDotNetDLL" Name="YamlDotNet.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\YamlDotNet.dll" />
+        <File Id="NodaTimeDLL" Name="NodaTime.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NodaTime.dll" />
       </Component>
       <Component Id="Utilities" Guid="93dd2c94-e909-4b30-a2ed-80e78d53ed5b">
         <!-- Helper Utilities -->
         <File Id="StartPaletteInsightAgentScript" Name="StartPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StartPaletteInsightAgentService.bat" />
         <File Id="StopPaletteInsightAgentScript" Name="StopPaletteInsightAgentService.bat" DiskId="1" Vital="no" Source="$(var.BinFolder)\Util\StopPaletteInsightAgentService.bat" />
       </Component>
-      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03" Permanent="yes">
+      <Component Id="LogConfig" Guid="220e0e2f-3d45-4ce6-8ddc-048b8b4c6d03" Permanent="yes" NeverOverwrite="yes">
         <!-- NLog configuration -->
-        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config"/>
+        <File Id="NLogConfigForService" Name="NLog.config" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NLog_forService.config" KeyPath="yes"/>
       </Component>
     </DirectoryRef>
 
     <!-- Config Files -->
     <DirectoryRef Id="CONFIGFOLDER">
-      <Component Id="ConfigFiles" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes">
-        <File Id="CountersConfig" Name="Counters.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.yml" />
-        <File Id="PaletteInsightAgentConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />
-        <File Id="LogFolderDefaultsYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" />
-        <File Id="ProcessesDefaultsYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" />
-        <File Id="RepositoryDefaultsYAML" Name="Repository.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Repository.yml" />
+      <Component Id="CountersConfigComponent" Guid="ff8c7249-3eb4-4420-9f56-3ff662fe03b0" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="CountersConfig" Name="Counters.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Counters.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="PaletteInsightAgentConfigComponent" Guid="3af0ae94-bed1-4df2-b266-fec20977cd84" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="PaletteInsightAgentConfig" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="LogFolderConfigComponent" Guid="cae6c6c9-3b81-4ac1-9aa0-7c7f8c0e0207" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="LogFoldersYAML" Name="LogFolders.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\LogFolders.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="ProcessesConfigComponent" Guid="24617bd5-e4b4-45a0-9e96-64150bc0e8f1" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="ProcessesYAML" Name="Processes.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Processes.yml" KeyPath="yes" />
+      </Component>
+      <Component Id="RepositoryConfigComponent" Guid="21f282c4-0d38-435d-98f4-e354effc43ec" Permanent="yes"  NeverOverwrite="yes">
+        <File Id="RepositoryYAML" Name="Repository.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Repository.yml" KeyPath="yes" />
       </Component>
     </DirectoryRef>
     
@@ -149,7 +158,11 @@
         <ComponentRef Id='Executable' />
         <ComponentRef Id='Libraries' />
         <ComponentRef Id='LogConfig' />
-        <ComponentRef Id='ConfigFiles' />
+        <ComponentRef Id='CountersConfigComponent' />
+        <ComponentRef Id='PaletteInsightAgentConfigComponent' />
+        <ComponentRef Id='LogFolderConfigComponent' />
+        <ComponentRef Id='ProcessesConfigComponent' />
+        <ComponentRef Id='RepositoryConfigComponent' />
         <ComponentRef Id='Utilities' />
         <ComponentRef Id='ProgramFilesShortcut' />
         <ComponentRef Id='PossibleLicenseFile' />
@@ -158,8 +171,8 @@
 
     <!-- Custom Actions -->
     <!-- Install/uninstall as a Windows service --> 
-    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe install"/>
-    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]watchdog.exe remove"/>
+    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe install"/>
+    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe remove"/>
     <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
     <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
 

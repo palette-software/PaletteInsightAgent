@@ -92,7 +92,11 @@ namespace PaletteInsight
             public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
 
             [YamlMember(Alias = "ProcessedFilesTTL")]
-            public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
+            // public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
+            public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
+
+            [YamlMember(Alias = "StorageLimit")]
+            public int StorageLimit { get; set; } = 1 * 1024; // Default is 1 Gb. This value is given in megabytes.
 
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
@@ -100,8 +104,13 @@ namespace PaletteInsight
             [YamlMember(Alias = "DBWriteInterval")]
             public int DBWriteInterval { get; set; }
 
+            // Became outdated as it was misconfigured at clients
             [YamlMember(Alias = "AllProcesses")]
-            public bool AllProcesses { get; set; } = false;
+            public bool AllProcesses { get; set; } = true;
+
+            // This is a hack and as such I chose very ugly name intentionally so that we don't leave it this way.
+            [YamlMember(Alias = "AllProcesses2")]
+            public bool AllProcesses2 { get; set; } = true;
 
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }
@@ -114,6 +123,23 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "TableauRepo")]
             public DatabaseConfig TableauRepo { get; set; }
+
+            // Log polling options
+
+            [YamlMember(Alias = "UseCounterSamples")]
+            public bool? UseCounterSamples { get; set; }
+
+            [YamlMember(Alias = "UseThreadInfo")]
+            public bool? UseThreadInfo { get; set; }
+
+            [YamlMember(Alias = "UseLogPolling")]
+            public bool? UseLogPolling { get; set; }
+
+            [YamlMember(Alias = "UseRepoPolling")]
+            public bool? UseRepoPolling { get; set; }
+
+            [YamlMember(Alias = "UseHeartbeat")]
+            public bool? UseHeartbeat { get; set; }
         }
 
         #endregion

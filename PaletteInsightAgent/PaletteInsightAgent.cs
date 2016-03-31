@@ -51,10 +51,11 @@ namespace PaletteInsightAgent
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private const bool USE_COUNTERSAMPLES = true;
-        private const bool USE_LOGPOLLER = true;
-        private const bool USE_THREADINFO = true;
-        private const bool USE_HEARTBEAT = true;
+        private bool USE_HEARTBEAT = true;
+
+        private bool USE_COUNTERSAMPLES = true;
+        private bool USE_LOGPOLLER = true;
+        private bool USE_THREADINFO = true;
 
         // use the constant naming convention for now as the mutability
         // of this variable is temporary until the Db output is removed
@@ -86,6 +87,13 @@ namespace PaletteInsightAgent
             string version = fvi.FileVersion;
             Log.Info("Palette Insight Agent version: " + version);
 
+            USE_LOGPOLLER = options.UseLogPolling;
+            USE_THREADINFO = options.UseThreadInfo;
+            USE_COUNTERSAMPLES = options.UseCounterSamples;
+            USE_TABLEAU_REPO = options.UseRepoPolling;
+
+            USE_HEARTBEAT = options.UseHeartbeat;
+
             if (USE_LOGPOLLER)
             {
                 // Load the log poller config & start the agent
@@ -101,10 +109,6 @@ namespace PaletteInsightAgent
             // we'll use the webservice if we have the configuration for it
             USE_WEBSERVICE = !(options.WebserviceConfig == null);
             USE_DB = !USE_WEBSERVICE;
-
-            // If the repo poll interval is set to 0, then do not poll the
-            // tableau repo
-            USE_TABLEAU_REPO = !(options.RepoTablesPollInterval == 0);
 
             if (USE_TABLEAU_REPO)
             {
@@ -421,7 +425,7 @@ namespace PaletteInsightAgent
         private void WriteToDB(object stateInfo)
         {
             // Stateinfo contains an IOutput object
-            DBWriter.Start((IOutput)stateInfo, options.ProcessedFilestTTL);
+            DBWriter.Start((IOutput)stateInfo, options.ProcessedFilestTTL, options.StorageLimit);
         }
 
         /// <summary>

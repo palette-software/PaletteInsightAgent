@@ -121,7 +121,15 @@ namespace PaletteInsightAgent.Helpers
 
         private static string UploadUrl(string package, string maxId)
         {
-            var url = String.Format("{0}/upload?pkg={1}&host={2}", config.Endpoint, package, HostName);
+            // Get the timezone on each send, so that if the server clock timezone is
+            // changed while the agent is running, we are keeping up with the changes
+            var timezoneName = TimezoneHelpers.WindowsToIana( TimeZoneInfo.Local.Id );
+            var url = String.Format("{0}/upload?pkg={1}&host={2}&tz={3}",
+                config.Endpoint, 
+                Uri.EscapeUriString(package), 
+                Uri.EscapeUriString(HostName),
+                Uri.EscapeUriString(timezoneName));
+
             if (maxId != null)
             {
                 url = String.Format("{0}&maxid={1}", url, Uri.EscapeDataString(maxId));

@@ -34,6 +34,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E94F9F78-4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaletteInsightAgent.UnitTests", "test\PaletteInsightAgent.UnitTests\PaletteInsightAgent.UnitTests.csproj", "{4876E1DE-4B02-40EF-8DEC-79BFEAE22341}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{4FB91D45-6EF8-4319-9884-EBC7FA8C5BAF}"
+	ProjectSection(SolutionItems) = preProject
+		test\configs\Config_AppVeyor.yml = test\configs\Config_AppVeyor.yml
+		test\configs\Config_GoCD.yml = test\configs\Config_GoCD.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,5 +138,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4876E1DE-4B02-40EF-8DEC-79BFEAE22341} = {E94F9F78-41D8-4832-A24E-727A4AEE5DDC}
+		{4FB91D45-6EF8-4319-9884-EBC7FA8C5BAF} = {E94F9F78-41D8-4832-A24E-727A4AEE5DDC}
 	EndGlobalSection
 EndGlobal

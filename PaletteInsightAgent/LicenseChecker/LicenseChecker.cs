@@ -49,6 +49,13 @@ namespace PaletteInsightAgent.LicenseChecker
                         return license;
                     } else
                     {
+                        var license = validLicense.license;
+
+                        Log.Info("Invalid license in {0}", f);
+                        Log.Info("  - licensed to: {0}", license.owner);
+                        Log.Info("  - licensed id is: {0}", license.licenseId);
+                        Log.Info("  - license core count: {0}", license.coreCount);
+                        Log.Info("  - valid until: {0}", license.validUntilUTC.ToLongDateString());
                         Log.Info("License is invalid.");
                     }
 

@@ -41,8 +41,9 @@ namespace PaletteInsight
                 options.DBWriteInterval = config.DBWriteInterval;
 
                 options.ProcessedFilestTTL = config.ProcessedFilesTTL;
+                options.StorageLimit = config.StorageLimit;
 
-                options.AllProcesses = config.AllProcesses;
+                options.AllProcesses = config.AllProcesses2;
 
                 // store the result database details
                 options.ResultDatabase = CreateDbConnectionInfo(config.Database);
@@ -81,6 +82,26 @@ namespace PaletteInsight
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
 
+
+                // setup the polling options (they should be true unless explicitly set)
+                options.UseCounterSamples = getWithDefault(config.UseCounterSamples, true);
+                options.UseLogPolling = getWithDefault(config.UseLogPolling, true);
+                options.UseThreadInfo = getWithDefault(config.UseThreadInfo, true);
+
+                // set the heartbeat (should be false unless set)
+                options.UseHeartbeat = getWithDefault(config.UseHeartbeat, false);
+
+                // If the UseRepoPolling flag is not set,
+                // handle the legacy case of having the repo poll interval set to 0 to
+                // signal that the repo tables should not be polled
+                if (!config.UseRepoPolling.HasValue)
+                {
+                    options.UseRepoPolling = !(options.RepoTablesPollInterval == 0);
+                }
+                else
+                {
+                    options.UseRepoPolling = config.UseRepoPolling.Value;
+                }
             }
 
             public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
@@ -100,7 +121,7 @@ namespace PaletteInsight
             /// <param name="tableauRoot"></param>
             private static void AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-                Repository repo = null;
+                Workgroup repo = null;
                 string workgroupyml = @"tabsvc\config\workgroup.yml";
 
                 var configFilePath = "";
@@ -109,7 +130,7 @@ namespace PaletteInsight
                     configFilePath = Path.Combine(tableauRoot, workgroupyml);
                     using (var reader = File.OpenText(configFilePath))
                     {
-                        repo = GetRepoFromWorkgroupYaml(reader);
+                        repo = GetRepoFromWorkgroupYaml(tableauRoot);
                     }
                 }
                 catch (Exception e)
@@ -141,11 +162,11 @@ namespace PaletteInsight
                     }
                     options.RepositoryDatabase = new DbConnectionInfo
                     {
-                        Server = repo.Host,
-                        Port = repo.Port0,
+                        Server = repo.Connection.Host,
+                        Port = repo.Connection.Port,
                         Username = repo.Username,
                         Password = repo.Password,
-                        DatabaseName = repo.DatabaseName
+                        DatabaseName = repo.Connection.DatabaseName
                     };
                 }
             }
@@ -203,7 +224,7 @@ namespace PaletteInsight
                             FolderToWatch = fullPath,
                             DirectoryFilter = logFolder.Filter,
                         });
-                    }    
+                    }
                 }
             }
 
@@ -308,10 +329,10 @@ namespace PaletteInsight
             /// <summary>
             /// Deserialization struct for the repo config from the workgroup.yml
             /// </summary>
-            public class Repository
+            public class Workgroup
             {
-                [YamlMember(Alias = "datacollector.postgres.host")]
-                public string Host { get; set; }
+                [YamlMember(Alias = "pgsql.readonly.enabled")]
+                public bool ReadonlyEnabled { get; set; }
 
                 [YamlMember(Alias = "pgsql.readonly_username")]
                 public string Username { get; set; }
@@ -319,24 +340,54 @@ namespace PaletteInsight
                 [YamlMember(Alias = "pgsql.readonly_password")]
                 public string Password { get; set; }
 
-                [YamlMember(Alias = "datacollector.postgres.tablename")]
-                public string DatabaseName { get; set; }
+                [YamlMember(Alias = "pgsql.connections.yml")]
+                public string ConnectionsFile { get; set; }
 
-                [YamlMember(Alias = "pgsql0.port")]
-                public int Port0 { get; set; }
-
-                // The testing tableau server had two ports in the workgroup.yml, hence this one
-                [YamlMember(Alias = "pgsql1.port")]
-                public int Port1 { get; set; }
-
-
+                public TableauConnectionInfo Connection { get; set; }
             }
 
-            private static Repository GetRepoFromWorkgroupYaml(TextReader input)
+            public class TableauConnectionInfo
             {
+                [YamlMember(Alias = "pgsql.host")]
+                public string Host { get; set; }
+
+                [YamlMember(Alias = "pgsql.port")]
+                public int Port { get; set; }
+
+                // It is not possible to change it @Tableau so we hardcode it for now
+                public readonly string DatabaseName = "workgroup";
+            }
+
+            private static bool IsValidRepoData(Workgroup workgroup)
+            {
+                return workgroup.ReadonlyEnabled
+                    && workgroup.Username != null
+                    && workgroup.Password != null
+                    && workgroup.Connection.Host != null;
+            }
+
+            private static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot)
+            {
+                // Get basic info from workgroup yml. Everything else from connections.yml
                 var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
-                var result = deserializer.Deserialize<Repository>(input);
-                return result;
+
+                string workgroupyml = @"tabsvc\config\workgroup.yml";
+                var configFilePath = Path.Combine(tableauRoot, workgroupyml);
+                Workgroup workgroup = null;
+                using (var workgroupFile = File.OpenText(configFilePath))
+                {
+                    workgroup = deserializer.Deserialize<Workgroup>(workgroupFile);
+                    using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
+                    {
+                        workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
+                    }
+                    if (!IsValidRepoData(workgroup))
+                    {
+                        return null;
+                    }
+                }
+
+                return workgroup;
             }
 
             #endregion
@@ -370,6 +421,22 @@ namespace PaletteInsight
                 }
             }
 
+
+            #endregion
+
+            #region misc
+
+            /// <summary>
+            /// Helper to get a value from a nullable value with a default in case the value is null
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <param name="value">The nullable value we want to invetiagte</param>
+            /// <param name="defaultValue">The value to return if the nullable value is null</param>
+            /// <returns></returns>
+            private static T getWithDefault<T>(Nullable<T> value, T defaultValue) where T : struct
+            {
+                return value.HasValue ? value.Value : defaultValue;
+            }
 
             #endregion
         }
