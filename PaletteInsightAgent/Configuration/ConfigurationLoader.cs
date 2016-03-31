@@ -89,6 +89,7 @@ namespace PaletteInsight
                 // [...] for the legacy case UseRepoPolling is true by default and RepoTablesPollInterval is 0 to
                 // disable repo polling so this would mean different behaviour with the same config file.
                 options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
+                options.UseHeartbeat = config.UseHeartbeat;
             }
 
             public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
@@ -211,7 +212,7 @@ namespace PaletteInsight
                             FolderToWatch = fullPath,
                             DirectoryFilter = logFolder.Filter,
                         });
-                    }    
+                    }
                 }
             }
 
@@ -408,6 +409,22 @@ namespace PaletteInsight
                 }
             }
 
+
+            #endregion
+
+            #region misc
+
+            /// <summary>
+            /// Helper to get a value from a nullable value with a default in case the value is null
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <param name="value">The nullable value we want to invetiagte</param>
+            /// <param name="defaultValue">The value to return if the nullable value is null</param>
+            /// <returns></returns>
+            private static T getWithDefault<T>(Nullable<T> value, T defaultValue) where T : struct
+            {
+                return value.HasValue ? value.Value : defaultValue;
+            }
 
             #endregion
         }

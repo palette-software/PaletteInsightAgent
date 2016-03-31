@@ -19,6 +19,7 @@ using YamlDotNet.Serialization.NamingConventions;
 using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
 using PaletteInsightAgent.Helpers;
+using PaletteInsightAgent.Heartbeat;
 
 [assembly: CLSCompliant(true)]
 
@@ -36,6 +37,7 @@ namespace PaletteInsightAgent
         private Timer webserviceTimer;
         private Timer repoTablesPollTimer;
         private Timer streamingTablesPollTimer;
+        private Timer heartbeatTimer;
         private LogPollerAgent logPollerAgent;
         private ThreadInfoAgent threadInfoAgent;
         private RepoPollAgent repoPollAgent;
@@ -48,6 +50,8 @@ namespace PaletteInsightAgent
         private const int DBWriteLockAcquisitionTimeout = 10; // In seconds.
         private const int PollWaitTimeout = 1000;  // In milliseconds.
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        private bool USE_HEARTBEAT = true;
 
         private bool USE_COUNTERSAMPLES = true;
         private bool USE_LOGPOLLER = true;
@@ -87,6 +91,8 @@ namespace PaletteInsightAgent
             USE_THREADINFO = options.UseThreadInfo;
             USE_COUNTERSAMPLES = options.UseCounterSamples;
             USE_TABLEAU_REPO = options.UseRepoPolling;
+
+            USE_HEARTBEAT = options.UseHeartbeat;
 
             if (USE_LOGPOLLER)
             {
@@ -234,6 +240,16 @@ namespace PaletteInsightAgent
                 APIClient.Init(options.WebserviceConfig);
                 output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
                 webserviceTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: 10 * 1000);
+
+                // only do heartbeat stuff if we are using the webservice backend
+                if (USE_HEARTBEAT)
+                {
+                    heartbeatTimer = new Timer(
+                        callback: (_) => { tryStartIndividualPoll(HeartbeatAgent.Lock, PollWaitTimeout, HeartbeatAgent.Send); },
+                        state: null,
+                        dueTime: 0,
+                        period: HeartbeatAgent.HeartbeatInterval);
+                }
             }
             else
             {
@@ -332,6 +348,7 @@ namespace PaletteInsightAgent
             if (USE_WEBSERVICE) running = running && (webserviceTimer != null);
             if (USE_DB) running = running && (dbWriterTimer != null);
             if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null && streamingTablesPollTimer != null);
+            if (USE_WEBSERVICE && USE_HEARTBEAT) running = running && (heartbeatTimer != null);
             return running;
         }
 
