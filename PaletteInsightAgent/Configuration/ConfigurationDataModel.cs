@@ -127,19 +127,19 @@ namespace PaletteInsight
             // Log polling options
 
             [YamlMember(Alias = "UseCounterSamples")]
-            public bool? UseCounterSamples { get; set; }
+            public bool UseCounterSamples { get; set; } = true;
 
             [YamlMember(Alias = "UseThreadInfo")]
-            public bool? UseThreadInfo { get; set; }
+            public bool UseThreadInfo { get; set; } = true;
 
             [YamlMember(Alias = "UseLogPolling")]
-            public bool? UseLogPolling { get; set; }
+            public bool UseLogPolling { get; set; } = true;
 
             [YamlMember(Alias = "UseRepoPolling")]
-            public bool? UseRepoPolling { get; set; }
+            public bool UseRepoPolling { get; set; } = true;
 
             [YamlMember(Alias = "UseHeartbeat")]
-            public bool? UseHeartbeat { get; set; }
+            public bool UseHeartbeat { get; set; } = false;
         }
 
         #endregion

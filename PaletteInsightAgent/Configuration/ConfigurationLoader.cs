@@ -82,26 +82,14 @@ namespace PaletteInsight
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
 
-
-                // setup the polling options (they should be true unless explicitly set)
-                options.UseCounterSamples = getWithDefault(config.UseCounterSamples, true);
-                options.UseLogPolling = getWithDefault(config.UseLogPolling, true);
-                options.UseThreadInfo = getWithDefault(config.UseThreadInfo, true);
-
-                // set the heartbeat (should be false unless set)
-                options.UseHeartbeat = getWithDefault(config.UseHeartbeat, false);
-
-                // If the UseRepoPolling flag is not set,
-                // handle the legacy case of having the repo poll interval set to 0 to
-                // signal that the repo tables should not be polled
-                if (!config.UseRepoPolling.HasValue)
-                {
-                    options.UseRepoPolling = !(options.RepoTablesPollInterval == 0);
-                }
-                else
-                {
-                    options.UseRepoPolling = config.UseRepoPolling.Value;
-                }
+                // setup the polling options
+                options.UseCounterSamples = config.UseCounterSamples;
+                options.UseLogPolling = config.UseLogPolling;
+                options.UseThreadInfo = config.UseThreadInfo;
+                // [...] for the legacy case UseRepoPolling is true by default and RepoTablesPollInterval is 0 to
+                // disable repo polling so this would mean different behaviour with the same config file.
+                options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
+                options.UseHeartbeat = config.UseHeartbeat;
             }
 
             public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
