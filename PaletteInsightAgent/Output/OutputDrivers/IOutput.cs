@@ -21,11 +21,6 @@ namespace PaletteInsightAgent.Output
         /// Files that failed with unrecoverable errors
         /// </summary>
         public IList<string> failedFiles = new List<string>();
-        /// <summary>
-        /// Files failed with unrecoverable configuration errors, but
-        /// may be later resent when the configuration is corrected
-        /// </summary>
-        public IList<string> unsentFiles = new List<string>();
 
         /// <summary>
         /// Combines the contents of two output results
@@ -36,7 +31,6 @@ namespace PaletteInsightAgent.Output
             return parts.Aggregate(new OutputWriteResult(), (memo,part)=>{
                 memo.failedFiles.AddRange(part.failedFiles);
                 memo.successfullyWrittenFiles.AddRange(part.successfullyWrittenFiles);
-                memo.unsentFiles.AddRange(part.unsentFiles);
                 return memo;
             });
         }
@@ -58,10 +52,6 @@ namespace PaletteInsightAgent.Output
             return new OutputWriteResult { failedFiles = new List<string>(files) };
         }
 
-        public static OutputWriteResult Unsent(params string[] files)
-        {
-            return new OutputWriteResult { unsentFiles = new List<string>(files) };
-        }
         #endregion
     }
 

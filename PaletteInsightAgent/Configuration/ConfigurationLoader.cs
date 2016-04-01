@@ -45,9 +45,6 @@ namespace PaletteInsight
 
                 options.AllProcesses = config.AllProcesses2;
 
-                // store the result database details
-                options.ResultDatabase = CreateDbConnectionInfo(config.Database);
-
                 if (config.Webservice != null)
                 {
                     // Do not add the username or password here, as they come from the license
@@ -240,9 +237,9 @@ namespace PaletteInsight
             /// </summary>
             /// <param name="databaseConfig"></param>
             /// <returns></returns>
-            private static IDbConnectionInfo CreateDbConnectionInfo(DatabaseConfig databaseConfig)
+            private static DbConnectionInfo CreateDbConnectionInfo(DatabaseConfig databaseConfig)
             {
-                IDbConnectionInfo dbConnInfo = new DbConnectionInfo()
+                DbConnectionInfo dbConnInfo = new DbConnectionInfo()
                 {
                     Server = databaseConfig.Host,
                     Port = databaseConfig.Port,
