@@ -14,24 +14,14 @@ StorageLimit: 1024          # Given in megabytes. Default is 1 Gb.
 # The maximum number of log lines that will be read in a single batch
 LogLinesPerBatch: 10000
 
-Database: 
-  Host: localhost
-  Port: 5432
-  Database: palette
-  User: palette
-  Password: password
-  CommandTimeout: 600
+Webservice:
+ Endpoint: http://localhost:9000
 
-# To use the webservice output, uncomment the following lines:
- 
-# Webservice:
-#  Endpoint: http://localhost:9000
-
-Logs: 
-  - 
+Logs:
+  -
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'
     Filter: '*.txt'
-  - 
+  -
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
     Filter: 'tabprotosrv*.txt'
 TableauRepo: 

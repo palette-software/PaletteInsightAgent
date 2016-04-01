@@ -82,6 +82,11 @@ namespace PaletteInsight
 
         public class PaletteInsightConfiguration
         {
+            // Deprecated. Referring section needs to be removed from all config files first.
+            [YamlMember(Alias = "Database")]
+            public DatabaseConfig Database { get; set; }
+ 
+
             [YamlMember(Alias = "PollInterval")]
             public int PollInterval { get; set; }
 
@@ -111,9 +116,6 @@ namespace PaletteInsight
             // This is a hack and as such I chose very ugly name intentionally so that we don't leave it this way.
             [YamlMember(Alias = "AllProcesses2")]
             public bool AllProcesses2 { get; set; } = true;
-
-            [YamlMember(Alias = "Database")]
-            public DatabaseConfig Database { get; set; }
 
             [YamlMember(Alias = "Webservice")]
             public Webservice Webservice { get; set; }

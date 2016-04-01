@@ -17,8 +17,6 @@ namespace PaletteInsightAgent
             public string FolderToWatch { get; set; }
             public string DirectoryFilter { get; set; }
         }
-        [CLSCompliant(false)]
-        public IDbConnectionInfo ResultDatabase { get; set; }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
         public int RepoTablesPollInterval { get; set; }
@@ -47,7 +45,7 @@ namespace PaletteInsightAgent
 
         #region Repo properties
 
-        public IDbConnectionInfo RepositoryDatabase { get; set; }
+        public DbConnectionInfo RepositoryDatabase { get; set; }
 
         #endregion Repo properties
 
