@@ -1,7 +1,6 @@
 ﻿PollInterval: 30
 ThreadInfoPollInterval: 12
 LogPollInterval: 6
-DBWriteInterval: 7
 AllProcesses: false
 
 Database: 
