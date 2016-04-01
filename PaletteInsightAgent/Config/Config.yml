@@ -11,6 +11,9 @@ RepoTablesPollInterval: 3600
 ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
 StorageLimit: 1024          # Given in megabytes. Default is 1 Gb.
 
+# The maximum number of log lines that will be read in a single batch
+LogLinesPerBatch: 10000
+
 Webservice:
  Endpoint: http://localhost:9000
 

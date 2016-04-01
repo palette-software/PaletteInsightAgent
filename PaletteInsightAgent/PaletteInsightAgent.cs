@@ -89,7 +89,7 @@ namespace PaletteInsightAgent
             if (USE_LOGPOLLER)
             {
                 // Load the log poller config & start the agent
-                logPollerAgent = new LogPollerAgent(options.LogFolders);
+                logPollerAgent = new LogPollerAgent(options.LogFolders, options.LogLinesPerBatch);
             }
 
             if (USE_THREADINFO)
@@ -290,7 +290,7 @@ namespace PaletteInsightAgent
             // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
             if (!Monitor.TryEnter(FileUploader.FileUploadLock, DBWriteLockAcquisitionTimeout * 1000))
             {
-                Log.Error("Could not acquire DB write lock; forcing exit..");
+                Log.Warn("Could not acquire DB write lock; forcing exit..");
             }
             else
             {
