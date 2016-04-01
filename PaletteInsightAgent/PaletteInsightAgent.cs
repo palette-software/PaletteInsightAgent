@@ -59,8 +59,6 @@ namespace PaletteInsightAgent
         private bool USE_WEBSERVICE = false;
         private bool USE_TABLEAU_REPO = true;
 
-        public static bool STOPPING = false;
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PaletteInsightAgent(bool loadOptionsFromConfig = true)
         {
@@ -264,7 +262,6 @@ namespace PaletteInsightAgent
         public void Stop()
         {
             Log.Info("Shutting down PaletteInsightAgent..");
-            STOPPING = true;
 
             if (USE_COUNTERSAMPLES)
             {

@@ -30,8 +30,10 @@ namespace SplunkNLog
             hasMessageToLog = new EventWaitHandle(false, EventResetMode.AutoReset);
 
             MaxPendingQueueSize = 65000;
+            MaxBatchSize = 100;
 
             SplunkerThread = new Thread(ProcessLogMessages);
+            SplunkerThread.IsBackground = true;
             SplunkerThread.Start();
         }
 
@@ -51,6 +53,9 @@ namespace SplunkNLog
 
         [DefaultValue(65000), RequiredParameter]
         public int MaxPendingQueueSize { get; set; }
+
+        [DefaultValue(100), RequiredParameter]
+        public int MaxBatchSize { get; set; }
 
 
         private Queue           messagesToSplunk;
@@ -101,7 +106,7 @@ namespace SplunkNLog
                     messageBatch[i] = (string)messagesToSplunk.Dequeue();
                 }
 
-                if (isStopping || PaletteInsightAgent.PaletteInsightAgent.STOPPING)
+                if (isStopping)
                 {
                     // Shutting down. Abort.
                     return;
@@ -112,8 +117,6 @@ namespace SplunkNLog
                     WebRequest request = WebRequest.Create(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port));
                     request.Credentials = CredentialCache.DefaultCredentials;
                     request.Headers.Add("Authorization", String.Format("Splunk {0}", Token));
-
-                    //((HttpWebRequest)request).UserAgent = ".NET Framework Example Client";
                     request.Method = "POST";
 
                     SplunkMessage spm = new SplunkMessage();
