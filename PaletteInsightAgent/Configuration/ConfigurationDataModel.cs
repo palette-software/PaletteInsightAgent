@@ -85,13 +85,18 @@ namespace PaletteInsight
             // Deprecated. Referring section needs to be removed from all config files first.
             [YamlMember(Alias = "Database")]
             public DatabaseConfig Database { get; set; }
- 
+            // Deprecated. Referring section needs to be removed from all config files first.
+            [YamlMember(Alias = "DBWriteInterval")]
+            public int DBWriteInterval { get; set; } = 0;
 
             [YamlMember(Alias = "PollInterval")]
             public int PollInterval { get; set; }
 
             [YamlMember(Alias = "ThreadInfoPollInterval")]
             public int ThreadInfoPollInterval { get; set; }
+
+            [YamlMember(Alias = "UploadInterval")]
+            public int UploadInterval { get; set; } = 10; // Every ten seconds
 
             [YamlMember(Alias = "RepoTablesPollInterval")]
             public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
@@ -106,8 +111,6 @@ namespace PaletteInsight
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
 
-            [YamlMember(Alias = "DBWriteInterval")]
-            public int DBWriteInterval { get; set; }
 
             // Became outdated as it was misconfigured at clients
             [YamlMember(Alias = "AllProcesses")]

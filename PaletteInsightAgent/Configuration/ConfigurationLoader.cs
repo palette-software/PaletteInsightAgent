@@ -36,9 +36,9 @@ namespace PaletteInsight
             {
                 options.PollInterval = config.PollInterval;
                 options.LogPollInterval = config.LogPollInterval;
+                options.UploadInterval = config.UploadInterval;
                 options.RepoTablesPollInterval = config.RepoTablesPollInterval;
                 options.ThreadInfoPollInterval = config.ThreadInfoPollInterval;
-                options.DBWriteInterval = config.DBWriteInterval;
 
                 options.ProcessedFilestTTL = config.ProcessedFilesTTL;
                 options.StorageLimit = config.StorageLimit;
