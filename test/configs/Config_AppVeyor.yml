@@ -1,7 +1,6 @@
 ﻿PollInterval: 5
 ThreadInfoPollInterval: 6
 LogPollInterval: 7
-DBWriteInterval: 60
 RepoTablesPollInterval: 3600
 ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
 StorageLimit: 1          # Given in megabytes. Default is 1 Gb.
