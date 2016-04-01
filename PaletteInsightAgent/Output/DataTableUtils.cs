@@ -1,5 +1,8 @@
 ﻿using CsvHelper;
 using NLog;
+using PaletteInsightAgent.LogPoller;
+using PaletteInsightAgent.Sampler;
+using PaletteInsightAgent.ThreadInfoPoller;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -25,31 +28,41 @@ namespace PaletteInsightAgent.Output
             table.Rows.Add(row);
         }
 
+        private static string GetDBType(string nativeType)
+        {
+            switch (nativeType)
+            {
+                case "System.DateTime":
+                    return "timestamp without time zone";
+                case "System.Int64":
+                    return "bigint";
+                case "System.Int32":
+                    return "integer";
+                case "System.Boolean":
+                    return "boolean";
+                case "System.Double":
+                    return "double precision";
+                default:
+                    return "text";
+            }
+        }
+
+        private static void AddMetadata(DataTable result, DataTable table)
+        {
+            var index = 0;
+            foreach (DataColumn column in table.Columns)
+            {
+                index++;
+                AddColumnInfo(result, table.TableName, column.ColumnName, index, GetDBType(column.DataType.ToString()));
+            }
+
+        }
+
         public static void AddAgentMetadata(DataTable table)
         {
-            AddColumnInfo(table, "serverlogs", "filename", 1);
-            AddColumnInfo(table, "serverlogs", "host_name", 2);
-            AddColumnInfo(table, "serverlogs", "line", 3);
-
-            AddColumnInfo(table, "threadinfo", "host_name", 1);
-            AddColumnInfo(table, "threadinfo", "process", 2);
-            AddColumnInfo(table, "threadinfo", "ts", 3, "timestamp without time zone");
-            AddColumnInfo(table, "threadinfo", "pid", 4, "bigint");
-            AddColumnInfo(table, "threadinfo", "tid", 5, "bigint");
-            AddColumnInfo(table, "threadinfo", "cpu_time", 6, "bigint");
-            AddColumnInfo(table, "threadinfo", "poll_cycle_ts", 7, "timestamp without time zone");
-            AddColumnInfo(table, "threadinfo", "start_ts", 8, "timestamp without time zone");
-            AddColumnInfo(table, "threadinfo", "thread_count", 9, "integer");
-            AddColumnInfo(table, "threadinfo", "working_set", 10, "bigint");
-            AddColumnInfo(table, "threadinfo", "thread_level", 11, "boolean");
-
-            AddColumnInfo(table, "countersamples",  "timestamp", 1, "timestamp without time zone");
-            AddColumnInfo(table, "countersamples",  "machine", 2);
-            AddColumnInfo(table, "countersamples",  "category", 3);
-            AddColumnInfo(table, "countersamples",  "instance", 4);
-
-            AddColumnInfo(table, "countersamples",  "name", 5);
-            AddColumnInfo(table, "countersamples",  "value", 6, "double precision");
+            AddMetadata(table, LogTables.makeServerLogsTable());
+            AddMetadata(table, ThreadTables.makeThreadInfoTable());
+            AddMetadata(table, CounterSampler.makeCounterSamplesTable());
         }
     }
 }
