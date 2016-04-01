@@ -14,14 +14,20 @@ namespace PaletteInsightAgent.LogPoller
         private ICollection<LogFileWatcher> watchers;
         private LogsToDbConverter logsToDbConverter;
 
+        /// <summary>
+        /// The maximum log lines in a batch for ChangeDelegate.
+        /// </summary>
+        private int logLinesPerBatch;
+
 
         private ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch;
 
 
-        public LogPollerAgent(ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch)
+        public LogPollerAgent(ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch, int logLinesPerBatch)
         {
             Log.Info("Initializing LogPollerAgent with number of folders: {0}.", foldersToWatch.Count);
             this.foldersToWatch = foldersToWatch;
+            this.logLinesPerBatch = logLinesPerBatch;
             logsToDbConverter = new LogsToDbConverter();
         }
 
@@ -33,7 +39,7 @@ namespace PaletteInsightAgent.LogPoller
             foreach (var folderInfo in foldersToWatch)
             {
                 Log.Info("Starting LogFileWatcher in " + folderInfo.FolderToWatch + " with file mask:" + folderInfo.DirectoryFilter);
-                watchers.Add(new LogFileWatcher(folderInfo.FolderToWatch, folderInfo.DirectoryFilter));
+                watchers.Add(new LogFileWatcher(folderInfo.FolderToWatch, folderInfo.DirectoryFilter, logLinesPerBatch));
             }
         }
 
@@ -46,14 +52,20 @@ namespace PaletteInsightAgent.LogPoller
 
         public void pollLogs()
         {
-            var serverLogsTable = LogTables.makeServerLogsTable();
-
             foreach (var watcher in watchers)
-            { 
+            {
                 watcher.watchChangeCycle((filename, lines) =>
                 {
+                    // create a new output table for the file
+                    var serverLogsTable = LogTables.makeServerLogsTable();
+
                     Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
+
+                    // process the newly found lines
                     logsToDbConverter.processServerLogLines(filename, lines, serverLogsTable);
+
+                    // write the current batch out
+                    WriteOutServerlogRows(serverLogsTable);
                 }, () =>
                 {
                     // if no change, just flush if needed
@@ -61,6 +73,14 @@ namespace PaletteInsightAgent.LogPoller
                 });
             }
 
+        }
+
+        /// <summary>
+        /// Helper that writes a serverlogs table to disk as a CSV
+        /// </summary>
+        /// <param name="serverLogsTable"></param>
+        private static void WriteOutServerlogRows(System.Data.DataTable serverLogsTable)
+        {
             var serverLogsTableCount = serverLogsTable.Rows.Count;
 
             if (serverLogsTableCount == 0)
@@ -72,9 +92,7 @@ namespace PaletteInsightAgent.LogPoller
             var statusLine = String.Format("{0} server log {1}",
                  serverLogsTableCount, "row".Pluralize(serverLogsTableCount));
 
-
             Log.Info("Sending off " + statusLine);
-
 
             if (serverLogsTableCount > 0)
             {
@@ -83,6 +101,5 @@ namespace PaletteInsightAgent.LogPoller
 
             Log.Info("Sent off {0}", statusLine);
         }
-
     }
 }

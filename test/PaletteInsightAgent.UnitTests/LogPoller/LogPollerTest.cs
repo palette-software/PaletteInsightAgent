@@ -20,7 +20,7 @@ namespace UnitTestLogPoller
 
 
             // Act
-            LogFileWatcher watcher = new LogFileWatcher(testFolder, testFilter);
+            LogFileWatcher watcher = new LogFileWatcher(testFolder, testFilter, 10000);
 
             // Assert
             Assert.IsNotNull(watcher);
