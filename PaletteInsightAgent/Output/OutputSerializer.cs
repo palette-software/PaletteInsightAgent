@@ -41,6 +41,7 @@ namespace PaletteInsightAgent.Output
 
             // write out if any
             var dataFileName = GetDataFile(table.TableName);
+
             Log.Info("Trying to write: {0} -- files in directory:", dataFileName);
             foreach (var filename in Directory.EnumerateFiles(Path.GetDirectoryName(dataFileName)))
             {
