@@ -41,6 +41,7 @@
             this.saveLicenseButton = new System.Windows.Forms.Button();
             this.coreCount = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
+            this.metaTextBox = new System.Windows.Forms.TextBox();
             this.keyGeneratorControl = new LicenseGenerator.KeyGeneratorControl();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.coreCount)).BeginInit();
@@ -53,7 +54,7 @@
             this.licenseTextBox.Multiline = true;
             this.licenseTextBox.Name = "licenseTextBox";
             this.licenseTextBox.ReadOnly = true;
-            this.licenseTextBox.Size = new System.Drawing.Size(607, 202);
+            this.licenseTextBox.Size = new System.Drawing.Size(607, 183);
             this.licenseTextBox.TabIndex = 15;
             this.licenseTextBox.WordWrap = false;
             // 
@@ -151,6 +152,16 @@
             this.label4.TabIndex = 19;
             this.label4.Text = "Core Count";
             // 
+            // metaTextBox
+            // 
+            this.metaTextBox.Location = new System.Drawing.Point(14, 318);
+            this.metaTextBox.Multiline = true;
+            this.metaTextBox.Name = "metaTextBox";
+            this.metaTextBox.ReadOnly = true;
+            this.metaTextBox.Size = new System.Drawing.Size(607, 25);
+            this.metaTextBox.TabIndex = 20;
+            this.metaTextBox.WordWrap = false;
+            // 
             // keyGeneratorControl
             // 
             this.keyGeneratorControl.Location = new System.Drawing.Point(8, 349);
@@ -163,6 +174,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.metaTextBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.coreCount);
             this.Controls.Add(this.saveLicenseButton);
@@ -199,5 +211,6 @@
         private System.Windows.Forms.Button saveLicenseButton;
         private System.Windows.Forms.NumericUpDown coreCount;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox metaTextBox;
     }
 }
