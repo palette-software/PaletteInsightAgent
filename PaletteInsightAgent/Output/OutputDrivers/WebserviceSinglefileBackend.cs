@@ -103,11 +103,12 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                         case HttpStatusCode.Conflict:
                             Log.Warn("-> MD5 error in '{0}' -- resending", file);
                             return DoSendFile(file, maxId);
-                        // otherwise move to the unsent ones, as this most likely is
-                        // a server or auth error
+                        // otherwise move to the errored ones for now as that is the safe bet
+                        // we should later handle some error codes differently so that upload is blocked until successful
+                        // in certain cases
                         default:
-                            Log.Warn("-> Unknown status: '{0}' for '{1}' -- moving to unsent", result.StatusCode, file);
-                            return OutputWriteResult.Unsent(results);
+                            Log.Error("-> Unknown status: '{0}' for '{1}' -- moving to error", result.StatusCode, file);
+                            return OutputWriteResult.Failed(results);
                     }
                 }
                 catch (Exception e)
@@ -117,8 +118,8 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                     // DoSendFile() calls should catch any errors propagating from nested
                     // sends
                     Log.Error(e, "Error during sending '{0}' to the webservice: {1}", file, e);
-                    // so we are just adding this file to the unsent ones.
-                    return OutputWriteResult.Unsent(results);
+                    // so we are just adding this file to the failed ones.
+                    return OutputWriteResult.Failed(results);
 
                 }
             });

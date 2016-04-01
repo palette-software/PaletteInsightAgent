@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace PaletteInsightAgent.Output
 {
-    class DBWriter
+    class FileUploader
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         /// <summary>
@@ -18,17 +18,6 @@ namespace PaletteInsightAgent.Output
         /// The directory where the files that have errors (invalid names, etc.)
         /// </summary>
         private const string ERROR_PREFIX = @"errors/";
-        /// <summary>
-        /// The path where files to be re-sent later are stored.
-        /// TODO: try these files on start
-        /// </summary>
-        private const string UNSENT_PREFIX = @"unsent/";
-
-        /// <summary>
-        /// The chance (as fraction) that a call to Start() will also result in a call
-        /// to TryToSendUnsentFiles()
-        /// </summary>
-        private const double UNSENT_FILES_RESEND_CHANCE = 0.01;
 
         private static string DataFilePattern
         {
@@ -54,25 +43,8 @@ namespace PaletteInsightAgent.Output
             }
         }
 
-        private static string UnsentPath
-        {
-            get
-            {
-                return Path.Combine(OutputSerializer.DATA_FOLDER, UNSENT_PREFIX);
-            }
-        }
-        public static readonly object DBWriteLock = new object();
-        private static readonly int waitLockTimeout = 1000;
-
-        /// <summary>
-        /// Helper method that is usually called on startup to check the unsent folder
-        /// for unsent files and tries to send them
-        /// </summary>
-        /// <param name="output"></param>
-        public static void TryToSendUnsentFiles(IOutput output)
-        {
-            DoUpload(output, UnsentPath);
-        }
+        public static readonly object FileUploadLock = new object();
+        private static readonly int fileUploadLockTimeout = 1000;
 
         /// <summary>
         /// Start a single write loop
@@ -80,14 +52,6 @@ namespace PaletteInsightAgent.Output
         /// <param name="output"></param>
         public static void Start(IOutput output, int processedFilesTTL, long storageLimit)
         {
-            // add some chance (1%) of uploading the unsent files, so once every
-            // ~1500 seconds on average we try to re-upload the stuff we may have missed
-            if (ShouldTryResendingData())
-            {
-                Log.Info("+++ LUCKY DRAW: trying to re-send unsent files +++");
-                TryToSendUnsentFiles(output);
-                Log.Info("+++ /LUCKY DRAW: done trying to re-sending unsent files +++");
-            }
             DoUpload(output, OutputSerializer.DATA_FOLDER);
             DeleteOldFiles(ProcessedPath, processedFilesTTL);
             // Storage limit is given in megabytes in config, but we will work with
@@ -175,18 +139,13 @@ namespace PaletteInsightAgent.Output
         {
             // Collect all the stored files (processed, unsent, error) into an ordered
             // list, where the first item is going to be the oldest file.
-            IList<string> folders = new List<string>(new string[] { ProcessedPath, ErrorPath, UnsentPath });
+            IList<string> folders = new List<string>(new string[] { ProcessedPath, ErrorPath });
 
             return folders.Where(folder => Directory.Exists(folder))
                 .SelectMany(folder => Directory.EnumerateFiles(folder))
                 .Select(file => new FileInfo(file))
                 .OrderBy(file => file.CreationTimeUtc)
                 .ToList();
-        }
-
-        private static bool ShouldTryResendingData()
-        {
-            return new Random().NextDouble() < UNSENT_FILES_RESEND_CHANCE;
         }
 
         private static IList<string> GetPendingTables(string from)
@@ -207,9 +166,9 @@ namespace PaletteInsightAgent.Output
         /// <param name="dataPath"></param>
         private static void DoUpload(IOutput output, string dataPath)
         {
-            if (!Monitor.TryEnter(DBWriteLock, waitLockTimeout))
+            if (!Monitor.TryEnter(FileUploadLock, fileUploadLockTimeout))
             {
-                Log.Debug("Skipping DB write as it is already in progress.");
+                Log.Debug("Skipping file upload as it is already in progress.");
                 return;
             }
 
@@ -233,7 +192,7 @@ namespace PaletteInsightAgent.Output
             }
             finally
             {
-                Monitor.Exit(DBWriteLock);
+                Monitor.Exit(FileUploadLock);
             }
         }
 
@@ -247,8 +206,6 @@ namespace PaletteInsightAgent.Output
             MoveToFolder(processedFiles.successfullyWrittenFiles, ProcessedPath);
             // Move files with errors to the errors folder
             MoveToFolder(processedFiles.failedFiles, ErrorPath);
-            // Move files with errors to the errors folder
-            MoveToFolder(processedFiles.unsentFiles, UnsentPath);
         }
 
         /// <summary>
