@@ -108,7 +108,7 @@ namespace PaletteInsightAgent.LogPoller
         /// 
         /// </summary>
         /// <param name="fullPath"></param>
-        bool pollChangesToWithLimit(string fullPath, ChangeDelegate changeDelegate, int limitOfLines=1000)
+        bool pollChangesToWithLimit(string fullPath, ChangeDelegate changeDelegate, int limitOfLines)
         {
             using (var fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
             using (var sr = new StreamReader(fs))

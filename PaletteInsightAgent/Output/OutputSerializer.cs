@@ -39,10 +39,10 @@ namespace PaletteInsightAgent.Output
                 return;
             }
 
+            // write out if any
+            var dataFileName = GetDataFile(table.TableName);
             try
             {
-                // write out if any
-                var dataFileName = GetDataFile(table.TableName);
 
                 Writer.WriteDataFile(dataFileName, table);
 
@@ -58,7 +58,7 @@ namespace PaletteInsightAgent.Output
             }
             catch (Exception e)
             {
-                Log.Error("Failed to write {0} table contents to CSV file! Exception message: {1}", table.TableName, e.Message);
+                Log.Error("Failed to write {0} table contents to CSV file '{1}'! Exception message: {2}", table.TableName, dataFileName, e.Message);
             }
         }
 
