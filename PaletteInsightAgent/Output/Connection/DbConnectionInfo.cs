@@ -3,7 +3,7 @@
     /// <summary>
     /// Contains all of the information associated with a database connection.
     /// </summary>
-    public class DbConnectionInfo : IDbConnectionInfo
+    public class DbConnectionInfo
     {
         public string Server { get; set; }
         public int Port { get; set; }

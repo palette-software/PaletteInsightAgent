@@ -57,7 +57,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();
 
-        public Tableau9RepoConn(IDbConnectionInfo db)
+        public Tableau9RepoConn(DbConnectionInfo db)
         {
             connectionStringBuilder =
                 new NpgsqlConnectionStringBuilder()
