@@ -67,6 +67,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PaletteInsightAgent\PaletteInsightAgent.csproj">
+      <Project>{332fb878-a88d-4413-813d-910a1e678498}</Project>
+      <Name>PaletteInsightAgent</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(ProjectDir)bin\$(Configuration)\$(TargetFileName) $(SolutionDir)\PaletteInsightAgent\bin\$(Configuration)\$(TargetFileName)
