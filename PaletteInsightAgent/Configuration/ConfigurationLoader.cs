@@ -86,6 +86,9 @@ namespace PaletteInsight
                 // [...] for the legacy case UseRepoPolling is true by default and RepoTablesPollInterval is 0 to
                 // disable repo polling so this would mean different behaviour with the same config file.
                 options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
+
+                // set the maximum log lines
+                options.LogLinesPerBatch = config.LogLinesPerBatch;
             }
 
             public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
