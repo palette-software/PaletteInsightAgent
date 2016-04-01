@@ -13,7 +13,7 @@ namespace PaletteInsightAgent.Helpers
             act();
             var endTime = DateTime.UtcNow;
             Log.Info("<-- Done [{1}ms] {0}", message,
-                (endTime - currentTime).TotalMilliseconds);
+                (long)((endTime - currentTime).TotalMilliseconds));
         }
 
 

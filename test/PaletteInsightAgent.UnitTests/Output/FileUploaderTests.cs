@@ -13,9 +13,9 @@ namespace PaletteInsightAgentTests.Output
     /// DB writer tests
     /// </summary>
     [TestClass]
-    public class DbWriterTests
+    public class FileUploaderTests
     {
-        public DbWriterTests()
+        public FileUploaderTests()
         {
             //
             // TODO: Add constructor logic here
@@ -71,7 +71,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(testFiles);
 
             // Act
-            var resultFiles = DBWriter.GetFilesOfSameTable();
+            var resultFiles = FileUploader.GetFilesOfSameTable();
 
             // Assert
             Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("data/", "serverlog-*.csv"));
@@ -88,7 +88,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => Directory.GetFiles("data/", "serverlog-*.csv")).WithExactArguments().WillReturn(serverLogs);
 
             // Act
-            var resultFiles = DBWriter.GetFilesOfSameTable();
+            var resultFiles = FileUploader.GetFilesOfSameTable();
 
             // Assert
             Isolate.Verify.WasCalledWithExactArguments(() => Directory.GetFiles("data/", "serverlog-*.csv"));
@@ -109,7 +109,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(new string[0]);
 
             // Act
-            var resultFiles = DBWriter.GetFilesOfSameTable();
+            var resultFiles = FileUploader.GetFilesOfSameTable();
 
             // Assert
             Assert.IsTrue(resultFiles.Count == 0);
@@ -124,7 +124,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => Directory.GetFiles("anyfolder", "anyfilter")).WillReturn(testFiles);
 
             // Act
-            var resultFiles = DBWriter.GetFilesOfSameTable();
+            var resultFiles = FileUploader.GetFilesOfSameTable();
 
             // Assert
             // The result is expected to be an empty list, since none of the filenames contain "-" (hyphens).
@@ -160,7 +160,7 @@ namespace PaletteInsightAgentTests.Output
             var fullFileName = "data/" + testFile;
 
             // Act
-            var fileName = DBWriter.GetFileName(fullFileName);
+            var fileName = FileUploader.GetFileName(fullFileName);
 
             // Assert
             Assert.AreEqual(testFile, fileName);
@@ -173,7 +173,7 @@ namespace PaletteInsightAgentTests.Output
             var fullFileName = testFile;
 
             // Act
-            var fileName = DBWriter.GetFileName(fullFileName);
+            var fileName = FileUploader.GetFileName(fullFileName);
 
             // Assert
             Assert.AreEqual(testFile, fileName);
@@ -186,7 +186,7 @@ namespace PaletteInsightAgentTests.Output
             var fullFileName = "one/two/three/" + testFile;
 
             // Act
-            var fileName = DBWriter.GetFileName(fullFileName);
+            var fileName = FileUploader.GetFileName(fullFileName);
 
             // Assert
             Assert.AreEqual(testFile, fileName);
@@ -197,7 +197,7 @@ namespace PaletteInsightAgentTests.Output
         public void TestGetTableName()
         {
             // Act
-            var tableName = DBWriter.GetTableName(testFile);
+            var tableName = FileUploader.GetTableName(testFile);
 
             // Assert
             Assert.AreEqual("serverlog", tableName);
@@ -210,7 +210,7 @@ namespace PaletteInsightAgentTests.Output
             var invalidFile = "threadinfo.csv"; // invalid because it does not contain "-" (hyphen)
 
             // Act
-            var tableName = DBWriter.GetTableName(invalidFile);
+            var tableName = FileUploader.GetTableName(invalidFile);
 
             // Assert
             Assert.AreEqual("", tableName);
@@ -259,7 +259,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
 
             // Act
-            DBWriter.MoveToProcessed(testFileList);
+            FileUploader.MoveToProcessed(testFileList);
 
             // Assert
             Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
@@ -276,7 +276,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Delete("anyfile")).IgnoreCall();
 
             // Act
-            DBWriter.MoveToProcessed(testFileList);
+            FileUploader.MoveToProcessed(testFileList);
 
             // Assert
             Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Delete("anyfile")));
@@ -301,7 +301,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => Directory.Exists(destinationFolder)).WithExactArguments().WillReturn(true);
 
             // Act
-            DBWriter.MoveToProcessed(testFileList);
+            FileUploader.MoveToProcessed(testFileList);
 
             // Assert
             // Make sure that the not-existing folder got created
@@ -316,7 +316,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Exists("anyfile")).WillThrow(testException);
 
             // Act
-            DBWriter.MoveToProcessed(testFileList);
+            FileUploader.MoveToProcessed(testFileList);
 
             // Assert
             Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
@@ -332,7 +332,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Delete("anyfile")).WillThrow(testException);
 
             // Act
-            DBWriter.MoveToProcessed(testFileList);
+            FileUploader.MoveToProcessed(testFileList);
 
             // Assert
             Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
@@ -349,7 +349,7 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Move("source", "destination")).WillThrow(testException);
 
             // Act
-            DBWriter.MoveToProcessed(testFileList);
+            FileUploader.MoveToProcessed(testFileList);
 
             // Assert
             Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
