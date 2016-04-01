@@ -43,6 +43,8 @@ namespace PaletteInsightAgent
         public bool UseLogPolling { get; set; }
         public bool UseRepoPolling { get; set; }
 
+        public int LogLinesPerBatch { get; set; }
+
         #region Repo properties
 
         public IDbConnectionInfo RepositoryDatabase { get; set; }

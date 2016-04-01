@@ -137,6 +137,13 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "UseRepoPolling")]
             public bool UseRepoPolling { get; set; } = true;
+
+            /// <summary>
+            /// The maximum lines to be parsed in a batch from a log file
+            /// </summary>
+            [YamlMember(Alias = "LogLinesPerBatch")]
+            public int LogLinesPerBatch { get; set; } = 5000;
+
         }
 
         #endregion

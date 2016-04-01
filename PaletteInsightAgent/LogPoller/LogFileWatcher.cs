@@ -20,11 +20,17 @@ namespace PaletteInsightAgent.LogPoller
         public string watchedFolderPath { get; protected set; }
         public string filter { get; protected set; }
 
+        /// <summary>
+        /// The limit of lines per batch (so we dont get OOM for large files)
+        /// </summary>
+        private int linesPerBatch;
+
         Dictionary<string, long> stateOfFiles; //contains filename and actual number of lines in the file
-        public LogFileWatcher(string folderpath, string filter)
+        public LogFileWatcher(string folderpath, string filter, int linesPerBatch)
         {
             stateOfFiles = new Dictionary<string, long>();
             watchedFolderPath = folderpath;
+            this.linesPerBatch = linesPerBatch;
             this.filter = filter;
             initFileState();
         }
@@ -81,7 +87,7 @@ namespace PaletteInsightAgent.LogPoller
                     // check if we have any changes
                     // Two lines by intention. Please do not unite into one line as in that case the order of
                     // the operands would be meaningful and in wrong order would cause pollChangesTo to not be called!!!!
-                    var changedThisFile = pollChangesTo(fileName, changeDelegate);
+                    var changedThisFile = pollChangesToWithLimit(fileName, changeDelegate, linesPerBatch);
                     hasChanges = changedThisFile || hasChanges;
                 }
                 catch (Exception e)
@@ -102,7 +108,7 @@ namespace PaletteInsightAgent.LogPoller
         /// 
         /// </summary>
         /// <param name="fullPath"></param>
-        bool pollChangesTo(string fullPath, ChangeDelegate changeDelegate)
+        bool pollChangesToWithLimit(string fullPath, ChangeDelegate changeDelegate, int limitOfLines=1000)
         {
             using (var fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
             using (var sr = new StreamReader(fs))
@@ -121,26 +127,56 @@ namespace PaletteInsightAgent.LogPoller
                 var offsetInFile = stateOfFiles.ContainsKey(signature) ? stateOfFiles[signature] : 0;
                 sr.BaseStream.Seek(offsetInFile, SeekOrigin.Begin);
 
-                var lines = new List<string>();
+                // Have we read the file to the end?
+                bool isFileOver = false;
+                // were there any changes to the file?
+                bool hadChanges = false;
 
-                //read the new lines which were appended to the file
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                    lines.Add(line);
-
-                // Update the offset
-                stateOfFiles[signature] = fs.Position;
-
-                // Callback if we have changes
-                if (lines.Count > 0)
+                while(!isFileOver)
                 {
-                    changeDelegate(Path.GetFileName(fullPath), lines.ToArray());
-                    // mark that we have done our duty
-                    return true;
+
+                    var lines = new List<string>();
+
+                    // 1, if we read null, the file is over
+                    // 2, if we read not null, add it to the liens
+                    //    if the lines are over the limit, then return them and say that we may have more
+
+
+                    while (true)
+                    {
+                        string line = sr.ReadLine();
+                        // if the line is null, the file is over
+                        if (line == null)
+                        {
+                            isFileOver = true;
+                            break;
+                        }
+
+                        // If its not null, we can add it
+                        lines.Add(line);
+
+                        // if we are over the line limit, break it up
+                        if (lines.Count >= limitOfLines)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Callback if we have changes
+                    if (lines.Count > 0)
+                    {
+                        changeDelegate(Path.GetFileName(fullPath), lines.ToArray());
+                        // mark that we have done our duty
+                        hadChanges = true;
+                    }
                 }
 
+
+                // Update the offset for this file
+                stateOfFiles[signature] = fs.Position;
+
                 // signal that we did not do any inserts
-                return false;
+                return hadChanges;
             }
         }
 
