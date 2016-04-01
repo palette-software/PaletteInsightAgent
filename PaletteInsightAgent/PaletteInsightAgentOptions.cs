@@ -19,9 +19,9 @@ namespace PaletteInsightAgent
         }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
+        public int UploadInterval { get; set; }
         public int RepoTablesPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
-        public int DBWriteInterval { get; set; }
         public int ProcessedFilestTTL { get; set; }
         public long StorageLimit { get; set; }
         public bool AllProcesses { get; set; }
@@ -75,13 +75,13 @@ namespace PaletteInsightAgent
             return PollInterval >= MinPollInterval
                 && LogPollInterval >= MinPollInterval
                 && ThreadInfoPollInterval >= MinPollInterval
-                && DBWriteInterval >= MinPollInterval;
+                && UploadInterval >= MinPollInterval;
         }
 
         public override string ToString()
         {
-            return String.Format("[PollInterval='{0}', LogPollInterval='{1}', ThreadInfoPollInterval='{2}'], DBWriteInterval='{3}'",
-                                   PollInterval, LogPollInterval, ThreadInfoPollInterval, DBWriteInterval);
+            return String.Format("[PollInterval='{0}', LogPollInterval='{1}', ThreadInfoPollInterval='{2}', UploadInterval='{3}'] ",
+                                   PollInterval, LogPollInterval, ThreadInfoPollInterval, UploadInterval);
         }
 
         #endregion
