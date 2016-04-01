@@ -11,25 +11,14 @@ RepoTablesPollInterval: 3600
 ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
 StorageLimit: 1024          # Given in megabytes. Default is 1 Gb.
 
+Webservice:
+ Endpoint: http://localhost:9000
 
-Database: 
-  Host: localhost
-  Port: 5432
-  Database: palette
-  User: palette
-  Password: password
-  CommandTimeout: 600
-
-# To use the webservice output, uncomment the following lines:
- 
-# Webservice:
-#  Endpoint: http://localhost:9000
-
-Logs: 
-  - 
+Logs:
+  -
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'
     Filter: '*.txt'
-  - 
+  -
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
     Filter: 'tabprotosrv*.txt'
 TableauRepo: 
