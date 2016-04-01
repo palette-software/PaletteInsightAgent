@@ -225,7 +225,7 @@ namespace PaletteInsightAgent
 
             APIClient.Init(options.WebserviceConfig);
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
-            webserviceTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: 10 * 1000);
+            webserviceTimer = new Timer(callback: UploadData, state: output, dueTime: 0, period: options.UploadInterval * 1000);
 
             if (USE_TABLEAU_REPO)
             {
@@ -277,6 +277,11 @@ namespace PaletteInsightAgent
                 dbWriterTimer.Dispose();
             }
 
+            if (webserviceTimer != null)
+            {
+                webserviceTimer.Dispose();
+            }
+
             if (streamingTablesPollTimer != null)
             {
                 streamingTablesPollTimer.Dispose();
@@ -285,16 +290,6 @@ namespace PaletteInsightAgent
             if (repoTablesPollTimer != null)
             {
                 repoTablesPollTimer.Dispose();
-            }
-
-            // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
-            if (!Monitor.TryEnter(FileUploader.FileUploadLock, DBWriteLockAcquisitionTimeout * 1000))
-            {
-                Log.Warn("Could not acquire DB write lock; forcing exit..");
-            }
-            else
-            {
-                Log.Debug("Acquired DB write lock gracefully..");
             }
 
             Log.Info("PaletteInsightAgent stopped.");
@@ -385,10 +380,27 @@ namespace PaletteInsightAgent
         }
 
 
-        private void WriteToDB(object stateInfo)
+        private void UploadData(object stateInfo)
         {
-            // Stateinfo contains an IOutput object
-            FileUploader.Start((IOutput)stateInfo, options.ProcessedFilestTTL, options.StorageLimit);
+            var thread = new Thread(() =>
+            {
+                if (!Monitor.TryEnter(FileUploader.FileUploadLock, FileUploader.fileUploadLockTimeout))
+                {
+                    Log.Debug("Skipping file upload as it is already in progress.");
+                    return;
+                }
+
+                try
+                {
+                    FileUploader.Start((IOutput)stateInfo, options.ProcessedFilestTTL, options.StorageLimit);
+                }
+                finally
+                {
+                    Monitor.Exit(FileUploader.FileUploadLock);
+                }
+            });
+            thread.IsBackground = true;
+            thread.Start();
         }
 
         /// <summary>

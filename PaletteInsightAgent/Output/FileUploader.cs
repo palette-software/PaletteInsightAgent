@@ -44,7 +44,7 @@ namespace PaletteInsightAgent.Output
         }
 
         public static readonly object FileUploadLock = new object();
-        private static readonly int fileUploadLockTimeout = 1000;
+        public static readonly int fileUploadLockTimeout = 1000;
 
         /// <summary>
         /// Start a single write loop
@@ -166,12 +166,6 @@ namespace PaletteInsightAgent.Output
         /// <param name="dataPath"></param>
         private static void DoUpload(IOutput output, string dataPath)
         {
-            if (!Monitor.TryEnter(FileUploadLock, fileUploadLockTimeout))
-            {
-                Log.Debug("Skipping file upload as it is already in progress.");
-                return;
-            }
-
             try
             {
                 // The old code (a while loop) gets stuck if we use the 'unsent' folder
@@ -189,10 +183,6 @@ namespace PaletteInsightAgent.Output
             catch (Exception e)
             {
                 Log.Error(e, "Failed to write data files to database! Exception message: {0}", e);
-            }
-            finally
-            {
-                Monitor.Exit(FileUploadLock);
             }
         }
 
