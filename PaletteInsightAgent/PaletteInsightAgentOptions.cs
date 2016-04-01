@@ -74,13 +74,14 @@ namespace PaletteInsightAgent
             // removed the host from here as we arent using that functionality
             return PollInterval >= MinPollInterval
                 && LogPollInterval >= MinPollInterval
-                && ThreadInfoPollInterval >= MinPollInterval;
+                && ThreadInfoPollInterval >= MinPollInterval
+                && UploadInterval >= MinPollInterval;
         }
 
         public override string ToString()
         {
-            return String.Format("[PollInterval='{0}', LogPollInterval='{1}', ThreadInfoPollInterval='{2}'] ",
-                                   PollInterval, LogPollInterval, ThreadInfoPollInterval);
+            return String.Format("[PollInterval='{0}', LogPollInterval='{1}', ThreadInfoPollInterval='{2}', UploadInterval='{3}'] ",
+                                   PollInterval, LogPollInterval, ThreadInfoPollInterval, UploadInterval);
         }
 
         #endregion
