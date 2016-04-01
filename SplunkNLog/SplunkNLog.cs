@@ -62,12 +62,12 @@ namespace SplunkNLog
 
         private void ProcessLogMessages()
         {
-            WaitHandle[] handles = { hasMessageToLog, stopSign };
+            WaitHandle[] handles = { stopSign, hasMessageToLog };
 
             while (true)
             {
                 int index = WaitHandle.WaitAny(handles);
-                if (index == 1)
+                if (index == 0)
                 {
                     // Stop signal received. Quit.
                     return;
