@@ -91,8 +91,6 @@ namespace PaletteInsightAgent.Output
         /// <returns></returns>
         private static string FindNextAvailableFilename(string fileName, int filePartIdx, string baseDir)
         {
-            string filePathWithPart;
-
             // The index we use if there already is a file with this name in the directory
             var seqIdx = 0;
 
@@ -101,12 +99,12 @@ namespace PaletteInsightAgent.Output
 
                 // get the output file path
                 var fileNameWithPart = String.Format("{0}--seq{1:0000}--part{2:0000}{3}", Path.GetFileNameWithoutExtension(fileName), seqIdx, filePartIdx, Path.GetExtension(fileName));
-                filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
+                var filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
 
                 // If it does not exist, we have the name we want
                 if (!File.Exists(filePathWithPart))
                 {
-                    break;
+                    return filePathWithPart;
                 }
 
                 Log.Info("Increasing seq-id because file '{0}' already exists", fileNameWithPart);
@@ -115,7 +113,6 @@ namespace PaletteInsightAgent.Output
                 seqIdx++;
             }
 
-            return filePathWithPart;
         }
 
 
