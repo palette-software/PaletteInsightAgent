@@ -11,6 +11,7 @@ namespace PaletteInsightAgent.Output
 {
     class CsvSerializer : IWriter
     {
+
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly CsvConfiguration CsvConfig = new CsvHelper.Configuration.CsvConfiguration
         {
@@ -41,14 +42,13 @@ namespace PaletteInsightAgent.Output
             var lastRow = 0;
             var filePartIdx = 0;
 
+
             // The directory where we put the CSV files
             var baseDir = Path.GetDirectoryName(fileName);
 
             while (true)
             {
-                // get the output file path
-                var fileNameWithPart = String.Format("{0}--part{1:0000}{2}", Path.GetFileNameWithoutExtension(fileName), filePartIdx, Path.GetExtension(fileName));
-                var filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
+                var filePathWithPart = FindNextAvailableFilename(fileName, filePartIdx, baseDir);
 
                 // First create the file name with a postfix, so that the bulk copy
                 // loader won't touch this file, until it is being written.
@@ -72,7 +72,7 @@ namespace PaletteInsightAgent.Output
                 // After writing the file, move it to its final destination, and 
                 // remove the postfix to signal that the file write is done.
                 File.Move(inProgressFileName, filePathWithPart);
-                Log.Info("[CSV] written final part '{0}' -- {1}/{2} rows", fileNameWithPart, lastRow, table.Rows.Count);
+                Log.Info("[CSV] written final part '{0}' -- {1}/{2} rows", Path.GetFileName(filePathWithPart), lastRow, table.Rows.Count);
                 // if the last row is -1, the write function has finished the whole table
                 if (lastRow == -1) return;
 
@@ -81,6 +81,43 @@ namespace PaletteInsightAgent.Output
             }
 
         }
+
+        /// <summary>
+        /// Tries to find the next available output filename for a CSV file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="filePartIdx"></param>
+        /// <param name="baseDir"></param>
+        /// <returns></returns>
+        private static string FindNextAvailableFilename(string fileName, int filePartIdx, string baseDir)
+        {
+            string filePathWithPart;
+
+            // The index we use if there already is a file with this name in the directory
+            var seqIdx = 0;
+
+            while (true)
+            {
+
+                // get the output file path
+                var fileNameWithPart = String.Format("{0}--seq{1:0000}--part{2:0000}{3}", Path.GetFileNameWithoutExtension(fileName), seqIdx, filePartIdx, Path.GetExtension(fileName));
+                filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
+
+                // If it does not exist, we have the name we want
+                if (!File.Exists(filePathWithPart))
+                {
+                    break;
+                }
+
+                Log.Info("Increasing seq-id because file '{0}' already exists", fileNameWithPart);
+
+                // otherwise get the next seq id
+                seqIdx++;
+            }
+
+            return filePathWithPart;
+        }
+
 
         /// <summary>
         /// Writes the rows of a datatable ot a csv file
