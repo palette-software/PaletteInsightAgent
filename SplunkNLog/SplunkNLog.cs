@@ -37,8 +37,7 @@ namespace SplunkNLog
 
         ~SplunkNLog()
         {
-            isStopping = true;
-            stopSign.Set();
+            Dispose();
         }
 
         [RequiredParameter]
@@ -50,7 +49,7 @@ namespace SplunkNLog
         [RequiredParameter]
         public string Token { get; set; }
 
-        [DefaultValue(65000), DefaultParameter]
+        [DefaultValue(65000), RequiredParameter]
         public int MaxPendingQueueSize { get; set; }
 
 
@@ -102,7 +101,7 @@ namespace SplunkNLog
                     messageBatch[i] = (string)messagesToSplunk.Dequeue();
                 }
 
-                if (isStopping)
+                if (isStopping || PaletteInsightAgent.PaletteInsightAgent.STOPPING)
                 {
                     // Shutting down. Abort.
                     return;
@@ -161,6 +160,14 @@ namespace SplunkNLog
             base.CloseTarget();
 
             SplunkerThread.Join(5000);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            isStopping = true;
+            stopSign.Set();
         }
     }
 }
