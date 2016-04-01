@@ -96,9 +96,8 @@ namespace SplunkNLog
                     continue;
                 }
 
-                int maxBatchSize = 100;
                 // Do not work with too large batches
-                if (messageCount > maxBatchSize) messageCount = maxBatchSize;
+                if (messageCount > MaxBatchSize) messageCount = MaxBatchSize;
 
                 string[] messageBatch = new string[messageCount];
                 for (int i = 0; i < messageCount; ++i)
