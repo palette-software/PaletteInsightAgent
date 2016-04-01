@@ -309,7 +309,7 @@ namespace PaletteInsightAgent
             // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
             if (!Monitor.TryEnter(DBWriter.DBWriteLock, DBWriteLockAcquisitionTimeout * 1000))
             {
-                Log.Error("Could not acquire DB write lock; forcing exit..");
+                Log.Warn("Could not acquire DB write lock; forcing exit..");
             }
             else
             {
