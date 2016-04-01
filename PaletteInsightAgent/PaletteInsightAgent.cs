@@ -55,8 +55,6 @@ namespace PaletteInsightAgent
 
         // use the constant naming convention for now as the mutability
         // of this variable is temporary until the Db output is removed
-        private bool USE_DB = true;
-        private bool USE_WEBSERVICE = false;
         private bool USE_TABLEAU_REPO = true;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
@@ -68,7 +66,7 @@ namespace PaletteInsightAgent
 
             // Load PaletteInsightAgentOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PaletteInsightAgentOptions.Instance;
-            PaletteInsight.Configuration.Loader.LoadConfigTo( LoadConfigFile("config/Config.yml"), options );
+            PaletteInsight.Configuration.Loader.LoadConfigTo(LoadConfigFile("config/Config.yml"), options);
 
             tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
@@ -99,10 +97,6 @@ namespace PaletteInsightAgent
                 // start the thread info agent
                 threadInfoAgent = new ThreadInfoAgent();
             }
-
-            // we'll use the webservice if we have the configuration for it
-            USE_WEBSERVICE = !(options.WebserviceConfig == null);
-            USE_DB = !USE_WEBSERVICE;
 
             if (USE_TABLEAU_REPO)
             {
@@ -229,22 +223,9 @@ namespace PaletteInsightAgent
 
             }
 
-            if (USE_WEBSERVICE)
-            {
-                APIClient.Init(options.WebserviceConfig);
-                output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
-                webserviceTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: 10 * 1000);
-            }
-            else
-            {
-                // Start the DB Writer
-                output = new PostgresOutput(options.ResultDatabase);
-
-                // On start try to send all unsent files
-                DBWriter.TryToSendUnsentFiles(output);
-
-                dbWriterTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: options.DBWriteInterval * 1000);
-            } 
+            APIClient.Init(options.WebserviceConfig);
+            output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
+            webserviceTimer = new Timer(callback: WriteToDB, state: output, dueTime: 0, period: 10 * 1000);
 
             if (USE_TABLEAU_REPO)
             {
@@ -307,7 +288,7 @@ namespace PaletteInsightAgent
             }
 
             // Wait for write lock to finish before exiting to avoid corrupting data, up to a certain threshold.
-            if (!Monitor.TryEnter(DBWriter.DBWriteLock, DBWriteLockAcquisitionTimeout * 1000))
+            if (!Monitor.TryEnter(FileUploader.FileUploadLock, DBWriteLockAcquisitionTimeout * 1000))
             {
                 Log.Error("Could not acquire DB write lock; forcing exit..");
             }
@@ -329,8 +310,7 @@ namespace PaletteInsightAgent
             if (USE_COUNTERSAMPLES) running = running && (sampler != null && timer != null);
             if (USE_LOGPOLLER) running = running && (logPollTimer != null);
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
-            if (USE_WEBSERVICE) running = running && (webserviceTimer != null);
-            if (USE_DB) running = running && (dbWriterTimer != null);
+            running = running && (webserviceTimer != null);
             if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null && streamingTablesPollTimer != null);
             return running;
         }
@@ -408,7 +388,7 @@ namespace PaletteInsightAgent
         private void WriteToDB(object stateInfo)
         {
             // Stateinfo contains an IOutput object
-            DBWriter.Start((IOutput)stateInfo, options.ProcessedFilestTTL, options.StorageLimit);
+            FileUploader.Start((IOutput)stateInfo, options.ProcessedFilestTTL, options.StorageLimit);
         }
 
         /// <summary>
