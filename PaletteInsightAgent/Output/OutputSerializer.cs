@@ -11,7 +11,12 @@ namespace PaletteInsightAgent.Output
     class OutputSerializer
     {
         public const string DATA_FOLDER = "data/";
-        private const string FILENAME_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss";
+        /// <summary>
+        /// Since we may write multiple outputs from the same serverlogs file, the output
+        /// may have conflicts if only seconds-precision is used, so we have to use microseconds
+        /// which are unlikely to conflict.
+        /// </summary>
+        private const string FILENAME_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss-ffffff";
         public const string IN_PROGRESS_FILE_POSTFIX = ".writing";
         public const string MAX_ID_PREFIX = "maxid";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
