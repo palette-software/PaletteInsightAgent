@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.Helpers
 {
-    class APIClient
+    public class APIClient
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static WebserviceConfiguration config = null;
@@ -52,6 +52,7 @@ namespace PaletteInsightAgent.Helpers
             {
                 var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
                 httpClient.DefaultRequestHeaders.Authorization = authHeader;
+                
 
                 using (var response = await httpClient.GetAsync(GetMaxIdUrl(tableName)))
                 {
