@@ -73,6 +73,10 @@ namespace PaletteInsightAgent
             // check the license after the configuration has been loaded.
             var license = CheckLicense(Path.GetDirectoryName(assembly.Location) + "\\");
 
+            // Make sure that our HTTP client is initialized, because Splunk logger might be enabled
+            // and it is using HTTP to send log messages to Splunk.
+            APIClient.Init(options.WebserviceConfig);
+
             // Add the webservice username/auth token from the license
             PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options, license);
 
@@ -223,7 +227,6 @@ namespace PaletteInsightAgent
 
             }
 
-            APIClient.Init(options.WebserviceConfig);
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
             webserviceTimer = new Timer(callback: UploadData, state: output, dueTime: 0, period: options.UploadInterval * 1000);
 
