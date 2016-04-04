@@ -146,15 +146,14 @@ namespace SplunkNLog
                 {
                     using (var response = await httpClient.PostAsync(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port), new ByteArrayContent(splunkEvent)))
                     {
-                        //if (response.StatusCode != HttpStatusCode.OK)
-                        //{
-                        //    Console.WriteLine(String.Format("POST unsuccessful. Response: {0}", response));
-                        //}
+                        // This section might be useful when we try to handle network outages, so let's
+                        // leave it here until we fix network outage handling.
                     }
                 }
                 catch (Exception)
                 {
                     // TODO : Retry Splunk event POST based in case of network outage
+
                 }
             }
         }
