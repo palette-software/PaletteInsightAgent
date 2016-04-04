@@ -1,17 +1,8 @@
 - Name: vizqlserver
   Granularity: Thread
 - Name: tabprotosrv
-- Name: backgrounder
-- Name: clustercontroller
+  Granularity: Thread
 - Name: dataserver
-- Name: filestore
-- Name: PaletteInsightAgent
-- Name: tabadmsvc
-- Name: tabadmwrk
-- Name: tabspawn
-- Name: tabsvc
+  Granularity: Thread
 - Name: tdeserver64
-- Name: vizportal
-- Name: wgserver
-- Name: zookeeper
-- Name: redis-server
+  Granularity: Thread
