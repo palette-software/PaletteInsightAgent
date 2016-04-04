@@ -2,12 +2,14 @@
 using NLog;
 using NLog.Targets;
 using NLog.Config;
-using System.Net;
 using System.IO;
 using System.Text;
 using System.Collections;
 using System.Threading;
 using System.ComponentModel;
+using PaletteInsightAgent.Helpers;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace SplunkNLog
 {
@@ -113,11 +115,6 @@ namespace SplunkNLog
 
                 try
                 {
-                    WebRequest request = WebRequest.Create(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port));
-                    request.Credentials = CredentialCache.DefaultCredentials;
-                    request.Headers.Add("Authorization", String.Format("Splunk {0}", Token));
-                    request.Method = "POST";
-
                     SplunkMessage spm = new SplunkMessage();
                     spm.Event = messageBatch;
 
@@ -125,24 +122,39 @@ namespace SplunkNLog
                     param.SerializeToLowerCaseNames = true;
                     param.UseExtensions = false;
                     string jsonContent = fastJSON.JSON.ToJSON(spm, param);
-
                     byte[] byteArray = Encoding.UTF8.GetBytes(jsonContent);
 
-                    request.ContentLength = byteArray.Length;
-                    request.ContentType = "application/x-www-form-urlencoded";
-
-                    Stream dataStream = request.GetRequestStream();
-                    dataStream.Write(byteArray, 0, byteArray.Length);
-                    dataStream.Close();
-
-                    // It's important to get the response, otherwise it won't send new requests.
-                    WebResponse response = request.GetResponse();
-                    response.Close();
+                    PostSplunkEvent(byteArray);
                 }
                 catch (Exception)
                 {
                     // TODO: Retry log message on connection error
                     continue;
+                }
+            }
+        }
+
+        private async void PostSplunkEvent(byte[] splunkEvent)
+        {
+            using (var handler = APIClient.GetHttpClientHandler())
+            using (var httpClient = new HttpClient(handler))
+            {
+                var authHeader = new AuthenticationHeaderValue("Splunk", Token);
+                httpClient.DefaultRequestHeaders.Authorization = authHeader;
+
+                try
+                {
+                    using (var response = await httpClient.PostAsync(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port), new ByteArrayContent(splunkEvent)))
+                    {
+                        //if (response.StatusCode != HttpStatusCode.OK)
+                        //{
+                        //    Console.WriteLine(String.Format("POST unsuccessful. Response: {0}", response));
+                        //}
+                    }
+                }
+                catch (Exception)
+                {
+                    // TODO : Retry Splunk event POST based in case of network outage
                 }
             }
         }
