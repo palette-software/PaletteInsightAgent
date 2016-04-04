@@ -2,14 +2,13 @@
 using NLog;
 using NLog.Targets;
 using NLog.Config;
-using System.IO;
 using System.Text;
-using System.Collections;
 using System.Threading;
 using System.ComponentModel;
 using PaletteInsightAgent.Helpers;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Collections.Concurrent;
 
 namespace SplunkNLog
 {
@@ -25,8 +24,7 @@ namespace SplunkNLog
         {
             isStopping = false;
 
-            Queue q = new Queue();
-            messagesToSplunk = Queue.Synchronized(q);
+            messagesToSplunk = new ConcurrentQueue<string>();
 
             stopSign = new EventWaitHandle(false, EventResetMode.ManualReset);
             hasMessageToLog = new EventWaitHandle(false, EventResetMode.AutoReset);
@@ -60,11 +58,11 @@ namespace SplunkNLog
         public int MaxBatchSize { get; set; }
 
 
-        private Queue           messagesToSplunk;
-        private EventWaitHandle stopSign;
-        private EventWaitHandle hasMessageToLog;
-        private Thread          SplunkerThread;
-        private bool            isStopping;
+        private ConcurrentQueue<string> messagesToSplunk;
+        private EventWaitHandle         stopSign;
+        private EventWaitHandle         hasMessageToLog;
+        private Thread                  SplunkerThread;
+        private bool                    isStopping;
 
         private void ProcessLogMessages()
         {
@@ -79,17 +77,10 @@ namespace SplunkNLog
                     return;
                 }
 
-                while (messagesToSplunk.Count > MaxPendingQueueSize)
+                if (messagesToSplunk.Count > MaxPendingQueueSize)
                 {
-                    try
-                    {
-                        // Discard the oldest messages, until we get back below the limit.
-                        messagesToSplunk.Dequeue();
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // Just go on.
-                    }
+                    // Discard the oldest messages, until we get back below the limit.
+                    messagesToSplunk.DiscardItems(messagesToSplunk.Count - MaxPendingQueueSize);
                 }
 
                 int messageCount = messagesToSplunk.Count;
@@ -104,7 +95,17 @@ namespace SplunkNLog
                 string[] messageBatch = new string[messageCount];
                 for (int i = 0; i < messageCount; ++i)
                 {
-                    messageBatch[i] = (string)messagesToSplunk.Dequeue();
+                    try
+                    {
+                        messageBatch[i] = messagesToSplunk.Dequeue();
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // Failed to dequeue anything. This shouldn't happen, because it means
+                        // that the queue got empty somehow. But we are supposed to be the
+                        // only thread consuming this queue... Anyway, put an empty string there.
+                        messageBatch[i] = "";
+                    }
                 }
 
                 if (isStopping)
@@ -181,6 +182,55 @@ namespace SplunkNLog
 
             isStopping = true;
             stopSign.Set();
+        }
+    }
+
+}
+
+public static class ConcurrentQueueExtensions
+{
+    /// <summary>
+    /// Dequeue the next item from the queue. It is a blocking function until
+    /// the item is retrieved from the queue. Calling this function on an
+    /// empty queue raises an InvalidOperationException.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="queue"></param>
+    /// <returns>The oldest item of the queue.</returns>
+    public static T Dequeue<T>(this ConcurrentQueue<T> queue)
+    {
+        T item;
+        while (!queue.TryDequeue(out item))
+        {
+            if (queue.Count == 0)
+            {
+                throw new InvalidOperationException("The queue is already empty. No item can be dequeued.");
+            }
+            // Try again, we will get it for sure sometime.
+        }
+
+        return item;
+    }
+
+    /// <summary>
+    /// Removes a given number of items from the beginning of the queue.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="queue"></param>
+    /// <param name="itemCount"></param>
+    public static void DiscardItems<T>(this ConcurrentQueue<T> queue, int itemCount)
+    {
+        for (int i = 0; i < itemCount; i++)
+        {
+            try
+            {
+                queue.Dequeue();
+            }
+            catch (InvalidOperationException)
+            {
+                // The queue is already empty.
+                return;
+            }
         }
     }
 }
