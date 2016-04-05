@@ -20,7 +20,7 @@ namespace UnitTestLogPoller
 
 
             // Act
-            LogFileWatcher watcher = new LogFileWatcher(testFolder, testFilter, 10000);
+            LogFileWatcher watcher = new LogFileWatcher(testFolder, testFilter, 10000, "json");
 
             // Assert
             Assert.IsNotNull(watcher);
