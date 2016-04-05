@@ -9,6 +9,7 @@ using PaletteInsightAgent.Helpers;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace SplunkNLog
 {
@@ -41,6 +42,8 @@ namespace SplunkNLog
         {
             Dispose();
         }
+
+        private static readonly int SPLUNK_RETRY_COUNT = 10;
 
         [RequiredParameter]
         public string Host { get; set; }
@@ -125,17 +128,32 @@ namespace SplunkNLog
                     string jsonContent = fastJSON.JSON.ToJSON(spm, param);
                     byte[] byteArray = Encoding.UTF8.GetBytes(jsonContent);
 
-                    PostSplunkEvent(byteArray);
+                    for (int i = 0; i < SPLUNK_RETRY_COUNT; i++)
+                    {
+                        var result = PostSplunkEvent(byteArray);
+                        result.Wait();
+                        if (result.Result)
+                        {
+                            /// Successfully posted message to Splunk. No need to re-try.
+                            break;
+                        }
+                    }
                 }
                 catch (Exception)
                 {
-                    // TODO: Retry log message on connection error
                     continue;
                 }
             }
         }
 
-        private async void PostSplunkEvent(byte[] splunkEvent)
+        /// <summary>
+        /// Posts the given byte array to the Splunk server.
+        /// </summary>
+        /// <param name="splunkEvent"></param>
+        /// <returns>This function returns true, if the post operation was successful, or it is
+        /// expected to end up with the same result always. If this function returns false, it 
+        /// might be wise to re-try the post operation.</returns>
+        private async Task<bool> PostSplunkEvent(byte[] splunkEvent)
         {
             using (var handler = APIClient.GetHttpClientHandler())
             using (var httpClient = new HttpClient(handler))
@@ -147,16 +165,24 @@ namespace SplunkNLog
                 {
                     using (var response = await httpClient.PostAsync(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port), new ByteArrayContent(splunkEvent)))
                     {
-                        // This section might be useful when we try to handle network outages, so let's
-                        // leave it here until we fix network outage handling.
+                        if (response.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+                        {
+                            return false;
+                        }
                     }
+                }
+                catch (HttpRequestException)
+                {
+                    return false;
                 }
                 catch (Exception)
                 {
-                    // TODO : Retry Splunk event POST based in case of network outage
-
+                    // We believe that this exception would be permanent, so there is no point
+                    // in re-trying in this case.
                 }
             }
+
+            return true;
         }
 
         protected override void Write(LogEventInfo logEvent)
