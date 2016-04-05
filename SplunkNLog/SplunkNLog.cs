@@ -34,6 +34,9 @@ namespace SplunkNLog
             MaxBatchSize = 100;
 
             SplunkerThread = new Thread(ProcessLogMessages);
+            // Make sure that the worker thread is configured as a background thread,
+            // otherwise it will be a frontend thread, and it will make the agent
+            // not being able to stop.
             SplunkerThread.IsBackground = true;
             SplunkerThread.Start();
         }
@@ -42,8 +45,6 @@ namespace SplunkNLog
         {
             Dispose();
         }
-
-        private static readonly int SPLUNK_RETRY_COUNT = 10;
 
         [RequiredParameter]
         public string Host { get; set; }
@@ -128,7 +129,9 @@ namespace SplunkNLog
                     string jsonContent = fastJSON.JSON.ToJSON(spm, param);
                     byte[] byteArray = Encoding.UTF8.GetBytes(jsonContent);
 
-                    for (int i = 0; i < SPLUNK_RETRY_COUNT; i++)
+                    // Try to send messages to Splunk, until we have space in the buffer.
+                    // This is the way we are handling network issues.
+                    while (messagesToSplunk.Count < MaxPendingQueueSize)
                     {
                         var result = PostSplunkEvent(byteArray);
                         result.Wait();
