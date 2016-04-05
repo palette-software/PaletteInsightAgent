@@ -296,6 +296,7 @@ namespace PaletteInsight
                                 if (key == null) continue;
                                 Object o = key.GetValue(subKey);
                                 if (o == null) continue;
+                                Log.Info("Found Tableau Data folder: {0}\\{1}", regPath, subKey);
                                 return o as String;
                             }
                         }
