@@ -174,12 +174,12 @@ namespace SplunkNLog
                         }
                     }
                 }
-                catch (HttpRequestException)
+                catch (Exception ex)
                 {
-                    return false;
-                }
-                catch (Exception)
-                {
+                    if (ex is HttpRequestException || ex is TaskCanceledException)
+                    {
+                        return false;
+                    }
                     // We believe that this exception would be permanent, so there is no point
                     // in re-trying in this case.
                 }
