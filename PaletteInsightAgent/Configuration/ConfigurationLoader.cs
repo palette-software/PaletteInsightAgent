@@ -189,7 +189,8 @@ namespace PaletteInsight
                         options.LogFolders.Add(new PaletteInsightAgentOptions.LogFolderInfo
                         {
                             FolderToWatch = logFolder.Directory,
-                            DirectoryFilter = logFolder.Filter
+                            DirectoryFilter = logFolder.Filter,
+                            LogFormat = logFolder.Format
                         });
                     }
                 }
@@ -210,6 +211,7 @@ namespace PaletteInsight
                         {
                             FolderToWatch = fullPath,
                             DirectoryFilter = logFolder.Filter,
+                            LogFormat = logFolder.Format
                         });
                     }    
                 }
