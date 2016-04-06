@@ -2,7 +2,6 @@
 using NLog;
 using NLog.Targets;
 using NLog.Config;
-using System.Text;
 using System.Threading;
 using System.ComponentModel;
 using PaletteInsightAgent.Helpers;
@@ -10,12 +9,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace SplunkNLog
 {
     public class SplunkMessage
     {
-        public string[] Event { get; set; }
+        public string Event { get; set; }
     }
 
     [Target("SplunkNLog")]
@@ -96,44 +96,43 @@ namespace SplunkNLog
                 // Do not work with too large batches
                 if (messageCount > MaxBatchSize) messageCount = MaxBatchSize;
 
-                string[] messageBatch = new string[messageCount];
-                for (int i = 0; i < messageCount; ++i)
-                {
-                    try
-                    {
-                        messageBatch[i] = messagesToSplunk.Dequeue();
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // Failed to dequeue anything. This shouldn't happen, because it means
-                        // that the queue got empty somehow. But we are supposed to be the
-                        // only thread consuming this queue... Anyway, put an empty string there.
-                        messageBatch[i] = "";
-                    }
-                }
-
-                if (isStopping)
-                {
-                    // Shutting down. Abort.
-                    return;
-                }
-
                 try
                 {
-                    SplunkMessage spm = new SplunkMessage();
-                    spm.Event = messageBatch;
-
+                    MemoryStream ms = new MemoryStream();
                     fastJSON.JSONParameters param = new fastJSON.JSONParameters();
                     param.SerializeToLowerCaseNames = true;
                     param.UseExtensions = false;
-                    string jsonContent = fastJSON.JSON.ToJSON(spm, param);
-                    byte[] byteArray = Encoding.UTF8.GetBytes(jsonContent);
+                    using (StreamWriter writer = new StreamWriter(ms))
+                    {
+                        for (int i = 0; i < messageCount; ++i)
+                        {
+                            SplunkMessage spm = new SplunkMessage();
+                            try
+                            {
+                                spm.Event = messagesToSplunk.Dequeue();
+                                string jsonContent = fastJSON.JSON.ToJSON(spm, param);
+                                writer.WriteLine(jsonContent);
+                            }
+                            catch (Exception)
+                            {
+                                // Either dequeue failed (which means that the queue was empty) or the
+                                // JSON conversion failed. Either way, skip this event.
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (isStopping)
+                    {
+                        // Shutting down. Abort.
+                        return;
+                    }
 
                     // Try to send messages to Splunk, until we have space in the buffer.
                     // This is the way we are handling network issues.
                     while (messagesToSplunk.Count < MaxPendingQueueSize)
                     {
-                        var result = PostSplunkEvent(byteArray);
+                        var result = PostSplunkEvent(ms.GetBuffer());
                         result.Wait();
                         if (result.Result)
                         {
