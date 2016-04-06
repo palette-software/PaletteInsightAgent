@@ -61,10 +61,11 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
         protected void pollProcessList(ICollection<Process> processList, IDictionary<string, ProcessData> processData, DataTable threadInfoTable, ref long threadInfoTableCount)
         {
+            var pollCycleTimeStamp = DateTimeOffset.Now.UtcDateTime;
             foreach (var process in processList)
             {
                 var threadLevel = processData.ContainsKey(process.ProcessName) && processData[process.ProcessName].Granularity == "Thread";
-                pollThreadCountersOfProcess(process, threadLevel, threadInfoTable, ref threadInfoTableCount);
+                pollThreadCountersOfProcess(process, threadLevel, threadInfoTable, ref threadInfoTableCount, pollCycleTimeStamp);
             }
         }
 
@@ -91,12 +92,11 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             ThreadTables.addToTable(table, threadInfo);
         }
 
-        protected void pollThreadCountersOfProcess(Process process, bool threadLevel, DataTable table, ref long threadInfoTableCount)
+        protected void pollThreadCountersOfProcess(Process process, bool threadLevel, DataTable table, ref long threadInfoTableCount, DateTime pollCycleTimeStamp)
         {
             try
             {
                 // Store the total processor time of the whole process so that we can do sanity checks on the sum of thread cpu times
-                var pollCycleTimeStamp = DateTimeOffset.Now.UtcDateTime;
                 addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime(), threadLevel);
                 threadInfoTableCount++;
 
