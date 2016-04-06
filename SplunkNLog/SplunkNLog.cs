@@ -15,7 +15,7 @@ namespace SplunkNLog
 {
     public class SplunkMessage
     {
-        public string[] Event { get; set; }
+        public string Event { get; set; }
     }
 
     [Target("SplunkNLog")]
@@ -101,30 +101,30 @@ namespace SplunkNLog
                 // Do not work with too large batches
                 if (messageCount > MaxBatchSize) messageCount = MaxBatchSize;
 
-                string[] messageBatch = new string[messageCount];
-                for (int i = 0; i < messageCount; ++i)
-                {
-                    messageBatch[i] = (string)messagesToSplunk.Dequeue();
-                }
-
-                if (isStopping)
-                {
-                    // Shutting down. Abort.
-                    return;
-                }
-
                 try
                 {
-                    SplunkMessage spm = new SplunkMessage();
-                    spm.Event = messageBatch;
-
+                    MemoryStream ms = new MemoryStream();
                     fastJSON.JSONParameters param = new fastJSON.JSONParameters();
                     param.SerializeToLowerCaseNames = true;
                     param.UseExtensions = false;
-                    string jsonContent = fastJSON.JSON.ToJSON(spm, param);
-                    byte[] byteArray = Encoding.UTF8.GetBytes(jsonContent);
+                    using (StreamWriter writer = new StreamWriter(ms))
+                    {
+                        for (int i = 0; i < messageCount; ++i)
+                        {
+                            SplunkMessage spm = new SplunkMessage();
+                            spm.Event = (string)messagesToSplunk.Dequeue();
+                            string jsonContent = fastJSON.JSON.ToJSON(spm, param);
+                            writer.WriteLine(jsonContent);
+                        }
+                    }
 
-                    PostSplunkEvent(byteArray);
+                    if (isStopping)
+                    {
+                        // Shutting down. Abort.
+                        return;
+                    }
+
+                    PostSplunkEvent(ms.GetBuffer());
                 }
                 catch (Exception)
                 {
