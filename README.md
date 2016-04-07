@@ -1,5 +1,3 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/reub3y37h4hkw0ck/branch/master?svg=true)](https://ci.appveyor.com/project/palette-software/blackboxrecorder/branch/master)
-
 # Palette Insight Agent #
 
 ## What is Palette Insight Agent?
