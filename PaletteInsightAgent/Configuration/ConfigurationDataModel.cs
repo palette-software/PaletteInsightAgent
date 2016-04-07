@@ -36,9 +36,6 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "Filter")]
             public string Filter { get; set; }
-
-            [YamlMember(Alias = "Format")]
-            public string Format { get; set; } = "json";
         }
 
         public class ProcessData
