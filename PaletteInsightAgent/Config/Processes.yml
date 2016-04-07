@@ -1,6 +1,8 @@
 - Name: vizqlserver
   Granularity: Thread
-- Name: tdeserver
+- Name: tabprotosrv
+  Granularity: Thread
+- Name: dataserver
   Granularity: Thread
 - Name: tdeserver64
   Granularity: Thread
