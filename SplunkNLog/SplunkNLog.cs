@@ -2,14 +2,16 @@
 using NLog;
 using NLog.Targets;
 using NLog.Config;
-using System.IO;
-using System.Text;
-using System.Collections;
 using System.Threading;
 using System.ComponentModel;
 using PaletteInsightAgent.Helpers;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using System.IO;
+using fastJSON;
 
 namespace SplunkNLog
 {
@@ -25,8 +27,7 @@ namespace SplunkNLog
         {
             isStopping = false;
 
-            Queue q = new Queue();
-            messagesToSplunk = Queue.Synchronized(q);
+            messagesToSplunk = new ConcurrentQueue<string>();
 
             stopSign = new EventWaitHandle(false, EventResetMode.ManualReset);
             hasMessageToLog = new EventWaitHandle(false, EventResetMode.AutoReset);
@@ -35,6 +36,9 @@ namespace SplunkNLog
             MaxBatchSize = 100;
 
             SplunkerThread = new Thread(ProcessLogMessages);
+            // Make sure that the worker thread is configured as a background thread,
+            // otherwise it will be a frontend thread, and it will make the agent
+            // not being able to stop.
             SplunkerThread.IsBackground = true;
             SplunkerThread.Start();
         }
@@ -60,11 +64,11 @@ namespace SplunkNLog
         public int MaxBatchSize { get; set; }
 
 
-        private Queue           messagesToSplunk;
-        private EventWaitHandle stopSign;
-        private EventWaitHandle hasMessageToLog;
-        private Thread          SplunkerThread;
-        private bool            isStopping;
+        private ConcurrentQueue<string> messagesToSplunk;
+        private EventWaitHandle         stopSign;
+        private EventWaitHandle         hasMessageToLog;
+        private Thread                  SplunkerThread;
+        private bool                    isStopping;
 
         private void ProcessLogMessages()
         {
@@ -79,32 +83,30 @@ namespace SplunkNLog
                     return;
                 }
 
-                while (messagesToSplunk.Count > MaxPendingQueueSize)
-                {
-                    try
-                    {
-                        // Discard the oldest messages, until we get back below the limit.
-                        messagesToSplunk.Dequeue();
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // Just go on.
-                    }
-                }
-
                 int messageCount = messagesToSplunk.Count;
                 if (messageCount <= 0)
                 {
                     continue;
                 }
 
+                if (messageCount > MaxPendingQueueSize)
+                {
+                    // Discard the oldest messages, until we get back below the limit.
+                    messagesToSplunk.DiscardItems(messageCount - MaxPendingQueueSize);
+                }
+
                 // Do not work with too large batches
-                if (messageCount > MaxBatchSize) messageCount = MaxBatchSize;
+                if (messageCount > MaxBatchSize)
+                {
+                    messageCount = MaxBatchSize;
+                    // Signal that we still have unprocessed messages.
+                    hasMessageToLog.Set();
+                }
 
                 try
                 {
                     MemoryStream ms = new MemoryStream();
-                    fastJSON.JSONParameters param = new fastJSON.JSONParameters();
+                    JSONParameters param = new JSONParameters();
                     param.SerializeToLowerCaseNames = true;
                     param.UseExtensions = false;
                     using (StreamWriter writer = new StreamWriter(ms))
@@ -112,9 +114,18 @@ namespace SplunkNLog
                         for (int i = 0; i < messageCount; ++i)
                         {
                             SplunkMessage spm = new SplunkMessage();
-                            spm.Event = (string)messagesToSplunk.Dequeue();
-                            string jsonContent = fastJSON.JSON.ToJSON(spm, param);
-                            writer.WriteLine(jsonContent);
+                            try
+                            {
+                                spm.Event = messagesToSplunk.Dequeue();
+                                string jsonContent = JSON.ToJSON(spm, param);
+                                writer.WriteLine(jsonContent);
+                            }
+                            catch (Exception)
+                            {
+                                // Either dequeue failed (which means that the queue was empty) or the
+                                // JSON conversion failed. Either way, skip this event.
+                                continue;
+                            }
                         }
                     }
 
@@ -124,17 +135,34 @@ namespace SplunkNLog
                         return;
                     }
 
-                    PostSplunkEvent(ms.GetBuffer());
+                    // Try to send messages to Splunk, until we have space in the buffer.
+                    // This is the way we are handling network issues.
+                    while (messagesToSplunk.Count < MaxPendingQueueSize)
+                    {
+                        var result = PostSplunkEvent(ms.GetBuffer());
+                        result.Wait();
+                        if (result.Result)
+                        {
+                            /// Successfully posted message to Splunk. No need to re-try.
+                            break;
+                        }
+                    }
                 }
                 catch (Exception)
                 {
-                    // TODO: Retry log message on connection error
                     continue;
                 }
             }
         }
 
-        private async void PostSplunkEvent(byte[] splunkEvent)
+        /// <summary>
+        /// Posts the given byte array to the Splunk server.
+        /// </summary>
+        /// <param name="splunkEvent"></param>
+        /// <returns>This function returns true, if the post operation was successful, or it is
+        /// expected to end up with the same result always. If this function returns false, it 
+        /// might be wise to re-try the post operation.</returns>
+        private async Task<bool> PostSplunkEvent(byte[] splunkEvent)
         {
             using (var handler = APIClient.GetHttpClientHandler())
             using (var httpClient = new HttpClient(handler))
@@ -146,16 +174,25 @@ namespace SplunkNLog
                 {
                     using (var response = await httpClient.PostAsync(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port), new ByteArrayContent(splunkEvent)))
                     {
-                        // This section might be useful when we try to handle network outages, so let's
-                        // leave it here until we fix network outage handling.
+                        if (response.StatusCode == HttpStatusCode.RequestTimeout || response.StatusCode >= HttpStatusCode.InternalServerError)
+                        {
+                            // Retry in case of timed out requests or in case of server errors.
+                            return false;
+                        }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // TODO : Retry Splunk event POST based in case of network outage
-
+                    if (ex is HttpRequestException || ex is TaskCanceledException)
+                    {
+                        return false;
+                    }
+                    // We believe that this exception would be permanent, so there is no point
+                    // in re-trying in this case.
                 }
             }
+
+            return true;
         }
 
         protected override void Write(LogEventInfo logEvent)
@@ -181,6 +218,55 @@ namespace SplunkNLog
 
             isStopping = true;
             stopSign.Set();
+        }
+    }
+
+}
+
+public static class ConcurrentQueueExtensions
+{
+    /// <summary>
+    /// Dequeue the next item from the queue. It is a blocking function until
+    /// the item is retrieved from the queue. Calling this function on an
+    /// empty queue raises an InvalidOperationException.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="queue"></param>
+    /// <returns>The oldest item of the queue.</returns>
+    public static T Dequeue<T>(this ConcurrentQueue<T> queue)
+    {
+        T item;
+        while (!queue.TryDequeue(out item))
+        {
+            if (queue.Count == 0)
+            {
+                throw new InvalidOperationException("The queue is already empty. No item can be dequeued.");
+            }
+            // Try again, we will get it for sure sometime.
+        }
+
+        return item;
+    }
+
+    /// <summary>
+    /// Removes a given number of items from the beginning of the queue.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="queue"></param>
+    /// <param name="itemCount"></param>
+    public static void DiscardItems<T>(this ConcurrentQueue<T> queue, int itemCount)
+    {
+        for (int i = 0; i < itemCount; i++)
+        {
+            try
+            {
+                queue.Dequeue();
+            }
+            catch (InvalidOperationException)
+            {
+                // The queue is already empty.
+                return;
+            }
         }
     }
 }
