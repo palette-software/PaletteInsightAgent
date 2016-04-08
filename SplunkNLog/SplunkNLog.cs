@@ -5,11 +5,13 @@ using NLog.Config;
 using System.Threading;
 using System.ComponentModel;
 using PaletteInsightAgent.Helpers;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.IO;
+using fastJSON;
 
 namespace SplunkNLog
 {
@@ -81,25 +83,30 @@ namespace SplunkNLog
                     return;
                 }
 
-                if (messagesToSplunk.Count > MaxPendingQueueSize)
-                {
-                    // Discard the oldest messages, until we get back below the limit.
-                    messagesToSplunk.DiscardItems(messagesToSplunk.Count - MaxPendingQueueSize);
-                }
-
                 int messageCount = messagesToSplunk.Count;
                 if (messageCount <= 0)
                 {
                     continue;
                 }
 
+                if (messageCount > MaxPendingQueueSize)
+                {
+                    // Discard the oldest messages, until we get back below the limit.
+                    messagesToSplunk.DiscardItems(messageCount - MaxPendingQueueSize);
+                }
+
                 // Do not work with too large batches
-                if (messageCount > MaxBatchSize) messageCount = MaxBatchSize;
+                if (messageCount > MaxBatchSize)
+                {
+                    messageCount = MaxBatchSize;
+                    // Signal that we still have unprocessed messages.
+                    hasMessageToLog.Set();
+                }
 
                 try
                 {
                     MemoryStream ms = new MemoryStream();
-                    fastJSON.JSONParameters param = new fastJSON.JSONParameters();
+                    JSONParameters param = new JSONParameters();
                     param.SerializeToLowerCaseNames = true;
                     param.UseExtensions = false;
                     using (StreamWriter writer = new StreamWriter(ms))
@@ -110,7 +117,7 @@ namespace SplunkNLog
                             try
                             {
                                 spm.Event = messagesToSplunk.Dequeue();
-                                string jsonContent = fastJSON.JSON.ToJSON(spm, param);
+                                string jsonContent = JSON.ToJSON(spm, param);
                                 writer.WriteLine(jsonContent);
                             }
                             catch (Exception)
@@ -167,8 +174,9 @@ namespace SplunkNLog
                 {
                     using (var response = await httpClient.PostAsync(String.Format("{0}:{1}/services/collector/event", this.Host, this.Port), new ByteArrayContent(splunkEvent)))
                     {
-                        if (response.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+                        if (response.StatusCode == HttpStatusCode.RequestTimeout || response.StatusCode >= HttpStatusCode.InternalServerError)
                         {
+                            // Retry in case of timed out requests or in case of server errors.
                             return false;
                         }
                     }
