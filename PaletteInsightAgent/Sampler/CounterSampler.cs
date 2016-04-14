@@ -43,7 +43,7 @@ namespace PaletteInsightAgent.Sampler
         public DataTable SampleAll()
         {
             Log.Info("Polling..");
-            var pollTimestamp = DateTimeOffset.Now.UtcDateTime;
+            var pollTimestamp = DateTime.UtcNow;
 
             // Create a new empty table to store results of this sampling, using our existing column schema.
             var dataTable = schema.Clone();
