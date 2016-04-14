@@ -259,7 +259,10 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Exists("anyfile")).WillReturn(false);
 
             // Act
-            FileUploader.MoveToProcessed(testFileList);
+            foreach (var file in testFileList)
+            {
+                FileUploader.MoveToFolder(file, FileUploader.ProcessedPath);
+            }
 
             // Assert
             Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Exists("anyfile")));
@@ -276,7 +279,10 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Delete("anyfile")).IgnoreCall();
 
             // Act
-            FileUploader.MoveToProcessed(testFileList);
+            foreach (var file in testFileList)
+            {
+                FileUploader.MoveToFolder(file, FileUploader.ProcessedPath);
+            }
 
             // Assert
             Assert.AreEqual(3, Isolate.Verify.GetTimesCalled(() => File.Delete("anyfile")));
@@ -301,7 +307,10 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => Directory.Exists(destinationFolder)).WithExactArguments().WillReturn(true);
 
             // Act
-            FileUploader.MoveToProcessed(testFileList);
+            foreach (var file in testFileList)
+            {
+                FileUploader.MoveToFolder(file, FileUploader.ProcessedPath);
+            }
 
             // Assert
             // Make sure that the not-existing folder got created
@@ -316,7 +325,10 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Exists("anyfile")).WillThrow(testException);
 
             // Act
-            FileUploader.MoveToProcessed(testFileList);
+            foreach (var file in testFileList)
+            {
+                FileUploader.MoveToFolder(file, FileUploader.ProcessedPath);
+            }
 
             // Assert
             Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
@@ -332,7 +344,10 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Delete("anyfile")).WillThrow(testException);
 
             // Act
-            FileUploader.MoveToProcessed(testFileList);
+            foreach (var file in testFileList)
+            {
+                FileUploader.MoveToFolder(file, FileUploader.ProcessedPath);
+            }
 
             // Assert
             Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
@@ -349,7 +364,10 @@ namespace PaletteInsightAgentTests.Output
             Isolate.WhenCalled(() => File.Move("source", "destination")).WillThrow(testException);
 
             // Act
-            FileUploader.MoveToProcessed(testFileList);
+            foreach (var file in testFileList)
+            {
+                FileUploader.MoveToFolder(file, FileUploader.ProcessedPath);
+            }
 
             // Assert
             Isolate.Verify.WasCalledWithAnyArguments(() => fakeLog.Error(testException, "any line"));
