@@ -99,7 +99,7 @@ namespace PaletteInsightAgent
             if (USE_THREADINFO)
             {
                 // start the thread info agent
-                threadInfoAgent = new ThreadInfoAgent();
+                threadInfoAgent = new ThreadInfoAgent(options.ThreadInfoPollInterval);
             }
 
             if (USE_TABLEAU_REPO)
@@ -206,6 +206,7 @@ namespace PaletteInsightAgent
             {
                 // Kick off the thread polling timer
                 int dueTime = CalculateDueTime(options.ThreadInfoPollInterval);
+                Log.Debug("Due time until the next best timing for thread info poll start: {0}", dueTime);
                 threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: dueTime, period: options.ThreadInfoPollInterval * 1000);
             }
 
