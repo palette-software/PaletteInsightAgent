@@ -69,7 +69,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
         protected void pollProcessList(ICollection<Process> processList, IDictionary<string, ProcessData> processData, DataTable threadInfoTable, ref long threadInfoTableCount)
         {
-            var pollCycleTimeStamp = DateTimeOffset.Now.UtcDateTime;
+            var pollCycleTimeStamp = DateTime.UtcNow;
 
             // We need to make sure that between the current poll cycle time stamp and the
             // previous poll cycle time stamp there is at least one poll interval elapsed.
@@ -103,7 +103,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             threadInfo.processId = process.Id;
             threadInfo.threadId = threadId;
             threadInfo.cpuTime = ticks;
-            threadInfo.pollTimeStamp = DateTimeOffset.Now.UtcDateTime;
+            threadInfo.pollTimeStamp = DateTime.UtcNow;
             threadInfo.pollCycleTimeStamp = pollCycleTimeStamp;
             threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
