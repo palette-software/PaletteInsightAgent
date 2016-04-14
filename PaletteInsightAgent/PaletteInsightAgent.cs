@@ -29,7 +29,7 @@ namespace PaletteInsightAgent
     /// </summary>
     public class PaletteInsightAgent : IDisposable
     {
-        private Timer timer;
+        private Timer counterSampleTimer;
         private Timer logPollTimer;
         private Timer threadInfoTimer;
         private Timer dbWriterTimer;
@@ -191,7 +191,7 @@ namespace PaletteInsightAgent
 
                 // Kick off the polling timer.
                 Log.Info("PaletteInsightAgent initialized!  Starting performance counter polling..");
-                timer = new Timer(callback: Poll, state: null, dueTime: 0, period: options.PollInterval * 1000);
+                counterSampleTimer = new Timer(callback: PollCounters, state: null, dueTime: 0, period: options.PollInterval * 1000);
             }
 
 
@@ -205,7 +205,8 @@ namespace PaletteInsightAgent
             if (USE_THREADINFO)
             {
                 // Kick off the thread polling timer
-                threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
+                int dueTime = CalculateDueTime(options.ThreadInfoPollInterval);
+                threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: dueTime, period: options.ThreadInfoPollInterval * 1000);
             }
 
             // send the metadata if there is a tableau repo behind us
@@ -249,9 +250,9 @@ namespace PaletteInsightAgent
 
             if (USE_COUNTERSAMPLES)
             {
-                if (timer != null)
+                if (counterSampleTimer != null)
                 {
-                    timer.Dispose();
+                    counterSampleTimer.Dispose();
                 }
             }
 
@@ -305,7 +306,7 @@ namespace PaletteInsightAgent
         public bool IsRunning()
         {
             var running = true;
-            if (USE_COUNTERSAMPLES) running = running && (sampler != null && timer != null);
+            if (USE_COUNTERSAMPLES) running = running && (sampler != null && counterSampleTimer != null);
             if (USE_LOGPOLLER) running = running && (logPollTimer != null);
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
             running = running && (webserviceTimer != null);
@@ -321,7 +322,7 @@ namespace PaletteInsightAgent
         /// Polls the sampler's counters and writes the results to the writer object.
         /// </summary>
         /// <param name="stateInfo"></param>
-        private void Poll(object stateInfo)
+        private void PollCounters(object stateInfo)
         {
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
@@ -432,6 +433,45 @@ namespace PaletteInsightAgent
                 // Ensure that the lock is released.
                 Monitor.Exit(pollTypeLock);
             }
+        }
+
+        /// <summary>
+        /// Calculate when is going to be the next moment, when the "time is right"
+        /// to start the timer. If the poll interval is larger than a minute, the
+        /// next "time is right" going to be the start of the next minute.
+        /// </summary>
+        /// <param name="pollInterval"></param>
+        /// <returns>Offset in milliseconds until the next best timing for start the timer.</returns>
+        private int CalculateDueTime(int pollInterval)
+        {
+            var now = DateTime.Now;
+            var currentPhase = now.Second * 1000 + now.Millisecond;
+            if (currentPhase == 0)
+            {
+                // Timing is perfect now. Rare, but still.
+                return 0;
+            }
+
+            // Collect entries before the next minute, if there is any.
+            List<int> entries = new List<int>();
+            for (int nextEntry = pollInterval; nextEntry < 60; nextEntry += pollInterval)
+            {
+                entries.Add(nextEntry);
+            }
+
+            foreach (var entry in entries)
+            {
+                var entryMillis = entry * 1000;
+                if (currentPhase <= entryMillis)
+                {
+                    // Let's take this entry, don't wait until the next minute.
+                    return entryMillis - currentPhase;
+                }
+            }
+
+            // Let's start on the next minute. This is automatically the case when
+            // poll interval is larger than a minute.
+            return 60 * 1000 - currentPhase;
         }
 
         #endregion Private Methods
