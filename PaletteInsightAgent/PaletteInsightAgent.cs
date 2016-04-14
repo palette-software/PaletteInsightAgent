@@ -206,7 +206,7 @@ namespace PaletteInsightAgent
             {
                 // Kick off the thread polling timer
                 int dueTime = CalculateDueTime(options.ThreadInfoPollInterval);
-                Log.Debug("Due time until the next best timing for thread info poll start: {0}", dueTime);
+                Log.Debug("Due time until the next best timing for thread info poll start: {0} msec", dueTime);
                 threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: dueTime, period: options.ThreadInfoPollInterval * 1000);
             }
 
@@ -238,7 +238,6 @@ namespace PaletteInsightAgent
                 repoTablesPollTimer = new Timer(callback: PollFullTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
                 streamingTablesPollTimer = new Timer(callback: PollStreamingTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
             }
-
         }
 
 
