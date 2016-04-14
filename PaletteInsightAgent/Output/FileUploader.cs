@@ -194,7 +194,7 @@ namespace PaletteInsightAgent.Output
                         }
                         catch (Exception e)
                         {
-                            Log.Error(e, "Failed to write data file to database! Exception message: {0}", e);
+                            Log.Error(e, "Failed to write data file {0} to database! Exception message: {1}", csvFile, e.Message);
                             MoveToFolder(csvFile, ErrorPath);
                         }
                     }
