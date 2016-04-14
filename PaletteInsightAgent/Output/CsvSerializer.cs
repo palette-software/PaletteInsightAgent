@@ -107,7 +107,7 @@ namespace PaletteInsightAgent.Output
                     return filePathWithPart;
                 }
 
-                Log.Info("Increasing seq-id because file '{0}' already exists", fileNameWithPart);
+                Log.Debug("Increasing seq-id because file '{0}' already exists", fileNameWithPart);
 
                 // otherwise get the next seq id
                 seqIdx++;
