@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 
 namespace PaletteInsightAgent.Output.OutputDrivers
@@ -11,26 +12,19 @@ namespace PaletteInsightAgent.Output.OutputDrivers
     /// <summary>
     /// A webservice backend for dealing with single file uploads
     /// </summary>
-    public class SinglefileBackend : WebserviceBackendBase, WebserviceBackend
+    public class SinglefileBackend : WebserviceBackendBase, IOutput
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public OutputWriteResult Write(IList<string> csvFiles)
+        public void Write(string file)
         {
-            // skip empty batches
-            if (csvFiles.Count == 0) return new OutputWriteResult { };
-
-            // otherwise retry the files we need to retry
-            return OutputWriteResult.Aggregate(csvFiles, (file) =>
+            Log.Info("+ Sending file {0}", file);
+            string maxId = null;
+            if (IsStreamingTable(file))
             {
-                Log.Info("+ Sending file {0}", file);
-                string maxId = null;
-                if (IsStreamingTable(file))
-                {
-                    maxId = File.ReadAllText(MaxIdFileName(file));
-                }
-                return DoSendFile(file, maxId);
-            });
+                maxId = File.ReadAllText(MaxIdFileName(file));
+            }
+            DoSendFile(file, maxId);
         }
 
         public static string GetFileNameWithoutPart(string fileName)
@@ -77,50 +71,31 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// <param name="file">The name / path of the file </param>
         /// <param name="metadata">The contents of the metadata</param>
         /// <returns></returns>
-        private OutputWriteResult DoSendFile(string file, string maxId)
+        private void DoSendFile(string file, string maxId)
         {
             var results = PrepareResultArray(file, maxId);
 
             // skip working if the file does not exist
-            if (!File.Exists(file)) return OutputWriteResult.Failed(results);
+            if (!File.Exists(file)) return; 
 
-            return LoggingHelpers.TimedLog<OutputWriteResult>(Log, String.Format("Uploading file : {0}", file), () =>
+            LoggingHelpers.TimedLog(Log, String.Format("Uploading file : {0}", file), () =>
             {
                 // try to send the request, convert the result from JSON
-                try
-                {
-                    var response = APIClient.UploadFile(file, maxId);
-                    response.Wait();
+                var response = APIClient.UploadFile(file, maxId);
+                response.Wait();
 
-                    var result = response.Result;
-                    switch (result.StatusCode)
-                    {
-                        // if we are ok, we are ok
-                        case HttpStatusCode.OK:
-                            Log.Debug("-> Sent ok: '{0}'", file);
-                            return OutputWriteResult.Ok(results);
-                        // On Md5 failiure re-send the file
-                        case HttpStatusCode.Conflict:
-                            Log.Warn("-> MD5 error in '{0}' -- resending", file);
-                            return DoSendFile(file, maxId);
-                        // otherwise move to the errored ones for now as that is the safe bet
-                        // we should later handle some error codes differently so that upload is blocked until successful
-                        // in certain cases
-                        default:
-                            Log.Error("-> Unknown status: '{0}' for '{1}' -- moving to error", result.StatusCode, file);
-                            return OutputWriteResult.Failed(results);
-                    }
-                }
-                catch (Exception e)
+                var result = response.Result;
+                switch (result.StatusCode)
                 {
-                    // if we have an error here, that should mean
-                    // we are having some HTTP errors (as this block in the recursive 
-                    // DoSendFile() calls should catch any errors propagating from nested
-                    // sends
-                    Log.Error(e, "Error during sending '{0}' to the webservice: {1}", file, e);
-                    // so we are just adding this file to the failed ones.
-                    return OutputWriteResult.Failed(results);
-
+                    // if we are ok, we are ok
+                    case HttpStatusCode.OK:
+                        Log.Debug("-> Sent ok: '{0}'", file);
+                        return;
+                    // On Md5 failure re-send the file
+                    case HttpStatusCode.Conflict:
+                        throw new HttpRequestException("MD5 error in " + file);
+                    default:
+                        throw new ArgumentException(String.Format("-> Unknown status: '{0}' for '{1}' -- moving to error", result.StatusCode, file));
                 }
             });
         }
