@@ -8,6 +8,7 @@ using System.Reflection;
 using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Output;
 using PaletteInsight.Configuration;
+using System.Threading;
 
 namespace PaletteInsightAgent.ThreadInfoPoller
 {
@@ -69,25 +70,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
         protected void pollProcessList(ICollection<Process> processList, IDictionary<string, ProcessData> processData, DataTable threadInfoTable, ref long threadInfoTableCount)
         {
-            var pollCycleTimeStamp = DateTime.UtcNow;
-
-            // We need to make sure that between the current poll cycle time stamp and the
-            // previous poll cycle time stamp there is at least one poll interval elapsed.
-            if (previousPollCycleTimeStamp != default(DateTime))
-            {
-                // So this is not the first poll. Let's do the check and align, if necessary.
-                var nextAcceptableTimeStamp = previousPollCycleTimeStamp.AddSeconds(pollInterval);
-                if (nextAcceptableTimeStamp > pollCycleTimeStamp)
-                {
-                    if (nextAcceptableTimeStamp > pollCycleTimeStamp.AddSeconds(1))
-                    {
-                        Log.Warn("Aligned poll cycle time stamp is more than 1 second later than the current time stamp! Difference: {0}",
-                            nextAcceptableTimeStamp - pollCycleTimeStamp);
-                        // NOTE: Maybe we should do a quick sleep in this case.
-                    }
-                    pollCycleTimeStamp = nextAcceptableTimeStamp;
-                }
-            }
+            var pollCycleTimeStamp = CalculatePollCycleTimeStamp();
 
             foreach (var process in processList)
             {
@@ -156,6 +139,76 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             {
                 Log.Error("Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message);
             }
+        }
+
+        public static List<int> GetTimingEntries(int pollInterval)
+        {
+            List<int> entries = new List<int>();
+            for (int nextEntry = 0; nextEntry < 60; nextEntry += pollInterval)
+            {
+                entries.Add(nextEntry);
+            }
+
+            return entries;
+        }
+
+        protected DateTime CalculatePollCycleTimeStamp()
+        {
+            var now = DateTime.UtcNow;
+            var pollCycleTimeStamp = GetRoundedPollCycleTimeStamp(now, pollInterval);
+
+            // We need to make sure that between the current poll cycle time stamp and the
+            // previous poll cycle time stamp there is at least one poll interval elapsed.
+            if (previousPollCycleTimeStamp != default(DateTime))
+            {
+                // So this is not the first poll. Let's do the check and align, if necessary.
+                var nextAcceptableTimeStamp = previousPollCycleTimeStamp.AddSeconds(pollInterval);
+                if (nextAcceptableTimeStamp > pollCycleTimeStamp)
+                {
+                    // Align the poll cycle timestamp
+                    pollCycleTimeStamp = nextAcceptableTimeStamp;
+                }
+
+                if (pollCycleTimeStamp > now.AddSeconds(1))
+                {
+                    TimeSpan difference = pollCycleTimeStamp - now;
+                    Log.Warn("Aligned poll cycle time stamp is more than 1 second later than the current time stamp! Difference: {0}",
+                        difference);
+                    // Try our best to match up with the desired poll timings.
+                    Thread.Sleep(difference);
+                }
+            }
+            previousPollCycleTimeStamp = pollCycleTimeStamp;
+
+            return pollCycleTimeStamp;
+        }
+
+        protected static DateTime GetRoundedPollCycleTimeStamp(DateTime now, int pollInterval)
+        {
+            List<int> timeEntries = GetTimingEntries(pollInterval);
+            timeEntries.Reverse();
+            // Make sure that the result will be really rounded.
+            DateTime prevEntry = now.AddMilliseconds(-now.Millisecond);
+
+            foreach (var entry in timeEntries)
+            {
+                if (now.Second >= entry)
+                {
+                    prevEntry = prevEntry.AddSeconds(entry - now.Second);
+                    var nextEntry = prevEntry.AddSeconds(pollInterval);
+                    if (nextEntry - now < now - prevEntry)
+                    {
+                        // Next entry is closer in time.
+                        return nextEntry;
+                    }
+                    // Round to the previous entry.
+                    return prevEntry;
+                }
+            }
+
+            // We should never get here.
+            Log.Error("Failed to get a rounded poll cycle timestamp! Returning previous now as a default.");
+            return now;
         }
     }
 }
