@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 
 namespace PaletteInsightAgent.Output
@@ -19,7 +20,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         private const string ERROR_PREFIX = @"errors/";
 
-        private static string DataFilePattern
+        public static string DataFilePattern
         {
             get
             {
@@ -27,7 +28,7 @@ namespace PaletteInsightAgent.Output
             }
         }
 
-        private static string ProcessedPath
+        public static string ProcessedPath
         {
             get
             {
@@ -35,7 +36,7 @@ namespace PaletteInsightAgent.Output
             }
         }
 
-        private static string ErrorPath
+        public static string ErrorPath
         {
             get
             {
@@ -166,36 +167,44 @@ namespace PaletteInsightAgent.Output
         /// <param name="dataPath"></param>
         private static void DoUpload(IOutput output, string dataPath)
         {
-            try
+            // For all tables we want to upload the csv files for that data table and move the csv after the upload
+            // to the appropriate folder. (Processed on success Errors on failure)
+            var tableNames = GetPendingTables(dataPath);
+            foreach (var table in tableNames)
             {
-                // The old code (a while loop) gets stuck if we use the 'unsent' folder
-                // as a source.
-                var tableNames = GetPendingTables(dataPath);
-                MoveAllFiles(OutputWriteResult.Aggregate( tableNames, (table) => {
-                    return output.Write(GetFilesOfTable(dataPath, table));
-                }));
+                try
+                {
+                    foreach (var csvFile in GetFilesOfTable(dataPath, table))
+                    {
+                        try
+                        {
+                            output.Write(csvFile);
+                            MoveToFolder(csvFile, ProcessedPath);
+                        }
+                        catch (AggregateException ae)
+                        {
+                            ae.Handle((x) =>
+                            {
+                                if (x is HttpRequestException)
+                                {
+                                    throw new HttpRequestException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
+                                }
+                                return false;
+                            });
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e, "Failed to write data file {0} to database! Exception message: {1}", csvFile, e.Message);
+                            MoveToFolder(csvFile, ErrorPath);
+                        }
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    Log.Warn("Error while uploading files for table {0}. Message: {1}", table, e.Message);
+                    // Nothing to do here. Leave this filetype as is, we will upload in the next iteration and when connection is alive again
+                }
             }
-            catch (DirectoryNotFoundException)
-            {
-                // This means that the data folder does not exist, which also means that
-                // there are no data files to process.
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "Failed to write data files to database! Exception message: {0}", e);
-            }
-        }
-
-        /// <summary>
-        /// Moves all files of an output write to their proper locations
-        /// </summary>
-        /// <param name="processedFiles"></param>
-        private static void MoveAllFiles(OutputWriteResult processedFiles)
-        {
-            // Move files to processed folder
-            MoveToFolder(processedFiles.successfullyWrittenFiles, ProcessedPath);
-            // Move files with errors to the errors folder
-            MoveToFolder(processedFiles.failedFiles, ErrorPath);
         }
 
         /// <summary>
@@ -283,47 +292,40 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         /// <param name="fileList"></param>
         /// <param name="outputFolder"></param>
-        private static void MoveToFolder(IList<string> fileList, string outputFolder)
+        public static void MoveToFolder(string fullFileName, string outputFolder)
         {
-            foreach (var fullFileName in fileList)
+            try
             {
-                try
+                // create the output directory
+                if (!Directory.Exists(outputFolder))
+                    Directory.CreateDirectory(outputFolder);
+
+                var fileName = GetFileName(fullFileName);
+                Log.Debug("Trying to move: {0}", fileName);
+                var targetFile = Path.Combine(outputFolder, fileName);
+
+                // This should never happen but let's just make sure.
+                if (Path.GetFullPath(targetFile) == Path.GetFullPath(fullFileName))
                 {
-                    // create the output directory
-                    if (!Directory.Exists(outputFolder))
-                        Directory.CreateDirectory(outputFolder);
-
-                    var fileName = GetFileName(fullFileName);
-                    Log.Debug("Trying to move: {0}", fileName);
-                    var targetFile = Path.Combine(outputFolder, fileName);
-
-                    // If we are trying to move from unsent to unsent we may find
-                    // that we have the same filename twice
-                    if (Path.GetFullPath(targetFile) == Path.GetFullPath(fullFileName))
-                    {
-                        Log.Debug("Skipping moving a file to itself: {0}", fullFileName);
-                        continue;
-                    }
-                    
-                    // Delete the output if it already exists
-                    // TODO: shouldnt we rename the old file here?
-                    if (File.Exists(targetFile))
-                        File.Delete(targetFile);
-
-                    // Do the actual move
-                    File.Move(fullFileName, targetFile);
-                    Log.Info("Moved file: {0} to {1}", fileName, outputFolder);
+                    Log.Warn("Skipping moving a file to itself: {0}", fullFileName);
+                    return;
                 }
-                catch (Exception ex)
+
+                // Delete the output if it already exists. Although it shouldn't exist.
+                if (File.Exists(targetFile))
                 {
-                    Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
+                    Log.Warn("Deleting already existing file while moving a new file on it: {0} NewFile: {1}", targetFile, fullFileName);
+                    File.Delete(targetFile);
                 }
+
+                // Do the actual move
+                File.Move(fullFileName, targetFile);
+                Log.Info("Moved file: {0} to {1}", fileName, outputFolder);
             }
-        }
-
-        internal static void MoveToProcessed(IList<string> testFileList)
-        {
-            MoveToFolder(testFileList, ProcessedPath);
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
+            }
         }
 
     }
