@@ -442,8 +442,9 @@ namespace PaletteInsightAgent
         /// </summary>
         /// <param name="pollInterval"></param>
         /// <returns>Offset in milliseconds until the next best timing for start the timer.</returns>
-        private int CalculateDueTime(int pollInterval)
+        private static int CalculateDueTime(int pollInterval)
         {
+            // It doesn't matter if now is not in UTC, because we only care about the seconds this time.
             var now = DateTime.Now;
             var currentPhase = now.Second * 1000 + now.Millisecond;
             if (currentPhase == 0)
@@ -453,11 +454,7 @@ namespace PaletteInsightAgent
             }
 
             // Collect entries before the next minute, if there is any.
-            List<int> entries = new List<int>();
-            for (int nextEntry = pollInterval; nextEntry < 60; nextEntry += pollInterval)
-            {
-                entries.Add(nextEntry);
-            }
+            List<int> entries = ThreadInfoAgent.GetTimingEntries(pollInterval);
 
             foreach (var entry in entries)
             {
