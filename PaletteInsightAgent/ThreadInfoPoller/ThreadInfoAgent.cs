@@ -185,6 +185,13 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
         protected static DateTime GetRoundedPollCycleTimeStamp(DateTime now, int pollInterval)
         {
+            if (60 % pollInterval != 0)
+            {
+                // If a minute is not divisible by the poll interval, we could only achieve synchronized poll cycle
+                // time stamps among machines for an unacceptable high cost. So, no rounding in this case.
+                return now;
+            }
+
             List<int> timeEntries = GetTimingEntries(pollInterval);
             timeEntries.Reverse();
             // Make sure that the result will be really rounded.
