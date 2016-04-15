@@ -187,7 +187,7 @@ namespace PaletteInsightAgent.Output
                             {
                                 if (x is HttpRequestException)
                                 {
-                                    throw new HttpRequestException(String.Format("Unable to upload file: {0} (Message: {1}", csvFile, x.Message));
+                                    throw new HttpRequestException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
                                 }
                                 return false;
                             });
@@ -304,17 +304,19 @@ namespace PaletteInsightAgent.Output
                 Log.Debug("Trying to move: {0}", fileName);
                 var targetFile = Path.Combine(outputFolder, fileName);
 
-                // If we are trying to move from unsent to unsent we may find
-                // that we have the same filename twice
+                // This should never happen but let's just make sure.
                 if (Path.GetFullPath(targetFile) == Path.GetFullPath(fullFileName))
                 {
-                    Log.Debug("Skipping moving a file to itself: {0}", fullFileName);
+                    Log.Warn("Skipping moving a file to itself: {0}", fullFileName);
                     return;
                 }
-                
-                // Delete the output if it already exists
+
+                // Delete the output if it already exists. Although is shouldn't exist.
                 if (File.Exists(targetFile))
+                {
+                    Log.Warn("Deleting already existing file while moving a new file on it: {0} NewFile: {1}", targetFile, fullFileName);
                     File.Delete(targetFile);
+                }
 
                 // Do the actual move
                 File.Move(fullFileName, targetFile);
