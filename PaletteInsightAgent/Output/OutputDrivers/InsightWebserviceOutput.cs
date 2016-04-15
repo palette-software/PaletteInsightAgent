@@ -69,10 +69,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             }
         }
     }
-    public interface WebserviceBackend : IOutput
-    {
-
-    }
 
 
 
