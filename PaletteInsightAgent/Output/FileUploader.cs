@@ -311,7 +311,7 @@ namespace PaletteInsightAgent.Output
                     return;
                 }
 
-                // Delete the output if it already exists. Although is shouldn't exist.
+                // Delete the output if it already exists. Although it shouldn't exist.
                 if (File.Exists(targetFile))
                 {
                     Log.Warn("Deleting already existing file while moving a new file on it: {0} NewFile: {1}", targetFile, fullFileName);
