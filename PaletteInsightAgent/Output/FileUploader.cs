@@ -189,7 +189,11 @@ namespace PaletteInsightAgent.Output
                                 {
                                     throw new HttpRequestException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
                                 }
-                                return false;
+                                else
+                                {
+                                    Log.Error(x, "Error while uploading file: {0}", csvFile);
+                                }
+                                return true;
                             });
                         }
                         catch (Exception e)
@@ -203,6 +207,10 @@ namespace PaletteInsightAgent.Output
                 {
                     Log.Warn("Error while uploading files for table {0}. Message: {1}", table, e.Message);
                     // Nothing to do here. Leave this filetype as is, we will upload in the next iteration and when connection is alive again
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error while uploading files for table {0}", table);
                 }
             }
         }
