@@ -423,6 +423,10 @@ namespace PaletteInsightAgent
                 {
                     FileUploader.Start((IOutput)stateInfo, options.ProcessedFilestTTL, options.StorageLimit);
                 }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error while uploading data to insight server.");
+                }
                 finally
                 {
                     Monitor.Exit(FileUploader.FileUploadLock);
