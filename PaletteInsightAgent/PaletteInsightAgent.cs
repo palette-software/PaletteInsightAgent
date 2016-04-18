@@ -8,7 +8,7 @@ using System.Threading;
 using PaletteInsightAgent.CounterConfig;
 using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Sampler;
-
+using Licensing;
 using PaletteInsightAgent.LogPoller;
 using PaletteInsightAgent.ThreadInfoPoller;
 using PaletteInsightAgent.Output;
@@ -314,6 +314,31 @@ namespace PaletteInsightAgent
             return running;
         }
 
+        /// <summary>
+        /// Calculate when is going to be the next moment, when the "time is right" - let's call it a beat -
+        /// to start the timer. Beats are calculated from the unix epoch base time, so that we can have the
+        /// same beats across multiple machines.
+        /// </summary>
+        /// <param name="pollInterval"></param>
+        /// <returns>Offset in milliseconds until the next beat to start the timer.</returns>
+        public static int CalculateDueTime(int pollInterval)
+        {
+            int dueSeconds = GetNextTimerBeat(pollInterval);
+            // It doesn't matter if now is not in UTC, because we only care about the seconds this time.
+            var now = DateTime.Now;
+            if (dueSeconds == 0)
+            {
+                if (now.Millisecond == 0)
+                {
+                    // Odd, but still.
+                    return 0;
+                }
+                // Otherwise, it means that we just missed the beat.
+                dueSeconds += pollInterval;
+            }
+            return dueSeconds * 1000 - now.Millisecond;
+        }
+
         #endregion Public Methods
 
         #region Private Methods
@@ -435,40 +460,16 @@ namespace PaletteInsightAgent
             }
         }
 
-        /// <summary>
-        /// Calculate when is going to be the next moment, when the "time is right"
-        /// to start the timer. If the poll interval is larger than a minute, the
-        /// next "time is right" going to be the start of the next minute.
-        /// </summary>
-        /// <param name="pollInterval"></param>
-        /// <returns>Offset in milliseconds until the next best timing for start the timer.</returns>
-        private static int CalculateDueTime(int pollInterval)
+        private static int GetNextTimerBeat(int pollInterval)
         {
-            // It doesn't matter if now is not in UTC, because we only care about the seconds this time.
-            var now = DateTime.Now;
-            var currentPhase = now.Second * 1000 + now.Millisecond;
-            if (currentPhase == 0)
+            long nowTs = DateTimeConverter.ToTimestamp(DateTime.UtcNow);
+            int modulo = (int)(nowTs % pollInterval);
+            if (modulo == 0)
             {
-                // Timing is perfect now. Rare, but still.
                 return 0;
             }
 
-            // Collect entries before the next minute, if there is any.
-            List<int> entries = ThreadInfoAgent.GetTimingEntries(pollInterval);
-
-            foreach (var entry in entries)
-            {
-                var entryMillis = entry * 1000;
-                if (currentPhase <= entryMillis)
-                {
-                    // Let's take this entry, don't wait until the next minute.
-                    return entryMillis - currentPhase;
-                }
-            }
-
-            // Let's start on the next minute. This is automatically the case when
-            // poll interval is larger than a minute.
-            return 60 * 1000 - currentPhase;
+            return pollInterval - modulo;
         }
 
         #endregion Private Methods

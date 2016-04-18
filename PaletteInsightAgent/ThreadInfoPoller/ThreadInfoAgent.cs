@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
-using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Output;
 using PaletteInsight.Configuration;
 using System.Threading;
@@ -141,17 +139,6 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             }
         }
 
-        public static List<int> GetTimingEntries(int pollInterval)
-        {
-            List<int> entries = new List<int>();
-            for (int nextEntry = 0; nextEntry < 60; nextEntry += pollInterval)
-            {
-                entries.Add(nextEntry);
-            }
-
-            return entries;
-        }
-
         protected DateTime CalculatePollCycleTimeStamp()
         {
             var now = DateTime.UtcNow;
@@ -185,37 +172,17 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
         protected static DateTime GetRoundedPollCycleTimeStamp(DateTime now, int pollInterval)
         {
-            if (60 % pollInterval != 0)
+            int dueTimeToNextBeat = PaletteInsightAgent.CalculateDueTime(pollInterval);
+            DateTime nextBeat = now.AddMilliseconds(dueTimeToNextBeat);
+            DateTime prevBeat = nextBeat.AddSeconds(-pollInterval);
+
+            if (nextBeat - now < now - prevBeat)
             {
-                // If a minute is not divisible by the poll interval, we could only achieve synchronized poll cycle
-                // time stamps among machines for an unacceptable high cost. So, no rounding in this case.
-                return now;
+                // Next beat is closer in time.
+                return nextBeat;
             }
 
-            List<int> timeEntries = GetTimingEntries(pollInterval);
-            timeEntries.Reverse();
-            // Make sure that the result will be really rounded.
-            DateTime prevEntry = now.AddMilliseconds(-now.Millisecond);
-
-            foreach (var entry in timeEntries)
-            {
-                if (now.Second >= entry)
-                {
-                    prevEntry = prevEntry.AddSeconds(entry - now.Second);
-                    var nextEntry = prevEntry.AddSeconds(pollInterval);
-                    if (nextEntry - now < now - prevEntry)
-                    {
-                        // Next entry is closer in time.
-                        return nextEntry;
-                    }
-                    // Round to the previous entry.
-                    return prevEntry;
-                }
-            }
-
-            // We should never get here.
-            Log.Error("Failed to get a rounded poll cycle timestamp! Returning previous now as a default.");
-            return now;
+            return prevBeat;
         }
     }
 }
