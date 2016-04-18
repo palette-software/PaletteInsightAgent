@@ -3,7 +3,7 @@
 <?define Manufacturer = "Palette Software"?>
 <?define HelpLink = "http://www.palette-software.com"?>
 <?define UrlInfoAbout = "http://www.palette-software.com"?>
-<?define ProductUpgradeCode = "8c39f7f6-ad31-4efd-96ae-1f6f1a5e4f3a"?>
+<?define ProductUpgradeCode = "26A5F872-D392-4C8F-8D2C-E724395DE8A0"?>
 <?define IconFile = "..\PaletteInsightAgentService\Resources\palette_symbol.ico"?>
 <?define BinFolder = "..\PaletteInsightAgentService\bin\$(var.Configuration)"?>
 
