@@ -74,7 +74,7 @@ namespace PaletteInsightAgent.Output
         /// <returns></returns>
         private static string GetDataFile(string fileBaseName)
         {
-            var dateString = DateTimeOffset.Now.UtcDateTime.ToString(FILENAME_DATETIME_FORMAT);
+            var dateString = DateTime.UtcNow.ToString(FILENAME_DATETIME_FORMAT);
             // get a new filename
             var fileName = String.Format("{0}{1}-{2}{3}", DATA_FOLDER, fileBaseName, dateString, Writer.Extension);
 

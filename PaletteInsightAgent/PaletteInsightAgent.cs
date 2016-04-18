@@ -8,7 +8,7 @@ using System.Threading;
 using PaletteInsightAgent.CounterConfig;
 using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Sampler;
-
+using Licensing;
 using PaletteInsightAgent.LogPoller;
 using PaletteInsightAgent.ThreadInfoPoller;
 using PaletteInsightAgent.Output;
@@ -29,7 +29,7 @@ namespace PaletteInsightAgent
     /// </summary>
     public class PaletteInsightAgent : IDisposable
     {
-        private Timer timer;
+        private Timer counterSampleTimer;
         private Timer logPollTimer;
         private Timer threadInfoTimer;
         private Timer dbWriterTimer;
@@ -99,7 +99,7 @@ namespace PaletteInsightAgent
             if (USE_THREADINFO)
             {
                 // start the thread info agent
-                threadInfoAgent = new ThreadInfoAgent();
+                threadInfoAgent = new ThreadInfoAgent(options.ThreadInfoPollInterval);
             }
 
             if (USE_TABLEAU_REPO)
@@ -191,7 +191,7 @@ namespace PaletteInsightAgent
 
                 // Kick off the polling timer.
                 Log.Info("PaletteInsightAgent initialized!  Starting performance counter polling..");
-                timer = new Timer(callback: Poll, state: null, dueTime: 0, period: options.PollInterval * 1000);
+                counterSampleTimer = new Timer(callback: PollCounters, state: null, dueTime: 0, period: options.PollInterval * 1000);
             }
 
 
@@ -205,7 +205,9 @@ namespace PaletteInsightAgent
             if (USE_THREADINFO)
             {
                 // Kick off the thread polling timer
-                threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: 0, period: options.ThreadInfoPollInterval * 1000);
+                int dueTime = CalculateDueTime(options.ThreadInfoPollInterval);
+                Log.Debug("Due time until the next best timing for thread info poll start: {0} msec", dueTime);
+                threadInfoTimer = new Timer(callback: PollThreadInfo, state: null, dueTime: dueTime, period: options.ThreadInfoPollInterval * 1000);
             }
 
             // send the metadata if there is a tableau repo behind us
@@ -236,7 +238,6 @@ namespace PaletteInsightAgent
                 repoTablesPollTimer = new Timer(callback: PollFullTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
                 streamingTablesPollTimer = new Timer(callback: PollStreamingTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
             }
-
         }
 
 
@@ -249,9 +250,9 @@ namespace PaletteInsightAgent
 
             if (USE_COUNTERSAMPLES)
             {
-                if (timer != null)
+                if (counterSampleTimer != null)
                 {
-                    timer.Dispose();
+                    counterSampleTimer.Dispose();
                 }
             }
 
@@ -305,12 +306,37 @@ namespace PaletteInsightAgent
         public bool IsRunning()
         {
             var running = true;
-            if (USE_COUNTERSAMPLES) running = running && (sampler != null && timer != null);
+            if (USE_COUNTERSAMPLES) running = running && (sampler != null && counterSampleTimer != null);
             if (USE_LOGPOLLER) running = running && (logPollTimer != null);
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
             running = running && (webserviceTimer != null);
             if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null && streamingTablesPollTimer != null);
             return running;
+        }
+
+        /// <summary>
+        /// Calculate when is going to be the next moment, when the "time is right" - let's call it a beat -
+        /// to start the timer. Beats are calculated from the unix epoch base time, so that we can have the
+        /// same beats across multiple machines.
+        /// </summary>
+        /// <param name="pollInterval"></param>
+        /// <returns>Offset in milliseconds until the next beat to start the timer.</returns>
+        public static int CalculateDueTime(int pollInterval)
+        {
+            int dueSeconds = GetNextTimerBeat(pollInterval);
+            // It doesn't matter if now is not in UTC, because we only care about the seconds this time.
+            var now = DateTime.Now;
+            if (dueSeconds == 0)
+            {
+                if (now.Millisecond == 0)
+                {
+                    // Odd, but still.
+                    return 0;
+                }
+                // Otherwise, it means that we just missed the beat.
+                dueSeconds += pollInterval;
+            }
+            return dueSeconds * 1000 - now.Millisecond;
         }
 
         #endregion Public Methods
@@ -321,7 +347,7 @@ namespace PaletteInsightAgent
         /// Polls the sampler's counters and writes the results to the writer object.
         /// </summary>
         /// <param name="stateInfo"></param>
-        private void Poll(object stateInfo)
+        private void PollCounters(object stateInfo)
         {
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
@@ -432,6 +458,18 @@ namespace PaletteInsightAgent
                 // Ensure that the lock is released.
                 Monitor.Exit(pollTypeLock);
             }
+        }
+
+        private static int GetNextTimerBeat(int pollInterval)
+        {
+            long nowTs = DateTimeConverter.ToTimestamp(DateTime.UtcNow);
+            int modulo = (int)(nowTs % pollInterval);
+            if (modulo == 0)
+            {
+                return 0;
+            }
+
+            return pollInterval - modulo;
         }
 
         #endregion Private Methods

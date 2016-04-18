@@ -77,7 +77,7 @@ namespace PaletteInsightAgentTests.ThreadInfo
             var table = ThreadTables.makeThreadInfoTable();
             IBox<long> count = Args.Ref<long>(0);
 
-            var agent = new ThreadInfoAgent();
+            var agent = new ThreadInfoAgent(15);
             Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
             Assert.AreEqual(count.Value, 1);
         }
@@ -93,7 +93,7 @@ namespace PaletteInsightAgentTests.ThreadInfo
             var table = ThreadTables.makeThreadInfoTable();
             IBox<long> count = Args.Ref<long>(0);
 
-            var agent = new ThreadInfoAgent();
+            var agent = new ThreadInfoAgent(15);
             Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
             Isolate.Verify.WasNotCalled(() => FakeLogger.Error("Failed to poll thread info for process {0}! Exception message: {1}", "", ""));
         }
