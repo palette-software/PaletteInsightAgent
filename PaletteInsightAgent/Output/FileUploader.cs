@@ -138,12 +138,10 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         private static IList<FileInfo> CollectStoredFiles()
         {
-            // Collect all the stored files (processed, unsent, error) into an ordered
+            // Collect all the stored files (data, data/processed, data/error) into an ordered
             // list, where the first item is going to be the oldest file.
-            IList<string> folders = new List<string>(new string[] { ProcessedPath, ErrorPath });
 
-            return folders.Where(folder => Directory.Exists(folder))
-                .SelectMany(folder => Directory.EnumerateFiles(folder))
+            return Directory.EnumerateFiles(OutputSerializer.DATA_FOLDER, "*.*", SearchOption.AllDirectories)
                 .Select(file => new FileInfo(file))
                 .OrderBy(file => file.CreationTimeUtc)
                 .ToList();
