@@ -142,7 +142,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
         protected DateTime CalculatePollCycleTimeStamp()
         {
             var now = DateTime.UtcNow;
-            var pollCycleTimeStamp = GetRoundedPollCycleTimeStamp(now, pollInterval);
+            var pollCycleTimeStamp = TruncateToPreviousBeat(now, pollInterval);
 
             // We need to make sure that between the current poll cycle time stamp and the
             // previous poll cycle time stamp there is at least one poll interval elapsed.
@@ -159,7 +159,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
                 if (pollCycleTimeStamp > now.AddSeconds(1))
                 {
                     TimeSpan difference = pollCycleTimeStamp - now;
-                    Log.Warn("Aligned poll cycle time stamp is more than 1 second later than the current time stamp! Difference: {0}",
+                    Log.Debug("Aligned poll cycle time stamp is more than 1 second later than the current time stamp! Difference: {0}",
                         difference);
                     // Try our best to match up with the desired poll timings.
                     Thread.Sleep(difference);
@@ -170,19 +170,17 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             return pollCycleTimeStamp;
         }
 
-        protected static DateTime GetRoundedPollCycleTimeStamp(DateTime now, int pollInterval)
+        protected static DateTime TruncateToPreviousBeat(DateTime now, int pollInterval)
         {
             int dueTimeToNextBeat = PaletteInsightAgent.CalculateDueTime(pollInterval);
-            DateTime nextBeat = now.AddMilliseconds(dueTimeToNextBeat);
-            DateTime prevBeat = nextBeat.AddSeconds(-pollInterval);
-
-            if (nextBeat - now < now - prevBeat)
+            if (dueTimeToNextBeat == 0)
             {
-                // Next beat is closer in time.
-                return nextBeat;
+                // Just on the beat.
+                return now;
             }
 
-            return prevBeat;
+            // Return the previous (already elapsed) beat.
+            return now.AddMilliseconds(dueTimeToNextBeat - pollInterval * 1000);
         }
     }
 }
