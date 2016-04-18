@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
-using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Output;
 using PaletteInsight.Configuration;
+using System.Threading;
 
 namespace PaletteInsightAgent.ThreadInfoPoller
 {
@@ -31,6 +30,14 @@ namespace PaletteInsightAgent.ThreadInfoPoller
         public static readonly string InProgressLock = "Thread Info";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
+
+        private int pollInterval;
+        private DateTime previousPollCycleTimeStamp;
+
+        public ThreadInfoAgent(int pollInterval)
+        {
+            this.pollInterval = pollInterval;
+        }
 
         public void poll(IDictionary<string, ProcessData> processData, bool allProcesses)
         {
@@ -61,7 +68,8 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
         protected void pollProcessList(ICollection<Process> processList, IDictionary<string, ProcessData> processData, DataTable threadInfoTable, ref long threadInfoTableCount)
         {
-            var pollCycleTimeStamp = DateTimeOffset.Now.UtcDateTime;
+            var pollCycleTimeStamp = CalculatePollCycleTimeStamp();
+
             foreach (var process in processList)
             {
                 var threadLevel = processData.ContainsKey(process.ProcessName) && processData[process.ProcessName].Granularity == "Thread";
@@ -76,7 +84,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             threadInfo.processId = process.Id;
             threadInfo.threadId = threadId;
             threadInfo.cpuTime = ticks;
-            threadInfo.pollTimeStamp = DateTimeOffset.Now.UtcDateTime;
+            threadInfo.pollTimeStamp = DateTime.UtcNow;
             threadInfo.pollCycleTimeStamp = pollCycleTimeStamp;
             threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
@@ -129,6 +137,52 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             {
                 Log.Error("Failed to poll thread info for process {0}! Exception message: {1}", process.ProcessName, ex.Message);
             }
+        }
+
+        protected DateTime CalculatePollCycleTimeStamp()
+        {
+            var now = DateTime.UtcNow;
+            var pollCycleTimeStamp = GetRoundedPollCycleTimeStamp(now, pollInterval);
+
+            // We need to make sure that between the current poll cycle time stamp and the
+            // previous poll cycle time stamp there is at least one poll interval elapsed.
+            if (previousPollCycleTimeStamp != default(DateTime))
+            {
+                // So this is not the first poll. Let's do the check and align, if necessary.
+                var nextAcceptableTimeStamp = previousPollCycleTimeStamp.AddSeconds(pollInterval);
+                if (nextAcceptableTimeStamp > pollCycleTimeStamp)
+                {
+                    // Align the poll cycle timestamp
+                    pollCycleTimeStamp = nextAcceptableTimeStamp;
+                }
+
+                if (pollCycleTimeStamp > now.AddSeconds(1))
+                {
+                    TimeSpan difference = pollCycleTimeStamp - now;
+                    Log.Warn("Aligned poll cycle time stamp is more than 1 second later than the current time stamp! Difference: {0}",
+                        difference);
+                    // Try our best to match up with the desired poll timings.
+                    Thread.Sleep(difference);
+                }
+            }
+            previousPollCycleTimeStamp = pollCycleTimeStamp;
+
+            return pollCycleTimeStamp;
+        }
+
+        protected static DateTime GetRoundedPollCycleTimeStamp(DateTime now, int pollInterval)
+        {
+            int dueTimeToNextBeat = PaletteInsightAgent.CalculateDueTime(pollInterval);
+            DateTime nextBeat = now.AddMilliseconds(dueTimeToNextBeat);
+            DateTime prevBeat = nextBeat.AddSeconds(-pollInterval);
+
+            if (nextBeat - now < now - prevBeat)
+            {
+                // Next beat is closer in time.
+                return nextBeat;
+            }
+
+            return prevBeat;
         }
     }
 }
