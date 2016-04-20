@@ -97,22 +97,10 @@ test_script:
         $watched_folder_2 = "c:\watched_folder_2";
         md $watched_folder_1;
         md $watched_folder_2;
-    #     $env:CONFIG_YML_PATH = "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml";
-    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "8060", "5432" } | Set-Content $env:CONFIG_YML_PATH;
-    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\vizqlserver\\Logs", $watched_folder_1 } | Set-Content $env:CONFIG_YML_PATH;
-    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "c:\\ProgramData\\Tableau\\Tableau Server\\data\\tabsvc\\logs\\vizqlserver", $watched_folder_2 } | Set-Content $env:CONFIG_YML_PATH;
-    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "ThreadInfoPollInterval: 15", "ThreadInfoPollInterval: 5" } | Set-Content $env:CONFIG_YML_PATH;
-    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "DBWriteInterval: 60", "DBWriteInterval: 7" } | Set-Content $env:CONFIG_YML_PATH;
-    #     (Get-Content $env:CONFIG_YML_PATH) | ForEach-Object { $_ -replace "LogPollInterval: 300", "LogPollInterval: 6" } | Set-Content $env:CONFIG_YML_PATH;
-    #     echo " - Name: PaletteInsightAgent" > "C:\Program Files (x86)\Palette Insight Agent\Config\Processes.yml";
-    # - echo "Reconfigured config.yml"
 
-    # # # Temporarily try to get insight-tester from Cubby, since github releases are private if the repo is private
-    # # - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/windows_amd64.zip/_9ad90cb684fd4e7393f655e82343dbc9', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\insight-tester.zip')
-    - ps: (New-Object Net.WebClient).DownloadFile('https://www.cubbyusercontent.com/pl/example_serverlogs.zip/_dff3cc9075aa4c9f8be14c4aeeb0f734', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
+    # Acquire example serverlogs from our S3 'palette-insight-test' bucket
+    - ps: (New-Object Net.WebClient).DownloadFile('https://s3.amazonaws.com/palette-insight-test/example_serverlogs.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
     - echo "Downloaded example_serverlogs.zip"
-    # - echo "Unzipped insight tester"
-    # - windows_amd64\agentrunner.exe start
     # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
     - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
     - ps: Start-Service -Name PaletteInsightAgent
@@ -121,7 +109,6 @@ test_script:
     - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
     - sleep 13
     - echo "Sleeping for 17 seconds"
-    # - windows_amd64\agentrunner.exe stop
     - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
     - echo "End of PaletteInsightAgent log"
     - ps: >-
