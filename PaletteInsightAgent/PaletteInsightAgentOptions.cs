@@ -16,6 +16,7 @@ namespace PaletteInsightAgent
         {
             public string FolderToWatch { get; set; }
             public string DirectoryFilter { get; set; }
+            public string LogFormat { get; set; }
         }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
