@@ -90,6 +90,8 @@ namespace PaletteInsightAgent.Counters
     // Yaml types
     public class Config
     {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
         [YamlMember(Alias = "Categories")]
         public ICollection<Category> Categories { get; set; }
         public static ICollection<ICounter> ToICounterList(ICollection<Config> configs)
@@ -105,12 +107,28 @@ namespace PaletteInsightAgent.Counters
                         {
                             foreach (var instance in counter.Instances)
                             {
-                                ret.Add(new PerfmonCounter(category.Name, counter.Name, instance));
+                                try
+                                {
+                                    ret.Add(new PerfmonCounter(category.Name, counter.Name, instance));
+                                }
+                                catch (Exception ex)
+                                {
+                                    Log.Warn("Failed to load performance counter! Category: {0} Counter: {1} Instance: {2}. Error message: {3}",
+                                     category.Name, counter.Name, instance, ex.Message);
+                                }
                             }
                         }
                         else
                         {
-                            ret.Add(new PerfmonCounter(category.Name, counter.Name, null));
+                            try
+                            {
+                                ret.Add(new PerfmonCounter(category.Name, counter.Name, null));
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Warn("Failed to load performance counter! Category: {0} Counter: {1}. Error message: {2}",
+                                 category.Name, counter.Name, ex.Message);
+                            }
                         }
                     }
 
