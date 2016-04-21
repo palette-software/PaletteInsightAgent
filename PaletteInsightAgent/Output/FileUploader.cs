@@ -91,7 +91,23 @@ namespace PaletteInsightAgent.Output
             long cumulatedSize = 0;
             foreach (var file in storedFiles)
             {
-                cumulatedSize += file.Length;
+                try
+                {
+                    cumulatedSize += file.Length;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is IOException || ex is FileNotFoundException)
+                    {
+                        // This is not an error, because file may be gone after we iterated them.
+                        // Either it has been uploaded in the meantime, or it has been renamed
+                        // because the CSV writing finished. (Removed the .writing postfix.)
+                    }
+                    else
+                    {
+                        Log.Error("Unexpected error while determining size of file: {0}. Error message: {1}", file.Name, ex.Message);
+                    }
+                }
             }
 
             if (storageLimitInBytes > cumulatedSize)
