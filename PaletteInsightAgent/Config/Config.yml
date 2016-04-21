@@ -1,17 +1,20 @@
-﻿UseCounterSamples: true
-UseLogPolling: true
-UseRepoPolling: true
-UseThreadInfo: true
+﻿# Default values are commented out, so that they can be more easily updated with newer releases.
+# Simply uncomment those where you need different values.
 
-PollInterval: 30
-ThreadInfoPollInterval: 15
-LogPollInterval: 300
-RepoTablesPollInterval: 3600
-ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
-StorageLimit: 1024          # Given in megabytes. Default is 1 Gb.
+#UseCounterSamples: true
+#UseLogPolling: true
+#UseRepoPolling: true
+#UseThreadInfo: true
 
-# The maximum number of log lines that will be read in a single batch
-LogLinesPerBatch: 10000
+#PollInterval: 30
+#ThreadInfoPollInterval: 15
+#LogPollInterval: 300
+RepoTablesPollInterval: 3600	# This value must be set to 0 for worker nodes.
+#ProcessedFilesTTL: 0			# Given in seconds. Default is not to keep processed files.
+#StorageLimit: 1024				# Given in megabytes. Default is 10 Gb.
+
+# The maximum number of log lines that will be read and uploaded in a single batch
+#LogLinesPerBatch: 10000
 
 Webservice:
  Endpoint: http://localhost:9000
