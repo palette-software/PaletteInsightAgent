@@ -36,6 +36,11 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "Filter")]
             public string Filter { get; set; }
+
+            [YamlMember(Alias = "Format")]
+            //public string Format { get; set; } = "json";
+            // Until the Talend side is not updated, the default format name should remain "server"
+            public string Format { get; set; } = "server";
         }
 
         public class ProcessData
