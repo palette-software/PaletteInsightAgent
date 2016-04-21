@@ -8,8 +8,6 @@ namespace PaletteInsight
 
     namespace Configuration
     {
-        // DatabaseConfig is deprecated, but we need to support them until there are agents still
-        // out there with config files containing DatabaseConfig.
         public class DatabaseConfig
         {
             [YamlMember(Alias = "Database")]
