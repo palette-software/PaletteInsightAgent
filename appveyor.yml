@@ -131,7 +131,7 @@ deploy:
   tag: v$(appveyor_build_version)
   release: Palette Insight v$(appveyor_build_version)
   auth_token:
-    secure: Y8zvK91qR+RxmrmqdSPNYGAoLJFytPzX6cVSnHv4LY358RJfTrpzwiWuDumqYNps
+    secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
   artifact: '*.msi'
   draft: true
   prerelease: true
