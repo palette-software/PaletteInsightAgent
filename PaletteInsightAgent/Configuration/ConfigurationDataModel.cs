@@ -8,6 +8,8 @@ namespace PaletteInsight
 
     namespace Configuration
     {
+        // DatabaseConfig is deprecated, but we need to support them until there are agents still
+        // out there with config files containing DatabaseConfig.
         public class DatabaseConfig
         {
             [YamlMember(Alias = "Database")]
@@ -106,7 +108,7 @@ namespace PaletteInsight
             public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
 
             [YamlMember(Alias = "StorageLimit")]
-            public int StorageLimit { get; set; } = 1 * 1024; // Default is 1 Gb. This value is given in megabytes.
+            public int StorageLimit { get; set; } = 10 * 1024; // Default is 10 GB. This value is given in megabytes.
 
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; }
