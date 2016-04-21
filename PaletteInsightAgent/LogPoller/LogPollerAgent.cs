@@ -39,7 +39,7 @@ namespace PaletteInsightAgent.LogPoller
             foreach (var folderInfo in foldersToWatch)
             {
                 Log.Info("Starting LogFileWatcher in " + folderInfo.FolderToWatch + " with file mask:" + folderInfo.DirectoryFilter);
-                watchers.Add(new LogFileWatcher(folderInfo.FolderToWatch, folderInfo.DirectoryFilter, logLinesPerBatch));
+                watchers.Add(new LogFileWatcher(folderInfo.FolderToWatch, folderInfo.DirectoryFilter, logLinesPerBatch, folderInfo.LogFormat));
             }
         }
 
@@ -57,7 +57,7 @@ namespace PaletteInsightAgent.LogPoller
                 watcher.watchChangeCycle((filename, lines) =>
                 {
                     // create a new output table for the file
-                    var serverLogsTable = LogTables.makeServerLogsTable();
+                    var serverLogsTable = LogTables.makeServerLogsTable(watcher.logFormat);
 
                     Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
 
