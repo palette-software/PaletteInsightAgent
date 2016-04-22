@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PaletteInsightAgent.Helpers;
+using NLog;
 
 namespace PaletteInsightAgent.LogPoller
 {
     class LogTables
     {
-        public static readonly string SERVERLOGS_TABLE_NAME = "serverlogs";
+        public static readonly string SERVERLOGS_TABLE_NAME = "logs";
 
         //CREATE TABLE serverlogs
         //(
@@ -18,9 +19,10 @@ namespace PaletteInsightAgent.LogPoller
         //  host_name text,
         //  line text
         //)
-        public static DataTable makeServerLogsTable()
+        public static DataTable makeServerLogsTable(string format)
         {
-            var table = new DataTable(SERVERLOGS_TABLE_NAME);
+            var tableName = format + SERVERLOGS_TABLE_NAME;
+            var table = new DataTable(tableName);
 
             TableHelper.addColumn(table, "filename");
             TableHelper.addColumn(table, "host_name");
