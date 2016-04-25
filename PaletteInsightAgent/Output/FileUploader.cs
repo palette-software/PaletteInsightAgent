@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 
 namespace PaletteInsightAgent.Output
 {
@@ -201,12 +200,20 @@ namespace PaletteInsightAgent.Output
                             {
                                 if (x is HttpRequestException)
                                 {
-                                    throw new HttpRequestException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
+                                    throw new TemporaryException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
                                 }
-                                else
+                                else if (x is IOException)
                                 {
-                                    Log.Error(x, "Error while uploading file: {0}", csvFile);
+                                    if (x.Message.Contains("The process cannot access the file"))
+                                    {
+                                        // Don't do anything. It means we have concurred with the unfinished File.Move.
+                                        // This file will be successfully uploaded in next iteration.
+                                        throw new TemporaryException(String.Format("File is still being moved by other thread: {0} Message: {1}", csvFile, x.Message));
+                                    }
                                 }
+
+                                Log.Error(x, "Error while uploading file: {0}", csvFile);
+                                MoveToFolder(csvFile, ErrorPath);
                                 return true;
                             });
                         }
@@ -217,10 +224,10 @@ namespace PaletteInsightAgent.Output
                         }
                     }
                 }
-                catch (HttpRequestException e)
+                catch (TemporaryException e)
                 {
-                    Log.Warn("Error while uploading files for table {0}. Message: {1}", table, e.Message);
-                    // Nothing to do here. Leave this filetype as is, we will upload in the next iteration and when connection is alive again
+                    // Nothing to do here. Leave this filetype as is, we will upload in the next iteration
+                    Log.Warn("Temporarily unable to upload files for table {0}. Message: {1}", table, e.Message);
                 }
                 catch (Exception e)
                 {
@@ -349,6 +356,16 @@ namespace PaletteInsightAgent.Output
                 Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
             }
         }
+    }
 
+    /// <summary>
+    /// This type of exceptions are supposed to be "auto-healing" exceptions. So retry attempts of those operations
+    /// which throw exceptions like this, are expected to finish without exception eventually.
+    /// </summary>
+    class TemporaryException : Exception
+    {
+        public TemporaryException(string message) : base(message)
+        {
+        }
     }
 }
