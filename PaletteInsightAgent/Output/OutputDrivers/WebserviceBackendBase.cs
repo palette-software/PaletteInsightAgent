@@ -27,24 +27,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// </summary>
         protected HashAlgorithm fileHasher = ((HashAlgorithm)CryptoConfig.CreateFromName("MD5"));
 
-        /// <summary>
-        /// Gets the Md5 of a file using a FileStream instead of reading it into memory
-        /// </summary>
-        /// <param name="file"></param>
-        /// <returns></returns>
-        protected static string GetFileMd5(string file)
-        {
-            // get the MD5
-            using (var fs = File.OpenRead(file))
-            {
-                using (var md5 = MD5.Create())
-                {
-                    return BitConverter.ToString(md5.ComputeHash(fs)).Replace("-", string.Empty);
-                }
-            }
-        }
-
-
         #region IDisposable
         /// <summary>
         /// Since this output driver holds no resources that need to be released,
