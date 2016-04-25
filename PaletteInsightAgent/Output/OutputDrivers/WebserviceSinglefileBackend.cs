@@ -12,8 +12,9 @@ namespace PaletteInsightAgent.Output.OutputDrivers
     /// <summary>
     /// A webservice backend for dealing with single file uploads
     /// </summary>
-    public class SinglefileBackend : WebserviceBackendBase, IOutput
+    public class SinglefileBackend : IOutput
     {
+        public WebserviceConfiguration config;
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public void Write(string file)
@@ -99,5 +100,16 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                 }
             });
         }
+
+        #region IDisposable
+        /// <summary>
+        /// Since this output driver holds no resources that need to be released,
+        /// we dont do anything is Dispose()
+        /// </summary>
+        public void Dispose()
+        {
+        }
+
+        #endregion
     }
 }
