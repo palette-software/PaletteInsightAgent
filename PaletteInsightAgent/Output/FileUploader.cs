@@ -187,10 +187,18 @@ namespace PaletteInsightAgent.Output
                                 {
                                     throw new HttpRequestException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
                                 }
-                                else
+                                else if (x is IOException)
                                 {
-                                    Log.Error(x, "Error while uploading file: {0}", csvFile);
+                                    if (x.Message.Contains("The process cannot access the file"))
+                                    {
+                                        // Don't do anything. It means we have concurred with the unfinished File.Move.
+                                        // This file will be successfully uploaded in next iteration.
+                                        return true;
+                                    }
                                 }
+
+                                Log.Error(x, "Error while uploading file: {0}", csvFile);
+                                MoveToFolder(csvFile, ErrorPath);
                                 return true;
                             });
                         }
