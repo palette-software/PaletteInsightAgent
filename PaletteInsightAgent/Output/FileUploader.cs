@@ -8,6 +8,13 @@ using System.Threading;
 
 namespace PaletteInsightAgent.Output
 {
+    class TemporaryException : Exception
+    {
+        public TemporaryException(string message) : base(message)
+        {
+        }
+    }
+
     class FileUploader
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -185,7 +192,7 @@ namespace PaletteInsightAgent.Output
                             {
                                 if (x is HttpRequestException)
                                 {
-                                    throw new HttpRequestException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
+                                    throw new TemporaryException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
                                 }
                                 else if (x is IOException)
                                 {
@@ -193,7 +200,7 @@ namespace PaletteInsightAgent.Output
                                     {
                                         // Don't do anything. It means we have concurred with the unfinished File.Move.
                                         // This file will be successfully uploaded in next iteration.
-                                        return true;
+                                        throw new TemporaryException(String.Format("File is still being moved by other thread: {0} Message: {1}", csvFile, x.Message));
                                     }
                                 }
 
@@ -209,10 +216,10 @@ namespace PaletteInsightAgent.Output
                         }
                     }
                 }
-                catch (HttpRequestException e)
+                catch (TemporaryException e)
                 {
-                    Log.Warn("Error while uploading files for table {0}. Message: {1}", table, e.Message);
-                    // Nothing to do here. Leave this filetype as is, we will upload in the next iteration and when connection is alive again
+                    // Nothing to do here. Leave this filetype as is, we will upload in the next iteration
+                    Log.Warn("Temporarily unable to upload files for table {0}. Message: {1}", table, e.Message);
                 }
                 catch (Exception e)
                 {
