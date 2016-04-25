@@ -155,7 +155,7 @@ namespace PaletteInsightAgent.Sampler
             }
             else
             {
-                // Oracle has a 30 char limimt for columnNames.
+                // Oracle has a 30 char limit for columnNames.
                 row[toOracleColumnName(counter.Counter.ToSnakeCase())] = sample.SampleValue;
             }
             row["instance"] = counter.Instance;
