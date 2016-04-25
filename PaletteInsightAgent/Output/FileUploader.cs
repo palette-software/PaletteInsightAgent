@@ -4,17 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 
 namespace PaletteInsightAgent.Output
 {
-    class TemporaryException : Exception
-    {
-        public TemporaryException(string message) : base(message)
-        {
-        }
-    }
-
     class FileUploader
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -348,6 +340,16 @@ namespace PaletteInsightAgent.Output
                 Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
             }
         }
+    }
 
+    /// <summary>
+    /// This type of exceptions are supposed to be "auto-healing" exceptions. So retry attempts of those operations
+    /// which throw exceptions like this, are expected to finish without exception eventually.
+    /// </summary>
+    class TemporaryException : Exception
+    {
+        public TemporaryException(string message) : base(message)
+        {
+        }
     }
 }
