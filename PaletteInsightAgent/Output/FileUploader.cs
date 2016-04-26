@@ -199,8 +199,9 @@ namespace PaletteInsightAgent.Output
                         {
                             ae.Handle((x) =>
                             {
-                                if (x is HttpRequestException || x is OperationCanceledException || x is TaskCanceledException)
+                                if (x is HttpRequestException || x is TaskCanceledException)
                                 {
+                                    // HttpRequestException is expected on network errors. TaskCanceledException is thrown if the async task (HTTP request) timed out.
                                     throw new TemporaryException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
                                 }
                                 else if (x is IOException)
