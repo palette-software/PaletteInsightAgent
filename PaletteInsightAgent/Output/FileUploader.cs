@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.Output
 {
@@ -198,7 +199,7 @@ namespace PaletteInsightAgent.Output
                         {
                             ae.Handle((x) =>
                             {
-                                if (x is HttpRequestException)
+                                if (x is HttpRequestException || x is OperationCanceledException || x is TaskCanceledException)
                                 {
                                     throw new TemporaryException(String.Format("Unable to upload file: {0} Message: {1}", csvFile, x.Message));
                                 }
