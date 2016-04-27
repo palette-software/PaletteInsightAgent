@@ -20,6 +20,15 @@ namespace PaletteInsightAgent.Helpers
         private static readonly string HostName = Uri.EscapeDataString(Dns.GetHostName());
         private static IWebProxy proxy = null;
 
+        public static void SetTrustSSL()
+        {
+            ServicePointManager
+                .ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => {
+                    return true;
+                    };
+        }
+
         public static void Init(WebserviceConfiguration webConfig)
         {
             config = webConfig;
@@ -27,11 +36,6 @@ namespace PaletteInsightAgent.Helpers
             {
                 proxy = new WebProxy(webConfig.ProxyAddress, false, new string[]{}, new NetworkCredential(webConfig.ProxyUsername, webConfig.ProxyPassword));
             }
-            ServicePointManager
-                .ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => {
-                    return true;
-                    };
         }
 
         public static HttpClientHandler GetHttpClientHandler()
