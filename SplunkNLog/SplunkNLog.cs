@@ -125,7 +125,7 @@ namespace SplunkNLog
                             }
 
                             // Do not work with too large batches
-                            if (serializedMessagesCount > MaxBatchSize)
+                            if (serializedMessagesCount >= MaxBatchSize)
                             {
                                 // Signal that we still have unprocessed messages.
                                 hasMessageToLog.Set();
