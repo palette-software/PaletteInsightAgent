@@ -95,14 +95,6 @@ namespace SplunkNLog
                     messagesToSplunk.DiscardItems(messageCount - MaxPendingQueueSize);
                 }
 
-                // Do not work with too large batches
-                if (messageCount > MaxBatchSize)
-                {
-                    messageCount = MaxBatchSize;
-                    // Signal that we still have unprocessed messages.
-                    hasMessageToLog.Set();
-                }
-
                 try
                 {
                     MemoryStream ms = new MemoryStream();
@@ -111,7 +103,8 @@ namespace SplunkNLog
                     param.UseExtensions = false;
                     using (StreamWriter writer = new StreamWriter(ms))
                     {
-                        for (int i = 0; i < messageCount; ++i)
+                        var serializedMessagesCount = 0;
+                        while (messageCount > 0)
                         {
                             SplunkMessage spm = new SplunkMessage();
                             try
@@ -126,6 +119,21 @@ namespace SplunkNLog
                                 // JSON conversion failed. Either way, skip this event.
                                 continue;
                             }
+                            finally
+                            {
+                                serializedMessagesCount++;
+                            }
+
+                            // Do not work with too large batches
+                            if (serializedMessagesCount > MaxBatchSize)
+                            {
+                                // Signal that we still have unprocessed messages.
+                                hasMessageToLog.Set();
+                                break;
+                            }
+
+                            // Try to be greedy to increase batch size.
+                            messageCount = messagesToSplunk.Count;
                         }
                     }
 
