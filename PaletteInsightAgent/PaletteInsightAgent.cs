@@ -64,6 +64,8 @@ namespace PaletteInsightAgent
             Assembly assembly = Assembly.GetExecutingAssembly();
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assembly.Location));
 
+            APIClient.SetTrustSSL();
+
             // Load PaletteInsightAgentOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PaletteInsightAgentOptions.Instance;
             PaletteInsight.Configuration.Loader.LoadConfigTo(LoadConfigFile("config/Config.yml"), options);

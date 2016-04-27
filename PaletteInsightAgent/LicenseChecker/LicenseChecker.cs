@@ -33,13 +33,13 @@ namespace PaletteInsightAgent.LicenseChecker
                 {
                     var contents = File.ReadAllText(f);
                     var validLicense = licenseManager.isValidLicense(contents, coreCount, publicKey);
+                    // Set a custom variable for NLog, so that we can filter on it in LogEntries
+                    NLog.GlobalDiagnosticsContext.Set("license_owner", validLicense.license.owner);
+
                     // If the license is valid, then return true and log the success and license info
                     if (validLicense.isValid)
                     {
                         var license = validLicense.license;
-
-                        // Set a custom variable for NLog, so that we can filter on it in LogEntries
-                        NLog.GlobalDiagnosticsContext.Set("license_owner", license.owner);
 
                         Log.Info("Found valid license in {0}", f);
                         Log.Info("  - licensed to: {0}", license.owner);
@@ -47,7 +47,8 @@ namespace PaletteInsightAgent.LicenseChecker
                         Log.Info("  - license core count: {0}", license.coreCount);
                         Log.Info("  - valid until: {0}", license.validUntilUTC.ToLongDateString());
                         return license;
-                    } else
+                    }
+                    else
                     {
                         var license = validLicense.license;
 
