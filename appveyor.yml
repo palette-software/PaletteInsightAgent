@@ -124,7 +124,7 @@ test_script:
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
     # - echo "Starting SMOKE test on GoCD"
-    # - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST
+    # - curl 'https://gocd-server.palette-software.net:8154/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST --insecure
 artifacts:
 - path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
   name: Github
