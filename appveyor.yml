@@ -20,8 +20,8 @@ environment:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
         secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
-services:
-  - postgresql93
+# services:
+#   - postgresql93
 build_script:
   - nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
   - nuget.exe restore
@@ -59,6 +59,8 @@ build_script:
   - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
+  - '"vstest.console /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"'
+
     # # Setup Postgres 9.3 on the worker
     # - SET PGUSER=postgres
     # - SET PGPASSWORD=Password12!
