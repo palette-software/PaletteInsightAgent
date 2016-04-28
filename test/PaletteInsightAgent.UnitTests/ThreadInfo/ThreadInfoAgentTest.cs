@@ -1,13 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PaletteInsightAgent.ThreadInfoPoller;
-using TypeMock.ArrangeActAssert;
-using System.Diagnostics;
-using TypeMock.ArrangeActAssert.Fluent;
-using NLog;
-using TypeMock;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PaletteInsightAgentTests.ThreadInfo
 {
@@ -68,34 +59,34 @@ namespace PaletteInsightAgentTests.ThreadInfo
         //
         #endregion
 
-        [TestMethod, Isolated]
-        public void ShouldInsertValueForProcess()
-        {
-            var process = Isolate.Fake.AllInstances<Process>();
-            Isolate.WhenCalled(() => process.TotalProcessorTime).WillReturn(new TimeSpan(15600));
-            Isolate.WhenCalled(() => process.StartTime).WillReturn(System.DateTime.Now);
-            var table = ThreadTables.makeThreadInfoTable();
-            IBox<long> count = Args.Ref<long>(0);
+        //[TestMethod, Isolated]
+        //public void ShouldInsertValueForProcess()
+        //{
+        //    var process = Isolate.Fake.AllInstances<Process>();
+        //    Isolate.WhenCalled(() => process.TotalProcessorTime).WillReturn(new TimeSpan(15600));
+        //    Isolate.WhenCalled(() => process.StartTime).WillReturn(System.DateTime.Now);
+        //    var table = ThreadTables.makeThreadInfoTable();
+        //    IBox<long> count = Args.Ref<long>(0);
 
-            var agent = new ThreadInfoAgent(15);
-            Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
-            Assert.AreEqual(count.Value, 1);
-        }
+        //    var agent = new ThreadInfoAgent(15);
+        //    Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
+        //    Assert.AreEqual(count.Value, 1);
+        //}
 
-        [TestMethod, Isolated]
-        public void ShouldNotThrowWhenProcessExits()
-        {
-            var process = Isolate.Fake.AllInstances<Process>();
-            var FakeLogger = Isolate.Fake.Instance<Logger>();
-            ObjectState state = new ObjectState(typeof(ThreadInfoAgent));
-            state.SetField("Log", FakeLogger);
-            Isolate.WhenCalled(() => process.TotalProcessorTime).WillThrow(new InvalidOperationException());
-            var table = ThreadTables.makeThreadInfoTable();
-            IBox<long> count = Args.Ref<long>(0);
+        //[TestMethod, Isolated]
+        //public void ShouldNotThrowWhenProcessExits()
+        //{
+        //    var process = Isolate.Fake.AllInstances<Process>();
+        //    var FakeLogger = Isolate.Fake.Instance<Logger>();
+        //    ObjectState state = new ObjectState(typeof(ThreadInfoAgent));
+        //    state.SetField("Log", FakeLogger);
+        //    Isolate.WhenCalled(() => process.TotalProcessorTime).WillThrow(new InvalidOperationException());
+        //    var table = ThreadTables.makeThreadInfoTable();
+        //    IBox<long> count = Args.Ref<long>(0);
 
-            var agent = new ThreadInfoAgent(15);
-            Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
-            Isolate.Verify.WasNotCalled(() => FakeLogger.Error("Failed to poll thread info for process {0}! Exception message: {1}", "", ""));
-        }
+        //    var agent = new ThreadInfoAgent(15);
+        //    Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
+        //    Isolate.Verify.WasNotCalled(() => FakeLogger.Error("Failed to poll thread info for process {0}! Exception message: {1}", "", ""));
+        //}
     }
 }
