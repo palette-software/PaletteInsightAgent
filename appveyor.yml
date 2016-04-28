@@ -59,7 +59,7 @@ build_script:
   - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
-  #- vstest.console /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
+    - vstest.console /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
 
     # # Setup Postgres 9.3 on the worker
     # - SET PGUSER=postgres
@@ -152,4 +152,4 @@ deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
