@@ -96,7 +96,6 @@
   </Choose>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\resources\TypeMock\Isolator\8.2\AutoDeploy\TypeMock.MSBuild.Tasks" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -104,7 +103,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Target Name="RegisterTypeMock">
-    <TypeMockRegister Company="bastyip@starschema.net" License="O229-AZEM-7O76-9N64-6D86" AutoDeploy="True" />
-  </Target>
 </Project>
