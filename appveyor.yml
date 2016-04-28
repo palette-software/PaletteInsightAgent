@@ -139,6 +139,9 @@ deploy:
   prerelease: true
   on:
     branch: production
+after_deploy:
+- cmd: curl 'https://gocd-server.palette-software.net:8154/go/api/pipelines/Deployment/schedule' -u "gocd-admin:manager1" -X POST --insecure
+
 # notifications:
 # - provider: Slack
 #   incoming_webhook: <HOOK>
