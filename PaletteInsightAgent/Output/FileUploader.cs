@@ -165,13 +165,27 @@ namespace PaletteInsightAgent.Output
 
         private static IList<string> GetPendingTables(string from)
         {
-            return Directory.EnumerateFiles(from)
-                .Select(f => new FileInfo(f).Name)
-                .Where(fileName => fileName.Contains('-'))
-                .Select(fileName => fileName.Split('-')[0])
-                .Where(tableName => tableName.Length > 0)
-                .Distinct()
-                .ToList();
+            try
+            {
+                return Directory.EnumerateFiles(from)
+                    .Select(f => new FileInfo(f).Name)
+                    .Where(fileName => fileName.Contains('-'))
+                    .Select(fileName => fileName.Split('-')[0])
+                    .Where(tableName => tableName.Length > 0)
+                    .Distinct()
+                    .ToList();
+            }
+            catch (DirectoryNotFoundException dnfe)
+            {
+                Log.Warn("Directory: {0} not found while getting pending tables! Error message: {1}", dnfe.Message);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to get pending tables! Error message: {0}", e.Message);
+            }
+
+            // Return empty list on error
+            return new List<string>();
         }
 
         /// <summary>
