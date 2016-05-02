@@ -95,10 +95,10 @@ namespace PaletteInsight
             public int DBWriteInterval { get; set; } = 0;
 
             [YamlMember(Alias = "PollInterval")]
-            public int PollInterval { get; set; }
+            public int PollInterval { get; set; } = 30;
 
             [YamlMember(Alias = "ThreadInfoPollInterval")]
-            public int ThreadInfoPollInterval { get; set; }
+            public int ThreadInfoPollInterval { get; set; } = 15;
 
             [YamlMember(Alias = "UploadInterval")]
             public int UploadInterval { get; set; } = 10; // Every ten seconds
@@ -114,7 +114,7 @@ namespace PaletteInsight
             public int StorageLimit { get; set; } = 10 * 1024; // Default is 10 GB. This value is given in megabytes.
 
             [YamlMember(Alias = "LogPollInterval")]
-            public int LogPollInterval { get; set; }
+            public int LogPollInterval { get; set; } = 300;
 
 
             // Became outdated as it was misconfigured at clients
