@@ -59,22 +59,22 @@ build_script:
   - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
-    # # Setup Postgres 9.3 on the worker
-    # - SET PGUSER=postgres
-    # - SET PGPASSWORD=Password12!
-    # - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
-    # - createdb workgroup
-    # # Setup target database
-    # - createdb palette
-    # - psql -a -c "create user palette with password 'password';"    
-    # - psql -a -c "grant all on database palette to palette;"
-    # # Setup fake Tableau database
-    # - psql -a -c "create user readonly with password 'onlyread';"
-    # - psql -a -c "grant all on database workgroup to readonly;"
-    # - SET PGUSER=readonly
-    # - SET PGPASSWORD=onlyread
-    # - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
-    # - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
+    # Setup Postgres 9.3 on the worker
+    - SET PGUSER=postgres
+    - SET PGPASSWORD=Password12!
+    - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+    - createdb workgroup
+    # Setup target database
+    - createdb palette
+    - psql -a -c "create user palette with password 'password';"    
+    - psql -a -c "grant all on database palette to palette;"
+    # Setup fake Tableau database
+    - psql -a -c "create user readonly with password 'onlyread';"
+    - psql -a -c "grant all on database workgroup to readonly;"
+    - SET PGUSER=readonly
+    - SET PGPASSWORD=onlyread
+    - psql -a -c "CREATE TABLE core_licenses ( allocated_cores integer );" -d workgroup
+    - psql -a -c "INSERT INTO core_licenses VALUES (64);" -d workgroup
     # # And create the target tables, since the agent does not do that anymore on its own
     # - SET PGUSER=palette
     # - SET PGPASSWORD=password
