@@ -169,7 +169,7 @@ namespace PaletteInsightAgent.Output
             }
             catch (Exception e)
             {
-                Log.Error("Failed to collect stored files! Error message: {0}", e.Message);
+                Log.Error(e, "Failed to collect stored files! Exception: {0}", e);
             }
 
             // Return empty list on collection failure
@@ -194,7 +194,7 @@ namespace PaletteInsightAgent.Output
             }
             catch (Exception e)
             {
-                Log.Error("Failed to get pending tables from {0}! Error message: {1}",from , e.Message);
+                Log.Error("Failed to get pending tables from {0}! Exception: {1}", from , e);
             }
 
             // Return empty list on error
