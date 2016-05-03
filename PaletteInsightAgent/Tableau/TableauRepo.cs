@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.IO;
 using PaletteInsightAgent.Output;
+using System.Net.Sockets;
 
 namespace PaletteInsightAgent.RepoTablesPoller
 {
@@ -164,7 +165,15 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 }
                 catch (Npgsql.NpgsqlException e)
                 {
-                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                    Log.Error("NPGSQL exception while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                }
+                catch (SocketException se)
+                {
+                    Log.Warn("Socket exception while retrieving data from Tableau repository! Exception: {0}", se.Message);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error while retrieving data from Tableau repository Query: {0} Exception: {1}", query, ex);
                 }
             }
             return table;
