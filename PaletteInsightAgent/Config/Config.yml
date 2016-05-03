@@ -13,7 +13,7 @@
 RepoTablesPollInterval: 3600	# This value must be set to 0 for worker nodes.
 #ProcessedFilesTTL: 0			# Default is not to keep processed files.
 
-#StorageLimit: 1024				# Given in megabytes. Default is 10 GB.
+#StorageLimit: 10240			# Given in megabytes. Default is 10 GB.
 
 # The maximum number of log lines that will be read and uploaded in a single batch
 #LogLinesPerBatch: 10000
