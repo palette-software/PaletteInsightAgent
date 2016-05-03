@@ -156,22 +156,49 @@ namespace PaletteInsightAgent.Output
         {
             // Collect all the stored files (data, data/processed, data/error) into an ordered
             // list, where the first item is going to be the oldest file.
+            try
+            {
+                return Directory.EnumerateFiles(OutputSerializer.DATA_FOLDER, "*.*", SearchOption.AllDirectories)
+                    .Select(file => new FileInfo(file))
+                    .OrderBy(file => file.CreationTimeUtc)
+                    .ToList();
+            }
+            catch (DirectoryNotFoundException dnfe)
+            {
+                Log.Warn("Data directory not found while collecting stored files! Error message: {0}", dnfe.Message);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to collect stored files! Error message: {0}", e.Message);
+            }
 
-            return Directory.EnumerateFiles(OutputSerializer.DATA_FOLDER, "*.*", SearchOption.AllDirectories)
-                .Select(file => new FileInfo(file))
-                .OrderBy(file => file.CreationTimeUtc)
-                .ToList();
+            // Return empty list on collection failure
+            return new List<FileInfo>();
         }
 
         private static IList<string> GetPendingTables(string from)
         {
-            return Directory.EnumerateFiles(from)
-                .Select(f => new FileInfo(f).Name)
-                .Where(fileName => fileName.Contains('-'))
-                .Select(fileName => fileName.Split('-')[0])
-                .Where(tableName => tableName.Length > 0)
-                .Distinct()
-                .ToList();
+            try
+            {
+                return Directory.EnumerateFiles(from)
+                    .Select(f => new FileInfo(f).Name)
+                    .Where(fileName => fileName.Contains('-'))
+                    .Select(fileName => fileName.Split('-')[0])
+                    .Where(tableName => tableName.Length > 0)
+                    .Distinct()
+                    .ToList();
+            }
+            catch (DirectoryNotFoundException dnfe)
+            {
+                Log.Warn("Directory: {0} not found while getting pending tables! Error message: {1}", from, dnfe.Message);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to get pending tables from {0}! Error message: {1}",from , e.Message);
+            }
+
+            // Return empty list on error
+            return new List<string>();
         }
 
         /// <summary>
