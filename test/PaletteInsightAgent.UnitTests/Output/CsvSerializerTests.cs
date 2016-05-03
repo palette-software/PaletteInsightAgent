@@ -1,8 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TypeMock.ArrangeActAssert;
-using System.IO;
-using PaletteInsightAgent.Output;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PaletteInsightAgent.Helpers;
 
 namespace PaletteInsightAgentTests.Output

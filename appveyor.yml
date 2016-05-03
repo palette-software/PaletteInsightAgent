@@ -20,8 +20,8 @@ environment:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
         secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
-services:
-  - postgresql93
+# services:
+#   - postgresql93
 build_script:
   - nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
   - nuget.exe restore
@@ -59,6 +59,8 @@ build_script:
   - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
+    - vstest.console /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
+
     # # Setup Postgres 9.3 on the worker
     # - SET PGUSER=postgres
     # - SET PGPASSWORD=Password12!
@@ -122,7 +124,7 @@ test_script:
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
     # - echo "Starting SMOKE test on GoCD"
-    # - curl 'http://52.23.175.129:8153/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST
+    # - curl 'https://gocd-server.palette-software.net:8154/go/api/pipelines/smoke/schedule' -u "gocd-admin:%GOCDPASS%" -X POST --insecure
 artifacts:
 - path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
   name: Github
@@ -137,6 +139,9 @@ deploy:
   prerelease: true
   on:
     branch: production
+after_deploy:
+- cmd: curl 'https://gocd-server.palette-software.net:8154/go/api/pipelines/Deployment/schedule' -u "gocd-admin:manager1" -X POST --insecure
+
 # notifications:
 # - provider: Slack
 #   incoming_webhook: <HOOK>
