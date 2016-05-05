@@ -42,7 +42,6 @@ namespace PaletteInsightAgent.RepoTablesPoller
     /// </summary>
     public interface ITableauRepoConn : IDisposable
     {
-        ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp);
         DataTable GetTable(string tableName);
         DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax);
         DataTable GetIndices();
@@ -147,10 +146,11 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return (int)coreCount;
         }
 
-        private DataTable runQuery(string query)
+        private object queryWithReconnect(Func<object> query, object def)
         {
-            DataTable table = new DataTable();
-            lock (readLock)
+            // If server got restarted we get IOException for the first time and there is no
+            // other way to detect this but sending the query. This is why we have the for loop
+            for (int i= 0; i < 2; i++)
             {
                 if (!IsConnectionOpen())
                 {
@@ -158,52 +158,52 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 }
                 try
                 {
-                    using (var adapter = new NpgsqlDataAdapter(query, connection))
-                    {
-                        adapter.Fill(table);
-                    }
+                    return query();
                 }
                 catch (Npgsql.NpgsqlException e)
                 {
                     Log.Error("NPGSQL exception while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                    break;
                 }
-                catch (SocketException se)
+                catch (System.IO.IOException e)
                 {
-                    Log.Warn("Socket exception while retrieving data from Tableau repository! Exception: {0}", se.Message);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Error while retrieving data from Tableau repository Query: {0} Exception: {1}", query, ex);
+                    Log.Warn("Postgres Server was restarted. Reconnecting.", e);
                 }
             }
-            return table;
+            return def;
+        }
+
+        private DataTable runQuery(string query)
+        {
+            lock (readLock)
+            {
+                return (DataTable)queryWithReconnect(() => {
+                    using (var adapter = new NpgsqlDataAdapter(query, connection))
+                    {
+                        DataTable table = new DataTable();
+                        adapter.Fill(table);
+                        return table;
+                    }
+                }, new DataTable());
+            }
         }
 
         private long runScalarQuery(string query)
         {
-            long max = 0;
             lock (readLock)
             {
-                if (!IsConnectionOpen())
-                {
-                    reconnect();
-                }
-                try
+                return (long)queryWithReconnect(() =>
                 {
                     using (var cmd = new NpgsqlCommand())
                     {
                         cmd.Connection = connection;
                         // Insert some data
                         cmd.CommandText = query;
-                        max = (long)cmd.ExecuteScalar();
+                        long max = (long)cmd.ExecuteScalar();
+                        return max;
                     };
-                }
-                catch (Npgsql.NpgsqlException e)
-                {
-                    Log.Error("Error while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
-                }
+                }, 0);
             }
-            return max;
         }
 
         public DataTable GetSchemaTable()
@@ -314,77 +314,6 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return table;
         }
 
-
-        public ViewPath getViewPathForVizQLSessionId(string vizQLSessionId, DateTime timestamp)
-        {
-            if (String.IsNullOrWhiteSpace(vizQLSessionId)) return ViewPath.Empty;
-
-            lock (readLock)
-            {
-
-                if (!IsConnectionOpen())
-                {
-                    reconnect();
-                }
-
-                using (var cmd = connection.CreateCommand())
-                {
-
-                    cmd.Connection = connection;
-                    cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = "SELECT currentsheet, user_ip FROM http_requests WHERE vizql_session=@vizql_session_id AND created_at < @timestamp ORDER BY created_at DESC LIMIT 1";
-
-                    var sessionIdParam = cmd.CreateParameter();
-                    sessionIdParam.ParameterName = "@vizql_session_id";
-                    sessionIdParam.Value = vizQLSessionId;
-                    cmd.Parameters.Add(sessionIdParam);
-
-
-                    var timestampParam = cmd.CreateParameter();
-                    timestampParam.ParameterName = "@timestamp";
-                    timestampParam.Value = timestamp;
-                    cmd.Parameters.Add(timestampParam);
-
-                    try
-                    {
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                var sheet = reader["currentsheet"].ToString().Split(new char[] { '/' }, 2);
-                                var ip = reader["user_ip"].ToString();
-                                return ViewPath.make(sheet[0], sheet[1], ip);
-                            }
-                        }
-                        return ViewPath.Empty;
-                    }
-                    catch (DbException ex)
-                    {
-                        Log.Error("Error getting the vizql information for session id={0}. Exception message: {1}", vizQLSessionId, ex.Message);
-                        throw;
-                    }
-                    catch (IOException ioe)
-                    {
-                        Log.Error("IO Exception caught while getting view path for vizql session: {0}. Exception message: {1}", vizQLSessionId, ioe.Message);
-                        try
-                        {
-                            connection.Close();
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error("Exception caught while closing crippled connection for vizql session: {0}. Exception message: {1}", vizQLSessionId, e.Message);
-                        }
-                        finally
-                        {
-                            connection = null;
-                        }
-                    }
-                }
-            }
-
-            // Fallback to empty view path
-            return ViewPath.Empty;
-        }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
