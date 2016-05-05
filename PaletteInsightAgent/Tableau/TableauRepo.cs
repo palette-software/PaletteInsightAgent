@@ -146,7 +146,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return (int)coreCount;
         }
 
-        private object queryWithReconnect(Func<object> query, object def)
+        private T queryWithReconnect<T>(Func<T> query)
         {
             // If server got restarted we get IOException for the first time and there is no
             // other way to detect this but sending the query. This is why we have the for loop
@@ -170,21 +170,21 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     Log.Warn("Postgres Server was restarted. Reconnecting.", e);
                 }
             }
-            return def;
+            return (T)Activator.CreateInstance(typeof(T));
         }
 
         private DataTable runQuery(string query)
         {
             lock (readLock)
             {
-                return (DataTable)queryWithReconnect(() => {
+                return queryWithReconnect(() => {
                     using (var adapter = new NpgsqlDataAdapter(query, connection))
                     {
                         DataTable table = new DataTable();
                         adapter.Fill(table);
                         return table;
                     }
-                }, new DataTable());
+                });
             }
         }
 
@@ -192,7 +192,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         {
             lock (readLock)
             {
-                return (long)queryWithReconnect(() =>
+                return queryWithReconnect(() =>
                 {
                     using (var cmd = new NpgsqlCommand())
                     {
@@ -202,7 +202,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         long max = (long)cmd.ExecuteScalar();
                         return max;
                     };
-                }, 0);
+                });
             }
         }
 
