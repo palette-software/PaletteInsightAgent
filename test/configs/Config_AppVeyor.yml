@@ -10,9 +10,10 @@
 PollInterval: 5
 ThreadInfoPollInterval: 6
 LogPollInterval: 7
-RepoTablesPollInterval: 0	# Turned off for now. It would require external Tableau resources...
-ProcessedFilesTTL: 0        # Given in seconds. Default is not to keep processed files.
-StorageLimit: 1				# Given in megabytes. Default is 10 Gb.
+RepoTablesPollInterval: 0	    # Turned off for now. It would require external Tableau resources...
+StreamingTablesPollInterval: 0	# Turned off for now. It would require external Tableau resources...
+ProcessedFilesTTL: 0            # Given in seconds. Default is not to keep processed files.
+StorageLimit: 1				    # Given in megabytes. Default is 10 Gb.
 
 # The maximum number of log lines that will be read and uploaded in a single batch
 #LogLinesPerBatch: 10000

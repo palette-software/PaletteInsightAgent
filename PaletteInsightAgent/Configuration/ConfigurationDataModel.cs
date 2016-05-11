@@ -107,7 +107,7 @@ namespace PaletteInsight
             public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
 
             [YamlMember(Alias = "StreamingTablesPollInterval")]
-            public int StreamingTablesPollInterval { get; set; } = 0; // Default is turned off. It should be only turned on on primary nodes. Recommended value is 600 seconds.
+            public int StreamingTablesPollInterval { get; set; } = 600; // 10 minutes
 
             [YamlMember(Alias = "ProcessedFilesTTL")]
             // public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
@@ -150,6 +150,9 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "UseRepoPolling")]
             public bool UseRepoPolling { get; set; } = true;
+
+            [YamlMember(Alias = "IsPrimaryNode")]
+            public bool IsPrimaryNode { get; set; } = true;
 
             /// <summary>
             /// The maximum lines to be parsed in a batch from a log file

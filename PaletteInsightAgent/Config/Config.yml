@@ -6,12 +6,14 @@
 #UseRepoPolling: true
 #UseThreadInfo: true
 
+#IsPrimaryNode: false
+
 # The following values are all given in seconds.
 #PollInterval: 30
 #ThreadInfoPollInterval: 15
 #LogPollInterval: 300
-RepoTablesPollInterval: 3600		# This value must be set to 0 for worker nodes.
-StreamingTablesPollInterval: 600	# This value must be set to 0 for worker nodes.
+#RepoTablesPollInterval: 3600		# This value effects only on primary nodes.
+#StreamingTablesPollInterval: 600	# This value effects only on primary nodes.
 #ProcessedFilesTTL: 0				# Default is not to keep processed files.
 
 #StorageLimit: 10240				# Given in megabytes. Default is 10 GB.
