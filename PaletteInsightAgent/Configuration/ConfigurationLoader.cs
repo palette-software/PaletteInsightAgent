@@ -84,11 +84,15 @@ namespace PaletteInsight
                 options.UseCounterSamples = config.UseCounterSamples;
                 options.UseLogPolling = config.UseLogPolling;
                 options.UseThreadInfo = config.UseThreadInfo;
+
+                options.IsPrimaryNode = config.IsPrimaryNode;
+
+                // Polling of Tableau repo and streaming tables needs to be executed only on primary nodes.
                 // [...] for the legacy case UseRepoPolling is true by default and RepoTablesPollInterval is 0 to
                 // disable repo polling so this would mean different behaviour with the same config file.
-                options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
+                options.UseRepoPolling = config.IsPrimaryNode && config.UseRepoPolling && config.RepoTablesPollInterval > 0;
                 // and streaming tables is very similar and related to repo polling
-                options.UseStreamingTables = config.UseRepoPolling && config.StreamingTablesPollInterval > 0;
+                options.UseStreamingTables = config.IsPrimaryNode && config.UseRepoPolling && config.StreamingTablesPollInterval > 0;
 
                 // set the maximum log lines
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
