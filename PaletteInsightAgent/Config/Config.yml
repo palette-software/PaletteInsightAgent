@@ -10,10 +10,11 @@
 #PollInterval: 30
 #ThreadInfoPollInterval: 15
 #LogPollInterval: 300
-RepoTablesPollInterval: 3600	# This value must be set to 0 for worker nodes.
-#ProcessedFilesTTL: 0			# Default is not to keep processed files.
+RepoTablesPollInterval: 3600		# This value must be set to 0 for worker nodes.
+StreamingTablesPollInterval: 600	# This value must be set to 0 for worker nodes.
+#ProcessedFilesTTL: 0				# Default is not to keep processed files.
 
-#StorageLimit: 10240			# Given in megabytes. Default is 10 GB.
+#StorageLimit: 10240				# Given in megabytes. Default is 10 GB.
 
 # The maximum number of log lines that will be read and uploaded in a single batch
 #LogLinesPerBatch: 10000
@@ -28,6 +29,11 @@ Logs:
   -
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
     Filter: 'tabprotosrv*.txt'
+  - 
+	Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
+	Filter: 'tdeserver*.txt'
+	Format: 'plain'
+
 TableauRepo: 
   Host: localhost
   Port: 8060

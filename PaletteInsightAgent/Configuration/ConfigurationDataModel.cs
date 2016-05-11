@@ -106,6 +106,9 @@ namespace PaletteInsight
             [YamlMember(Alias = "RepoTablesPollInterval")]
             public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
 
+            [YamlMember(Alias = "StreamingTablesPollInterval")]
+            public int StreamingTablesPollInterval { get; set; } = 0; // Default is turned off. It should be only turned on on primary nodes. Recommended value is 600 seconds.
+
             [YamlMember(Alias = "ProcessedFilesTTL")]
             // public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
             public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
