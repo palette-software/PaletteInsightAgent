@@ -240,6 +240,11 @@ namespace PaletteInsightAgent.Output
                                         throw new TemporaryException(String.Format("File is still being moved by other thread: {0} Message: {1}", csvFile, x.Message));
                                     }
                                 }
+                                else if (x is TemporaryException)
+                                {
+                                    // It is already a TemporaryException, just pass it on to the handler.
+                                    throw x;
+                                }
 
                                 Log.Error(x, "Error while uploading file: {0}", csvFile);
                                 MoveToFolder(csvFile, ErrorPath);
