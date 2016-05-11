@@ -22,6 +22,7 @@ namespace PaletteInsightAgent
         public int LogPollInterval { get; set; }
         public int UploadInterval { get; set; }
         public int RepoTablesPollInterval { get; set; }
+        public int StreamingTablesPollInterval { get; set; }
         public int ThreadInfoPollInterval { get; set; }
         public int ProcessedFilestTTL { get; set; }
         public long StorageLimit { get; set; }
@@ -41,6 +42,9 @@ namespace PaletteInsightAgent
         public bool UseThreadInfo { get; set; }
         public bool UseLogPolling { get; set; }
         public bool UseRepoPolling { get; set; }
+        public bool UseStreamingTables { get; set; }
+
+        public bool IsPrimaryNode { get; set; }
 
         public int LogLinesPerBatch { get; set; }
 

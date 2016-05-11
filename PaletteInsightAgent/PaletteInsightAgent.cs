@@ -56,6 +56,7 @@ namespace PaletteInsightAgent
         // use the constant naming convention for now as the mutability
         // of this variable is temporary until the Db output is removed
         private bool USE_TABLEAU_REPO = true;
+        private bool USE_STREAMING_TABLES = true;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         public PaletteInsightAgent(bool loadOptionsFromConfig = true)
@@ -90,7 +91,15 @@ namespace PaletteInsightAgent
             USE_LOGPOLLER = options.UseLogPolling;
             USE_THREADINFO = options.UseThreadInfo;
             USE_COUNTERSAMPLES = options.UseCounterSamples;
+
             USE_TABLEAU_REPO = options.UseRepoPolling;
+            USE_STREAMING_TABLES = options.UseStreamingTables;
+            if (USE_TABLEAU_REPO != USE_STREAMING_TABLES)
+            {
+                // Having different setup for Tableau repo and streaming tables is not welcome
+                Log.Error("Invalid repo poll configuration! Either both Tableau repo poll and streaming tables poll should be enabled, or neither! Repo poll: {0} vs. Streaming tables: {1}",
+                    USE_TABLEAU_REPO, USE_STREAMING_TABLES);
+            }
 
             if (USE_LOGPOLLER)
             {
@@ -104,7 +113,7 @@ namespace PaletteInsightAgent
                 threadInfoAgent = new ThreadInfoAgent(options.ThreadInfoPollInterval);
             }
 
-            if (USE_TABLEAU_REPO)
+            if (USE_TABLEAU_REPO || USE_STREAMING_TABLES)
             {
                 repoPollAgent = new RepoPollAgent();
             }
@@ -213,7 +222,7 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if (USE_TABLEAU_REPO)
+            if (USE_TABLEAU_REPO || USE_STREAMING_TABLES)
             {
 
                 // On start get the schema of the repository tables
@@ -238,7 +247,11 @@ namespace PaletteInsightAgent
             {
                 // Poll Tableau repository data as well
                 repoTablesPollTimer = new Timer(callback: PollFullTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
-                streamingTablesPollTimer = new Timer(callback: PollStreamingTables, state: output, dueTime: 0, period: options.RepoTablesPollInterval * 1000);
+            }
+
+            if (USE_STREAMING_TABLES)
+            {
+                streamingTablesPollTimer = new Timer(callback: PollStreamingTables, state: output, dueTime: 0, period: options.StreamingTablesPollInterval * 1000);
             }
         }
 
@@ -312,7 +325,8 @@ namespace PaletteInsightAgent
             if (USE_LOGPOLLER) running = running && (logPollTimer != null);
             if (USE_THREADINFO) running = running && (threadInfoTimer != null);
             running = running && (webserviceTimer != null);
-            if (USE_TABLEAU_REPO) running = running && (repoTablesPollTimer != null && streamingTablesPollTimer != null);
+            if (USE_TABLEAU_REPO) running = running && repoTablesPollTimer != null;
+            if (USE_STREAMING_TABLES) running = running && streamingTablesPollTimer != null;
             return running;
         }
 
