@@ -38,6 +38,7 @@ namespace PaletteInsight
                 options.LogPollInterval = config.LogPollInterval;
                 options.UploadInterval = config.UploadInterval;
                 options.RepoTablesPollInterval = config.RepoTablesPollInterval;
+                options.StreamingTablesPollInterval = config.StreamingTablesPollInterval;
                 options.ThreadInfoPollInterval = config.ThreadInfoPollInterval;
 
                 options.ProcessedFilestTTL = config.ProcessedFilesTTL;
@@ -86,6 +87,8 @@ namespace PaletteInsight
                 // [...] for the legacy case UseRepoPolling is true by default and RepoTablesPollInterval is 0 to
                 // disable repo polling so this would mean different behaviour with the same config file.
                 options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
+                // and streaming tables is very similar and related to repo polling
+                options.UseStreamingTables = config.UseRepoPolling && config.StreamingTablesPollInterval > 0;
 
                 // set the maximum log lines
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
