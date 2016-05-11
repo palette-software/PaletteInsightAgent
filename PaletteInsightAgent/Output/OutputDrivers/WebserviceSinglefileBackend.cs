@@ -94,7 +94,11 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                         return;
                     // On Md5 failure re-send the file
                     case HttpStatusCode.Conflict:
-                        throw new HttpRequestException("MD5 error in " + file);
+                        throw new TemporaryException("MD5 error in " + file);
+                    case HttpStatusCode.BadGateway:
+                        throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
+                    case HttpStatusCode.Forbidden:
+                        throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
                     default:
                         throw new ArgumentException(String.Format("-> Unknown status: '{0}' for '{1}' -- moving to error", result.StatusCode, file));
                 }
