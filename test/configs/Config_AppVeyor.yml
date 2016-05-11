@@ -6,6 +6,8 @@
 #UseRepoPolling: true
 #UseThreadInfo: true
 
+IsPrimaryNode: true
+
 # The following values are all given in seconds.
 PollInterval: 5
 ThreadInfoPollInterval: 6
