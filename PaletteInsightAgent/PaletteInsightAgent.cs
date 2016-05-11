@@ -91,8 +91,15 @@ namespace PaletteInsightAgent
             USE_LOGPOLLER = options.UseLogPolling;
             USE_THREADINFO = options.UseThreadInfo;
             USE_COUNTERSAMPLES = options.UseCounterSamples;
+
             USE_TABLEAU_REPO = options.UseRepoPolling;
             USE_STREAMING_TABLES = options.UseStreamingTables;
+            if (USE_TABLEAU_REPO != USE_STREAMING_TABLES)
+            {
+                // Having different setup for Tableau repo and streaming tables is not welcome
+                Log.Error("Invalid repo poll configuration! Either both Tableau repo poll and streaming tables poll should be enabled, or neither! Repo poll: {0} vs. Streaming tables: {1}",
+                    USE_TABLEAU_REPO, USE_STREAMING_TABLES);
+            }
 
             if (USE_LOGPOLLER)
             {
