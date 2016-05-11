@@ -152,7 +152,7 @@ namespace PaletteInsight
             public bool UseRepoPolling { get; set; } = true;
 
             [YamlMember(Alias = "IsPrimaryNode")]
-            public bool IsPrimaryNode { get; set; } = true;
+            public bool IsPrimaryNode { get; set; } = false;
 
             /// <summary>
             /// The maximum lines to be parsed in a batch from a log file
