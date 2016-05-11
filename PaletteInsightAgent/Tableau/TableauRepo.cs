@@ -71,7 +71,6 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
             Log.Info("Connecting to Tableau Repo PostgreSQL:" + db.Server);
             OpenConnection();
-            Log.Info("Connected to Tableau Repo...");
 
         }
 
@@ -84,6 +83,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             {
                 connection = new NpgsqlConnection(connectionStringBuilder);
                 connection.Open();
+                Log.Info("Connected to Tableau Repo...");
             }
             catch (Exception ex)
             {
