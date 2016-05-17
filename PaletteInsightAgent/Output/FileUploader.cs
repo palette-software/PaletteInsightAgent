@@ -251,9 +251,14 @@ namespace PaletteInsightAgent.Output
                                 return true;
                             });
                         }
+                        catch (TemporaryException tex)
+                        {
+                            // Nothing to do here. Leave this filetype as is, we will upload in the next iteration
+                            Log.Warn("Temporarily unable to upload data file {0}! Exception: {1}", csvFile, tex);
+                        }
                         catch (Exception e)
                         {
-                            Log.Error(e, "Failed to write data file {0} to database! Exception message: {1}", csvFile, e.Message);
+                            Log.Error(e, "Failed to upload data file {0}! Exception message: {1}", csvFile, e.Message);
                             MoveToFolder(csvFile, ErrorPath);
                         }
                     }
