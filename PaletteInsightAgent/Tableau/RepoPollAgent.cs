@@ -62,9 +62,14 @@ namespace PaletteInsightAgent.RepoTablesPoller
                             OutputSerializer.Write(table, newMax);
                         }
                     }
+                    catch (TaskCanceledException tce)
+                    {
+                        // This should be only a temporary condition, it is only a problem if it occurs many times in a row.
+                        Log.Warn("Polling streaming tables timed out! Exception: {0}", tce);
+                    }
                     catch (Exception e)
                     {
-                        Log.Error(e, String.Format("Error while polling streaming table: Message: {0}", e.Message));
+                        Log.Error(e, String.Format("Error while polling streaming table! Exception: "));
                     }
                 });
 
