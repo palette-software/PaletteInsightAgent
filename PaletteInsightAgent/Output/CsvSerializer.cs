@@ -6,6 +6,7 @@ using System;
 using System.Data;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 
 namespace PaletteInsightAgent.Output
 {
@@ -26,7 +27,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         public static int MaxFileSize = 50 * 1024 * 1024;
 
-        public string Extension { get { return ".csv"; } }
+        public string Extension { get { return ".csv.gz"; } }
 
         /// <summary>
         /// Tries to write the passed datatable to a series of files with a (rough) limit on the maximum file size.
@@ -56,8 +57,10 @@ namespace PaletteInsightAgent.Output
 
 
                 var fileExists = File.Exists(inProgressFileName);
-                using (var streamWriter = File.AppendText(inProgressFileName))
-                using (var csvWriter = new CsvHelper.CsvWriter(streamWriter, CsvConfig))
+                using (var fileStream = new FileStream(inProgressFileName, FileMode.Append))
+                using (var gzipStream = new GZipStream(fileStream, CompressionLevel.Optimal))
+                using (var streamWriter = new StreamWriter(gzipStream))
+                using (var csvWriter = new CsvWriter(streamWriter, CsvConfig))
                 {
                     // only write the header if the file does not exists
                     if (!fileExists)
