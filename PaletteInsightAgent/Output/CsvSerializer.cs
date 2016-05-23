@@ -14,6 +14,7 @@ namespace PaletteInsightAgent.Output
     {
 
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly string StaticExtension = ".csv.gz";
         private static readonly CsvConfiguration CsvConfig = new CsvHelper.Configuration.CsvConfiguration
         {
             CultureInfo = CultureInfo.InvariantCulture,
@@ -27,7 +28,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         public static int MaxFileSize = 50 * 1024 * 1024;
 
-        public string Extension { get { return ".csv.gz"; } }
+        public string Extension { get { return StaticExtension; } }
 
         /// <summary>
         /// Tries to write the passed datatable to a series of files with a (rough) limit on the maximum file size.
@@ -101,12 +102,14 @@ namespace PaletteInsightAgent.Output
             {
 
                 // get the output file path
-                var fileNameWithPart = String.Format("{0}--seq{1:0000}--part{2:0000}{3}", Path.GetFileNameWithoutExtension(fileName), seqIdx, filePartIdx, Path.GetExtension(fileName));
+                var fileNameWithPart = String.Format("{0}--seq{1:0000}--part{2:0000}{3}", fileName.TrimEnd(StaticExtension.ToCharArray()), seqIdx, filePartIdx, StaticExtension);
                 var filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
 
                 // If it does not exist, we have the name we want
                 if (!File.Exists(filePathWithPart))
                 {
+                    // IMPORTANT NOTE: This check only works, if there is only one thread creating and writing these files.
+                    // This check is not threadsafe.
                     return filePathWithPart;
                 }
 
