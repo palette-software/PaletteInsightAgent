@@ -50,7 +50,7 @@ namespace PaletteInsightAgent.Output
 
             while (true)
             {
-                var filePathWithPart = FindNextAvailableFilename(fileName, filePartIdx, baseDir);
+                var filePathWithPart = FindNextAvailableFilename(fileName, filePartIdx);
 
                 // First create the file name with a postfix, so that the bulk copy
                 // loader won't touch this file, until it is being written.
@@ -93,7 +93,7 @@ namespace PaletteInsightAgent.Output
         /// <param name="filePartIdx"></param>
         /// <param name="baseDir"></param>
         /// <returns></returns>
-        private static string FindNextAvailableFilename(string fileName, int filePartIdx, string baseDir)
+        private static string FindNextAvailableFilename(string fileName, int filePartIdx)
         {
             // The index we use if there already is a file with this name in the directory
             var seqIdx = 0;
@@ -103,14 +103,13 @@ namespace PaletteInsightAgent.Output
 
                 // get the output file path
                 var fileNameWithPart = String.Format("{0}--seq{1:0000}--part{2:0000}{3}", fileName.TrimEnd(StaticExtension.ToCharArray()), seqIdx, filePartIdx, StaticExtension);
-                var filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
 
                 // If it does not exist, we have the name we want
-                if (!File.Exists(filePathWithPart))
+                if (!File.Exists(fileNameWithPart))
                 {
                     // IMPORTANT NOTE: This check only works, if there is only one thread creating and writing these files.
                     // This check is not threadsafe.
-                    return filePathWithPart;
+                    return fileNameWithPart;
                 }
 
                 Log.Debug("Increasing seq-id because file '{0}' already exists", fileNameWithPart);
