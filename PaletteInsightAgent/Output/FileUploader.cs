@@ -11,6 +11,8 @@ namespace PaletteInsightAgent.Output
     class FileUploader
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static DateTime lastStorageUsageLogTimestamp;
+
         /// <summary>
         /// The directory we store the succesfully uploaded files
         /// </summary>
@@ -108,6 +110,14 @@ namespace PaletteInsightAgent.Output
                         Log.Error("Unexpected error while determining size of file: {0}. Error message: {1}", file.Name, ex.Message);
                     }
                 }
+            }
+
+            if (DateTime.UtcNow - lastStorageUsageLogTimestamp > TimeSpan.FromMinutes(10))
+            {
+                // Last storage usage was logged more than 10 minutes ago, so it's time to log again
+                // Only log up to 3 decimal places
+                Log.Info("Storage usage of agent data folder: {0} Mb", ((double)cumulatedSize / (1024 * 1024)).ToString("0.###"));
+                lastStorageUsageLogTimestamp = DateTime.UtcNow;
             }
 
             if (storageLimitInBytes > cumulatedSize)
