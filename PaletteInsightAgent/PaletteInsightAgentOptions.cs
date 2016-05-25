@@ -23,13 +23,9 @@ namespace PaletteInsightAgent
             {
                 // get a full path without the end separators
                 var fullPath = Path.GetFullPath(path)
-                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-
-                // if the path starts with a drive letter, uppercase it
-                if (fullPath.Length >= 2 && fullPath[1] == ':' )
-                {
-                    fullPath = String.Format("{0}{1}", Char.ToUpper(fullPath[0]), fullPath.Substring(1));
-                }
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    // lowercase it so different cased paths do still conflict
+                    .ToLower();
 
                 // create the object
                 return new LogFolderInfo
@@ -37,7 +33,6 @@ namespace PaletteInsightAgent
                     FolderToWatch = fullPath,
                     DirectoryFilter = filter,
                     LogFormat = logFormat,
-
                 };
             }
 
