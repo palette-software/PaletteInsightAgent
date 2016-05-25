@@ -67,7 +67,7 @@ namespace PaletteInsightAgent.LogPoller
                     // check if we have already processed this file, and skip processing it it we have
                     if (alreadySubmittedFiles.Contains(fullPath))
                     {
-                        Log.Warn("Skippping already processed change in '{0}'", fullPath);
+                        Log.Error("Skippping already processed change in '{0}'", fullPath);
                         return;
 
                     }
