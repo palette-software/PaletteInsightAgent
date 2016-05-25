@@ -112,7 +112,7 @@ namespace PaletteInsightAgent.Output
                 }
             }
 
-            if (DateTime.UtcNow - lastStorageUsageLogTimestamp > new TimeSpan(0, 10, 0))
+            if (DateTime.UtcNow - lastStorageUsageLogTimestamp > TimeSpan.FromMinutes(10))
             {
                 // Last storage usage was logged more than 10 minutes ago, so it's time to log again
                 // Only log up to 3 decimal places
