@@ -22,7 +22,6 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         private const string ERROR_PREFIX = @"errors/";
 
-
         public static string DataFilePattern
         {
             get
