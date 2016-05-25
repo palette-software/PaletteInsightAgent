@@ -24,15 +24,14 @@ namespace PaletteInsightAgent
                 // get a full path without the end separators
                 var fullPath = Path.GetFullPath(path)
                     .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                    // lowercase it so different cased paths do still conflict
                     .ToLower();
 
-                // create the object
+                // Lowercase the paths so different cased paths do still conflict
                 return new LogFolderInfo
                 {
-                    FolderToWatch = fullPath,
-                    DirectoryFilter = filter,
-                    LogFormat = logFormat,
+                    FolderToWatch = fullPath.ToLower(),
+                    DirectoryFilter = filter.ToLower(),
+                    LogFormat = logFormat.ToLower(),
                 };
             }
 
