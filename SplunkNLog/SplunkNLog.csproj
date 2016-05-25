@@ -75,7 +75,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)bin\$(Configuration)\$(TargetFileName) $(SolutionDir)\PaletteInsightAgent\bin\$(Configuration)\$(TargetFileName)
+    <PostBuildEvent>copy "$(ProjectDir)bin\$(Configuration)\$(TargetFileName)" "$(SolutionDir)\PaletteInsightAgent\bin\$(Configuration)\$(TargetFileName)"
 
 </PostBuildEvent>
   </PropertyGroup>
