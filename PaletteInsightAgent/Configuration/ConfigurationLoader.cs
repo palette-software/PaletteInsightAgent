@@ -178,6 +178,28 @@ namespace PaletteInsight
 
 
             /// <summary>
+            /// Adds a watched folder to the list of watched folders.
+            /// </summary>
+            /// <returns>If the folder was added</returns>
+            private static bool AddFoldetToWatched(ICollection<PaletteInsightAgentOptions.LogFolderInfo> logFolders, PaletteInsightAgentOptions.LogFolderInfo folder)
+            {
+                var folderValueString = folder.ToValueString();
+                foreach (var logFolder in logFolders)
+                {
+                    // Skip if we already have this folder
+                    if (String.Equals(logFolder.ToValueString(), folderValueString))
+                    {
+                        Log.Warn("Skipping addition of duplicate watched path: {0}", folderValueString);
+                        return false;
+                    }
+                }
+
+                // If no matches found, add to the list of dirs
+                logFolders.Add(folder);
+                return true;
+            }
+
+            /// <summary>
             /// Adds the log folders from either the config (if no tableau server is installed),
             /// or from the registry
             /// </summary>
@@ -192,13 +214,12 @@ namespace PaletteInsight
                 {
                     foreach (LogFolder logFolder in config.Logs)
                     {
-                        // we just blindly add here, as this code path is only for debugging
-                        options.LogFolders.Add(new PaletteInsightAgentOptions.LogFolderInfo
-                        {
-                            FolderToWatch = logFolder.Directory,
-                            DirectoryFilter = logFolder.Filter,
-                            LogFormat = logFolder.Format
-                        });
+                        AddFoldetToWatched(options.LogFolders,
+                            PaletteInsightAgentOptions.LogFolderInfo.Create(
+                                logFolder.Directory,
+                                logFolder.Filter,
+                                logFolder.Format
+                                ));
                     }
                 }
 
@@ -207,20 +228,16 @@ namespace PaletteInsight
                     // otherwise try to add the log folders from the registry setup
                     foreach (var logFolder in LoadDefaultLogFolders())
                     {
-                        var fullPath = Path.Combine(tableauRoot, logFolder.Directory);
+                        var fullPath = Path.GetFullPath(Path.Combine(tableauRoot, logFolder.Directory));
                         // we check here so we won't add non-existent folders
                         if (!Directory.Exists(fullPath))
                         {
                             Log.Error("Log folder not found: {0}", fullPath);
                             continue;
                         }
-                        options.LogFolders.Add(new PaletteInsightAgentOptions.LogFolderInfo
-                        {
-                            FolderToWatch = fullPath,
-                            DirectoryFilter = logFolder.Filter,
-                            LogFormat = logFolder.Format
-                        });
-                    }    
+
+                        AddFoldetToWatched(options.LogFolders, PaletteInsightAgentOptions.LogFolderInfo.Create(fullPath, logFolder.Filter, logFolder.Format));
+                    }
                 }
             }
 
