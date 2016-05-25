@@ -181,7 +181,7 @@ namespace PaletteInsight
             /// Adds a watched folder to the list of watched folders.
             /// </summary>
             /// <returns>If the folder was added</returns>
-            private static bool AddFoldetToWatched(ICollection<PaletteInsightAgentOptions.LogFolderInfo> logFolders, PaletteInsightAgentOptions.LogFolderInfo folder)
+            private static bool AddFolderToWatched(ICollection<PaletteInsightAgentOptions.LogFolderInfo> logFolders, PaletteInsightAgentOptions.LogFolderInfo folder)
             {
                 var folderValueString = folder.ToValueString();
                 foreach (var logFolder in logFolders)
@@ -189,7 +189,7 @@ namespace PaletteInsight
                     // Skip if we already have this folder
                     if (String.Equals(logFolder.ToValueString(), folderValueString))
                     {
-                        Log.Warn("Skipping addition of duplicate watched path: {0}", folderValueString);
+                        Log.Error("Skipping addition of duplicate watched path: {0}", folderValueString);
                         return false;
                     }
                 }
@@ -214,12 +214,8 @@ namespace PaletteInsight
                 {
                     foreach (LogFolder logFolder in config.Logs)
                     {
-                        AddFoldetToWatched(options.LogFolders,
-                            PaletteInsightAgentOptions.LogFolderInfo.Create(
-                                logFolder.Directory,
-                                logFolder.Filter,
-                                logFolder.Format
-                                ));
+                        AddFolderToWatched(options.LogFolders, 
+                            PaletteInsightAgentOptions.LogFolderInfo.Create( logFolder.Directory, logFolder.Filter, logFolder.Format ));
                     }
                 }
 
@@ -235,8 +231,9 @@ namespace PaletteInsight
                             Log.Error("Log folder not found: {0}", fullPath);
                             continue;
                         }
-
-                        AddFoldetToWatched(options.LogFolders, PaletteInsightAgentOptions.LogFolderInfo.Create(fullPath, logFolder.Filter, logFolder.Format));
+                        
+                        AddFolderToWatched(options.LogFolders,
+                            PaletteInsightAgentOptions.LogFolderInfo.Create(fullPath, logFolder.Filter, logFolder.Format));
                     }
                 }
             }
