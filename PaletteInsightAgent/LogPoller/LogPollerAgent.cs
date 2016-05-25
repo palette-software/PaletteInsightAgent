@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using PaletteInsightAgent.Output;
+using System.IO;
 
 namespace PaletteInsightAgent.LogPoller
 {
@@ -52,10 +53,28 @@ namespace PaletteInsightAgent.LogPoller
 
         public void pollLogs()
         {
+            // Keep track of the files we have already processed, so we wont have
+            // doubles if a file matches multiple watchers
+            var alreadySubmittedFiles = new HashSet<string>();
+
             foreach (var watcher in watchers)
             {
                 watcher.watchChangeCycle((filename, lines) =>
                 {
+                    // make sure we are using absolute paths for the checks
+                    var fullPath = Path.GetFullPath(filename);
+
+                    // check if we have already processed this file, and skip processing it it we have
+                    if (alreadySubmittedFiles.Contains(fullPath))
+                    {
+                        Log.Info("Skippping already processed change in '{0}'", fullPath);
+                        return;
+
+                    }
+
+                    // add to the list of processed files
+                    alreadySubmittedFiles.Add(fullPath);
+
                     // create a new output table for the file
                     var serverLogsTable = LogTables.makeServerLogsTable(watcher.logFormat);
 
