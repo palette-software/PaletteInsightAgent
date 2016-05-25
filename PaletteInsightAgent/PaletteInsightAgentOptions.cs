@@ -4,6 +4,7 @@ using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output;
 using PaletteInsight.Configuration;
 using PaletteInsightAgent.Output.OutputDrivers;
+using System.IO;
 
 namespace PaletteInsightAgent
 {
@@ -17,6 +18,32 @@ namespace PaletteInsightAgent
             public string FolderToWatch { get; set; }
             public string DirectoryFilter { get; set; }
             public string LogFormat { get; set; }
+
+            public static LogFolderInfo Create(string path, string filter, string logFormat)
+            {
+                // get a full path without the end separators
+                var fullPath = Path.GetFullPath(path)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .ToLower();
+
+                // Lowercase the paths so different cased paths do still conflict
+                return new LogFolderInfo
+                {
+                    FolderToWatch = fullPath.ToLower(),
+                    DirectoryFilter = filter.ToLower(),
+                    LogFormat = logFormat.ToLower(),
+                };
+            }
+
+            /// <summary>
+            /// Returns a unique string for this LogFolderInfo which matches the ToValueString()
+            /// return value of any other LogFolderInfo with the same values.
+            /// </summary>
+            /// <returns></returns>
+            public string ToValueString()
+            {
+                return String.Format("{0}|||{1}|||{2}", FolderToWatch, DirectoryFilter, LogFormat);
+            }
         }
         public int PollInterval { get; set; }
         public int LogPollInterval { get; set; }
