@@ -39,7 +39,6 @@ namespace PaletteInsightAgent.Output
 
             try
             {
-
                 Writer.WriteDataFile(dataFileName, table);
 
                 // remove any rows from the csv queue
@@ -63,7 +62,11 @@ namespace PaletteInsightAgent.Output
             Directory.EnumerateFiles(DATA_FOLDER, tableName + "*.csv*")
                 .Select(f => new FileInfo(f))
                 .ToList()
-                .ForEach(f => f.Delete());
+                .ForEach(f =>
+                {
+                    f.Delete();
+                    Log.Warn("Deleted pending streaming table file: {0}. Pending files can exist due to network issues of earlier upload attempts.", f.Name);
+                });
         }
 
         /// <summary>
