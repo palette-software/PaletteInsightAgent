@@ -32,7 +32,6 @@ namespace PaletteInsightAgent
         private Timer counterSampleTimer;
         private Timer logPollTimer;
         private Timer threadInfoTimer;
-        private Timer dbWriterTimer;
         private Timer webserviceTimer;
         private Timer repoTablesPollTimer;
         private Timer streamingTablesPollTimer;
@@ -289,11 +288,6 @@ namespace PaletteInsightAgent
                 {
                     threadInfoTimer.Dispose();
                 }
-            }
-
-            if (dbWriterTimer != null)
-            {
-                dbWriterTimer.Dispose();
             }
 
             if (webserviceTimer != null)

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace PaletteInsightAgent.LogPoller
 {
     using System.Security.Cryptography;
-    using ChangeDelegate = Action<string, string[]>;
+    using ChangeDelegate = Action<string, string[], int>;
 
     class LogFileWatcher
     {
@@ -134,6 +134,8 @@ namespace PaletteInsightAgent.LogPoller
                 // were there any changes to the file?
                 bool hadChanges = false;
 
+                int partCount = 0;
+
                 while(!isFileOver)
                 {
 
@@ -167,7 +169,7 @@ namespace PaletteInsightAgent.LogPoller
                     // Callback if we have changes
                     if (lines.Count > 0)
                     {
-                        changeDelegate(Path.GetFileName(fullPath), lines.ToArray());
+                        changeDelegate(fullPath, lines.ToArray(), partCount++);
                         // mark that we have done our duty
                         hadChanges = true;
                     }

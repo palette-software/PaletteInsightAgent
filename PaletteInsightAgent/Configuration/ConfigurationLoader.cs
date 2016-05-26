@@ -196,6 +196,7 @@ namespace PaletteInsight
 
                 // If no matches found, add to the list of dirs
                 logFolders.Add(folder);
+                Log.Info("Watching folder: {0} with filter: {1} with format: {2}", folder.FolderToWatch, folder.DirectoryFilter, folder.LogFormat);
                 return true;
             }
 
