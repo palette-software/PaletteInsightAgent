@@ -59,29 +59,30 @@ namespace PaletteInsightAgent.LogPoller
 
             foreach (var watcher in watchers)
             {
-                watcher.watchChangeCycle((filename, lines) =>
+                watcher.watchChangeCycle((fullPath, lines, partCount) =>
                 {
-                    // make sure we are using absolute paths for the checks
-                    var fullPath = Path.GetFullPath(filename);
+                    // we can get the same file in multiple parts, it is only a duplicate if it's
+                    // full path and part index is the same
+                    var fileId = String.Format("{0}|{1}", fullPath, partCount);
 
                     // check if we have already processed this file, and skip processing it it we have
-                    if (alreadySubmittedFiles.Contains(fullPath))
+                    if (alreadySubmittedFiles.Contains(fileId))
                     {
-                        Log.Error("Skippping already processed change in '{0}'", fullPath);
+                        Log.Error("Skipping already processed change in '{0}'", fullPath);
                         return;
 
                     }
 
                     // add to the list of processed files
-                    alreadySubmittedFiles.Add(fullPath);
+                    alreadySubmittedFiles.Add(fileId);
 
                     // create a new output table for the file
                     var serverLogsTable = LogTables.makeServerLogsTable(watcher.logFormat);
 
-                    Log.Info("Got new {0} lines from {1}.", lines.Length, filename);
+                    Log.Info("Got new {0} lines from {1}.", lines.Length, fullPath);
 
                     // process the newly found lines
-                    logsToDbConverter.processServerLogLines(filename, lines, serverLogsTable);
+                    logsToDbConverter.processServerLogLines(fullPath, lines, serverLogsTable);
 
                     // write the current batch out
                     WriteOutServerlogRows(serverLogsTable);
