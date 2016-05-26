@@ -99,7 +99,7 @@ namespace PaletteInsightAgent.Helpers
             // Get the timezone on each send, so that if the server clock timezone is
             // changed while the agent is running, we are keeping up with the changes
             var timezoneName = TimezoneHelpers.WindowsToIana( TimeZoneInfo.Local.Id );
-            var url = String.Format("{0}/upload?pkg={1}&host={2}&tz={3}",
+            var url = String.Format("{0}/upload?pkg={1}&host={2}&tz={3}&compression=gzip",
                 config.Endpoint, 
                 Uri.EscapeUriString(package), 
                 Uri.EscapeUriString(HostName),

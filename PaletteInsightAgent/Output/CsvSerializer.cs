@@ -6,6 +6,7 @@ using System;
 using System.Data;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 
 namespace PaletteInsightAgent.Output
 {
@@ -13,6 +14,7 @@ namespace PaletteInsightAgent.Output
     {
 
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly string StaticExtension = ".csv.gz";
         private static readonly CsvConfiguration CsvConfig = new CsvHelper.Configuration.CsvConfiguration
         {
             CultureInfo = CultureInfo.InvariantCulture,
@@ -26,7 +28,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         public static int MaxFileSize = 50 * 1024 * 1024;
 
-        public string Extension { get { return ".csv"; } }
+        public string Extension { get { return StaticExtension; } }
 
         /// <summary>
         /// Tries to write the passed datatable to a series of files with a (rough) limit on the maximum file size.
@@ -48,7 +50,7 @@ namespace PaletteInsightAgent.Output
 
             while (true)
             {
-                var filePathWithPart = FindNextAvailableFilename(fileName, filePartIdx, baseDir);
+                var filePathWithPart = FindNextAvailableFilename(fileName, filePartIdx);
 
                 // First create the file name with a postfix, so that the bulk copy
                 // loader won't touch this file, until it is being written.
@@ -56,8 +58,10 @@ namespace PaletteInsightAgent.Output
 
 
                 var fileExists = File.Exists(inProgressFileName);
-                using (var streamWriter = File.AppendText(inProgressFileName))
-                using (var csvWriter = new CsvHelper.CsvWriter(streamWriter, CsvConfig))
+                using (var fileStream = new FileStream(inProgressFileName, FileMode.Append))
+                using (var gzipStream = new GZipStream(fileStream, CompressionLevel.Optimal))
+                using (var streamWriter = new StreamWriter(gzipStream))
+                using (var csvWriter = new CsvWriter(streamWriter, CsvConfig))
                 {
                     // only write the header if the file does not exists
                     if (!fileExists)
@@ -89,7 +93,7 @@ namespace PaletteInsightAgent.Output
         /// <param name="filePartIdx"></param>
         /// <param name="baseDir"></param>
         /// <returns></returns>
-        private static string FindNextAvailableFilename(string fileName, int filePartIdx, string baseDir)
+        private static string FindNextAvailableFilename(string fileName, int filePartIdx)
         {
             // The index we use if there already is a file with this name in the directory
             var seqIdx = 0;
@@ -98,13 +102,14 @@ namespace PaletteInsightAgent.Output
             {
 
                 // get the output file path
-                var fileNameWithPart = String.Format("{0}--seq{1:0000}--part{2:0000}{3}", Path.GetFileNameWithoutExtension(fileName), seqIdx, filePartIdx, Path.GetExtension(fileName));
-                var filePathWithPart = Path.Combine(baseDir, fileNameWithPart);
+                var fileNameWithPart = String.Format("{0}--seq{1:0000}--part{2:0000}{3}", fileName.TrimEnd(StaticExtension.ToCharArray()), seqIdx, filePartIdx, StaticExtension);
 
                 // If it does not exist, we have the name we want
-                if (!File.Exists(filePathWithPart))
+                if (!File.Exists(fileNameWithPart))
                 {
-                    return filePathWithPart;
+                    // IMPORTANT NOTE: This check only works, if there is only one thread creating and writing these files.
+                    // This check is not threadsafe.
+                    return fileNameWithPart;
                 }
 
                 Log.Debug("Increasing seq-id because file '{0}' already exists", fileNameWithPart);
