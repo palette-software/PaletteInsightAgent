@@ -134,7 +134,7 @@ namespace PaletteInsightAgentTests.Output
     [TestClass]
     public class DbWriterTests_GetFileOrTableName
     {
-        private string testFile = "";
+        //private string testFile = "";
 
         public DbWriterTests_GetFileOrTableName()
         {
@@ -142,12 +142,12 @@ namespace PaletteInsightAgentTests.Output
 
         #region Additional test attributes
 
-        // Use TestInitialize to run code before running each test
-        [TestInitialize()]
-        public void MyTestInitialize()
-        {
-            testFile = "serverlog-2016-01-28-15-06-00.csv";
-        }
+        //// Use TestInitialize to run code before running each test
+        //[TestInitialize()]
+        //public void MyTestInitialize()
+        //{
+        //    testFile = "serverlog-2016-01-28-15-06-00.csv";
+        //}
 
         #endregion
 
@@ -219,8 +219,8 @@ namespace PaletteInsightAgentTests.Output
     [TestClass]
     public class DbWriterTests_MoveToProcessed
     {
-        IList<string> testFileList;
-        Logger fakeLog;
+        //IList<string> testFileList;
+        //Logger fakeLog;
 
         public DbWriterTests_MoveToProcessed()
         {
@@ -241,12 +241,12 @@ namespace PaletteInsightAgentTests.Output
         //    Isolate.WhenCalled(() => LogManager.GetCurrentClassLogger()).WillReturn(fakeLog);
         //}
 
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        public void MyTestCleanup()
-        {
-            testFileList.Clear();
-        }
+        //// Use TestCleanup to run code after each test has run
+        //// [TestCleanup()]
+        //public void MyTestCleanup()
+        //{
+        //    testFileList.Clear();
+        //}
 
         #endregion
 

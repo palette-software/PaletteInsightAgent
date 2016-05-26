@@ -48,8 +48,6 @@ namespace PaletteInsightAgent.LogPoller
 
         private void addServerLogs(string filename, string[] logLines, DataTable serverLogsTable)
         {
-            // get the base filename for logging
-            var fileBaseName = Path.GetFileName(filename);
             // log that we have started
             foreach (var logLine in logLines)
             {
