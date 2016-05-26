@@ -21,7 +21,7 @@ StorageLimit: 1				    # Given in megabytes. Default is 10 Gb.
 #LogLinesPerBatch: 10000
  
 Webservice:
-  Endpoint: http://staging-insight.palette-software.net:9000
+  Endpoint: https://staging-insight.palette-software.net
 
 Logs: 
   - 

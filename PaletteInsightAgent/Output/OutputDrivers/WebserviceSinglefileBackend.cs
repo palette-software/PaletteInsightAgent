@@ -30,7 +30,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
 
         public static string GetFileNameWithoutPart(string fileName)
         {
-            var pattern = new Regex("(.*-[0-9]{4}-[0-9]{2}-[0-9]{2}--[0-9]{2}-[0-9]{2}-[0-9]{2})(.*)([.].+)$");
+            var pattern = new Regex("(.*-[0-9]{4}-[0-9]{2}-[0-9]{2}--[0-9]{2}-[0-9]{2}-[0-9]{2})(.*?)([.].+)$");
             return pattern.Replace(fileName, "$1$3");
         }
 
