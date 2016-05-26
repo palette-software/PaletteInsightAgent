@@ -63,7 +63,7 @@ namespace PaletteInsightAgent.LogPoller
                 {
                     // we can get the same file in multiple parts, it is only a duplicate if it's
                     // full path and part index is the same
-                    string fileId = fullPath + partCount;
+                    var fileId = String.Format("{0}|{1}", fullPath, partCount);
 
                     // check if we have already processed this file, and skip processing it it we have
                     if (alreadySubmittedFiles.Contains(fileId))
