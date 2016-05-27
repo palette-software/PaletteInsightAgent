@@ -30,14 +30,14 @@ namespace PaletteInsightAgent.LogPoller
         /// <summary>
         /// This function insert a row into the Serverlogs table in PaletteInsightAgent DB
         /// </summary>
-        /// <param name="filename"></param>
+        /// <param name="fullPath"></param>
         /// <param name="jsonStringLines"></param>
         /// <param name="serverLogsTable"></param>
-        public void processServerLogLines(String filename, String[] jsonStringLines, DataTable serverLogsTable)
+        public void processServerLogLines(String fullPath, String[] jsonStringLines, DataTable serverLogsTable)
         {
             try
             {
-                addServerLogs(filename, jsonStringLines, serverLogsTable);
+                addServerLogs(fullPath, jsonStringLines, serverLogsTable);
             }
             catch (Exception e)
             {
@@ -46,14 +46,15 @@ namespace PaletteInsightAgent.LogPoller
             }
         }
 
-        private void addServerLogs(string filename, string[] logLines, DataTable serverLogsTable)
+        private void addServerLogs(string fullPath, string[] logLines, DataTable serverLogsTable)
         {
+            // get the base filename for logging
+            var filename = Path.GetFileName(fullPath);
             // log that we have started
             foreach (var logLine in logLines)
             {
                 insertIntoServerLogsTable(filename, serverLogsTable, logLine);
             }
-
         }
 
         private void insertIntoServerLogsTable(string filename, DataTable serverLogsTable, string logLine)
