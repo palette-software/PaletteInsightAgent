@@ -60,14 +60,20 @@ namespace PaletteInsightAgent.Helpers
 
                 using (var response = await httpClient.GetAsync(GetMaxIdUrl(tableName)))
                 {
-                    if (response.StatusCode == HttpStatusCode.NoContent)
+                    switch (response.StatusCode)
                     {
-                        return null;
+                        case HttpStatusCode.OK:
+                            break;
+                        case HttpStatusCode.NoContent:
+                            return null;
+                        case HttpStatusCode.BadGateway:
+                            throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
+                        case HttpStatusCode.Forbidden:
+                            throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
+                        default:
+                            throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
                     }
-                    if (response.StatusCode != HttpStatusCode.OK)
-                    {
-                        throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
-                    }
+
                     using (HttpContent content = response.Content)
                     {
                         string result = await content.ReadAsStringAsync();
@@ -158,6 +164,17 @@ namespace PaletteInsightAgent.Helpers
             System.Buffer.BlockCopy(config.AuthToken, 0, authBytes, usernameLen, authLen);
             return authBytes;
 
+        }
+    }
+
+    /// <summary>
+    /// This type of exceptions are supposed to be "auto-healing" exceptions. So retry attempts of those operations
+    /// which throw exceptions like this, are expected to finish without exception eventually.
+    /// </summary>
+    class TemporaryException : Exception
+    {
+        public TemporaryException(string message) : base(message)
+        {
         }
     }
 }
