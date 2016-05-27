@@ -38,10 +38,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 .ToList()
                 .ForEach(async (t) =>
                 {
+                    var tableName = t.Name;
+
                     try
                     {
-                        var tableName = t.Name;
-
                         // Delete all pending files for that streaming table
                         OutputSerializer.Delete(tableName);
 
@@ -62,6 +62,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
                             OutputSerializer.Write(table, newMax);
                         }
                     }
+                    catch (TemporaryException tex)
+                    {
+                        Log.Warn("Temporarily unable to get max ID for table: {0}! Exception: {1}", tableName, tex);
+                    }
                     catch (TaskCanceledException tce)
                     {
                         // This should be only a temporary condition, it is only a problem if it occurs many times in a row.
@@ -69,7 +73,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e, String.Format("Error while polling streaming table! Exception: "));
+                        Log.Error(e, "Error while polling streaming table! Exception: ");
                     }
                 });
 

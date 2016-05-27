@@ -1,4 +1,5 @@
 ﻿using NLog;
+using PaletteInsightAgent.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -404,17 +405,6 @@ namespace PaletteInsightAgent.Output
             {
                 Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
             }
-        }
-    }
-
-    /// <summary>
-    /// This type of exceptions are supposed to be "auto-healing" exceptions. So retry attempts of those operations
-    /// which throw exceptions like this, are expected to finish without exception eventually.
-    /// </summary>
-    class TemporaryException : Exception
-    {
-        public TemporaryException(string message) : base(message)
-        {
         }
     }
 }
