@@ -28,17 +28,17 @@ build_script:
       
   # Get insight-tester and unzip it. It is needed for the github-downlaoder
   - mkdir %INSTALLER_DIR%
-  - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/releases/download/v0.0.6-lw/windows_amd64.zip', $env:INSTALLER_DIR+'\insight-tester.zip')
+  - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/dl-github-release/releases/download/v1.0.1/windows_amd64.zip', $env:INSTALLER_DIR+'\windows_amd64.zip')
   - ps: dir $env:INSTALLER_DIR
-  - echo "Downloaded insight-tester"
-  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\insight-tester.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
-  - echo "Unzipped insight tester"
-  - del %INSTALLER_DIR%\insight-tester.zip
+  - echo "Downloaded Github Private Release Downloader"
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\windows_amd64.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release');
+  - echo "Unzipped Github Private Release Downloader"
+  - del %INSTALLER_DIR%\windows_amd64.zip
 
   # Use github downloader to get latest palette-updater release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
-  - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\githubrelease.exe palette-software palette-updater %GITHUB_TOKEN%
+  - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\dl-github-release.exe palette-software palette-updater %GITHUB_TOKEN%
   - copy *.zip %INSTALLER_DIR%
     
   # Unzip palette-updater to the appropriate place
