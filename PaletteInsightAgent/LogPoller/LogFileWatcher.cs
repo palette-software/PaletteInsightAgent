@@ -69,7 +69,7 @@ namespace PaletteInsightAgent.LogPoller
             }
             catch (Exception e)
             {
-                Log.Error("Failed to get files from directory: {0}. Exception message: {1}", watchedFolderPath, e.Message);
+                Log.Error(e, "Failed to get files from directory: {0}. Exception: ", watchedFolderPath);
                 return new string[0];
             }
         }

@@ -23,7 +23,14 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             string maxId = null;
             if (IsStreamingTable(file))
             {
-                maxId = File.ReadAllText(MaxIdFileName(file));
+                try
+                {
+                    maxId = File.ReadAllText(MaxIdFileName(file));
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    throw new TemporaryException("Unauthorized access or file is being used by another process.");
+                }
             }
             DoSendFile(file, maxId);
         }
