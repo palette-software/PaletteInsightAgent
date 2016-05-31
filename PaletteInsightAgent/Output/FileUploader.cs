@@ -152,8 +152,8 @@ namespace PaletteInsightAgent.Output
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Failed to delete file {0} while applying storage limit! Error message: {1}",
-                        file.FullName, e.Message);
+                    Log.Error(e, "Failed to delete file {0} while applying storage limit! Exception: ",
+                        file.FullName);
                 }                
             }
         }
@@ -257,7 +257,7 @@ namespace PaletteInsightAgent.Output
                                     throw x;
                                 }
 
-                                Log.Error(x, "Error while uploading file: {0}", csvFile);
+                                Log.Error(x, "Error while uploading file: {0}! Moving to errors folder! Exception: ", csvFile);
                                 MoveToFolder(csvFile, ErrorPath);
                                 return true;
                             });
@@ -269,7 +269,7 @@ namespace PaletteInsightAgent.Output
                         }
                         catch (Exception e)
                         {
-                            Log.Error(e, "Failed to upload data file {0}! Exception message: {1}", csvFile, e.Message);
+                            Log.Error(e, "Failed to upload data file {0}! Moving to errors folder! Exception: ", csvFile);
                             MoveToFolder(csvFile, ErrorPath);
                         }
                     }

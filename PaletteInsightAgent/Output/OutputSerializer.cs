@@ -53,7 +53,7 @@ namespace PaletteInsightAgent.Output
             }
             catch (Exception e)
             {
-                Log.Error("Failed to write {0} table contents to CSV file '{1}'! Exception message: {2}", table.TableName, dataFileName, e.Message);
+                Log.Error(e, "Failed to write {0} table contents to CSV file '{1}'! Exception: ", table.TableName, dataFileName);
             }
         }
 
