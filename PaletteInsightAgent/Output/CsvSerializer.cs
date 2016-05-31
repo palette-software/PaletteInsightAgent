@@ -83,7 +83,6 @@ namespace PaletteInsightAgent.Output
                 // increment the part idx
                 filePartIdx++;
             }
-
         }
 
         /// <summary>

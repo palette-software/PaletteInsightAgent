@@ -69,7 +69,7 @@ namespace PaletteInsightAgent.LogPoller
             }
             catch (Exception e)
             {
-                Log.Error("Failed to get files from directory: {0}. Exception message: {1}", watchedFolderPath, e.Message);
+                Log.Error(e, "Failed to get files from directory: {0}. Exception: ", watchedFolderPath);
                 return new string[0];
             }
         }
@@ -94,7 +94,7 @@ namespace PaletteInsightAgent.LogPoller
                 }
                 catch (Exception e)
                 {
-                    Log.Error("Unexpected exception occured during reading the log files: " + e.StackTrace);
+                    Log.Error(e, "Unexpected exception occured during reading the log lines of file: {0}! Exception: ", fileName);
                 }
             }
 
