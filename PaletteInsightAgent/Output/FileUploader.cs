@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.Output
@@ -231,7 +232,18 @@ namespace PaletteInsightAgent.Output
                         try
                         {
                             output.Write(csvFile);
-                            MoveToFolder(csvFile, ProcessedPath);
+                            bool isStreaming = IsStreamingTable(csvFile);
+                            // After successful upload, move the file to the processed folder
+                            MoveToFolder(csvFile, ProcessedPath, !isStreaming);
+
+                            // Also move the maxid file to processed, if there is one.
+                            if (isStreaming)
+                            {
+                                // Pending maxid files might be deleted on another thread while we are uploading
+                                // files, so if the maxid file disappears during the move, it is not
+                                // necessarily a problem.
+                                MoveToFolder(MaxIdFileName(csvFile), ProcessedPath, false);
+                            }
                         }
                         catch (AggregateException ae)
                         {
@@ -371,7 +383,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         /// <param name="fileList"></param>
         /// <param name="outputFolder"></param>
-        public static void MoveToFolder(string fullFileName, string outputFolder)
+        public static void MoveToFolder(string fullFileName, string outputFolder, bool errorOnNotFound = true)
         {
             try
             {
@@ -386,25 +398,57 @@ namespace PaletteInsightAgent.Output
                 // This should never happen but let's just make sure.
                 if (Path.GetFullPath(targetFile) == Path.GetFullPath(fullFileName))
                 {
-                    Log.Warn("Skipping moving a file to itself: {0}", fullFileName);
+                    Log.Error("Skipping moving a file to itself: {0}", fullFileName);
                     return;
                 }
 
                 // Delete the output if it already exists. Although it shouldn't exist.
                 if (File.Exists(targetFile))
                 {
-                    Log.Warn("Deleting already existing file while moving a new file on it: {0} NewFile: {1}", targetFile, fullFileName);
+                    Log.Error("Deleting already existing file while moving a new file on it: {0} NewFile: {1}", targetFile, fullFileName);
                     File.Delete(targetFile);
                 }
 
                 // Do the actual move
-                File.Move(fullFileName, targetFile);
+                try
+                {
+                    File.Move(fullFileName, targetFile);
+                }
+                catch (FileNotFoundException fne)
+                {
+                    string logMessage = String.Format("File {0} not found during moving to {1}! Exception: {2}", fullFileName, targetFile, fne);
+                    if (errorOnNotFound)
+                    {
+                        Log.Error(logMessage);
+                    }
+                    else
+                    {
+                        Log.Warn(logMessage);
+                    }
+                    return;
+                }
                 Log.Info("Moved file: {0} to {1}", fileName, outputFolder);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Exception while moving file {0} to {1}: {2}", fullFileName, outputFolder, ex);
             }
+        }
+
+        public static string GetFileNameWithoutPart(string fileName)
+        {
+            var pattern = new Regex("(.*-[0-9]{4}-[0-9]{2}-[0-9]{2}--[0-9]{2}-[0-9]{2}-[0-9]{2})(.*?)([.].+)$");
+            return pattern.Replace(fileName, "$1$3");
+        }
+
+        public static string MaxIdFileName(string fileName)
+        {
+            return GetFileNameWithoutPart(fileName) + "maxid";
+        }
+
+        public static bool IsStreamingTable(string fileName)
+        {
+            return File.Exists(MaxIdFileName(fileName));
         }
     }
 }
