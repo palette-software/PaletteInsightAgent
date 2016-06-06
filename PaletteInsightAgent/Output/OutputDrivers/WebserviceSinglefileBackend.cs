@@ -21,11 +21,11 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         {
             Log.Info("+ Sending file {0}", file);
             string maxId = null;
-            if (IsStreamingTable(file))
+            if (FileUploader.IsStreamingTable(file))
             {
                 try
                 {
-                    maxId = File.ReadAllText(MaxIdFileName(file));
+                    maxId = File.ReadAllText(FileUploader.MaxIdFileName(file));
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -34,23 +34,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             }
             DoSendFile(file, maxId);
         }
-
-        public static string GetFileNameWithoutPart(string fileName)
-        {
-            var pattern = new Regex("(.*-[0-9]{4}-[0-9]{2}-[0-9]{2}--[0-9]{2}-[0-9]{2}-[0-9]{2})(.*?)([.].+)$");
-            return pattern.Replace(fileName, "$1$3");
-        }
-
-        private string MaxIdFileName(string fileName)
-        {
-            return SinglefileBackend.GetFileNameWithoutPart(fileName) + "maxid";
-        }
-
-        private bool IsStreamingTable(string fileName)
-        {
-            return File.Exists(MaxIdFileName(fileName));
-        }
-
 
         public bool IsInProgress(string tableName)
         {
@@ -64,7 +47,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             string[] results;
             if (maxId != null)
             {
-                results = new string[] { file, MaxIdFileName(file) };
+                results = new string[] { file, FileUploader.MaxIdFileName(file) };
             }
             else
             {
