@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -70,6 +71,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     {
                         // This should be only a temporary condition, it is only a problem if it occurs many times in a row.
                         Log.Warn("Polling streaming tables timed out! Exception: {0}", tce);
+                    }
+                    catch (HttpRequestException hre)
+                    {
+                        Log.Warn("HTTP request exception while polling streaming tables! Exception: {0}", hre);
                     }
                     catch (Exception e)
                     {
