@@ -282,7 +282,10 @@ namespace PaletteInsightAgent.Output
                         catch (Exception e)
                         {
                             Log.Error(e, "Failed to upload data file {0}! Moving to errors folder! Exception: ", csvFile);
-                            MoveToFolder(csvFile, ErrorPath);
+                            if (e is FileNotFoundException == false)
+                            {
+                                MoveToFolder(csvFile, ErrorPath);
+                            }
                         }
                     }
                 }
