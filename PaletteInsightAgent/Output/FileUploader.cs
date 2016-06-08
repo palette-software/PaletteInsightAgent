@@ -234,6 +234,10 @@ namespace PaletteInsightAgent.Output
                             output.Write(csvFile);
                             bool isStreaming = IsStreamingTable(csvFile);
                             // After successful upload, move the file to the processed folder
+                            // NOTE: If the file really got uploaded, and there is a network outage at
+                            // this point, the streaming table csv might be deleted before moving to 'processed'
+                            // folder. In this case we are going to duplicate some records, but its chance is
+                            // really-really low. We need to come up with a 100% solution in the future.
                             MoveToFolder(csvFile, ProcessedPath, !isStreaming);
 
                             // Also move the maxid file to processed, if there is one.
