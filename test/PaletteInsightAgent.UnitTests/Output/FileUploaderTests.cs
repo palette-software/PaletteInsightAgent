@@ -38,6 +38,30 @@ namespace PaletteInsightAgentTests.Output
             }
         }
 
+        [TestMethod]
+        public void TestGetFileNameWithoutPart_csv()
+        {
+            var expected = "http_requests-2016-03-22--07-42-20.csv";
+            var actual = FileUploader.GetFileNameWithoutPart("http_requests-2016-03-22--07-42-20--part0000.csv");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void TestGetFileNameWithoutPart_csvgz()
+        {
+            var expected = "http_requests-2016-03-22--07-42-20.csv.gz";
+            var actual = FileUploader.GetFileNameWithoutPart("http_requests-2016-03-22--07-42-20--part0000.csv.gz");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void TestGetFileNameWithoutPart_withSequence()
+        {
+            var expected = "countersamples-2016-05-23--13-15-15.csv.gz";
+            var actual = FileUploader.GetFileNameWithoutPart("countersamples-2016-05-23--13-15-15--seq0000--part0000.csv.gz");
+            Assert.AreEqual(expected, actual);
+        }
+
         #region Additional test attributes
         //
         // You can use the following additional attributes as you write your tests:
