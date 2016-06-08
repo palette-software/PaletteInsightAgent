@@ -283,13 +283,14 @@ namespace PaletteInsightAgent.Output
                             // Nothing to do here. Leave this filetype as is, we will upload in the next iteration
                             Log.Warn("Temporarily unable to upload data file {0}! Exception: {1}", csvFile, tex);
                         }
+                        catch (FileNotFoundException fne)
+                        {
+                            Log.Error(fne, "File {0} not found when trying to upload! Exception: ", csvFile);
+                        }
                         catch (Exception e)
                         {
                             Log.Error(e, "Failed to upload data file {0}! Moving to errors folder! Exception: ", csvFile);
-                            if (e is FileNotFoundException == false)
-                            {
-                                MoveToFolder(csvFile, ErrorPath);
-                            }
+                            MoveToFolder(csvFile, ErrorPath);
                         }
                     }
                 }
