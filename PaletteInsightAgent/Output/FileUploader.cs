@@ -289,6 +289,11 @@ namespace PaletteInsightAgent.Output
                         }
                         catch (Exception e)
                         {
+                            if (e is IOException && e.Message.Contains("The process cannot access the file"))
+                            {
+                                Log.Warn("Temporarily could not access file {0} while trying to upload! Exception: {1}", csvFile, e);
+                                return;
+                            }
                             Log.Error(e, "Failed to upload data file {0}! Moving to errors folder! Exception: ", csvFile);
                             MoveToFolder(csvFile, ErrorPath);
                         }
