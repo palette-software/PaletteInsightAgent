@@ -65,7 +65,7 @@ namespace PaletteInsightAgent.LogPoller
         {
             try
             {
-                return Directory.GetFiles(watchedFolderPath, filter, SearchOption.AllDirectories);
+                return Directory.GetFiles(watchedFolderPath, filter, SearchOption.AllDirectories).OrderBy(f => new FileInfo(f).LastWriteTime).ToArray();
             }
             catch (Exception e)
             {
