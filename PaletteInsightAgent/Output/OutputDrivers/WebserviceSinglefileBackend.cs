@@ -89,6 +89,8 @@ namespace PaletteInsightAgent.Output.OutputDrivers
                         throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
                     case HttpStatusCode.Forbidden:
                         throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
+                    case HttpStatusCode.GatewayTimeout:
+                        throw new TemporaryException("Gateway timeout. This is probably due to temporary networking issues.");
                     default:
                         throw new ArgumentException(String.Format("-> Unknown status: '{0}' for '{1}' -- moving to error", result.StatusCode, file));
                 }
