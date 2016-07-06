@@ -35,6 +35,10 @@ Logs:
     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
     Filter: 'tdeserver*.txt'
     Format: 'plain'
+  -
+    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\dataengine\'
+    Filter: 'tdeserver*.log'
+    Format: 'plain'
 
 TableauRepo: 
   Host: localhost
