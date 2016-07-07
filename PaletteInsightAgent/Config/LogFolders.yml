@@ -9,3 +9,6 @@
 - Directory: 'tabsvc\logs\vizqlserver'
   Filter: 'tdeserver*.txt'
   Format: 'plain'
+- Directory: 'tabsvc\logs\dataengine'
+  Filter: 'tdeserver*.log'
+  Format: 'plain'
