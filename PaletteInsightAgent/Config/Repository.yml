@@ -11,6 +11,10 @@
     Full: false
     Field: type_id
 -
+    Name: historical_disk_usage
+    Full: false
+    Field: id
+-
     Name: historical_events
     Full: false
     Field: id
