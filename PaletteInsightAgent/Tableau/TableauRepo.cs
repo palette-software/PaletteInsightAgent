@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.IO;
 using PaletteInsightAgent.Output;
 using System.Net.Sockets;
+using PaletteInsight.Configuration;
 
 namespace PaletteInsightAgent.RepoTablesPoller
 {
@@ -43,7 +44,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
     public interface ITableauRepoConn : IDisposable
     {
         DataTable GetTable(string tableName);
-        DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax);
+        DataTable GetStreamingTable(string tableName, RepoTable table, string from, out string newMax);
         DataTable GetIndices();
         DataTable GetSchemaTable();
         int getCoreCount();
@@ -282,10 +283,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return null;
         }
 
-        public DataTable GetStreamingTable(string tableName, string field, string filter, string from, out string newMax)
+        public DataTable GetStreamingTable(string tableName, RepoTable table, string from, out string newMax)
         {
             // At first determine the max until we can query
-            newMax = GetMax(tableName, field, filter);
+            newMax = GetMax(tableName, table.Field, table.Filter);
 
             // If we don't quit here we risk data being created before 
             // actually asking for it and not having maxId set correctly
@@ -295,23 +296,31 @@ namespace PaletteInsightAgent.RepoTablesPoller
             }
 
             var query = "";
+            // This means we have not yet sent anything. In this case we should just send the newest row or the whole table
+            // depending on the Table configuration
             if (from == null)
             {
-                // This means we have not yet sent anything. In this case we should just send the newest row.
-                query = String.Format("select * from {0} where {1} = '{2}'", tableName, field, newMax);
+                if (table.HistoryNeeded)
+                {
+                    query = String.Format("select * from {0}", tableName);
+                }
+                else
+                {
+                    query = String.Format("select * from {0} where {1} = '{2}'", tableName, table.Field, newMax);
+                }
             }
             else
             {
-                query = String.Format("select * from {0} where {1} > '{2}' and {1} <= '{3}'", tableName, field, from, newMax);
+                query = String.Format("select * from {0} where {1} > '{2}' and {1} <= '{3}'", tableName, table.Field, from, newMax);
             }
 
-            if (filter != null)
+            if (table.Filter != null)
             {
-                query += String.Format(" and {0}", filter);
+                query += String.Format(" and {0}", table.Filter);
             }
-            var table = runQuery(query);
-            table.TableName = tableName;
-            return table;
+            var dataTable = runQuery(query);
+            dataTable.TableName = tableName;
+            return dataTable;
         }
 
 

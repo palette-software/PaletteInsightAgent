@@ -10,74 +10,92 @@
     Name: historical_event_types
     Full: false
     Field: type_id
+    HistoryNeeded: true
 -
     Name: historical_disk_usage
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: historical_events
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_capabilities
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_comments
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_configs
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_data_connections
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_datasources
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_groups
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_licensing_roles
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_projects
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_schedules
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_sites
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_tags   
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_tasks
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_users
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_views
     Full: false
     Field: id
+    HistoryNeeded: true
 -
     Name: hist_workbooks
     Full: false
     Field: id
+    HistoryNeeded: true
 - 
     Name: views
 - 
