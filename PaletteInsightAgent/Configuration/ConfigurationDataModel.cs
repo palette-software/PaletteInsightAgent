@@ -65,6 +65,9 @@ namespace PaletteInsight
 
             [YamlMember(Alias = "Filter")]
             public string Filter { get; set; }
+
+            [YamlMember(Alias = "HistoryNeeded")]
+            public bool HistoryNeeded { get; set; } = false;
         }
 
         public class Webservice
