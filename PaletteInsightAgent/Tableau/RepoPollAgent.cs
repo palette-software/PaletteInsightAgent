@@ -35,11 +35,11 @@ namespace PaletteInsightAgent.RepoTablesPoller
         public void PollStreamingTables(ITableauRepoConn connection, ICollection<RepoTable> tables, IOutput output)
         {
             Log.Info("Polling Tableau Streaming tables.");
-            tables.Where(t => !t.Full)
+            tables.Where(table => !table.Full)
                 .ToList()
-                .ForEach(async (t) =>
+                .ForEach((table) =>
                 {
-                    var tableName = t.Name;
+                    var tableName = table.Name;
 
                     try
                     {
@@ -53,14 +53,16 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         }
 
                         // Ask web service what is the max id
-                        var maxId = await APIClient.GetMaxId(tableName);
+                        var maxIdPromise = APIClient.GetMaxId(tableName);
+                        maxIdPromise.Wait();
+                        var maxId = maxIdPromise.Result;
 
                         // Get data from that max id
                         string newMax;
-                        DataTable table = connection.GetStreamingTable(tableName, t.Field, t.Filter, maxId, out newMax);
-                        if (table != null)
+                        DataTable dataTable = connection.GetStreamingTable(tableName, table, maxId, out newMax);
+                        if (dataTable != null)
                         {
-                            OutputSerializer.Write(table, newMax);
+                            OutputSerializer.Write(dataTable, newMax);
                         }
                     }
                     catch (TemporaryException tex)
