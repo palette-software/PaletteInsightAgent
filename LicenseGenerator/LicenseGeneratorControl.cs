@@ -36,7 +36,7 @@ namespace LicenseGenerator
         {
             return licenseManager.generateLicense(
                 licenseName.Text,
-                licenseId.Text,
+                licenseName.Text,
                 Decimal.ToInt32(coreCount.Value),
                 // force the license datetime to be UTC
                 DateTime.SpecifyKind(validUntilPicker.Value, DateTimeKind.Utc)
@@ -102,5 +102,10 @@ namespace LicenseGenerator
 
         }
 
+        private void LicenseGeneratorControl_Load(object sender, EventArgs e)
+        {
+            validUntilPicker.Value = System.DateTime.Now.AddYears(1);
+
+        }
     }
 }
