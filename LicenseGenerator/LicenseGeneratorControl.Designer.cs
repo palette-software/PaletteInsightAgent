@@ -32,8 +32,6 @@
             this.licenseTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.validUntilPicker = new System.Windows.Forms.DateTimePicker();
-            this.label2 = new System.Windows.Forms.Label();
-            this.licenseId = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.licenseName = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
@@ -50,7 +48,7 @@
             // licenseTextBox
             // 
             this.licenseTextBox.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.licenseTextBox.Location = new System.Drawing.Point(14, 129);
+            this.licenseTextBox.Location = new System.Drawing.Point(14, 108);
             this.licenseTextBox.Multiline = true;
             this.licenseTextBox.Name = "licenseTextBox";
             this.licenseTextBox.ReadOnly = true;
@@ -61,7 +59,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 94);
+            this.label3.Location = new System.Drawing.Point(14, 73);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(85, 13);
             this.label3.TabIndex = 14;
@@ -69,31 +67,15 @@
             // 
             // validUntilPicker
             // 
-            this.validUntilPicker.Location = new System.Drawing.Point(126, 90);
+            this.validUntilPicker.Location = new System.Drawing.Point(126, 69);
             this.validUntilPicker.Name = "validUntilPicker";
             this.validUntilPicker.Size = new System.Drawing.Size(160, 20);
             this.validUntilPicker.TabIndex = 13;
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 42);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(58, 13);
-            this.label2.TabIndex = 12;
-            this.label2.Text = "License ID";
-            // 
-            // licenseId
-            // 
-            this.licenseId.Location = new System.Drawing.Point(126, 38);
-            this.licenseId.Name = "licenseId";
-            this.licenseId.Size = new System.Drawing.Size(292, 20);
-            this.licenseId.TabIndex = 11;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(14, 16);
+            this.label1.Location = new System.Drawing.Point(14, 18);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(86, 13);
             this.label1.TabIndex = 10;
@@ -101,14 +83,14 @@
             // 
             // licenseName
             // 
-            this.licenseName.Location = new System.Drawing.Point(126, 12);
+            this.licenseName.Location = new System.Drawing.Point(126, 14);
             this.licenseName.Name = "licenseName";
             this.licenseName.Size = new System.Drawing.Size(292, 20);
             this.licenseName.TabIndex = 9;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(427, 12);
+            this.button1.Location = new System.Drawing.Point(427, 14);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(197, 23);
             this.button1.TabIndex = 8;
@@ -118,7 +100,7 @@
             // 
             // saveLicenseButton
             // 
-            this.saveLicenseButton.Location = new System.Drawing.Point(427, 90);
+            this.saveLicenseButton.Location = new System.Drawing.Point(427, 69);
             this.saveLicenseButton.Name = "saveLicenseButton";
             this.saveLicenseButton.Size = new System.Drawing.Size(197, 23);
             this.saveLicenseButton.TabIndex = 17;
@@ -128,7 +110,7 @@
             // 
             // coreCount
             // 
-            this.coreCount.Location = new System.Drawing.Point(126, 64);
+            this.coreCount.Location = new System.Drawing.Point(126, 43);
             this.coreCount.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -146,7 +128,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(14, 68);
+            this.label4.Location = new System.Drawing.Point(14, 47);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 19;
@@ -154,7 +136,7 @@
             // 
             // metaTextBox
             // 
-            this.metaTextBox.Location = new System.Drawing.Point(14, 318);
+            this.metaTextBox.Location = new System.Drawing.Point(14, 297);
             this.metaTextBox.Multiline = true;
             this.metaTextBox.Name = "metaTextBox";
             this.metaTextBox.ReadOnly = true;
@@ -164,7 +146,7 @@
             // 
             // keyGeneratorControl
             // 
-            this.keyGeneratorControl.Location = new System.Drawing.Point(8, 349);
+            this.keyGeneratorControl.Location = new System.Drawing.Point(8, 328);
             this.keyGeneratorControl.Name = "keyGeneratorControl";
             this.keyGeneratorControl.Size = new System.Drawing.Size(608, 187);
             this.keyGeneratorControl.TabIndex = 16;
@@ -182,13 +164,12 @@
             this.Controls.Add(this.licenseTextBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.validUntilPicker);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.licenseId);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.licenseName);
             this.Controls.Add(this.button1);
             this.Name = "LicenseGeneratorControl";
-            this.Size = new System.Drawing.Size(797, 608);
+            this.Size = new System.Drawing.Size(642, 493);
+            this.Load += new System.EventHandler(this.LicenseGeneratorControl_Load);
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.coreCount)).EndInit();
             this.ResumeLayout(false);
@@ -201,8 +182,6 @@
         private System.Windows.Forms.TextBox licenseTextBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker validUntilPicker;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox licenseId;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox licenseName;
         private System.Windows.Forms.Button button1;
