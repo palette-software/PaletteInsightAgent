@@ -16,7 +16,7 @@ namespace PaletteInsightAgentTests.Tableau
         {
             int id = 123;
             var stringified = Tableau9RepoConn.StringifyMax(id);
-            Assert.AreEqual(stringified, "123");
+            Assert.AreEqual("123", stringified);
         }
 
         [TestMethod]
@@ -24,7 +24,7 @@ namespace PaletteInsightAgentTests.Tableau
         {
             string babe = "Shaunie";
             var stringified = Tableau9RepoConn.StringifyMax(babe);
-            Assert.AreEqual(stringified, "Shaunie");
+            Assert.AreEqual("Shaunie", stringified);
         }
 
         [TestMethod]
@@ -33,7 +33,7 @@ namespace PaletteInsightAgentTests.Tableau
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-GB");
             DateTime en_gb = new DateTime(2016, 08, 17, 13, 22, 56);
             var stringified = Tableau9RepoConn.StringifyMax(en_gb);
-            Assert.AreEqual(stringified, "2016-08-17 13:22:56Z");
+            Assert.AreEqual("2016-08-17 13:22:56Z", stringified);
         }
 
         [TestMethod]
@@ -42,7 +42,7 @@ namespace PaletteInsightAgentTests.Tableau
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("hu-HU");
             DateTime hu_hu = new DateTime(2016, 08, 17, 13, 22, 56);
             var stringified = Tableau9RepoConn.StringifyMax(hu_hu);
-            Assert.AreEqual(stringified, "2016-08-17 13:22:56Z");
+            Assert.AreEqual("2016-08-17 13:22:56Z", stringified);
         }
 
         [TestMethod]
@@ -51,7 +51,7 @@ namespace PaletteInsightAgentTests.Tableau
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
             DateTime en_us = new DateTime(2016, 08, 17, 13, 22, 56);
             var stringified = Tableau9RepoConn.StringifyMax(en_us);
-            Assert.AreEqual(stringified, "2016-08-17 13:22:56Z");
+            Assert.AreEqual("2016-08-17 13:22:56Z", stringified);
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace PaletteInsightAgentTests.Tableau
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("ko");
             DateTime ko = new DateTime(2016, 08, 17, 13, 22, 56);
             var stringified = Tableau9RepoConn.StringifyMax(ko);
-            Assert.AreEqual(stringified, "2016-08-17 13:22:56Z");
+            Assert.AreEqual("2016-08-17 13:22:56Z", stringified);
         }
 
         [TestMethod]
@@ -69,7 +69,7 @@ namespace PaletteInsightAgentTests.Tableau
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("nl-NL");
             DateTime nl_nl = new DateTime(2016, 08, 17, 13, 22, 56);
             var stringified = Tableau9RepoConn.StringifyMax(nl_nl);
-            Assert.AreEqual(stringified, "2016-08-17 13:22:56Z");
+            Assert.AreEqual("2016-08-17 13:22:56Z", stringified);
         }
     }
 }
