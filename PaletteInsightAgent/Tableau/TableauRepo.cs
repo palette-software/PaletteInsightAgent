@@ -274,6 +274,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             {
                 query = String.Format("{0} where {1}", query, filter);
             }
+
             var table = runQuery(query);
             // This query should return one field
             if (table.Rows.Count == 1 && table.Columns.Count == 1)
@@ -283,7 +284,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return null;
         }
 
-        private string StringifyMax(object max)
+        internal static string StringifyMax(object max)
         {
             if (max is DateTime)
             {
