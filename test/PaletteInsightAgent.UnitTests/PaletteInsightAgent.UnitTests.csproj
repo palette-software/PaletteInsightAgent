@@ -60,6 +60,7 @@
     <Compile Include="Output\CsvSerializerTests.cs" />
     <Compile Include="Output\FileUploaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tableau\TableauRepoTest.cs" />
     <Compile Include="ThreadInfo\ThreadInfoAgentTest.cs" />
   </ItemGroup>
   <ItemGroup>

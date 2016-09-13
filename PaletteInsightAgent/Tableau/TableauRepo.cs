@@ -147,7 +147,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return (int)coreCount;
         }
 
-        private object queryWithReconnect(Func<object> query, object def)
+        private object queryWithReconnect(Func<object> query, object def, string sqlStatement)
         {
             // If server got restarted we get IOException for the first time and there is no
             // other way to detect this but sending the query. This is why we have the for loop
@@ -163,7 +163,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 }
                 catch (Npgsql.NpgsqlException e)
                 {
-                    Log.Error("NPGSQL exception while retreiving data from Tableau repository Query: {0} Exception: {1}", query, e);
+                    Log.Error("NPGSQL exception while retreiving data from Tableau repository Query: {0} Exception: {1}", sqlStatement, e);
                     break;
                 }
                 catch (System.IO.IOException e)
@@ -185,7 +185,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         adapter.Fill(table);
                         return table;
                     }
-                }, new DataTable());
+                }, new DataTable(), query);
             }
         }
 
@@ -203,7 +203,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         long max = (long)cmd.ExecuteScalar();
                         return max;
                     };
-                }, 0);
+                }, 0, query);
             }
         }
 
@@ -274,13 +274,26 @@ namespace PaletteInsightAgent.RepoTablesPoller
             {
                 query = String.Format("{0} where {1}", query, filter);
             }
+
             var table = runQuery(query);
             // This query should return one field
             if (table.Rows.Count == 1 && table.Columns.Count == 1)
             {
-                return table.Rows[0][0].ToString();
+                return StringifyMax(table.Rows[0][0]);
             }
             return null;
+        }
+
+        internal static string StringifyMax(object max)
+        {
+            if (max is DateTime)
+            {
+                // "u" means Universal sortable date/time pattern. This way we can
+                // avoid problems with different date/time patterns for example like
+                // dd/mm/yyyy and mm/dd/yyyy, which can result ambigous or invalid dates.
+                return ((DateTime)max).ToString("u");
+            }
+            return max.ToString();
         }
 
         public DataTable GetStreamingTable(string tableName, RepoTable table, string from, out string newMax)
