@@ -83,6 +83,39 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
+        public static string CheckLicense(string licenseKey)
+        {
+            using (var handler = GetHttpClientHandler())
+            using (var httpClient = new HttpClient(handler))
+            {
+                //var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
+                //var authHeader = new AuthenticationHeaderValue("Token", licenseGuid);
+                //httpClient.DefaultRequestHeaders.Authorization = authHeader;
+
+                using (var response = httpClient.GetAsync(GetLicenseCheckUrl(licenseKey)).Result)
+                {
+                    switch (response.StatusCode)
+                    {
+                        case HttpStatusCode.OK:
+                            break;
+                        case HttpStatusCode.NoContent:
+                            return null;
+                        case HttpStatusCode.BadGateway:
+                            throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
+                        case HttpStatusCode.Forbidden:
+                            throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
+                        default:
+                            throw new HttpRequestException(String.Format("Couldn't validate license key: {0}, Response: {1}", licenseKey, response.ReasonPhrase));
+                    }
+
+                    using (HttpContent content = response.Content)
+                    {
+                        return content.ReadAsStringAsync().Result;
+                    }
+                }
+            }
+        }
+
         public static async Task<HttpResponseMessage> UploadFile(string file, string maxId)
         {
             using (var handler = GetHttpClientHandler())
@@ -121,6 +154,11 @@ namespace PaletteInsightAgent.Helpers
         private static string GetMaxIdUrl(string tableName)
         {
             return String.Format("{0}/maxid?table={1}", config.Endpoint, tableName);
+        }
+
+        private static string GetLicenseCheckUrl(string licenseKey)
+        {
+            return String.Format("{0}/api/v1/license?key={1}", config.Endpoint, licenseKey);
         }
 
         private static MultipartFormDataContent CreateRequestContents(string file)
