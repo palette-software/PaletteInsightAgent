@@ -1,9 +1,7 @@
 ﻿using NLog;
 using PaletteInsightAgent.Output.OutputDrivers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -15,6 +13,7 @@ namespace PaletteInsightAgent.Helpers
 {
     public class APIClient
     {
+        public static readonly string API_VERSION = "v1";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static WebserviceConfiguration config = null;
         private static readonly string HostName = Uri.EscapeDataString(Dns.GetHostName());
@@ -83,7 +82,7 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
-        public static string CheckLicense(string licenseKey)
+        public static async Task<string> CheckLicense(string licenseKey)
         {
             using (var handler = GetHttpClientHandler())
             using (var httpClient = new HttpClient(handler))
@@ -92,7 +91,7 @@ namespace PaletteInsightAgent.Helpers
                 //var authHeader = new AuthenticationHeaderValue("Token", licenseGuid);
                 //httpClient.DefaultRequestHeaders.Authorization = authHeader;
 
-                using (var response = httpClient.GetAsync(GetLicenseCheckUrl(licenseKey)).Result)
+                using (var response = await httpClient.GetAsync(GetLicenseCheckUrl(licenseKey)))
                 {
                     switch (response.StatusCode)
                     {
@@ -110,7 +109,8 @@ namespace PaletteInsightAgent.Helpers
 
                     using (HttpContent content = response.Content)
                     {
-                        return content.ReadAsStringAsync().Result;
+                        string result = await content.ReadAsStringAsync();
+                        return result;
                     }
                 }
             }
@@ -158,7 +158,7 @@ namespace PaletteInsightAgent.Helpers
 
         private static string GetLicenseCheckUrl(string licenseKey)
         {
-            return String.Format("{0}/api/v1/license?key={1}", config.Endpoint, licenseKey);
+            return String.Format("{0}/api/{1}/license?key={2}", config.Endpoint, API_VERSION, licenseKey);
         }
 
         private static MultipartFormDataContent CreateRequestContents(string file)
@@ -192,14 +192,15 @@ namespace PaletteInsightAgent.Helpers
             var encoding = new ASCIIEncoding();
 
             var usernameBytes = encoding.GetBytes(String.Format("{0}:", config.Username));
+            var tokenBytes = encoding.GetBytes(config.AuthToken);
 
-            var authLen = config.AuthToken.Length;
+            var authLen = tokenBytes.Length;
             var usernameLen = usernameBytes.Length;
 
             var authBytes = new byte[usernameLen + authLen];
 
             System.Buffer.BlockCopy(usernameBytes, 0, authBytes, 0, usernameLen);
-            System.Buffer.BlockCopy(config.AuthToken, 0, authBytes, usernameLen, authLen);
+            System.Buffer.BlockCopy(tokenBytes, 0, authBytes, usernameLen, authLen);
             return authBytes;
 
         }
