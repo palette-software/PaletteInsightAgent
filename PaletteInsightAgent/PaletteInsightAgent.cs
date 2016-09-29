@@ -44,6 +44,8 @@ namespace PaletteInsightAgent
         private IOutput output;
         private readonly PaletteInsightAgentOptions options;
         private bool disposed;
+        private int licenseFailureCount;
+        private const int MAX_ALLOWED_LICENSE_FAILURES = 3;
         private const string PathToCountersYaml = @"Config\Counters.yml";
         private const int DBWriteLockAcquisitionTimeout = 10; // In seconds.
         private const int PollWaitTimeout = 1000;  // In milliseconds.
@@ -73,15 +75,19 @@ namespace PaletteInsightAgent
 
             tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
-            // check the license after the configuration has been loaded.
-            var license = CheckLicense();
-
             // Make sure that our HTTP client is initialized, because Splunk logger might be enabled
             // and it is using HTTP to send log messages to Splunk.
             APIClient.Init(options.WebserviceConfig);
 
             // Add the webservice username/auth token from the license
-            PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options, license);
+            PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options);
+
+            // check the license after the configuration has been loaded.
+            if (!CheckLicense(options.LicenseKey))
+            {
+                Log.Fatal("Invalid license! Exiting...");
+                Environment.Exit(-1);
+            }
 
             // Showing the current version in the log
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -361,13 +367,70 @@ namespace PaletteInsightAgent
 
         #region Private Methods
 
+        private bool CheckLicense(string licenseKey)
+        {
+            try
+            {
+                var licensePromise = APIClient.CheckLicense(licenseKey);
+                licensePromise.Wait();
+                string checkJsonString = licensePromise.Result;
+
+                Dictionary<string, object> parsedResult;
+
+                parsedResult = (Dictionary<string, object>)fastJSON.JSON.Parse(checkJsonString);
+
+                // Set a custom variable for NLog, so that we can filter on it in LogEntries
+                NLog.GlobalDiagnosticsContext.Set("license_owner", parsedResult["owner"]);
+
+                string licenseMessage = String.Format("License owner: {0} -- valid until: {1}", parsedResult["owner"], parsedResult["expiration-time"]);
+
+                if (Convert.ToBoolean(parsedResult["valid"]))
+                {
+                    Log.Info("License key is valid! {0}", licenseMessage);
+                    return true;
+                }
+
+                Log.Error("License key is invalid! {0}", licenseMessage);
+                return false;
+            }
+            catch (AggregateException ae)
+            {
+                ae.Handle((x) =>
+                {
+                    Log.Warn(x, "Failed to check license! Exception type: {0} Error:", x.GetType());
+
+                    // This return does not mean that the license is OK, but to tell that
+                    // the aggreagated exception is handled.
+                    return true;
+                });
+            }
+            catch (Exception e)
+            {
+                Log.Warn(e, "License check failed! Error: ");
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Timer invokable license check function
         /// </summary>
         /// <param name="stateInfo"></param>
         private void PollLicense(object stateInfo)
         {
-            CheckLicense();
+            if (CheckLicense(options.LicenseKey))
+            {
+                licenseFailureCount = 0;
+                return;
+            }
+
+            if (++licenseFailureCount >= MAX_ALLOWED_LICENSE_FAILURES)
+            {
+                // The grace period is 3 days. It means that there 3 days to fix the license or
+                // the connection between the Insight Agent and the Insight Server.
+                Log.Fatal("License check failed {0} times in-a-row! Exiting...", MAX_ALLOWED_LICENSE_FAILURES);
+                Environment.Exit(-1);
+            }
         }
 
         /// <summary>

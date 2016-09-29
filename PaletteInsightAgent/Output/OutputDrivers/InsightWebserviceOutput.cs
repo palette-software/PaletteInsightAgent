@@ -29,7 +29,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// <summary>
         /// The authentication token from the license
         /// </summary>
-        public byte[] AuthToken;
+        public string AuthToken;
 
         /// <summary>
         /// Should the output use multiple-file-upload (true) or single-file-upload(false)

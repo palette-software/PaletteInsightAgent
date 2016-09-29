@@ -132,7 +132,7 @@ namespace PaletteInsight
             public bool AllProcesses2 { get; set; } = true;
 
             [YamlMember(Alias = "LicenseKey")]
-            public int LicenseKey { get; set; }
+            public string LicenseKey { get; set; }
 
             [YamlMember(Alias = "Webservice")]
             public Webservice Webservice { get; set; }
