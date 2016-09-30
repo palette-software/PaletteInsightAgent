@@ -8,7 +8,7 @@ using System.Threading;
 using PaletteInsightAgent.CounterConfig;
 using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Sampler;
-using Licensing;
+using PaletteInsightAgent.License;
 using PaletteInsightAgent.LogPoller;
 using PaletteInsightAgent.ThreadInfoPoller;
 using PaletteInsightAgent.Output;
@@ -43,9 +43,8 @@ namespace PaletteInsightAgent
         private ITableauRepoConn tableauRepo;
         private IOutput output;
         private readonly PaletteInsightAgentOptions options;
+        private LicenseGuard licenseGuard;
         private bool disposed;
-        private int licenseFailureCount;
-        private const int MAX_ALLOWED_LICENSE_FAILURES = 3;
         private const string PathToCountersYaml = @"Config\Counters.yml";
         private const int DBWriteLockAcquisitionTimeout = 10; // In seconds.
         private const int PollWaitTimeout = 1000;  // In milliseconds.
@@ -83,7 +82,8 @@ namespace PaletteInsightAgent
             PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options);
 
             // check the license after the configuration has been loaded.
-            if (!CheckLicense(options.LicenseKey))
+            licenseGuard = new LicenseGuard();
+            if (!licenseGuard.CheckLicense(options.LicenseKey))
             {
                 Log.Fatal("Invalid license! Exiting...");
                 Environment.Exit(-1);
@@ -144,33 +144,6 @@ namespace PaletteInsightAgent
             }
         }
 
-        private Licensing.License CheckLicense()
-        {
-            try
-            {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                var pathToCheck = Path.GetDirectoryName(assembly.Location) + "\\";
-
-                Log.Info("Checking for licenses in: {0}", pathToCheck);
-                var coreCount = tableauRepo.getCoreCount();
-                var license = LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount);
-                // check for license.
-                if (license == null)
-                {
-                    Log.Fatal("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
-                    Environment.Exit(-1);
-                }
-
-                return license;
-            }
-            catch (Exception e)
-            {
-                Log.Fatal(e, "Error during license check. Exception: {0}", e);
-                Environment.Exit(-1);
-            }
-            return null;
-        }
-
         ~PaletteInsightAgent()
         {
             Dispose(false);
@@ -194,7 +167,7 @@ namespace PaletteInsightAgent
 
             // Check the license every day
             var oneDayInMs = 24 * 60 * 60 * 1000;
-            licenseCheckTimer = new Timer(callback: PollLicense, state: null, dueTime: oneDayInMs, period: oneDayInMs);
+            licenseCheckTimer = new Timer(callback: licenseGuard.PollLicense, state: options.LicenseKey, dueTime: oneDayInMs, period: oneDayInMs);
 
             // only start the JMX if we want to
             if (USE_COUNTERSAMPLES)
@@ -366,72 +339,6 @@ namespace PaletteInsightAgent
         #endregion Public Methods
 
         #region Private Methods
-
-        private bool CheckLicense(string licenseKey)
-        {
-            try
-            {
-                var licensePromise = APIClient.CheckLicense(licenseKey);
-                licensePromise.Wait();
-                string checkJsonString = licensePromise.Result;
-
-                Dictionary<string, object> parsedResult;
-
-                parsedResult = (Dictionary<string, object>)fastJSON.JSON.Parse(checkJsonString);
-
-                // Set a custom variable for NLog, so that we can filter on it in LogEntries
-                NLog.GlobalDiagnosticsContext.Set("license_owner", parsedResult["owner"]);
-
-                string licenseMessage = String.Format("License owner: {0} -- valid until: {1}", parsedResult["owner"], parsedResult["expiration-time"]);
-
-                if (Convert.ToBoolean(parsedResult["valid"]))
-                {
-                    Log.Info("License key is valid! {0}", licenseMessage);
-                    return true;
-                }
-
-                Log.Error("License key is invalid! {0}", licenseMessage);
-                return false;
-            }
-            catch (AggregateException ae)
-            {
-                ae.Handle((x) =>
-                {
-                    Log.Warn(x, "Failed to check license! Exception type: {0} Error:", x.GetType());
-
-                    // This return does not mean that the license is OK, but to tell that
-                    // the aggreagated exception is handled.
-                    return true;
-                });
-            }
-            catch (Exception e)
-            {
-                Log.Warn(e, "License check failed! Error: ");
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Timer invokable license check function
-        /// </summary>
-        /// <param name="stateInfo"></param>
-        private void PollLicense(object stateInfo)
-        {
-            if (CheckLicense(options.LicenseKey))
-            {
-                licenseFailureCount = 0;
-                return;
-            }
-
-            if (++licenseFailureCount >= MAX_ALLOWED_LICENSE_FAILURES)
-            {
-                // The grace period is 3 days. It means that there 3 days to fix the license or
-                // the connection between the Insight Agent and the Insight Server.
-                Log.Fatal("License check failed {0} times in-a-row! Exiting...", MAX_ALLOWED_LICENSE_FAILURES);
-                Environment.Exit(-1);
-            }
-        }
 
         /// <summary>
         /// Polls the sampler's counters and writes the results to the writer object.

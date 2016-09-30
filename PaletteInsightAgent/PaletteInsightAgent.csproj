@@ -118,6 +118,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\DateTimeConverter.cs" />
     <Compile Include="Configuration\ConfigurationDataModel.cs" />
     <Compile Include="Counters\CounterConfigLoader.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
@@ -127,8 +128,7 @@
     <Compile Include="Helpers\GreenplumCsvEscaper.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="Configuration\ConfigurationLoader.cs" />
-    <Compile Include="Helpers\TimezoneHelpers.cs" />
-    <Compile Include="LicenseChecker\LicenseChecker.cs" />
+    <Compile Include="License\LicenseGuard.cs" />
     <Compile Include="LicensePublicKey.cs" />
     <Compile Include="Output\FileUploader.cs" />
     <Compile Include="Output\IWriter.cs" />
@@ -204,14 +204,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Licensing\Licensing.csproj">
-      <Project>{ef71c0c3-ffe7-4c3a-827b-b9386b0c47fa}</Project>
-      <Name>Licensing</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
