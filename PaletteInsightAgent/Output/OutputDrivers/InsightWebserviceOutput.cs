@@ -22,12 +22,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         public string Endpoint;
 
         /// <summary>
-        /// The authentication username for the webservice (the licenseId of the license)
-        /// </summary>
-        public string Username;
-
-        /// <summary>
-        /// The authentication token from the license
+        /// The authentication token, which is the license key
         /// </summary>
         public string AuthToken;
 
@@ -65,7 +60,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         {
             get
             {
-                return Endpoint.Length >= 4 && Endpoint.StartsWith("http") && Username.Length > 0 && AuthToken.Length > 0;
+                return Endpoint.Length >= 4 && Endpoint.StartsWith("http") && AuthToken.Length > 0;
             }
         }
     }
