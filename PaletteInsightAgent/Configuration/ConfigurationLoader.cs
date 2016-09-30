@@ -105,8 +105,6 @@ namespace PaletteInsight
                 // skip if we arent using the webservice
                 if (options.WebserviceConfig == null) return;
 
-                // FIXME: username is no longer required!
-                options.WebserviceConfig.Username = "palette";
                 options.WebserviceConfig.AuthToken = options.LicenseKey;
             }
 
