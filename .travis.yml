@@ -1,4 +1,7 @@
 language: bash
+branches:
+  only:
+    - MANUAL_TRIGGER
 addons:
   apt:
     packages:
