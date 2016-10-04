@@ -23,6 +23,9 @@
 # Use bzip2 payload compression
 %define _binary_payload w9.bzdio
 
+# Enable bash specific commands (eg. pushd)
+%define _buildshell /bin/bash
+
 #
 # The Preamble
 #
