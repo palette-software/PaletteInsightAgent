@@ -1,1 +1,5 @@
 language: ruby # ruby is the default language - fix linter warning
+addons:
+  apt:
+    packages:
+      - rpm
