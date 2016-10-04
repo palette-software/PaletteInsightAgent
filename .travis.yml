@@ -7,4 +7,5 @@ addons:
     packages:
       - rpm
 install: true
-script: true
+script:
+    - rpmbuild -bb --buildroot $(pwd) -D "version ${VERSION}" -D "buildrelease 1" -D "_rpmdir $(pwd)/_build" insight-agent.spec
