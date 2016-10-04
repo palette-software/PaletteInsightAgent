@@ -1,4 +1,4 @@
-language: ruby # ruby is the default language - fix linter warning
+language: bash
 addons:
   apt:
     packages:
