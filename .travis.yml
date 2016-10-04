@@ -8,4 +8,4 @@ addons:
       - rpm
 install: true
 script:
-    - rpmbuild -bb --buildroot $(pwd) -D "version ${VERSION}" -D "buildrelease 1" -D "_rpmdir $(pwd)/_build" insight-agent.spec
+    - rpmbuild -bb --buildroot $(pwd) -D "version ${PALETTE_AGENT_VERSION}" -D "buildrelease 1" -D "_rpmdir $(pwd)/_build" insight-agent.spec
