@@ -15,7 +15,7 @@ addons:
       - sshpass
 install: true
 script:
-    - rpmbuild -bb --buildroot $(pwd) -D "version ${PALETTE_AGENT_VERSION}" -D "buildrelease 1" -D "_rpmdir $(pwd)/_build" insight-agent.spec
+  - rpmbuild -bb --buildroot $(pwd) -D "version ${PALETTE_AGENT_VERSION}" -D "buildrelease 1" -D "_rpmdir rpm-build/_build" insight-agent.spec
 deploy:
   provider: script
   script: ./deploy.sh
