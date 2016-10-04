@@ -1,4 +1,10 @@
 language: bash
+env:
+  global:
+    - DEPLOY_HOST=rpm.palette-software.com
+    - DEPLOY_PATH=/var/palette-rpm-repo
+    - DEPLOY_USER=palette-rpm
+    - secure: n7vTUZEnzyrdfV1p2zCh/ejIQrhco6C2oVedjVqZNsg7C8AXVJpGOreS6T4LwbHihmJZWMLgPFKpe7j5IKI04M1GeAM1ZwdltyBiltcpxnlim0SS4tfJYID8GCgvGt4bp6w5meoXqwdTL9vhMsjX6a2iUJ5mMr/JRoAz3x12JhcI8/S04GxLrKlL9nTie8zupaSHJtBXkJPlQeKdoczEAN/A4Hc1dA4hb/PqbZor0613ok1/mnWYyVGfNiJhrgFLD3nP0EQCEeYWI9VQjFOKVmbBLw1XllUDzWCGLZCP/x/WLM+8c/uz6W/RRq3EqM9Ijc/h5N/W+DJrZlUgLjuaGadLS4H0BL5D+cnLFEdCfLbvnsICce89VOIUWftf80lAueNaSVyCHyuw6yLuqGaNKLrEGrabA7EpsylJavrORiukkO9kKlSoto1ZfVEZa4DZP5ZKgOw4/Pr1yhONqMZEqhf8R5VuiAdoFkPHd4uHL/jpPoS06Un6NnszXcRNqXxbB3jcY1sFiSXsPYXFyK7owcFqvxfLkWozvHzmPn8XAnjy6brNBTYc9m4DRQrByHHrBimLzmtU2d8Sedc9dQEZDwJkhUS5d/SzL2IyXsxGkUP7AyGFohr2HOJhevfivdBmKcA5El2VNrwv1emCrO/JAENQrquT95NXR4dt76+NThM=
 branches:
   only:
     - MANUAL_TRIGGER
@@ -6,6 +12,13 @@ addons:
   apt:
     packages:
       - rpm
+      - sshpass
 install: true
 script:
     - rpmbuild -bb --buildroot $(pwd) -D "version ${PALETTE_AGENT_VERSION}" -D "buildrelease 1" -D "_rpmdir $(pwd)/_build" insight-agent.spec
+deploy:
+  provider: script
+  script: ./deploy.sh
+  skip_cleanup: true
+  on:
+    branch: master
