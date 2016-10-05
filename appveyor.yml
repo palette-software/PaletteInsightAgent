@@ -141,8 +141,7 @@ deploy:
   on:
     branch: rpm_from_release
 after_deploy:
-# Why is it not obvious how to run an external script in powershell?!
-- cmd: powershell %APPVEYOR_BUILD_FOLDER%\trigger-travis.ps1 %APPVEYOR_BUILD_VERSION%
+- ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION"
 
 # notifications:
 # - provider: Slack
