@@ -136,7 +136,6 @@ deploy:
   release: Palette Insight Agent v$(appveyor_build_version)
   auth_token:
     secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
-  artifact: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
   draft: true
   prerelease: true
   on:
