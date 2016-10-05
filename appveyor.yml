@@ -3,7 +3,6 @@ pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
-  - rpm_from_release
   - master
   - production
 os: Visual Studio 2015
@@ -139,7 +138,7 @@ deploy:
   draft: true
   prerelease: true
   on:
-    branch: rpm_from_release
+    branch: master
 after_deploy:
 - ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION"
 
