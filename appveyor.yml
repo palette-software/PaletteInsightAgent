@@ -142,7 +142,7 @@ deploy:
   on:
     branch: rpm_from_release
 after_deploy:
-- ps: '& { .\trigger-travis.ps1 "$env:APPVEYOR_BUILD_VERSION" }'
+- ps: $env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION
 
 # notifications:
 # - provider: Slack
