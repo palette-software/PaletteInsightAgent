@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory=$true)][string]$VERSION
 )
 
-$BRANCH="rpm_from_release"
+$BRANCH="master"
 
 $TRAVIS_REQUEST_BODY = @{
   request = @{

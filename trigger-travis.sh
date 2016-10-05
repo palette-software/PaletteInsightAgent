@@ -6,7 +6,7 @@ if [ $# -ne 1 ]; then
 fi
 
 VERSION="$1"
-BRANCH="rpm_from_release"
+BRANCH="master"
 
 TRAVIS_REQUEST_BODY="{
 \"request\": {
