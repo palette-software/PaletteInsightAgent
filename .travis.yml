@@ -4,7 +4,10 @@ env:
     - DEPLOY_HOST=rpm.palette-software.com
     - DEPLOY_PATH=/var/palette-rpm-repo
     - DEPLOY_USER=palette-rpm
+    # DEPLOY_PASS
     - secure: n7vTUZEnzyrdfV1p2zCh/ejIQrhco6C2oVedjVqZNsg7C8AXVJpGOreS6T4LwbHihmJZWMLgPFKpe7j5IKI04M1GeAM1ZwdltyBiltcpxnlim0SS4tfJYID8GCgvGt4bp6w5meoXqwdTL9vhMsjX6a2iUJ5mMr/JRoAz3x12JhcI8/S04GxLrKlL9nTie8zupaSHJtBXkJPlQeKdoczEAN/A4Hc1dA4hb/PqbZor0613ok1/mnWYyVGfNiJhrgFLD3nP0EQCEeYWI9VQjFOKVmbBLw1XllUDzWCGLZCP/x/WLM+8c/uz6W/RRq3EqM9Ijc/h5N/W+DJrZlUgLjuaGadLS4H0BL5D+cnLFEdCfLbvnsICce89VOIUWftf80lAueNaSVyCHyuw6yLuqGaNKLrEGrabA7EpsylJavrORiukkO9kKlSoto1ZfVEZa4DZP5ZKgOw4/Pr1yhONqMZEqhf8R5VuiAdoFkPHd4uHL/jpPoS06Un6NnszXcRNqXxbB3jcY1sFiSXsPYXFyK7owcFqvxfLkWozvHzmPn8XAnjy6brNBTYc9m4DRQrByHHrBimLzmtU2d8Sedc9dQEZDwJkhUS5d/SzL2IyXsxGkUP7AyGFohr2HOJhevfivdBmKcA5El2VNrwv1emCrO/JAENQrquT95NXR4dt76+NThM=
+    # GITHUB_TOKEN
+    - secure: SWr49SmcfrCIP/ugW3U6rlyhZEI8GTlyuSr/3CUl5L/jXUKC1xOK9WNdGyErJatHZaWkxG7fW6pcNtU6Aokgg/lIsTtI60UKiV7rhGJb9jqIiwhteVW03QSQpl29/0VM3eySGJ8mvxlqxFmyBg5w0QR6BJiEDF/3Kb2vhheOtCXjqOGV1+mLdkqztDEW0kOfxf2s49xz5P1sZaY3eVWZIexZ8QemRSIpsiOS+plXVbZP8gilB7iB8+brlaA5F0YNAARdoyI2CUMgAKJAy4xIyx7tPmMZe5nlZba/+pTjBCbFaGgSaurY+n0lqmMhu6XVV1CRZogb1BbxcMTYUswWao6qJDFaa6qpdgeveZOVMxE9YMBKn623TAoVFWCt11ZU0ty8eZKBLNATUZW2sw6G0YBVI/e5FpgBx2NdS31in+XhnG+oUQSjCfBdgP7SubbyuSu60H1AWx2UwMdeGF/TN81lqi/QgQ47yG7TW56Uuao/x5dHkAmXZy2IrMvCuUEW0r0bX9YxX0QBUbUKCIQ6DRmoDFRgQXcmdb2sIAwKubhOisE1ZATMTMNUmJ0fu/vN5wJ2fdjMv7lkA2ThvJf78/Ga0VFoDmrFlTanBY5OWpQm2V+A+YMIdZ4dDQm5E7GgPvY/LXgoYD2cQ88ozvY9KucmHVwjuzWpsUoVhMESGHI=
 branches:
   only:
     - MANUAL_TRIGGER
@@ -15,7 +18,7 @@ addons:
       - sshpass
 install: true
 script:
-  - rpmbuild -bb --buildroot $(pwd) -D "version ${PALETTE_AGENT_VERSION}" -D "buildrelease 1" -D "_rpmdir rpm-build/_build" insight-agent.spec
+  - rpmbuild -bb --buildroot $(pwd) -D "version ${PALETTE_AGENT_VERSION}" -D "github_token ${GITHUB_TOKEN}" -D "buildrelease 1" -D "_rpmdir rpm-build/_build" insight-agent.spec
 deploy:
   provider: script
   script: ./deploy.sh
