@@ -3,7 +3,7 @@ pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
-  - rpm_from_release
+  - master
   - production
 # Do not build on tags (GitHub and BitBucket)
 skip_tags: true
@@ -138,7 +138,7 @@ deploy:
   draft: false
   prerelease: false
   on:
-    branch: rpm_from_release
+    branch: master
 after_deploy:
 - ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION $env:APPVEYOR_REPO_BRANCH"
 
