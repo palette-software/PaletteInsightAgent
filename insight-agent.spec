@@ -54,6 +54,7 @@ Palette Insight GP Agent
 
 # Install directory - without / prefix
 %define install_dir opt/insight-agent/
+%define downloader_arch linux_amd64
 
 %pre
 # noop
@@ -64,7 +65,9 @@ Palette Insight GP Agent
 %prep
 mkdir -p %{install_dir}
 pushd %{install_dir}
-curl -O https://github.com/palette-software/PaletteInsightAgent/releases/download/v%{version}/Palette-Insight-v%{version}-installer.msi
+curl -OL https://github.com/palette-software/dl-github-release/releases/download/v1.1.1/%downloader_arch.zip
+unzip %downloader_arch.zip
+%downloader_arch/dl-github-release palette-software PaletteInsightAgent %github_token v%version
 popd
 
 %build
@@ -78,7 +81,8 @@ popd
 
 %clean
 pushd %{install_dir}
-rm *
+rm -rf  %downloader_arch
+rm -f *
 popd
 rmdir -p %{install_dir}
 
