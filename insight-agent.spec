@@ -92,6 +92,6 @@ rmdir -p %{install_dir}
 # Reject config files already listed or parent directories, then prefix files
 # with "/", then make sure paths with spaces are quoted.
 %dir /%{install_dir}
-/%{install_dir}/Palette-Insight-v%{version}-installer.msi
+/%{install_dir}/PaletteInsightAgent.msi
 
 %changelog
