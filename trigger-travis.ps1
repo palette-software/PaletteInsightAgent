@@ -1,8 +1,7 @@
 param(
-    [Parameter(Mandatory=$true)][string]$VERSION
+    [Parameter(Mandatory=$true)][string]$VERSION,
+    [Parameter(Mandatory=$true)][string]$BRANCH
 )
-
-$BRANCH="master"
 
 $TRAVIS_REQUEST_BODY = @{
   request = @{

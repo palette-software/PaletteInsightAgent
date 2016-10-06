@@ -138,7 +138,7 @@ deploy:
   on:
     branch: rpm_from_release
 after_deploy:
-- ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION"
+- ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION $env:APPVEYOR_REPO_BRANCH"
 
 # notifications:
 # - provider: Slack
