@@ -1,12 +1,12 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-  echo "Usage $0 <version>"
+if [ $# -ne 2 ]; then
+  echo "Usage $0 <version> <branch>"
   exit 1
 fi
 
 VERSION="$1"
-BRANCH="master"
+BRANCH="$2"
 
 TRAVIS_REQUEST_BODY="{
 \"request\": {
