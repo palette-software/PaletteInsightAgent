@@ -8,7 +8,7 @@ using System.Threading;
 using PaletteInsightAgent.CounterConfig;
 using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Sampler;
-using Licensing;
+using PaletteInsightAgent.License;
 using PaletteInsightAgent.LogPoller;
 using PaletteInsightAgent.ThreadInfoPoller;
 using PaletteInsightAgent.Output;
@@ -43,6 +43,7 @@ namespace PaletteInsightAgent
         private ITableauRepoConn tableauRepo;
         private IOutput output;
         private readonly PaletteInsightAgentOptions options;
+        private LicenseGuard licenseGuard;
         private bool disposed;
         private const string PathToCountersYaml = @"Config\Counters.yml";
         private const int DBWriteLockAcquisitionTimeout = 10; // In seconds.
@@ -73,15 +74,20 @@ namespace PaletteInsightAgent
 
             tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
-            // check the license after the configuration has been loaded.
-            var license = CheckLicense();
-
             // Make sure that our HTTP client is initialized, because Splunk logger might be enabled
             // and it is using HTTP to send log messages to Splunk.
             APIClient.Init(options.WebserviceConfig);
 
             // Add the webservice username/auth token from the license
-            PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options, license);
+            PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options);
+
+            // check the license after the configuration has been loaded.
+            licenseGuard = new LicenseGuard();
+            if (!licenseGuard.CheckLicense(options.LicenseKey))
+            {
+                Log.Fatal("Invalid license! Exiting...");
+                Environment.Exit(-1);
+            }
 
             // Showing the current version in the log
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -138,33 +144,6 @@ namespace PaletteInsightAgent
             }
         }
 
-        private Licensing.License CheckLicense()
-        {
-            try
-            {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                var pathToCheck = Path.GetDirectoryName(assembly.Location) + "\\";
-
-                Log.Info("Checking for licenses in: {0}", pathToCheck);
-                var coreCount = tableauRepo.getCoreCount();
-                var license = LicenseChecker.LicenseChecker.checkForLicensesIn(pathToCheck, LicensePublicKey.PUBLIC_KEY, coreCount);
-                // check for license.
-                if (license == null)
-                {
-                    Log.Fatal("No valid license found for Palette Insight in {0}. Exiting...", pathToCheck);
-                    Environment.Exit(-1);
-                }
-
-                return license;
-            }
-            catch (Exception e)
-            {
-                Log.Fatal(e, "Error during license check. Exception: {0}", e);
-                Environment.Exit(-1);
-            }
-            return null;
-        }
-
         ~PaletteInsightAgent()
         {
             Dispose(false);
@@ -188,7 +167,7 @@ namespace PaletteInsightAgent
 
             // Check the license every day
             var oneDayInMs = 24 * 60 * 60 * 1000;
-            licenseCheckTimer = new Timer(callback: PollLicense, state: null, dueTime: oneDayInMs, period: oneDayInMs);
+            licenseCheckTimer = new Timer(callback: licenseGuard.PollLicense, state: options.LicenseKey, dueTime: oneDayInMs, period: oneDayInMs);
 
             // only start the JMX if we want to
             if (USE_COUNTERSAMPLES)
@@ -360,15 +339,6 @@ namespace PaletteInsightAgent
         #endregion Public Methods
 
         #region Private Methods
-
-        /// <summary>
-        /// Timer invokable license check function
-        /// </summary>
-        /// <param name="stateInfo"></param>
-        private void PollLicense(object stateInfo)
-        {
-            CheckLicense();
-        }
 
         /// <summary>
         /// Polls the sampler's counters and writes the results to the writer object.

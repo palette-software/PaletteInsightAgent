@@ -46,6 +46,8 @@ namespace PaletteInsight
 
                 options.AllProcesses = config.AllProcesses2;
 
+                options.LicenseKey = config.LicenseKey;
+
                 if (config.Webservice != null)
                 {
                     // Do not add the username or password here, as they come from the license
@@ -98,13 +100,12 @@ namespace PaletteInsight
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
             }
 
-            public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options, Licensing.License license)
+            public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options)
             {
                 // skip if we arent using the webservice
                 if (options.WebserviceConfig == null) return;
 
-                options.WebserviceConfig.Username = license.licenseId;
-                options.WebserviceConfig.AuthToken = license.token;
+                options.WebserviceConfig.AuthToken = options.LicenseKey;
             }
 
             /// <summary>

@@ -12,10 +12,6 @@ Palette Insight Agent can be run as both a console app and a Windows service.
 
 Palette Insight Agent is zero configured and remotely updated.
 
-## How do I analyze results from Palette Insight Agent?
-
-The best way is to explore your results in Tableau!  A [sample workbook](https://github.com/palette-software/BlackBoxRecorder/blob/master/Sample%20Workbooks/PaletteInsightAgent%20Workbook.twb) has been created with some example dashboards & views to get you started.
-
 ## What do I need to build Palette Insight Agent from source?
 
 The current development requirements are:
@@ -29,12 +25,12 @@ The current development requirements are:
    https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
 
 
-See [Developer Notes.txt](https://github.com/palette-software/BlackBoxRecorder/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
+See [Developer Notes.txt](https://github.com/palette-software/PaletteInsightAgent/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
 
 ## Is Palette Insight Agent supported?
 
-Palette Insight Agent is made available AS-IS with licensed support. Any bugs discovered should be filed in the [Palette Insight Agent Git issue tracker](https://github.com/palette-software/BlackBoxRecorder/issues).
+Palette Insight Agent is made available AS-IS with licensed support. Any bugs discovered should be filed in the [Palette Insight Agent Git issue tracker](https://github.com/palette-software/PaletteInsightAgent/issues).
 
 ## How can I contribute to Palette Insight Agent?
 
-Code contributions & improvements by the community are welcomed & encouraged!  See [the LICENSE file](https://github.com/palette-software/BlackBoxRecorder/blob/master/LICENSE) for current open-source licensing & use information.
+Code contributions & improvements by the community are welcomed & encouraged!  See [the LICENSE file](https://github.com/palette-software/PaletteInsightAgent/blob/master/LICENSE) for current open-source licensing & use information.
