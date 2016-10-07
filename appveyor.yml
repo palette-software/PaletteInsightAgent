@@ -3,7 +3,6 @@ pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
-  - rpm_from_release
   - master
   - production
 # Do not build on tags (GitHub and BitBucket)
@@ -139,11 +138,9 @@ deploy:
   draft: false
   prerelease: false
   on:
-    branch: rpm_from_release
+    branch: master
 after_deploy:
-- echo "Triggering Travis build"
 - ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION $env:APPVEYOR_REPO_BRANCH $env:PALETTE_ROBOT_TRAVIS_TOKEN"
-- echo "Finished Travis trigger"
 
 # notifications:
 # - provider: Slack
