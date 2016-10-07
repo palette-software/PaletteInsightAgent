@@ -5,6 +5,8 @@ branches:
   only:
   - master
   - production
+# Do not build on tags (GitHub and BitBucket)
+skip_tags: true
 os: Visual Studio 2015
 configuration: Release
 platform: Any CPU
@@ -25,7 +27,7 @@ services:
 build_script:
   - nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
   - nuget.exe restore
-      
+
   # Get insight-tester and unzip it. It is needed for the github-downlaoder
   - mkdir %INSTALLER_DIR%
   - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/dl-github-release/releases/download/v1.0.1/windows_amd64.zip', $env:INSTALLER_DIR+'\windows_amd64.zip')
@@ -40,10 +42,10 @@ build_script:
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
   - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\dl-github-release.exe palette-software palette-updater %GITHUB_TOKEN%
   - copy *.zip %INSTALLER_DIR%
-    
+
   # Unzip palette-updater to the appropriate place
   - mkdir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
-  - ps: $env:UPDATER_ZIP = get-childitem $env:installer_dir | where {$_.extension -eq ".zip"} 
+  - ps: $env:UPDATER_ZIP = get-childitem $env:installer_dir | where {$_.extension -eq ".zip"}
   - ps: $env:UPDATER_ZIP = $env:INSTALLER_DIR + '\' + $env:UPDATER_ZIP
   - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:UPDATER_ZIP, 'c:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release');
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentService\bin\Release
@@ -56,8 +58,6 @@ build_script:
   # Sign the installer
   - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
 
-  - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
-
 test_script:
     # Run the unit tests first
     - vstest.console /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
@@ -69,7 +69,7 @@ test_script:
     - createdb workgroup
     # Setup target database
     - createdb palette
-    - psql -a -c "create user palette with password 'password';"    
+    - psql -a -c "create user palette with password 'password';"
     - psql -a -c "grant all on database palette to palette;"
     # Setup fake Tableau database
     - psql -a -c "create user readonly with password 'onlyread';"
@@ -87,7 +87,7 @@ test_script:
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
-    - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+    - set PALIN_MSI=PaletteInsightAgent.msi
     # Prepare the license file for the installer to use
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
@@ -116,7 +116,7 @@ test_script:
     # - echo "End of PaletteInsightAgent log"
     # - ps: >-
     #     If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
-    #       Write-Host "ERROR or FATAL found in log. Exiting with code 1" 
+    #       Write-Host "ERROR or FATAL found in log. Exiting with code 1"
     #       exit 1
     #     }
     # # - echo "Checking DB contents"
@@ -132,16 +132,15 @@ artifacts:
 deploy:
 - provider: GitHub
   tag: v$(appveyor_build_version)
-  release: Palette Insight v$(appveyor_build_version)
+  release: Palette Insight Agent v$(appveyor_build_version)
   auth_token:
     secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
-  artifact: '*.msi'
-  draft: true
-  prerelease: true
+  draft: false
+  prerelease: false
   on:
-    branch: production
+    branch: master
 after_deploy:
-- cmd: curl 'https://gocd-server.palette-software.net:8154/go/api/pipelines/Deployment/schedule' -u "gocd-admin:manager1" -X POST --insecure
+- ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION $env:APPVEYOR_REPO_BRANCH $env:PALETTE_ROBOT_TRAVIS_TOKEN"
 
 # notifications:
 # - provider: Slack
