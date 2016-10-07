@@ -3,9 +3,10 @@ pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
-  - rpm_from_release
   - master
   - production
+# Do not build on tags (GitHub and BitBucket)
+skip_tags: true
 os: Visual Studio 2015
 configuration: Release
 platform: Any CPU
@@ -57,8 +58,6 @@ build_script:
   # Sign the installer
   - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
 
-  - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
-
 test_script:
     # Run the unit tests first
     - vstest.console /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
@@ -88,7 +87,7 @@ test_script:
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
-    - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+    - set PALIN_MSI=PaletteInsightAgent.msi
     # Prepare the license file for the installer to use
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
@@ -107,22 +106,22 @@ test_script:
     - echo "Downloaded example_serverlogs.zip"
     # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
     - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
-    - ps: Start-Service -Name PaletteInsightAgent
-    - echo "Started PaletteInsightAgent service"
-    - sleep 4
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
-    - sleep 13
-    - echo "Sleeping for 17 seconds"
-    - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
-    - echo "End of PaletteInsightAgent log"
-    - ps: >-
-        If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
-          Write-Host "ERROR or FATAL found in log. Exiting with code 1"
-          exit 1
-        }
-    # - echo "Checking DB contents"
-    # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
-    # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    # - ps: Start-Service -Name PaletteInsightAgent
+    # - echo "Started PaletteInsightAgent service"
+    # - sleep 4
+    # - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
+    # - sleep 13
+    # - echo "Sleeping for 17 seconds"
+    # - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
+    # - echo "End of PaletteInsightAgent log"
+    # - ps: >-
+    #     If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
+    #       Write-Host "ERROR or FATAL found in log. Exiting with code 1"
+    #       exit 1
+    #     }
+    # # - echo "Checking DB contents"
+    # # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
+    # # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
     # - echo "Starting SMOKE test on GoCD"
@@ -136,13 +135,12 @@ deploy:
   release: Palette Insight Agent v$(appveyor_build_version)
   auth_token:
     secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
-  artifact: '*.msi'
-  draft: true
-  prerelease: true
+  draft: false
+  prerelease: false
   on:
-    branch: rpm_from_release
+    branch: master
 after_deploy:
-- ps: .\trigger-travis.ps1 $(appveyor_build_version)
+- ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION $env:APPVEYOR_REPO_BRANCH $env:PALETTE-ROBOT-TRAVIS-TOKEN"
 
 # notifications:
 # - provider: Slack
