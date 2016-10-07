@@ -1,9 +1,7 @@
 ﻿using NLog;
 using PaletteInsightAgent.Output.OutputDrivers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -15,6 +13,7 @@ namespace PaletteInsightAgent.Helpers
 {
     public class APIClient
     {
+        public static readonly string API_VERSION = "v1";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static WebserviceConfiguration config = null;
         private static readonly string HostName = Uri.EscapeDataString(Dns.GetHostName());
@@ -54,7 +53,7 @@ namespace PaletteInsightAgent.Helpers
             using (var handler = GetHttpClientHandler())
             using (var httpClient = new HttpClient(handler))
             {
-                var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
+                var authHeader = new AuthenticationHeaderValue("Token", config.AuthToken);
                 httpClient.DefaultRequestHeaders.Authorization = authHeader;
                 
 
@@ -83,12 +82,46 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
+        public static async Task<string> CheckLicense(string licenseKey)
+        {
+            using (var handler = GetHttpClientHandler())
+            using (var httpClient = new HttpClient(handler))
+            {
+                var authHeader = new AuthenticationHeaderValue("Token", licenseKey);
+                httpClient.DefaultRequestHeaders.Authorization = authHeader;
+
+                using (var response = await httpClient.GetAsync(GetLicenseCheckUrl()))
+                {
+                    switch (response.StatusCode)
+                    {
+                        case HttpStatusCode.OK:
+                            break;
+                        case HttpStatusCode.NoContent:
+                            return null;
+                        case HttpStatusCode.BadGateway:
+                            throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
+                        case HttpStatusCode.Forbidden:
+                            throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
+                        default:
+                            throw new HttpRequestException(String.Format("Couldn't validate license key: {0}, Status code: {1}, Response: {2}",
+                                licenseKey, response.StatusCode, response.ReasonPhrase));
+                    }
+
+                    using (HttpContent content = response.Content)
+                    {
+                        string result = await content.ReadAsStringAsync();
+                        return result;
+                    }
+                }
+            }
+        }
+
         public static async Task<HttpResponseMessage> UploadFile(string file, string maxId)
         {
             using (var handler = GetHttpClientHandler())
             using (var httpClient = new HttpClient(handler))
             {
-                var authHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(CreateAuthHeader()));
+                var authHeader = new AuthenticationHeaderValue("Token", config.AuthToken);
                 httpClient.DefaultRequestHeaders.Authorization = authHeader;
 
                 var package = "public";
@@ -104,7 +137,7 @@ namespace PaletteInsightAgent.Helpers
         {
             // Get the timezone on each send, so that if the server clock timezone is
             // changed while the agent is running, we are keeping up with the changes
-            var timezoneName = TimezoneHelpers.WindowsToIana( TimeZoneInfo.Local.Id );
+            var timezoneName = DateTimeConverter.WindowsToIana( TimeZoneInfo.Local.Id );
             var url = String.Format("{0}/upload?pkg={1}&host={2}&tz={3}&compression=gzip",
                 config.Endpoint, 
                 Uri.EscapeUriString(package), 
@@ -121,6 +154,11 @@ namespace PaletteInsightAgent.Helpers
         private static string GetMaxIdUrl(string tableName)
         {
             return String.Format("{0}/maxid?table={1}", config.Endpoint, tableName);
+        }
+
+        private static string GetLicenseCheckUrl()
+        {
+            return String.Format("{0}/api/{1}/license", config.Endpoint, API_VERSION);
         }
 
         private static MultipartFormDataContent CreateRequestContents(string file)
@@ -146,24 +184,6 @@ namespace PaletteInsightAgent.Helpers
             // go's side to get this value
             form.Add(new StringContent(Convert.ToBase64String(fileHash)), "_md5");
             return form;
-        }
-
-        private static byte[] CreateAuthHeader()
-        {
-            // add the basic authentication data
-            var encoding = new ASCIIEncoding();
-
-            var usernameBytes = encoding.GetBytes(String.Format("{0}:", config.Username));
-
-            var authLen = config.AuthToken.Length;
-            var usernameLen = usernameBytes.Length;
-
-            var authBytes = new byte[usernameLen + authLen];
-
-            System.Buffer.BlockCopy(usernameBytes, 0, authBytes, 0, usernameLen);
-            System.Buffer.BlockCopy(config.AuthToken, 0, authBytes, usernameLen, authLen);
-            return authBytes;
-
         }
     }
 

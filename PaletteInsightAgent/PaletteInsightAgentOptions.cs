@@ -61,6 +61,8 @@ namespace PaletteInsightAgent
 
         public ICollection<LogFolderInfo> LogFolders { get; set; }
 
+        public string LicenseKey { get; set; }
+
         public WebserviceConfiguration WebserviceConfig { get; set; }
 
         // Log polling options

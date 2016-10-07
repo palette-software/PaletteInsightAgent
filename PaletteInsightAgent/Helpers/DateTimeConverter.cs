@@ -1,13 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.Helpers
 {
-    class TimezoneHelpers
+    public class DateTimeConverter
     {
+
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        /// <summary>
+        /// Converts a datetime to its unix timestamp equivalent (ignores timezones)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static long ToTimestamp(DateTime value)
+        {
+            TimeSpan elapsedTime = value - Epoch;
+            return (long)elapsedTime.TotalSeconds;
+        }
+
+        /// <summary>
+        /// Converts a unix timestamp to its datetime equivalent
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <returns></returns>
+        public static DateTime ToDateTime(long timestamp)
+        {
+            // make sure thee datetime is in UTC
+            return DateTime.SpecifyKind(Epoch + TimeSpan.FromSeconds(timestamp), DateTimeKind.Utc);
+        }
+
         /// <summary>
         /// This will return the Windows zone that matches the IANA zone, if one exists.
         /// </summary>
