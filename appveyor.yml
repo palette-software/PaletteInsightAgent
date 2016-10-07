@@ -1,4 +1,4 @@
-version: 1.8.{build}
+version: 2.0.{build}
 pull_requests:
   do_not_increment_build_number: true
 branches:
@@ -106,6 +106,7 @@ test_script:
     - echo "Downloaded example_serverlogs.zip"
     # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
     - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
+    # FIXME: Reamrm these smoke tests when we have an Insight Server for testing purposes, or a locally runnable Insight Server
     # - ps: Start-Service -Name PaletteInsightAgent
     # - echo "Started PaletteInsightAgent service"
     # - sleep 4
