@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$VERSION,
     [Parameter(Mandatory=$true)][string]$BRANCH,
-    [Parameter(Mandatory=$true)][string]$TRAVIS-TOKEN
+    [Parameter(Mandatory=$true)][string]$TRAVISTOKEN
 )
 
 $TRAVIS_REQUEST_BODY = @{
@@ -24,7 +24,7 @@ $TRAVIS_REQUEST_HEADER = @{
   "Content-Type"       = "application/json"
   "Accept"             = "application/json"
   "Travis-API-Version" = "3"
-  "Authorization"      = "token $TRAVIS-TOKEN"
+  "Authorization"      = "token $TRAVISTOKEN"
 }
 
 Invoke-RestMethod -Method Post -Uri $TRAVIS_REQUEST_URI -Body $TRAVIS_REQUEST_BODY_JSON -Header $TRAVIS_REQUEST_HEADER
