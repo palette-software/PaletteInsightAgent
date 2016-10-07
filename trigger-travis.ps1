@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$VERSION,
-    [Parameter(Mandatory=$true)][string]$BRANCH
+    [Parameter(Mandatory=$true)][string]$BRANCH,
+    [Parameter(Mandatory=$true)][string]$PALETTE-ROBOT-TRAVIS-TOKEN
 )
 
 $TRAVIS_REQUEST_BODY = @{
@@ -23,7 +24,7 @@ $TRAVIS_REQUEST_HEADER = @{
   "Content-Type"       = "application/json"
   "Accept"             = "application/json"
   "Travis-API-Version" = "3"
-  "Authorization"      = "token SUHCsC2vxM_BeE_SCV77hw"
+  "Authorization"      = "token $PALETTE-ROBOT-TRAVIS-TOKEN"
 }
 
 Invoke-RestMethod -Method Post -Uri $TRAVIS_REQUEST_URI -Body $TRAVIS_REQUEST_BODY_JSON -Header $TRAVIS_REQUEST_HEADER
