@@ -27,6 +27,7 @@
     <Compile Include="CustomExitDialog.wxs" />
     <Compile Include="CustomInstallDir.wxs" />
     <Compile Include="CustomInstallDirDlg.wxs" />
+    <Compile Include="InsightServerUrl.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
