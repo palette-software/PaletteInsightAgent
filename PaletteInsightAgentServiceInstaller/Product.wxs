@@ -16,6 +16,7 @@
     
     <!-- Properties -->
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="WIXUI_INSIGHTSERVERURL" Value="INSIGHTSERVERURL" />
     <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
     <Property Id="ARPHELPLINK" Value="$(var.HelpLink)" />
     <Property Id="ARPURLINFOABOUT" Value="$(var.UrlInfoAbout)" />
