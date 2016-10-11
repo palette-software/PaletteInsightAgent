@@ -80,7 +80,8 @@ popd
 # For backward compatibility
 pushd %install_dir
 mkdir v%version
-ln --symbolic --relative %packaged_msi_name v%version/%packaged_msi_name-v%version
+cd v%version
+ln --symbolic ../%packaged_msi_name %packaged_msi_name-v%version
 popd
 #
 
