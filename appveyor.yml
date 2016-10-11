@@ -58,6 +58,8 @@ build_script:
   # Sign the installer
   - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "palette.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
 
+  - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+
 test_script:
     # Run the unit tests first
     - vstest.console /logger:Appveyor "c:\projects\blackboxrecorder\test\PaletteInsightAgent.UnitTests\bin\Release\PaletteInsightAgent.UnitTests.dll"
@@ -87,7 +89,7 @@ test_script:
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
     - cd PaletteInsightAgentServiceInstaller\bin\Release\
-    - set PALIN_MSI=PaletteInsightAgent.msi
+    - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
