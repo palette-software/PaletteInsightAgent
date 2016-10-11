@@ -55,6 +55,7 @@ Palette Insight GP Agent
 # Install directory - without / prefix
 %define install_dir opt/insight-agent/
 %define downloader_arch linux_amd64
+%define packaged_msi_name agent
 
 %pre
 # noop
@@ -71,10 +72,18 @@ unzip %downloader_arch.zip
 popd
 
 %build
-# noop
+pushd %install_dir
+mv Palette-Insight-v%{version}-installer.msi %packaged_msi_name
+popd
 
 %install
-# noop
+# For backward compatibility
+pushd %install_dir
+mkdir v%version
+ln --symbolic --relative %packaged_msi_name v%version/%packaged_msi_name-v%version
+popd
+#
+
 
 %post
 # noop
@@ -82,6 +91,7 @@ popd
 %clean
 pushd %{install_dir}
 rm -rf  %downloader_arch
+rm -rf  mkdir v%version # For backward compatibility
 rm -f *
 popd
 rmdir -p %{install_dir}
@@ -92,6 +102,9 @@ rmdir -p %{install_dir}
 # Reject config files already listed or parent directories, then prefix files
 # with "/", then make sure paths with spaces are quoted.
 %dir /%{install_dir}
-/%{install_dir}/PaletteInsightAgent.msi
+/%{install_dir}/%packaged_msi_name
+
+# For backward compatibility
+/%{install_dir}/v%version
 
 %changelog
