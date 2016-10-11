@@ -77,7 +77,13 @@ mv Palette-Insight-v%{version}-installer.msi %packaged_msi_name
 popd
 
 %install
-# noop
+# For backward compatibility
+pushd %install_dir
+mkdir v%version
+ln --symbolic --relative %packaged_msi_name v%version/%packaged_msi_name-v%version
+popd
+#
+
 
 %post
 # noop
@@ -85,6 +91,7 @@ popd
 %clean
 pushd %{install_dir}
 rm -rf  %downloader_arch
+rm -rf  mkdir v%version # For backward compatibility
 rm -f *
 popd
 rmdir -p %{install_dir}
@@ -96,5 +103,8 @@ rmdir -p %{install_dir}
 # with "/", then make sure paths with spaces are quoted.
 %dir /%{install_dir}
 /%{install_dir}/%packaged_msi_name
+
+# For backward compatibility
+/%{install_dir}/v%version
 
 %changelog
