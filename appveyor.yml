@@ -87,7 +87,16 @@ test_script:
     # - echo "Postgres database setup completed"
 
     # Make and run an Insight Server locally
-    - git clone git@github.com:palette-software/PaletteInsightAgent.git C:\projects\insight-server
+    # First create a go workspace
+    - SET GOPATH=c:\go-workspace
+    - SET GOPAL=%GOPATH%\src\github.com\palette-software
+    - md %GOPAL%
+    - git clone https://%GITHUB_TOKEN%@github.com/palette-software/insight-server.git %GOPAL%\insight-server
+    - cd %GOPAL%\insight-server
+    - go get ./...
+    - go install
+    - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
+    - %GOPATH%\bin\insight-server.exe
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
@@ -98,7 +107,17 @@ test_script:
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
     # Prepare the config.yml file
-    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    - SET CONFIG_YML_PATH="C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" %CONFIG_YML_PATH%
+    # Add the license key into the Config.yml
+    - cmd: >-
+        echo LicenseKey: license_key=c1d61023-249e-423c-bf2b-af9388f47d48 >> %CONFIG_YML_PATH%
+
+    # Disable Splunk logging in the insight agent
+    - ps: >-
+        $nlog_config_path = "C:\Program Files (x86)\Palette Insight Agent\NLog.config";
+        (Get-Content $nlog_config_path) | ForEach-Object { $_ -replace "writeTo=`"palette_alerts, splunk`"", "writeTo=`"palette_alerts`"" } | Set-Content $nlog_config_path;
+
     # Create fake serverlog folders
     - ps: >-
         $watched_folder_1 = "c:\watched_folder_1";
