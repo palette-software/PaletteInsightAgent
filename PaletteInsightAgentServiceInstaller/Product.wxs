@@ -6,7 +6,8 @@
 <?define ProductUpgradeCode = "26A5F872-D392-4C8F-8D2C-E724395DE8A0"?>
 <?define IconFile = "..\PaletteInsightAgentService\Resources\palette_symbol.ico"?>
 <?define BinFolder = "..\PaletteInsightAgentService\bin\$(var.Configuration)"?>
-<!-- For some reason we need to include the .dll which ends with .CA.dll, otherwise the installer stops
+<!-- For some reason we need to include the .dll which ends with .CA.dll (CA stands for Custom Action
+     and it is required for C# custom actions), otherwise the installer stops
      with a message that the installer package is malformed. -->
 <?define FillConfigPath = "..\PaletteInsightFillConfig\bin\$(var.Configuration)\PaletteInsightFillConfig.CA.dll"?>
 
@@ -23,6 +24,7 @@
     <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
     <Property Id="ARPHELPLINK" Value="$(var.HelpLink)" />
     <Property Id="ARPURLINFOABOUT" Value="$(var.UrlInfoAbout)" />
+    <!--<Property Id="CONFIG_YML_PATH" Value="$(var.BinFolder)\Config\Config.yml" />-->
     <Property Id="ARPNOREPAIR" Value="1" />
     <Property Id="INSTALLSHORTCUTS" Value="1" />
     
@@ -105,6 +107,7 @@
         <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
         <File Id="YamlDotNetDLL" Name="YamlDotNet.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\YamlDotNet.dll" />
         <File Id="NodaTimeDLL" Name="NodaTime.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NodaTime.dll" />
+        <!--<File Id="PaletteInsightAgentConfigYML" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />-->
       </Component>
       <Component Id="Utilities" Guid="93dd2c94-e909-4b30-a2ed-80e78d53ed5b">
         <!-- Helper Utilities -->
@@ -180,8 +183,19 @@
     <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe remove"/>
     <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
     <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
-    <!-- Fill in the details from installer dialog to Config.yml -->
-    <CustomAction Id='PaletteInsightFillConfig' BinaryKey='FillConfig' DllEntry='FillConfig' />
+    <!-- Pass necessary data for PaletteInsightFillConfig -->
+    <CustomAction Id="FillConfigCustomActionData"
+                  Property="PaletteInsightFillConfig"
+                  Value="InsightServerUrl=[WIXUI_INSIGHTSERVERURL];InstallDir=[INSTALLFOLDER]"
+                  />
+    <!-- Fill in the details from installer dialog to Config.yml.
+         Execute="deferred" and Impersonate="no" is required, so that the installer can
+         perform the custom action with elevated privileges -->
+    <CustomAction Id="PaletteInsightFillConfig"
+                  BinaryKey="FillConfig"
+                  DllEntry="FillConfig"
+                  Execute="deferred"
+                  Impersonate="no" />
       
     <!-- Install Sequence --> 
     <InstallExecuteSequence>
@@ -190,6 +204,7 @@
       <Custom Action="RunTopShelfServiceInstall" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="RunTopShelfServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
       <Custom Action="RunWatchdogServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+      <Custom Action="FillConfigCustomActionData" Before="PaletteInsightFillConfig" />
       <Custom Action="PaletteInsightFillConfig" After="InstallFiles">NOT Installed</Custom>
     </InstallExecuteSequence>
 

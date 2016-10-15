@@ -100,7 +100,26 @@ namespace PaletteInsight
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
             }
 
-            public static void updateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options)
+            public static PaletteInsightConfiguration LoadConfigFile(string filename)
+            {
+                try
+                {
+                    // deserialize the config
+                    using (var reader = File.OpenText(filename))
+                    {
+                        var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
+                        var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
+                        return config;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Fatal("Error during cofiguration loading: {0} -- {1}", filename, e);
+                    return null;
+                }
+            }
+
+            public static void UpdateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options)
             {
                 // skip if we arent using the webservice
                 if (options.WebserviceConfig == null) return;
