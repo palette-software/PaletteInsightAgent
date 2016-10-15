@@ -106,7 +106,6 @@
         <File Id="SodiumDLL" Name="Sodium.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Sodium.dll" />
         <File Id="YamlDotNetDLL" Name="YamlDotNet.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\YamlDotNet.dll" />
         <File Id="NodaTimeDLL" Name="NodaTime.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\NodaTime.dll" />
-        <!--<File Id="PaletteInsightAgentConfigYML" Name="Config.yml" DiskId="1" Vital="yes" Source="$(var.BinFolder)\Config\Config.yml" />-->
       </Component>
       <Component Id="Utilities" Guid="93dd2c94-e909-4b30-a2ed-80e78d53ed5b">
         <!-- Helper Utilities -->
