@@ -15,6 +15,7 @@ namespace PaletteInsightFillConfig
         {
             try
             {
+                // session.Log logs to the file specified by the '/log' parameter while running 'msiexec'
                 session.Log("Filling up Palette Insight Agent config file based on the parameters specified during the installer UI.");
                 bool anyChangeOnUI = false;
 
