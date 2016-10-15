@@ -3,15 +3,15 @@
 
 #UseCounterSamples: true
 #UseLogPolling: true
-UseRepoPolling: false
-UseThreadInfo: false
+#UseRepoPolling: true
+#UseThreadInfo: true
 
-IsPrimaryNode: true
+#IsPrimaryNode: false
 
 # The following values are all given in seconds.
-PollInterval: 10
+#PollInterval: 30
 #ThreadInfoPollInterval: 15
-LogPollInterval: 15
+#LogPollInterval: 300
 #RepoTablesPollInterval: 3600		# This value effects only on primary nodes.
 #StreamingTablesPollInterval: 600	# This value effects only on primary nodes.
 #ProcessedFilesTTL: 0				# Default is not to keep processed files.
@@ -21,30 +21,30 @@ LogPollInterval: 15
 # The maximum number of log lines that will be read and uploaded in a single batch
 #LogLinesPerBatch: 10000
 
-LicenseKey: c1d61023-249e-423c-bf2b-af9388f47d48    # This is just an example GUID, this is not a valid license
+LicenseKey: 34e6a6cc-a5ab-4c36-8129-15fc0d61069f    # This is just an example GUID, this is not a valid license
 
 Webservice:
  Endpoint: http://localhost:9000
 
 Logs:
   -
-    Directory: 'c:\Users\Peter\Munka\nflx-out-of-memory\vizqlserver\Logs\'
+    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'
     Filter: '*.txt'
   -
-    Directory: 'c:\Users\Peter\Munka\nflx-out-of-memory\vizqlserver\'
+    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
     Filter: 'tabprotosrv*.txt'
   - 
-    Directory: 'c:\Users\Peter\Munka\nflx-out-of-memory\vizqlserver\'
+    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
     Filter: 'tdeserver*.txt'
     Format: 'plain'
   -
-    Directory: 'c:\Users\Peter\Munka\nflx-out-of-memory\dataengine\'
+    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\dataengine\'
     Filter: 'tdeserver*.log'
     Format: 'plain'
 
 TableauRepo: 
-  Host: 192.168.221.30
+  Host: localhost
   Port: 8060
   Database: workgroup
   User: readonly
-  Password: onlyr3ad
+  Password: onlyread
