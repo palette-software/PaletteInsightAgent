@@ -28,7 +28,6 @@
     <Compile Include="CustomInstallDir.wxs" />
     <Compile Include="CustomInstallDirDlg.wxs" />
     <Compile Include="InsightServerUrl.wxs" />
-    <Compile Include="InsightTestDlg.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>

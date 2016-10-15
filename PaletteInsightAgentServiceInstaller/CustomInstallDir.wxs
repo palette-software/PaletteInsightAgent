@@ -68,10 +68,7 @@ Patch dialog sequence:
       <Publish Dialog="CustomInstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
 
       <Publish Dialog="InsightServerUrlDlg" Control="Back" Event="NewDialog" Value="CustomInstallDirDlg">1</Publish>
-      <Publish Dialog="InsightServerUrlDlg" Control="Next" Event="NewDialog" Value="InsightTestDlg" Order="2">1</Publish>
-
-      <Publish Dialog="InsightTestDlg" Control="Back" Event="NewDialog" Value="InsightServerUrlDlg">1</Publish>
-      <Publish Dialog="InsightTestDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">1</Publish>
+      <Publish Dialog="InsightServerUrlDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">1</Publish>
 
       <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomInstallDirDlg" Order="1">NOT Installed</Publish>
       <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
