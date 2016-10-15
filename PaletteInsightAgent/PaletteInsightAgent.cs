@@ -14,8 +14,6 @@ using PaletteInsightAgent.ThreadInfoPoller;
 using PaletteInsightAgent.Output;
 using System.Diagnostics;
 using PaletteInsight.Configuration;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
 using PaletteInsightAgent.Helpers;

@@ -24,7 +24,6 @@
     <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
     <Property Id="ARPHELPLINK" Value="$(var.HelpLink)" />
     <Property Id="ARPURLINFOABOUT" Value="$(var.UrlInfoAbout)" />
-    <!--<Property Id="CONFIG_YML_PATH" Value="$(var.BinFolder)\Config\Config.yml" />-->
     <Property Id="ARPNOREPAIR" Value="1" />
     <Property Id="INSTALLSHORTCUTS" Value="1" />
     
@@ -186,7 +185,7 @@
     <!-- Pass necessary data for PaletteInsightFillConfig -->
     <CustomAction Id="FillConfigCustomActionData"
                   Property="PaletteInsightFillConfig"
-                  Value="InsightServerUrl=[WIXUI_INSIGHTSERVERURL];InstallDir=[INSTALLFOLDER]"
+                  Value="InstallDir=[INSTALLFOLDER];InsightServerUrl=[WIXUI_INSIGHTSERVERURL];InsightLicenseKey=[WIXUI_INSIGHTLICENSEKEY]"
                   />
     <!-- Fill in the details from installer dialog to Config.yml.
          Execute="deferred" and Impersonate="no" is required, so that the installer can
