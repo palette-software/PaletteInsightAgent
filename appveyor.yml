@@ -97,7 +97,7 @@ test_script:
     - go install
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
-    - insight-server.exe --config license.config
+    # - insight-server.exe --config license.config
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
