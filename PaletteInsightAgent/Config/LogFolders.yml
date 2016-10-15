@@ -1,14 +1,14 @@
-# - Directory: 'tabsvc\vizqlserver\Logs'
-#   Filter: '*.txt'
-#   # Format: 'json'
-#   Format: 'server'	# Until Talend expects serverlogs table, the format should remain "server"
-# - Directory: 'tabsvc\logs\vizqlserver'
-#   Filter: 'tabprotosrv*.txt'
-#   # Format: 'json'
-#   Format: 'server'	# Until Talend expects serverlogs table, the format should remain "server"
-# - Directory: 'tabsvc\logs\vizqlserver'
-#   Filter: 'tdeserver*.txt'
-#   Format: 'plain'
-# - Directory: 'tabsvc\logs\dataengine'
-#   Filter: 'tdeserver*.log'
-#   Format: 'plain'
+- Directory: 'tabsvc\vizqlserver\Logs'
+  Filter: '*.txt'
+  # Format: 'json'
+  Format: 'server'	# Until Talend expects serverlogs table, the format should remain "server"
+- Directory: 'tabsvc\logs\vizqlserver'
+  Filter: 'tabprotosrv*.txt'
+  # Format: 'json'
+  Format: 'server'	# Until Talend expects serverlogs table, the format should remain "server"
+- Directory: 'tabsvc\logs\vizqlserver'
+  Filter: 'tdeserver*.txt'
+  Format: 'plain'
+- Directory: 'tabsvc\logs\dataengine'
+  Filter: 'tdeserver*.log'
+  Format: 'plain'
