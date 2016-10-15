@@ -96,11 +96,12 @@ test_script:
     - go get ./...
     - go install
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
-    - %GOPATH%\bin\insight-server.exe
+    - co %GOPATH%\bin
+    - insight-server.exe --config license.config
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
-    - cd PaletteInsightAgentServiceInstaller\bin\Release\
+    - cd c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
