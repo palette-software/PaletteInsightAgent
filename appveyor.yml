@@ -22,8 +22,6 @@ environment:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
         secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
-    # dev_license_key:
-    #     secure: 4dmHeZzRVawtsknbaRphtf13xolVrCxAtZLtDA6Jl6xmN3p9BfdNt5fNO6vR2IcY
 services:
   - postgresql93
 build_script:
@@ -100,7 +98,7 @@ test_script:
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
     # Start Insight Server in the background
-    - start insight-server.exe --config license.config
+    - ps: Start-Process insight-server.exe -ArgumentList "--config license.config"
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
