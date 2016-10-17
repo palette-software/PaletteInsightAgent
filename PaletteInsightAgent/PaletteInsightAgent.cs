@@ -14,8 +14,6 @@ using PaletteInsightAgent.ThreadInfoPoller;
 using PaletteInsightAgent.Output;
 using System.Diagnostics;
 using PaletteInsight.Configuration;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
 using PaletteInsightAgent.Helpers;
@@ -70,7 +68,7 @@ namespace PaletteInsightAgent
 
             // Load PaletteInsightAgentOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PaletteInsightAgentOptions.Instance;
-            PaletteInsight.Configuration.Loader.LoadConfigTo(LoadConfigFile("config/Config.yml"), options);
+            PaletteInsight.Configuration.Loader.LoadConfigTo(Loader.LoadConfigFile("config/Config.yml"), options);
 
             tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
@@ -79,7 +77,7 @@ namespace PaletteInsightAgent
             APIClient.Init(options.WebserviceConfig);
 
             // Add the webservice username/auth token from the license
-            PaletteInsight.Configuration.Loader.updateWebserviceConfigFromLicense(options);
+            PaletteInsight.Configuration.Loader.UpdateWebserviceConfigFromLicense(options);
 
             // check the license after the configuration has been loaded.
             licenseGuard = new LicenseGuard();
@@ -122,25 +120,6 @@ namespace PaletteInsightAgent
             if (USE_TABLEAU_REPO || USE_STREAMING_TABLES)
             {
                 repoPollAgent = new RepoPollAgent();
-            }
-        }
-
-        private PaletteInsightConfiguration LoadConfigFile(string filename)
-        {
-            try
-            {
-                // deserialize the config
-                using (var reader = File.OpenText(filename))
-                {
-                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
-                    var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
-                    return config;
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Fatal("Error during cofiguration loading: {0} -- {1}", filename, e);
-                return null;
             }
         }
 
