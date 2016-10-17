@@ -97,7 +97,8 @@ test_script:
     - go install
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
-    # - insight-server.exe --config license.config
+    # Start Insight Server in the background
+    - start /B insight-server.exe --config license.config
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
@@ -180,4 +181,4 @@ after_deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
