@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.RepoTablesPoller
@@ -80,10 +79,15 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     }
                     catch (Exception e)
                     {
+                        if (e is InvalidOperationException && e.Message.Contains("Connection property has not been initialized"))
+                        {
+                            // This might also mean that the connection to Tableau is down
+                            Log.Warn(e, "Temporarily unable to poll streaming table! Exception: ");
+                            return;
+                        }
                         Log.Error(e, "Error while polling streaming table! Exception: ");
                     }
                 });
-
         }
     }
 }
