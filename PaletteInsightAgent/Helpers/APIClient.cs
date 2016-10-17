@@ -6,18 +6,20 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.Helpers
 {
-    public class APIClient
+    public class APIClient : IDisposable
     {
         public static readonly string API_VERSION = "v1";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static WebserviceConfiguration config = null;
         private static readonly string HostName = Uri.EscapeDataString(Dns.GetHostName());
         private static IWebProxy proxy = null;
+
+        private HttpClient httpClient;
+        private HttpClientHandler clientHandler;
 
         public static void SetTrustSSL()
         {
@@ -48,29 +50,59 @@ namespace PaletteInsightAgent.Helpers
             return handler;
         }
 
+        public APIClient()
+        {
+            clientHandler = GetHttpClientHandler();
+            httpClient = new HttpClient(clientHandler);
+
+            // Setup the token based authorization automatically
+            var authHeader = new AuthenticationHeaderValue("Token", config.AuthToken);
+            httpClient.DefaultRequestHeaders.Authorization = authHeader;
+
+        }
+
+        public Task<HttpResponseMessage> GetAsync(string requestUri)
+        {
+            return httpClient.GetAsync(requestUri);
+        }
+
+        public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
+        {
+            return httpClient.PostAsync(requestUri, content);
+        }
+
+        public void Dispose()
+        {
+            httpClient.Dispose();
+            clientHandler.Dispose();
+        }
+
+        public static bool HandleSourResponse(HttpStatusCode statusCode)
+        {
+            switch (statusCode)
+            {
+                case HttpStatusCode.OK:
+                    break;
+                case HttpStatusCode.BadGateway:
+                    throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
+                case HttpStatusCode.Forbidden:
+                    throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
+                default:
+                    return false;
+            }
+
+            return true;
+        }
+
         public static async Task<string> GetMaxId(string tableName)
         {
-            using (var handler = GetHttpClientHandler())
-            using (var httpClient = new HttpClient(handler))
-            {
-                var authHeader = new AuthenticationHeaderValue("Token", config.AuthToken);
-                httpClient.DefaultRequestHeaders.Authorization = authHeader;
-                
-
-                using (var response = await httpClient.GetAsync(GetMaxIdUrl(tableName)))
+            using (var apiClient = new APIClient())
+            {   
+                using (var response = await apiClient.GetAsync(GetMaxIdUrl(tableName)))
                 {
-                    switch (response.StatusCode)
+                    if (!HandleSourResponse(response.StatusCode))
                     {
-                        case HttpStatusCode.OK:
-                            break;
-                        case HttpStatusCode.NoContent:
-                            return null;
-                        case HttpStatusCode.BadGateway:
-                            throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
-                        case HttpStatusCode.Forbidden:
-                            throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
-                        default:
-                            throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
+                        throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
                     }
 
                     using (HttpContent content = response.Content)
@@ -84,26 +116,13 @@ namespace PaletteInsightAgent.Helpers
 
         public static async Task<string> CheckLicense(string licenseKey)
         {
-            using (var handler = GetHttpClientHandler())
-            using (var httpClient = new HttpClient(handler))
+            using (var apiClient = new APIClient())
             {
-                var authHeader = new AuthenticationHeaderValue("Token", licenseKey);
-                httpClient.DefaultRequestHeaders.Authorization = authHeader;
-
-                using (var response = await httpClient.GetAsync(GetLicenseCheckUrl()))
+                using (var response = await apiClient.GetAsync(GetLicenseCheckUrl()))
                 {
-                    switch (response.StatusCode)
+                    if (!HandleSourResponse(response.StatusCode))
                     {
-                        case HttpStatusCode.OK:
-                            break;
-                        case HttpStatusCode.NoContent:
-                            return null;
-                        case HttpStatusCode.BadGateway:
-                            throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
-                        case HttpStatusCode.Forbidden:
-                            throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
-                        default:
-                            throw new HttpRequestException(String.Format("Couldn't validate license key: {0}, Status code: {1}, Response: {2}",
+                        throw new HttpRequestException(String.Format("Couldn't validate license key: {0}, Status code: {1}, Response: {2}",
                                 licenseKey, response.StatusCode, response.ReasonPhrase));
                     }
 
@@ -116,19 +135,19 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
-        public static async Task<HttpResponseMessage> UploadFile(string file, string maxId)
+        public static async Task UploadFile(string file, string maxId)
         {
-            using (var handler = GetHttpClientHandler())
-            using (var httpClient = new HttpClient(handler))
+            using (var apiClient = new APIClient())
             {
-                var authHeader = new AuthenticationHeaderValue("Token", config.AuthToken);
-                httpClient.DefaultRequestHeaders.Authorization = authHeader;
-
-                var package = "public";
-                var uploadUrl = UploadUrl(package, maxId);
-                using (var response = await httpClient.PostAsync(uploadUrl, CreateRequestContents(file)))
+                var uploadUrl = UploadUrl("public", maxId);
+                using (var response = await apiClient.PostAsync(uploadUrl, CreateRequestContents(file)))
                 {
-                    return response;
+                    if (!HandleSourResponse(response.StatusCode))
+                    {
+                        throw new ArgumentException(String.Format("-> Unknown status: '{0}' for '{1}' -- moving to error", response.StatusCode, file));
+                    }
+
+                    return;
                 }
             }
         }

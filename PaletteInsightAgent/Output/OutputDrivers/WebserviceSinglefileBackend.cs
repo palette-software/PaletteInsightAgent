@@ -1,11 +1,7 @@
 ﻿using NLog;
 using PaletteInsightAgent.Helpers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 
 namespace PaletteInsightAgent.Output.OutputDrivers
 {
@@ -72,28 +68,12 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             LoggingHelpers.TimedLog(Log, String.Format("Uploading file : {0}", file), () =>
             {
                 // try to send the request, convert the result from JSON
-                var response = APIClient.UploadFile(file, maxId);
-                response.Wait();
+                var uploadTask = APIClient.UploadFile(file, maxId);
+                // Wait for the result, so that our timed log can actually measure something
+                uploadTask.Wait();
 
-                var result = response.Result;
-                switch (result.StatusCode)
-                {
-                    // if we are ok, we are ok
-                    case HttpStatusCode.OK:
-                        Log.Debug("-> Sent ok: '{0}'", file);
-                        return;
-                    // On Md5 failure re-send the file
-                    case HttpStatusCode.Conflict:
-                        throw new TemporaryException("MD5 error in " + file);
-                    case HttpStatusCode.BadGateway:
-                        throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
-                    case HttpStatusCode.Forbidden:
-                        throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
-                    case HttpStatusCode.GatewayTimeout:
-                        throw new TemporaryException("Gateway timeout. This is probably due to temporary networking issues.");
-                    default:
-                        throw new ArgumentException(String.Format("-> Unknown status: '{0}' for '{1}' -- moving to error", result.StatusCode, file));
-                }
+                Log.Debug("-> Sent ok: '{0}'", file);
+                return;
             });
         }
 
