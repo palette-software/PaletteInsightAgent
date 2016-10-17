@@ -22,6 +22,8 @@ environment:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
         secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
+    dev_license_key:
+        secure: 4dmHeZzRVawtsknbaRphtf13xolVrCxAtZLtDA6Jl6xmN3p9BfdNt5fNO6vR2IcY
 services:
   - postgresql93
 build_script:
@@ -91,7 +93,7 @@ test_script:
     - SET GOPATH=c:\go-workspace
     - SET GOPAL=%GOPATH%\src\github.com\palette-software
     - md %GOPAL%
-    - git clone https://%GITHUB_TOKEN%@github.com/palette-software/insight-server.git %GOPAL%\insight-server
+    - git clone --depth 1 https://%GITHUB_TOKEN%@github.com/palette-software/insight-server.git %GOPAL%\insight-server
     - cd %GOPAL%\insight-server
     - go get ./...
     - go install
@@ -181,4 +183,4 @@ after_deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
