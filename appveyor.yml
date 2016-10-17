@@ -86,16 +86,40 @@ test_script:
     # - psql -d palette -f create_tables_pg.sql
     # - echo "Postgres database setup completed"
 
+    # Make and run an Insight Server locally
+    # First create a go workspace
+    - SET GOPATH=c:\go-workspace
+    - SET GOPAL=%GOPATH%\src\github.com\palette-software
+    - md %GOPAL%
+    - git clone --depth 1 https://%GITHUB_TOKEN%@github.com/palette-software/insight-server.git %GOPAL%\insight-server
+    - cd %GOPAL%\insight-server
+    - go get ./...
+    - go install
+    - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
+    - cd %GOPATH%\bin
+    # Start Insight Server in the background
+    - ps: Start-Process insight-server.exe -ArgumentList "--config license.config"
+
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
-    - cd PaletteInsightAgentServiceInstaller\bin\Release\
+    - cd c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
     - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
-        # Prepare the config.yml file
-    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    # Prepare the config.yml file
+    - SET CONFIG_YML_PATH="C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" %CONFIG_YML_PATH%
+    # Add the license key into the Config.yml
+    - cmd: >-
+        echo LicenseKey: %DEV_LICENSE_KEY% >> %CONFIG_YML_PATH%
+
+    # Disable Splunk logging in the insight agent
+    - ps: >-
+        $nlog_config_path = "C:\Program Files (x86)\Palette Insight Agent\NLog.config";
+        (Get-Content $nlog_config_path) | ForEach-Object { $_ -replace "writeTo=`"palette_alerts, splunk`"", "writeTo=`"palette_alerts`"" } | Set-Content $nlog_config_path;
+
     # Create fake serverlog folders
     - ps: >-
         $watched_folder_1 = "c:\watched_folder_1";
@@ -108,23 +132,22 @@ test_script:
     - echo "Downloaded example_serverlogs.zip"
     # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
     - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
-    # FIXME: Reamrm these smoke tests when we have an Insight Server for testing purposes, or a locally runnable Insight Server
-    # - ps: Start-Service -Name PaletteInsightAgent
-    # - echo "Started PaletteInsightAgent service"
-    # - sleep 4
-    # - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
-    # - sleep 13
-    # - echo "Sleeping for 17 seconds"
-    # - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
-    # - echo "End of PaletteInsightAgent log"
-    # - ps: >-
-    #     If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
-    #       Write-Host "ERROR or FATAL found in log. Exiting with code 1"
-    #       exit 1
-    #     }
-    # # - echo "Checking DB contents"
-    # # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
-    # # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
+    - ps: Start-Service -Name PaletteInsightAgent
+    - echo "Started PaletteInsightAgent service"
+    - sleep 4
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
+    - sleep 13
+    - echo "Sleeping for 17 seconds"
+    - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
+    - echo "End of PaletteInsightAgent log"
+    - ps: >-
+        If (Select-String -Pattern 'ERROR','FATAL' -CaseSensitive -SimpleMatch -Path "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt") {
+          Write-Host "ERROR or FATAL found in log. Exiting with code 1"
+          exit 1
+        }
+    # - echo "Checking DB contents"
+    # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
+    # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
     # - echo "Starting SMOKE test on GoCD"

@@ -19,9 +19,9 @@ StorageLimit: 1				    # Given in megabytes. Default is 10 Gb.
 
 # The maximum number of log lines that will be read and uploaded in a single batch
 #LogLinesPerBatch: 10000
- 
+
 Webservice:
-  Endpoint: https://staging-insight.palette-software.net
+  Endpoint: http://localhost:9000
 
 Logs: 
   - 
@@ -36,3 +36,5 @@ TableauRepo:
   Database: workgroup
   User: readonly
   Password: onlyread
+
+#LicenseKey is added during the AppVeyor build, below here
