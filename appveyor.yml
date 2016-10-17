@@ -98,7 +98,7 @@ test_script:
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
     # Start Insight Server in the background
-    - start /B insight-server.exe --config license.config
+    - ps: Start-Process insight-server.exe -ArgumentList "--config license.config"
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
