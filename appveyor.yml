@@ -22,8 +22,8 @@ environment:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
         secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
-    dev_license_key:
-        secure: 4dmHeZzRVawtsknbaRphtf13xolVrCxAtZLtDA6Jl6xmN3p9BfdNt5fNO6vR2IcY
+    # dev_license_key:
+    #     secure: 4dmHeZzRVawtsknbaRphtf13xolVrCxAtZLtDA6Jl6xmN3p9BfdNt5fNO6vR2IcY
 services:
   - postgresql93
 build_script:
@@ -100,7 +100,7 @@ test_script:
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
     # Start Insight Server in the background
-    - ps: Start-Process insight-server.exe -ArgumentList "--config license.config"
+    - start insight-server.exe --config license.config
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
@@ -115,7 +115,7 @@ test_script:
     - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" %CONFIG_YML_PATH%
     # Add the license key into the Config.yml
     - cmd: >-
-        echo LicenseKey: license_key=c1d61023-249e-423c-bf2b-af9388f47d48 >> %CONFIG_YML_PATH%
+        echo LicenseKey: %DEV_LICENSE_KEY% >> %CONFIG_YML_PATH%
 
     # Disable Splunk logging in the insight agent
     - ps: >-
@@ -183,4 +183,4 @@ after_deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
