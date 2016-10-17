@@ -18,6 +18,7 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PaletteInsightAgentServiceI
 		{FDA48B6E-F78D-4F5F-806D-FD2E3B1DE0F0} = {FDA48B6E-F78D-4F5F-806D-FD2E3B1DE0F0}
 		{332FB878-A88D-4413-813D-910A1E678498} = {332FB878-A88D-4413-813D-910A1E678498}
 		{65F4AAD4-E5C3-4841-985D-C0E2242F62A5} = {65F4AAD4-E5C3-4841-985D-C0E2242F62A5}
+		{598CCAD5-2095-4720-972F-5176D8A4327D} = {598CCAD5-2095-4720-972F-5176D8A4327D}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaletteInsightAgentService", "PaletteInsightAgentService\PaletteInsightAgentService.csproj", "{1E8BB102-CDCF-4AA7-8D0B-7F9792964708}"
@@ -35,6 +36,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "configs", "configs", "{4FB9
 		test\configs\Config_AppVeyor.yml = test\configs\Config_AppVeyor.yml
 		test\configs\Config_GoCD.yml = test\configs\Config_GoCD.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FillConfig", "PaletteInsightFillConfig\FillConfig.csproj", "{598CCAD5-2095-4720-972F-5176D8A4327D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -116,6 +119,16 @@ Global
 		{FDA48B6E-F78D-4F5F-806D-FD2E3B1DE0F0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{FDA48B6E-F78D-4F5F-806D-FD2E3B1DE0F0}.Release|x86.ActiveCfg = Release|Any CPU
 		{FDA48B6E-F78D-4F5F-806D-FD2E3B1DE0F0}.Release|x86.Build.0 = Release|Any CPU
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Debug|x86.ActiveCfg = Debug|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Debug|x86.Build.0 = Debug|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Release|Any CPU.ActiveCfg = Release|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Release|Mixed Platforms.Build.0 = Release|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Release|x86.ActiveCfg = Release|x86
+		{598CCAD5-2095-4720-972F-5176D8A4327D}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,10 @@
 <?define ProductUpgradeCode = "26A5F872-D392-4C8F-8D2C-E724395DE8A0"?>
 <?define IconFile = "..\PaletteInsightAgentService\Resources\palette_symbol.ico"?>
 <?define BinFolder = "..\PaletteInsightAgentService\bin\$(var.Configuration)"?>
+<!-- For some reason we need to include the .dll which ends with .CA.dll (CA stands for Custom Action
+     and it is required for C# custom actions), otherwise the installer stops
+     with a message that the installer package is malformed. -->
+<?define FillConfigPath = "..\PaletteInsightFillConfig\bin\$(var.Configuration)\PaletteInsightFillConfig.CA.dll"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" >
   <Product Id="*" Name="$(var.ApplicationName)" Language="1033" Codepage="1252" Version="$(var.ProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.ProductUpgradeCode)">
@@ -16,6 +20,7 @@
     
     <!-- Properties -->
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="WIXUI_INSIGHTSERVERURL" Value="https://" />
     <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
     <Property Id="ARPHELPLINK" Value="$(var.HelpLink)" />
     <Property Id="ARPURLINFOABOUT" Value="$(var.UrlInfoAbout)" />
@@ -176,7 +181,20 @@
     <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe remove"/>
     <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
     <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
-
+    <!-- Pass necessary data for PaletteInsightFillConfig -->
+    <CustomAction Id="FillConfigCustomActionData"
+                  Property="PaletteInsightFillConfig"
+                  Value="InstallDir=[INSTALLFOLDER];InsightServerUrl=[WIXUI_INSIGHTSERVERURL];InsightLicenseKey=[WIXUI_INSIGHTLICENSEKEY]"
+                  />
+    <!-- Fill in the details from installer dialog to Config.yml.
+         Execute="deferred" and Impersonate="no" is required, so that the installer can
+         perform the custom action with elevated privileges -->
+    <CustomAction Id="PaletteInsightFillConfig"
+                  BinaryKey="FillConfig"
+                  DllEntry="FillConfig"
+                  Execute="deferred"
+                  Impersonate="no" />
+      
     <!-- Install Sequence --> 
     <InstallExecuteSequence>
       <RemoveExistingProducts After="InstallValidate"/>
@@ -184,6 +202,10 @@
       <Custom Action="RunTopShelfServiceInstall" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="RunTopShelfServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
       <Custom Action="RunWatchdogServiceUninstall" After='InstallInitialize'>(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
+      <Custom Action="FillConfigCustomActionData" Before="PaletteInsightFillConfig" />
+      <Custom Action="PaletteInsightFillConfig" After="InstallFiles">NOT Installed</Custom>
     </InstallExecuteSequence>
+
+    <Binary Id='FillConfig' SourceFile='$(var.FillConfigPath)' />
   </Product>
 </Wix>
