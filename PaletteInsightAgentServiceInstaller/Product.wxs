@@ -84,10 +84,6 @@
           ResetPeriodInDays="1"
           />
       </Component>
-      <Component Id="PossibleLicenseFile" Guid="91736be3-5119-46d7-9bb8-ecb6659124fc" NeverOverwrite="yes">
-        <CopyFile Id="PaletteLicense" DestinationDirectory="INSTALLFOLDER" SourceName="*.license" SourceProperty="SOURCEDIR" />
-        <!--<CopyFile Id="ConfigFiles" DestinationDirectory="CONFIGFOLDER"  SourceName="*.yml" SourceProperty="SOURCEDIR" />-->
-      </Component>
       <Component Id="Libraries" Guid="e73d533c-f440-4baf-b0ed-be1c6e329c79">
         <!-- Required Libraries -->
         <File Id="PaletteInsightAgentLibDLL" Name="PaletteInsightAgentLib.dll" DiskId="1" Vital="yes" Source="$(var.BinFolder)\PaletteInsightAgentLib.dll" />
@@ -171,7 +167,6 @@
         <ComponentRef Id='RepositoryConfigComponent' />
         <ComponentRef Id='Utilities' />
         <ComponentRef Id='ProgramFilesShortcut' />
-        <ComponentRef Id='PossibleLicenseFile' />
       </Feature>
     </Feature>
 
