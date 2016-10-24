@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PaletteInsightAgent.Output
@@ -277,6 +278,11 @@ namespace PaletteInsightAgent.Output
                                 MoveToFolder(csvFile, ErrorPath);
                                 return true;
                             });
+                        }
+                        catch (InsightUnauthorizedException iuae)
+                        {
+                            Log.Error(iuae, "Unauthorized attempt to upload file {0}! Blocking file uploads for 30 minutes! Excpetion: ");
+                            Thread.Sleep(new TimeSpan(0, 30, 0));
                         }
                         catch (TemporaryException tex)
                         {
