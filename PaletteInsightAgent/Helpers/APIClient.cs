@@ -83,6 +83,8 @@ namespace PaletteInsightAgent.Helpers
             {
                 case HttpStatusCode.OK:
                     break;
+                case HttpStatusCode.Unauthorized:
+                    throw new InsightUnauthorizedException("Unauthorized access to Insight Server!");
                 case HttpStatusCode.BadGateway:
                     throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
                 case HttpStatusCode.Forbidden:
@@ -213,6 +215,16 @@ namespace PaletteInsightAgent.Helpers
     class TemporaryException : Exception
     {
         public TemporaryException(string message) : base(message)
+        {
+        }
+    }
+
+    /// <summary>
+    /// This exception is raised when Insight Server responses "Unauthorized"
+    /// </summary>
+    class InsightUnauthorizedException : Exception
+    {
+        public InsightUnauthorizedException(string message) : base(message)
         {
         }
     }
