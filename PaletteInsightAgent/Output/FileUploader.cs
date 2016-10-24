@@ -268,9 +268,9 @@ namespace PaletteInsightAgent.Output
                                         throw new TemporaryException(String.Format("File is still being moved by other thread: {0} Message: {1}", csvFile, x.Message));
                                     }
                                 }
-                                else if (x is TemporaryException)
+                                else if (x is TemporaryException || x is InsightUnauthorizedException)
                                 {
-                                    // It is already a TemporaryException, just pass it on to the handler.
+                                    // It is already an exception we know how to handle, just pass it on to the handler.
                                     throw x;
                                 }
 
@@ -304,6 +304,11 @@ namespace PaletteInsightAgent.Output
                             MoveToFolder(csvFile, ErrorPath);
                         }
                     }
+                }
+                catch (InsightUnauthorizedException iuae)
+                {
+                    Log.Error(iuae, "Unauthorized attempt to upload file {0}! Blocking file uploads for 30 minutes! Excpetion: ");
+                    Thread.Sleep(new TimeSpan(0, 30, 0));
                 }
                 catch (TemporaryException e)
                 {
