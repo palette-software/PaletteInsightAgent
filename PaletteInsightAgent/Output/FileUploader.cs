@@ -279,16 +279,6 @@ namespace PaletteInsightAgent.Output
                                 return true;
                             });
                         }
-                        catch (InsightUnauthorizedException iuae)
-                        {
-                            Log.Error(iuae, "Unauthorized attempt to upload file {0}! Blocking file uploads for 30 minutes! Excpetion: ");
-                            Thread.Sleep(new TimeSpan(0, 30, 0));
-                        }
-                        catch (TemporaryException tex)
-                        {
-                            // Nothing to do here. Leave this filetype as is, we will upload in the next iteration
-                            Log.Warn("Temporarily unable to upload data file {0}! Exception: {1}", csvFile, tex);
-                        }
                         catch (FileNotFoundException fne)
                         {
                             Log.Error(fne, "File {0} not found when trying to upload! Exception: ", csvFile);

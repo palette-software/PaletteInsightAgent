@@ -68,15 +68,11 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     {
                         ae.Handle((x) =>
                         {
-                            if (x is HttpRequestException || x is TaskCanceledException)
+                            if (x is HttpRequestException || x is TaskCanceledException || x is TemporaryException)
                             {
                                 // HttpRequestException is expected on network errors. TaskCanceledException is thrown if the async task (HTTP request) timed out.
                                 Log.Warn(x, "Polling streaming table: '{0}' timed out! Exception: ", tableName);
-                            }
-                            else if (x is TemporaryException)
-                            {
-                                // It is already a TemporaryException, just pass it on to the handler.
-                                throw x;
+                                return true;
                             }
 
                             Log.Error(x, "Async exception caught while polling streaming table: {0}! Exception: ", tableName);
@@ -85,7 +81,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     }
                     catch (TemporaryException tex)
                     {
-                        Log.Warn("Temporarily unable to get max ID for table: {0}! Exception: {1}", tableName, tex);
+                        Log.Warn("Temporarily unable to poll streaming table: {0}! Exception: {1}", tableName, tex);
                     }
                     catch (TaskCanceledException tce)
                     {
