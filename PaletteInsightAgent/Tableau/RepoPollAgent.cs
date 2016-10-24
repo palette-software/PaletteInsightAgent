@@ -64,6 +64,25 @@ namespace PaletteInsightAgent.RepoTablesPoller
                             OutputSerializer.Write(dataTable, newMax);
                         }
                     }
+                    catch (AggregateException ae)
+                    {
+                        ae.Handle((x) =>
+                        {
+                            if (x is HttpRequestException || x is TaskCanceledException)
+                            {
+                                // HttpRequestException is expected on network errors. TaskCanceledException is thrown if the async task (HTTP request) timed out.
+                                Log.Warn(x, "Polling streaming table: '{0}' timed out! Exception: ", tableName);
+                            }
+                            else if (x is TemporaryException)
+                            {
+                                // It is already a TemporaryException, just pass it on to the handler.
+                                throw x;
+                            }
+
+                            Log.Error(x, "Async exception caught while polling streaming table: {0}! Exception: ", tableName);
+                            return true;
+                        });
+                    }
                     catch (TemporaryException tex)
                     {
                         Log.Warn("Temporarily unable to get max ID for table: {0}! Exception: {1}", tableName, tex);
@@ -71,21 +90,21 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     catch (TaskCanceledException tce)
                     {
                         // This should be only a temporary condition, it is only a problem if it occurs many times in a row.
-                        Log.Warn("Polling streaming tables timed out! Exception: {0}", tce);
+                        Log.Warn("Polling streaming table: '{0}' timed out! Exception: {1}", tableName, tce);
                     }
                     catch (HttpRequestException hre)
                     {
-                        Log.Warn("HTTP request exception while polling streaming tables! Exception: {0}", hre);
+                        Log.Warn("HTTP request exception while polling streaming table: '{0}'! Exception: {1}", tableName, hre);
                     }
                     catch (Exception e)
                     {
                         if (e is InvalidOperationException && e.Message.Contains("Connection property has not been initialized"))
                         {
                             // This might also mean that the connection to Tableau is down
-                            Log.Warn(e, "Temporarily unable to poll streaming table! Exception: ");
+                            Log.Warn(e, "Temporarily unable to poll streaming table: '{0}'! Exception: ", tableName);
                             return;
                         }
-                        Log.Error(e, "Error while polling streaming table! Exception: ");
+                        Log.Error(e, "Error while polling streaming table: '{0}'! Exception: ", tableName);
                     }
                 });
         }
