@@ -77,12 +77,12 @@ namespace PaletteInsightAgent.Helpers
             clientHandler.Dispose();
         }
 
-        public static bool HandleSourResponse(HttpStatusCode statusCode)
+        private static void VerifyStatusCode(HttpStatusCode statusCode, Action errorDelegate)
         {
             switch (statusCode)
             {
                 case HttpStatusCode.OK:
-                    break;
+                    return;
                 case HttpStatusCode.Unauthorized:
                     throw new InsightUnauthorizedException("Unauthorized access to Insight Server!");
                 case HttpStatusCode.BadGateway:
@@ -90,10 +90,9 @@ namespace PaletteInsightAgent.Helpers
                 case HttpStatusCode.Forbidden:
                     throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
                 default:
-                    return false;
+                    errorDelegate();
+                    return;
             }
-
-            return true;
         }
 
         public static async Task<string> GetMaxId(string tableName)
@@ -102,10 +101,10 @@ namespace PaletteInsightAgent.Helpers
             {   
                 using (var response = await apiClient.GetAsync(GetMaxIdUrl(tableName)))
                 {
-                    if (!HandleSourResponse(response.StatusCode))
+                    VerifyStatusCode(response.StatusCode, () =>
                     {
                         throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
-                    }
+                    });
 
                     using (HttpContent content = response.Content)
                     {
@@ -122,11 +121,11 @@ namespace PaletteInsightAgent.Helpers
             {
                 using (var response = await apiClient.GetAsync(GetLicenseCheckUrl()))
                 {
-                    if (!HandleSourResponse(response.StatusCode))
+                    VerifyStatusCode(response.StatusCode, () =>
                     {
                         throw new HttpRequestException(String.Format("Couldn't validate license key: {0}, Status code: {1}, Response: {2}",
                                 licenseKey, response.StatusCode, response.ReasonPhrase));
-                    }
+                    });
 
                     using (HttpContent content = response.Content)
                     {
@@ -144,10 +143,10 @@ namespace PaletteInsightAgent.Helpers
                 var uploadUrl = UploadUrl("public", maxId);
                 using (var response = await apiClient.PostAsync(uploadUrl, CreateRequestContents(file)))
                 {
-                    if (!HandleSourResponse(response.StatusCode))
+                    VerifyStatusCode(response.StatusCode, () =>
                     {
                         throw new ArgumentException(String.Format("-> Unknown status: '{0}' for '{1}' -- moving to error", response.StatusCode, file));
-                    }
+                    });
 
                     return;
                 }
