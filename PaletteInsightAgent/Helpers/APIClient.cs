@@ -101,6 +101,12 @@ namespace PaletteInsightAgent.Helpers
             {   
                 using (var response = await apiClient.GetAsync(GetMaxIdUrl(tableName)))
                 {
+                    if (response.StatusCode == HttpStatusCode.NoContent)
+                    {
+                        // There isn't a max ID yet for this table
+                        return null;
+                    }
+
                     VerifyStatusCode(response.StatusCode, () =>
                     {
                         throw new HttpRequestException(String.Format("Couldn't get max id for table: {0}, Response: {1}", tableName, response.ReasonPhrase));
