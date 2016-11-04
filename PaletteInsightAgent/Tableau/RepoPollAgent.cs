@@ -26,8 +26,23 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 .ToList()
                 .ForEach(t =>
                 {
-                    DataTable table = connection.GetTable(t);
-                    OutputSerializer.Write(table);
+                    try
+                    {
+                        DataTable table = connection.GetTable(t);
+                        OutputSerializer.Write(table);
+                    }
+                    catch (InvalidOperationException ioe)
+                    {
+                        if (ioe.Message.Contains("Connection property has not been initialized"))
+                        {
+                            // This might also mean that the connection to Tableau is down
+                            Log.Warn(ioe, "Temporarily unable to poll full table: '{0}'! Exception: ", t);
+                        }
+                        else
+                        {
+                            Log.Error(ioe, "Invalid operation exception while polling full table: '{0}'! Exception: ", t);
+                        }
+                    }
                 });
         }
 
