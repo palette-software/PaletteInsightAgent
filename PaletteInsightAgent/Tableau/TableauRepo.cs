@@ -67,7 +67,10 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     Port = db.Port,
                     Username = db.Username,
                     Password = db.Password,
-                    Database = db.DatabaseName
+                    Database = db.DatabaseName,
+                    SslMode = SslMode.Prefer,
+                    // Trust invalid certificates as well
+                    TrustServerCertificate = true
                 };
 
             Log.Info("Connecting to Tableau Repo PostgreSQL:" + db.Server);
