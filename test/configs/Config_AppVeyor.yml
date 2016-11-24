@@ -23,13 +23,6 @@ StorageLimit: 1				    # Given in megabytes. Default is 10 Gb.
 Webservice:
   Endpoint: http://localhost:9000
 
-Logs: 
-  - 
-    Directory: 'c:\FakeTableau\data\watched_folder_1\'
-    Filter: '*.txt'
-  - 
-    Directory: 'c:\FakeTableau\data\watched_folder_2\'
-    Filter: 'tabprotosrv*.txt'
 TableauRepo: 
   Host: localhost
   Port: 5432
