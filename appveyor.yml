@@ -123,7 +123,7 @@ test_script:
     # Create fake Tableau data and serverlog folders
     - ps: >-
         $fake_tableau_data_folder = "c:\FakeTableau\data";
-        New-Item -Path "HKLM:\SOFTWARE\Tableau\Tableau Server 10\Directories" -Name Data -Value $fake_tableau_data_folder -Force;
+        New-Item -Path "HKLM:\SOFTWARE\Tableau\Tableau Server 10.0\Directories" -Name Data -Value $fake_tableau_data_folder -Force;
         $watched_folder_1 = "$fake_tableau_data_folder\watched_folder_1";
         $watched_folder_2 = "$fake_tableau_data_folder\watched_folder_2";
         md $watched_folder_1;
@@ -183,4 +183,4 @@ after_deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
