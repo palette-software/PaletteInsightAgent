@@ -45,7 +45,7 @@ namespace PaletteInsight
                 options.ProcessedFilestTTL = config.ProcessedFilesTTL;
                 options.StorageLimit = config.StorageLimit;
 
-                options.AllProcesses = config.AllProcesses2;
+                options.AllProcesses = config.AllProcesses;
 
                 options.LicenseKey = config.LicenseKey;
 
