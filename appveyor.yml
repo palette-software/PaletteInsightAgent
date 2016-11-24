@@ -122,8 +122,8 @@ test_script:
 
     # Create fake Tableau data and serverlog folders
     - ps: >-
-        $fake_tableau_data_folder = "c:\FakeTableau\data"
-        New-Item -Path "HKLM:\SOFTWARE\Tableau\Tableau Server 10\Directories" -Name Data -Value $fake_tableau_data_folder -Force
+        $fake_tableau_data_folder = "c:\FakeTableau\data";
+        New-Item -Path "HKLM:\SOFTWARE\Tableau\Tableau Server 10\Directories" -Name Data -Value $fake_tableau_data_folder -Force;
         $watched_folder_1 = "$fake_tableau_data_folder\watched_folder_1";
         $watched_folder_2 = "$fake_tableau_data_folder\watched_folder_2";
         md $watched_folder_1;
