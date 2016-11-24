@@ -319,16 +319,7 @@ namespace PaletteInsight
                 {
                     // Try to figure out based on the path of the Tableau Server
                     // Application Manager (tabsvc) service
-                    string tabsvcPath = GetPathOfService("tabsvc");
-
-                    // Extract the installation folder out of the tabsvc path
-                    var pattern = new Regex(@"(.*)[\/]+.*[\/]+bin[\/]+tabsvc.exe$");
-                    var groups = pattern.Match(tabsvcPath).Groups;
-                    // groups[0] is the entire match, thus we expect at least 2
-                    if (groups.Count > 1)
-                    {
-                        dataFolderPath = groups[1].Value;
-                    }
+                    dataFolderPath = RetrieveTableauInstallationFolder();
                 }
 
                 if (dataFolderPath == null || !Directory.Exists(dataFolderPath))
