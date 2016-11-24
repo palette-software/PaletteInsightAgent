@@ -309,36 +309,38 @@ namespace PaletteInsight
             #region Tableau Registry info
 
             /// <summary>
-            /// Retrieve Tablea's data folder path from the registry or try the usual path.
+            /// Retrieve Tableau's data folder path from the registry or figure it out
+            /// based on its installation folder or fallback and try the usual path.
             /// </summary>
             /// <returns></returns>
             private static string FindTableauDataFolder()
             {
                 string dataFolderPath = SearchRegistryForTableauDataFolder();
-                if (dataFolderPath == null || !Directory.Exists(dataFolderPath))
+                if (dataFolderPath != null)
                 {
-                    // Try to figure out based on the path of the Tableau Server
-                    // Application Manager (tabsvc) service
-                    string tableauInstallFolder = RetrieveTableauInstallationFolder();
-                    if (tableauInstallFolder != null)
-                    {
-                        dataFolderPath = Path.Combine(tableauInstallFolder, "data");
-                    }
+                    Log.Info("Found Tableau Data folder in registry: {0}", dataFolderPath);
+                    return dataFolderPath;   
                 }
 
-                if (dataFolderPath == null || !Directory.Exists(dataFolderPath))
+                // Look for it in the Tableau installation folder
+                dataFolderPath = SearchDataFolderInInstallationFolder();
+                if (dataFolderPath != null)
                 {
-                    // Try the usual path as a fallback
-                    dataFolderPath = @"C:\ProgramData\Tableau\Tableau Server\data";
-                    if (!Directory.Exists(dataFolderPath))
-                    {
-                        // No luck at all
-                        Log.Error("Could not find Tableau data folder!");
-                        return null;
-                    }
+                    Log.Info("Found Tableau Data folder in installation folder: {0}", dataFolderPath);
+                    return dataFolderPath;
                 }
 
-                return dataFolderPath;
+                // Try the usual path as a last resort
+                dataFolderPath = @"C:\ProgramData\Tableau\Tableau Server\data";
+                if (Directory.Exists(dataFolderPath))
+                {
+                    Log.Info("Found Tableau Data folder at default location: {0}", dataFolderPath);
+                    return dataFolderPath;
+                }
+
+                // No luck at all
+                Log.Error("Could not find Tableau data folder!");
+                return null;
             }
 
             /// <summary>
@@ -388,8 +390,14 @@ namespace PaletteInsight
                                     {
                                         continue;
                                     }
+
+                                    string possibleDataFolder = dataValue as String;
+                                    if (!Directory.Exists(possibleDataFolder))
+                                    {
+                                        continue;
+                                    }
                                     latestTableauVersion = version;
-                                    tableauDataFolder = dataValue as String;
+                                    tableauDataFolder = possibleDataFolder;
                                 }
                             }
                             catch (Exception)
@@ -402,13 +410,34 @@ namespace PaletteInsight
 
                     if (tableauDataFolder == null)
                     {
-                        Log.Warn("Failed to retrieve Tableau data folder path from registry!");
                         return null;
                     }
 
-                    Log.Info("Found Tableau Data folder: {0}", tableauDataFolder);
                     return tableauDataFolder;
                 }
+            }
+
+            /// <summary>
+            /// Try to find the Tableau data folder in the Tableau Installation folder,
+            /// which is calculated based on the path of the Tableau Server Application
+            /// Manager (tabsvc) service
+            /// </summary>
+            /// <returns></returns>
+            private static string SearchDataFolderInInstallationFolder()
+            {
+                string tableauInstallFolder = RetrieveTableauInstallationFolder();
+                if (tableauInstallFolder == null)
+                {
+                    return null;
+                }
+
+                string dataFolderPath = Path.Combine(tableauInstallFolder, "data");
+                if (!Directory.Exists(dataFolderPath))
+                {
+                    return null;
+                }
+
+                return dataFolderPath;
             }
 
             private static string RetrieveTableauInstallationFolder()
