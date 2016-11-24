@@ -78,7 +78,7 @@ namespace PaletteInsight
                 options.RepositoryTables = LoadRepositoryTables();
 
                 // Add the log folders based on the Tableau Data path from the registry
-                var tableauRoot = GetTableauDataFolder();
+                var tableauRoot = FindTableauDataFolder();
 
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
@@ -308,10 +308,32 @@ namespace PaletteInsight
             #region Tableau Registry info
 
             /// <summary>
+            /// Retrieve Tablea's data folder path from the registry or try the usual path.
+            /// </summary>
+            /// <returns></returns>
+            private static string FindTableauDataFolder()
+            {
+                string dataFolderPath = SearchRegistryForTableauDataFolder();
+                if (!Directory.Exists(dataFolderPath))
+                {
+                    // No luck with the registry, try the usual path as a fallback
+                    dataFolderPath = @"C:\ProgramData\Tableau\Tableau Server\data";
+                    if (!Directory.Exists(dataFolderPath))
+                    {
+                        // No luck at all
+                        Log.Warn("Could not find Tableau data folder!");
+                        return null;
+                    }
+                }
+
+                return dataFolderPath;
+            }
+
+            /// <summary>
             /// Tries to read Tableau's data folder from the registry
             /// </summary>
             /// <returns>null if no Tableau data folder is found in the registry </returns>
-            private static string GetTableauDataFolder()
+            private static string SearchRegistryForTableauDataFolder()
             {
                 // Try all versions of tableau from highest to lowest
                 using (var localKey = Environment.Is64BitOperatingSystem
@@ -368,7 +390,7 @@ namespace PaletteInsight
 
                     if (tableauDataFolder == null)
                     {
-                        Log.Error("Failed to determine version of Tableau Server!");
+                        Log.Warn("Failed to retrieve Tableau data folder path from registry!");
                         return null;
                     }
 
