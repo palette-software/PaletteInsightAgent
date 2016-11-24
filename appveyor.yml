@@ -125,10 +125,12 @@ test_script:
         $fake_tableau_data_folder = "c:\FakeTableau\data";
         New-Item -Path "HKLM:\SOFTWARE\Tableau\Tableau Server 10.0" -Name "Directories" -Force;
         New-ItemProperty -Path "HKLM:\SOFTWARE\Tableau\Tableau Server 10.0\Directories" -Name "Data" -PropertyType "String" -Value $fake_tableau_data_folder;
-        $watched_folder_1 = "$fake_tableau_data_folder\watched_folder_1";
-        $watched_folder_2 = "$fake_tableau_data_folder\watched_folder_2";
-        md $watched_folder_1;
-        md $watched_folder_2;
+        $watched_folder = "$fake_tableau_data_folder\tabsvc\vizqlserver\Logs";
+        md $watched_folder;
+        md "$fake_tableau_data_folder\tabsvc\vizqlserver\Logs";
+        md "$fake_tableau_data_folder\tabsvc\logs\vizqlserver";
+        md "$fake_tableau_data_folder\tabsvc\logs\vizqlserver";
+        md "$fake_tableau_data_folder\tabsvc\logs\dataengine";
 
     # Acquire example serverlogs from our S3 'palette-insight-test' bucket
     - ps: (New-Object Net.WebClient).DownloadFile('https://s3.amazonaws.com/palette-insight-test/example_serverlogs.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
@@ -138,7 +140,7 @@ test_script:
     - ps: Start-Service -Name PaletteInsightAgent
     - echo "Started PaletteInsightAgent service"
     - sleep 4
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder_1);
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder);
     - sleep 13
     - echo "Sleeping for 17 seconds"
     - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
