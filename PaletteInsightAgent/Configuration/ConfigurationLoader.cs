@@ -346,23 +346,6 @@ namespace PaletteInsight
                 return dataFolderPath;
             }
 
-            // This function is acquired from StackOverflow:
-            // http://stackoverflow.com/questions/2728578/how-to-get-phyiscal-path-of-windows-service-using-net
-            public static string GetPathOfService(string serviceName)
-            {
-                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name = '{0}'", serviceName));
-                using (ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(wqlObjectQuery))
-                using (ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get())
-                {
-                    foreach (ManagementObject managementObject in managementObjectCollection)
-                    {
-                        return managementObject.GetPropertyValue("PathName").ToString();
-                    }
-                }
-
-                return null;
-            }
-
             /// <summary>
             /// Tries to read Tableau's data folder from the registry
             /// </summary>
@@ -432,6 +415,49 @@ namespace PaletteInsight
                     return tableauDataFolder;
                 }
             }
+
+            private static string RetrieveTableauInstallationFolder()
+            {
+                string tabsvcPath = GetPathOfService("tabsvc");
+                return ExtractTableauInstallationFolder(tabsvcPath);
+            }
+
+            // This function is created only for unit testing
+            internal static string ExtractTableauInstallationFolder(string tabsvcPath)
+            {
+                if (tabsvcPath == null)
+                {
+                    return null;
+                }
+
+                // Extract the installation folder out of the tabsvc path
+                var pattern = new Regex(@"(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe$");
+                var groups = pattern.Match(tabsvcPath).Groups;
+                // groups[0] is the entire match, thus we expect at least 2
+                if (groups.Count < 2)
+                {
+                    return null;
+                }
+
+                return groups[1].Value;
+            }
+
+            // This function is acquired from StackOverflow:
+            // http://stackoverflow.com/questions/2728578/how-to-get-phyiscal-path-of-windows-service-using-net
+            public static string GetPathOfService(string serviceName)
+            {
+                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name = '{0}'", serviceName));
+                using (ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(wqlObjectQuery))
+                using (ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get())
+                {
+                    foreach (ManagementObject managementObject in managementObjectCollection)
+                    {
+                        return managementObject.GetPropertyValue("PathName").ToString();
+                    }
+                }
+
+                return null;
+            }           
             #endregion
 
 
