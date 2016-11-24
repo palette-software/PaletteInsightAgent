@@ -345,6 +345,7 @@ namespace PaletteInsight
 
             /// <summary>
             /// Tries to read Tableau's data folder from the registry
+            /// NOTE: This function works as long as Tableau versions are in X.X format
             /// </summary>
             /// <returns>null if no Tableau data folder is found in the registry </returns>
             private static string SearchRegistryForTableauDataFolder()
@@ -446,7 +447,8 @@ namespace PaletteInsight
                 return ExtractTableauInstallationFolder(tabsvcPath);
             }
 
-            // This function is created only for unit testing
+            // This function is created only for unit testing, since it is pretty difficult
+            // to mock static functions in C#
             internal static string ExtractTableauInstallationFolder(string tabsvcPath)
             {
                 if (tabsvcPath == null)
@@ -468,6 +470,7 @@ namespace PaletteInsight
 
             // This function is acquired from StackOverflow:
             // http://stackoverflow.com/questions/2728578/how-to-get-phyiscal-path-of-windows-service-using-net
+            // (with a bit of more careful object disposal)
             public static string GetPathOfService(string serviceName)
             {
                 WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name = '{0}'", serviceName));
