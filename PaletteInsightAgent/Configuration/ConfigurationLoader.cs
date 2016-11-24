@@ -10,6 +10,7 @@ using YamlDotNet.Serialization.NamingConventions;
 using NLog;
 using PaletteInsightAgent.Output.OutputDrivers;
 using System.Text.RegularExpressions;
+using System.Management;
 
 namespace PaletteInsight
 {
@@ -314,19 +315,52 @@ namespace PaletteInsight
             private static string FindTableauDataFolder()
             {
                 string dataFolderPath = SearchRegistryForTableauDataFolder();
-                if (!Directory.Exists(dataFolderPath))
+                if (dataFolderPath == null || !Directory.Exists(dataFolderPath))
                 {
-                    // No luck with the registry, try the usual path as a fallback
+                    // Try to figure out based on the path of the Tableau Server
+                    // Application Manager (tabsvc) service
+                    string tabsvcPath = GetPathOfService("tabsvc");
+
+                    // Extract the installation folder out of the tabsvc path
+                    var pattern = new Regex(@"(.*)[\/]+.*[\/]+bin[\/]+tabsvc.exe$");
+                    var groups = pattern.Match(tabsvcPath).Groups;
+                    // groups[0] is the entire match, thus we expect at least 2
+                    if (groups.Count > 1)
+                    {
+                        dataFolderPath = groups[1].Value;
+                    }
+                }
+
+                if (dataFolderPath == null || !Directory.Exists(dataFolderPath))
+                {
+                    // Try the usual path as a fallback
                     dataFolderPath = @"C:\ProgramData\Tableau\Tableau Server\data";
                     if (!Directory.Exists(dataFolderPath))
                     {
                         // No luck at all
-                        Log.Warn("Could not find Tableau data folder!");
+                        Log.Error("Could not find Tableau data folder!");
                         return null;
                     }
                 }
 
                 return dataFolderPath;
+            }
+
+            // This function is acquired from StackOverflow:
+            // http://stackoverflow.com/questions/2728578/how-to-get-phyiscal-path-of-windows-service-using-net
+            public static string GetPathOfService(string serviceName)
+            {
+                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name = '{0}'", serviceName));
+                using (ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(wqlObjectQuery))
+                using (ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get())
+                {
+                    foreach (ManagementObject managementObject in managementObjectCollection)
+                    {
+                        return managementObject.GetPropertyValue("PathName").ToString();
+                    }
+                }
+
+                return null;
             }
 
             /// <summary>
