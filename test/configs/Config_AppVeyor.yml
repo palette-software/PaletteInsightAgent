@@ -25,10 +25,10 @@ Webservice:
 
 Logs: 
   - 
-    Directory: 'c:\watched_folder_1\'
+    Directory: 'c:\FakeTableau\data\watched_folder_1\'
     Filter: '*.txt'
   - 
-    Directory: 'c:\watched_folder_2\'
+    Directory: 'c:\FakeTableau\data\watched_folder_2\'
     Filter: 'tabprotosrv*.txt'
 TableauRepo: 
   Host: localhost
