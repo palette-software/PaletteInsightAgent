@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigurationLoaderTests.cs" />
     <Compile Include="Output\CsvSerializerTests.cs" />
     <Compile Include="Output\FileUploaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

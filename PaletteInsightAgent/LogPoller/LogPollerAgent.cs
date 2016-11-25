@@ -26,7 +26,14 @@ namespace PaletteInsightAgent.LogPoller
 
         public LogPollerAgent(ICollection<PaletteInsightAgentOptions.LogFolderInfo> foldersToWatch, int logLinesPerBatch)
         {
-            Log.Info("Initializing LogPollerAgent with number of folders: {0}.", foldersToWatch.Count);
+            if (foldersToWatch.Count > 0)
+            {
+                Log.Info("Initializing LogPollerAgent with number of folders: {0}.", foldersToWatch.Count);
+            }
+            else
+            {
+                Log.Error("LogPollerAgent has no folder to watch!");
+            }
             this.foldersToWatch = foldersToWatch;
             this.logLinesPerBatch = logLinesPerBatch;
             logsToDbConverter = new LogsToDbConverter();
