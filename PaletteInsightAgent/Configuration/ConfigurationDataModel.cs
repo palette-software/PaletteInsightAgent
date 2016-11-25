@@ -122,14 +122,8 @@ namespace PaletteInsight
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; } = 300;
 
-
-            // Became outdated as it was misconfigured at clients
             [YamlMember(Alias = "AllProcesses")]
             public bool AllProcesses { get; set; } = true;
-
-            // This is a hack and as such I chose very ugly name intentionally so that we don't leave it this way.
-            [YamlMember(Alias = "AllProcesses2")]
-            public bool AllProcesses2 { get; set; } = true;
 
             [YamlMember(Alias = "LicenseKey")]
             public string LicenseKey { get; set; }

@@ -9,6 +9,8 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NLog;
 using PaletteInsightAgent.Output.OutputDrivers;
+using System.Text.RegularExpressions;
+using System.Management;
 
 namespace PaletteInsight
 {
@@ -44,7 +46,7 @@ namespace PaletteInsight
                 options.ProcessedFilestTTL = config.ProcessedFilesTTL;
                 options.StorageLimit = config.StorageLimit;
 
-                options.AllProcesses = config.AllProcesses2;
+                options.AllProcesses = config.AllProcesses;
 
                 options.LicenseKey = config.LicenseKey;
 
@@ -77,7 +79,7 @@ namespace PaletteInsight
                 options.RepositoryTables = LoadRepositoryTables();
 
                 // Add the log folders based on the Tableau Data path from the registry
-                var tableauRoot = GetTableauRegistryString("Data");
+                var tableauRoot = FindTableauDataFolder();
 
                 AddLogFoldersToOptions(config, options, tableauRoot);
                 AddRepoToOptions(config, options, tableauRoot);
@@ -136,12 +138,11 @@ namespace PaletteInsight
             private static void AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
                 Workgroup repo = null;
-                string workgroupyml = @"tabsvc\config\workgroup.yml";
 
                 var configFilePath = "";
                 try
                 {
-                    configFilePath = Path.Combine(tableauRoot, workgroupyml);
+                    configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
                     using (var reader = File.OpenText(configFilePath))
                     {
                         repo = GetRepoFromWorkgroupYaml(tableauRoot);
@@ -307,51 +308,183 @@ namespace PaletteInsight
 
             #region Tableau Registry info
 
-
-            // A list of possible locations for the tableau data in the registry.
-            // For now we are puttin this in descending version order so that the most recent
-            // version installed will be returned.
-            static readonly string[] POSSIBLE_TABLEAU_REGISTRY_PATHS = new string[]
+            /// <summary>
+            /// Retrieve Tableau's data folder path from the registry or figure it out
+            /// based on its installation folder or fallback and try the usual path.
+            /// </summary>
+            /// <returns></returns>
+            private static string FindTableauDataFolder()
             {
-                    @"Software\Tableau\Tableau Server 9.3\Directories",
-                    @"Software\Tableau\Tableau Server 9.2\Directories",
-                    @"Software\Tableau\Tableau Server 9.1\Directories",
-            };
+                string dataFolderPath = SearchRegistryForTableauDataFolder();
+                if (dataFolderPath != null)
+                {
+                    Log.Info("Found Tableau Data folder in registry: {0}", dataFolderPath);
+                    return dataFolderPath;   
+                }
 
+                // Look for it in the Tableau installation folder
+                dataFolderPath = SearchDataFolderInInstallationFolder();
+                if (dataFolderPath != null)
+                {
+                    Log.Info("Found Tableau Data folder in installation folder: {0}", dataFolderPath);
+                    return dataFolderPath;
+                }
+
+                // Try the usual path as a last resort
+                dataFolderPath = @"C:\ProgramData\Tableau\Tableau Server\data";
+                if (Directory.Exists(dataFolderPath))
+                {
+                    Log.Info("Found Tableau Data folder at default location: {0}", dataFolderPath);
+                    return dataFolderPath;
+                }
+
+                // No luck at all
+                Log.Error("Could not find Tableau data folder!");
+                return null;
+            }
 
             /// <summary>
-            /// Tries to get a value as string from the registry from the installed Tableau Servers version
+            /// Tries to read Tableau's data folder from the registry
+            /// NOTE: This function works as long as Tableau versions are in X.X format
             /// </summary>
-            /// <param name="subKey">The name of the value to get from the tableau version</param>
-            /// <returns>null if no Tableau is found or the </returns>
-            private static string GetTableauRegistryString(string subKey = "Data")
+            /// <returns>null if no Tableau data folder is found in the registry </returns>
+            private static string SearchRegistryForTableauDataFolder()
             {
                 // Try all versions of tableau from highest to lowest
                 using (var localKey = Environment.Is64BitOperatingSystem
                         ? RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
                         : RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
                 {
-                    foreach (var regPath in POSSIBLE_TABLEAU_REGISTRY_PATHS)
+                    RegistryKey tableauKey = localKey.OpenSubKey(@"Software\Tableau");
+                    if (tableauKey == null)
                     {
-                        try
+                        return null;
+                    }
+
+                    Version latestTableauVersion = new Version("0.0");
+                    string tableauDataFolder = null;
+
+                    foreach (string key in tableauKey.GetSubKeyNames())
+                    {
+                        var pattern = new Regex(@"^Tableau Server ([0-9]+\.[0-9]+)");
+                        var groups = pattern.Match(key).Groups;
+                        // groups[0] is the entire match, thus we expect 2
+                        if (groups.Count < 2)
                         {
-                            using (RegistryKey key = localKey.OpenSubKey(regPath))
+                            continue;
+                        }
+
+                        Version version = new Version(groups[1].Value);
+                        if (version > latestTableauVersion)
+                        {
+                            try
                             {
-                                if (key == null) continue;
-                                Object o = key.GetValue(subKey);
-                                if (o == null) continue;
-                                Log.Info("Found Tableau Data folder: {0}\\{1}", regPath, subKey);
-                                return o as String;
+                                string directoriesRegPath = Path.Combine(key, "Directories");
+                                using (RegistryKey dataFolderKey = tableauKey.OpenSubKey(directoriesRegPath))
+                                {
+                                    if (dataFolderKey == null)
+                                    {
+                                        continue;
+                                    }
+                                    Object dataValue = dataFolderKey.GetValue("Data");
+                                    if (dataValue == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    string possibleDataFolder = dataValue as String;
+                                    if (!Directory.Exists(possibleDataFolder))
+                                    {
+                                        continue;
+                                    }
+                                    latestTableauVersion = version;
+                                    tableauDataFolder = possibleDataFolder;
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                // no problem, only means this is not our version
+                                continue;
                             }
                         }
-                        catch (Exception)
-                        {
-                            // no problem, only means this is not our version
-                        }
                     }
-                    return null;
+
+                    if (tableauDataFolder == null)
+                    {
+                        return null;
+                    }
+
+                    return tableauDataFolder;
                 }
             }
+
+            /// <summary>
+            /// Try to find the Tableau data folder in the Tableau Installation folder,
+            /// which is calculated based on the path of the Tableau Server Application
+            /// Manager (tabsvc) service
+            /// </summary>
+            /// <returns></returns>
+            private static string SearchDataFolderInInstallationFolder()
+            {
+                string tableauInstallFolder = RetrieveTableauInstallationFolder();
+                if (tableauInstallFolder == null)
+                {
+                    return null;
+                }
+
+                string dataFolderPath = Path.Combine(tableauInstallFolder, "data");
+                if (!Directory.Exists(dataFolderPath))
+                {
+                    return null;
+                }
+
+                return dataFolderPath;
+            }
+
+            private static string RetrieveTableauInstallationFolder()
+            {
+                string tabsvcPath = GetPathOfService("tabsvc");
+                return ExtractTableauInstallationFolder(tabsvcPath);
+            }
+
+            // This function is created only for unit testing, since it is pretty difficult
+            // to mock static functions in C#
+            internal static string ExtractTableauInstallationFolder(string tabsvcPath)
+            {
+                if (tabsvcPath == null)
+                {
+                    return null;
+                }
+
+                // Extract the installation folder out of the tabsvc path
+                var pattern = new Regex(@"(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe$");
+                var groups = pattern.Match(tabsvcPath).Groups;
+                // groups[0] is the entire match, thus we expect at least 2
+                if (groups.Count < 2)
+                {
+                    return null;
+                }
+
+                return groups[1].Value;
+            }
+
+            // This function is acquired from StackOverflow:
+            // http://stackoverflow.com/questions/2728578/how-to-get-phyiscal-path-of-windows-service-using-net
+            // (with a bit of more careful object disposal)
+            public static string GetPathOfService(string serviceName)
+            {
+                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name = '{0}'", serviceName));
+                using (ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(wqlObjectQuery))
+                using (ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get())
+                {
+                    foreach (ManagementObject managementObject in managementObjectCollection)
+                    {
+                        return managementObject.GetPropertyValue("PathName").ToString();
+                    }
+                }
+
+                return null;
+            }           
             #endregion
 
 
@@ -403,8 +536,7 @@ namespace PaletteInsight
                 // Get basic info from workgroup yml. Everything else from connections.yml
                 var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
 
-                string workgroupyml = @"tabsvc\config\workgroup.yml";
-                var configFilePath = Path.Combine(tableauRoot, workgroupyml);
+                var configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
                 Workgroup workgroup = null;
                 using (var workgroupFile = File.OpenText(configFilePath))
                 {
