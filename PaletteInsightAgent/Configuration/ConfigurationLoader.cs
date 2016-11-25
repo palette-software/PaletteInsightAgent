@@ -429,12 +429,14 @@ namespace PaletteInsight
                 string tableauInstallFolder = RetrieveTableauInstallationFolder();
                 if (tableauInstallFolder == null)
                 {
+                    Log.Warn("Could not find Tableau installation folder!");
                     return null;
                 }
 
                 string dataFolderPath = Path.Combine(tableauInstallFolder, "data");
                 if (!Directory.Exists(dataFolderPath))
                 {
+                    Log.Warn("No Tableau data folder found in installation folder! Expected data folder path: {0}", dataFolderPath);
                     return null;
                 }
 
@@ -453,15 +455,18 @@ namespace PaletteInsight
             {
                 if (tabsvcPath == null)
                 {
+                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
                     return null;
                 }
 
-                // Extract the installation folder out of the tabsvc path
-                var pattern = new Regex(@"(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe$");
+                // Extract the installation folder out of the tabsvc path. We are going to
+                // chop <one_folder>/bin/tabsvc.exe from the end of the tabsvc path.
+                var pattern = new Regex(@"""?(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe.*");
                 var groups = pattern.Match(tabsvcPath).Groups;
                 // groups[0] is the entire match, thus we expect at least 2
                 if (groups.Count < 2)
                 {
+                    Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
                     return null;
                 }
 
