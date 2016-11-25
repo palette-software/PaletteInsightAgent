@@ -59,6 +59,30 @@ namespace PaletteInsightAgentTests.Configuration
         }
 
         [TestMethod]
+        public void TestExtractTableauInstallationFolder_longformat_slash()
+        {
+            var expected = @"D:/Tableau Server";
+            var actual = Loader.ExtractTableauInstallationFolder(@"""D:/Tableau Server/worker.1/bin/tabsvc.exe"" /SN:tabsvc");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void TestExtractTableauInstallationFolder_longformat_backslash()
+        {
+            var expected = @"D:\Tableau Server";
+            var actual = Loader.ExtractTableauInstallationFolder(@"""D:\Tableau Server\worker.1\bin\tabsvc.exe"" /SN:tabsvc");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void TestExtractTableauInstallationFolder_longformat_doublebackslash()
+        {
+            var expected = @"D:\\Tableau Server";
+            var actual = Loader.ExtractTableauInstallationFolder(@"""D:\\Tableau Server\\10.0\\bin\\tabsvc.exe"" /SN:tabsvc");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
         public void TestExtractTableauInstallationFolder_primary()
         {
             var expected = @"D:/Program Files/Tableau/Tableau Server";
