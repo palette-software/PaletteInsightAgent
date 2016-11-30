@@ -315,6 +315,8 @@ namespace PaletteInsight
             /// <returns></returns>
             private static string FindTableauDataFolder()
             {
+                // Primary nodes store the data folder location in the registry, except if
+                // Tableau Server is installed on C: drive
                 string dataFolderPath = SearchRegistryForTableauDataFolder();
                 if (dataFolderPath != null)
                 {
@@ -330,7 +332,8 @@ namespace PaletteInsight
                     return dataFolderPath;
                 }
 
-                // Try the usual path as a last resort
+                // Try the usual path as a last resort. The data folder is located here if you install
+                // Tableau Server on drive C: according to Tableau documentation
                 dataFolderPath = @"C:\ProgramData\Tableau\Tableau Server\data";
                 if (Directory.Exists(dataFolderPath))
                 {
@@ -421,7 +424,10 @@ namespace PaletteInsight
             /// <summary>
             /// Try to find the Tableau data folder in the Tableau Installation folder,
             /// which is calculated based on the path of the Tableau Server Application
-            /// Manager (tabsvc) service
+            /// Manager (tabsvc) service.
+            /// 
+            /// For worker nodes this is the way we can discover Tableau data folder, if
+            /// it is not located in the default directory.
             /// </summary>
             /// <returns></returns>
             private static string SearchDataFolderInInstallationFolder()
@@ -436,7 +442,6 @@ namespace PaletteInsight
                 string dataFolderPath = Path.Combine(tableauInstallFolder, "data");
                 if (!Directory.Exists(dataFolderPath))
                 {
-                    Log.Warn("No Tableau data folder found in installation folder! Expected data folder path: {0}", dataFolderPath);
                     return null;
                 }
 
