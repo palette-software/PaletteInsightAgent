@@ -21,7 +21,7 @@ namespace PaletteInsightAgent.CounterConfig
             // we should always be in the correct folder for this to work
             using (var reader = File.OpenText(pathToConfig))
             {
-                var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
+                var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
                 var counterConfig = deserializer.Deserialize<List<Counters.Config>>(reader);
                 return Counters.Config.ToICounterList(counterConfig);
             }
