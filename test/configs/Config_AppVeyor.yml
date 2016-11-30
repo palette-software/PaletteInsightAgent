@@ -8,6 +8,9 @@
 
 IsPrimaryNode: true
 
+# The following key is only for testing, that the agent should ignore unexpected keys
+AllProcesses2: true
+
 # The following values are all given in seconds.
 PollInterval: 5
 ThreadInfoPollInterval: 6

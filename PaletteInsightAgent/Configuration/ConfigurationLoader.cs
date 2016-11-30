@@ -109,7 +109,7 @@ namespace PaletteInsight
                     // deserialize the config
                     using (var reader = File.OpenText(filename))
                     {
-                        var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
+                        var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
                         var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
                         return config;
                     }
@@ -273,7 +273,7 @@ namespace PaletteInsight
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(LOGFOLDER_DEFAULTS_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
+                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
             }
@@ -576,7 +576,7 @@ namespace PaletteInsight
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention());
+                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
                     return deserializer.Deserialize<List<ProcessData>>(reader);
                 }
             }
@@ -585,7 +585,7 @@ namespace PaletteInsight
             {
                 using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new NullNamingConvention());
+                    var deserializer = new Deserializer(namingConvention: new NullNamingConvention(), ignoreUnmatched: true);
                     return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }
