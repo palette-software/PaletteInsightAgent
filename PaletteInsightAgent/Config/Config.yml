@@ -26,25 +26,26 @@ LicenseKey: 34e6a6cc-a5ab-4c36-8129-15fc0d61069f    # This is just an example GU
 Webservice:
  Endpoint: http://localhost:9000
 
-Logs:
-  -
-    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'
-    Filter: '*.txt'
-  -
-    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
-    Filter: 'tabprotosrv*.txt'
-  - 
-    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
-    Filter: 'tdeserver*.txt'
-    Format: 'plain'
-  -
-    Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\dataengine\'
-    Filter: 'tdeserver*.log'
-    Format: 'plain'
+# Log folders and Tableau settings are detected automatically since version 2.0.16
+# Logs:
+#   -
+#     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\vizqlserver\Logs\'
+#     Filter: '*.txt'
+#   -
+#     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
+#     Filter: 'tabprotosrv*.txt'
+#   - 
+#     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
+#     Filter: 'tdeserver*.txt'
+#     Format: 'plain'
+#   -
+#     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\dataengine\'
+#     Filter: 'tdeserver*.log'
+#     Format: 'plain'
 
-TableauRepo: 
-  Host: localhost
-  Port: 8060
-  Database: workgroup
-  User: readonly
-  Password: onlyread
+# TableauRepo: 
+#   Host: localhost
+#   Port: 8060
+#   Database: workgroup
+#   User: readonly
+#   Password: onlyread
