@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using YamlDotNet.Serialization;
 
 namespace PaletteInsight
@@ -8,6 +9,12 @@ namespace PaletteInsight
 
     namespace Configuration
     {
+        // Where the default value of a property is different than the default of its type
+        // (like 0 for int or "" for string or null for object) we signal our default
+        // value through [DefaultValue()] attribute, so that the YML parser won't write
+        // the default values during serialization. And this way we are free to change
+        // the default values in the future.
+
         public class DatabaseConfig
         {
             [YamlMember(Alias = "Database")]
@@ -78,50 +85,53 @@ namespace PaletteInsight
             [YamlMember(Alias = "UseProxy")]
             public bool UseProxy { get; set; } = false;
 
+            [DefaultValue("")]
             [YamlMember(Alias = "ProxyAddress")]
             public string ProxyAddress { get; set; } = "";
 
+            [DefaultValue("")]
             [YamlMember(Alias = "ProxyUsername")]
-            public string ProxyUsername { get; set; } = "";
+            public string ProxyUsername { get; set; }
 
+            [DefaultValue("")]
             [YamlMember(Alias = "ProxyPassword")]
-            public string ProxyPassword { get; set; } = "";
+            public string ProxyPassword { get; set; }
         }
 
         public class PaletteInsightConfiguration
         {
-            // Deprecated. Referring section needs to be removed from all config files first.
-            [YamlMember(Alias = "Database")]
-            public DatabaseConfig Database { get; set; }
-            // Deprecated. Referring section needs to be removed from all config files first.
-            [YamlMember(Alias = "DBWriteInterval")]
-            public int DBWriteInterval { get; set; } = 0;
-
+            [DefaultValue(30)]
             [YamlMember(Alias = "PollInterval")]
             public int PollInterval { get; set; } = 30;
 
+            [DefaultValue(15)]
             [YamlMember(Alias = "ThreadInfoPollInterval")]
             public int ThreadInfoPollInterval { get; set; } = 15;
 
+            [DefaultValue(10)]
             [YamlMember(Alias = "UploadInterval")]
             public int UploadInterval { get; set; } = 10; // Every ten seconds
 
+            [DefaultValue(3600)]
             [YamlMember(Alias = "RepoTablesPollInterval")]
             public int RepoTablesPollInterval { get; set; } = 3600; // Hourly
 
+            [DefaultValue(600)]
             [YamlMember(Alias = "StreamingTablesPollInterval")]
             public int StreamingTablesPollInterval { get; set; } = 600; // 10 minutes
 
             [YamlMember(Alias = "ProcessedFilesTTL")]
-            // public int ProcessedFilesTTL { get; set; } = 604800; // Default is a week
             public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
 
+            [DefaultValue(10 * 1024)]
             [YamlMember(Alias = "StorageLimit")]
             public int StorageLimit { get; set; } = 10 * 1024; // Default is 10 GB. This value is given in megabytes.
 
+            [DefaultValue(300)]
             [YamlMember(Alias = "LogPollInterval")]
             public int LogPollInterval { get; set; } = 300;
 
+            [DefaultValue(true)]
             [YamlMember(Alias = "AllProcesses")]
             public bool AllProcesses { get; set; } = true;
 
@@ -139,15 +149,19 @@ namespace PaletteInsight
 
             // Log polling options
 
+            [DefaultValue(true)]
             [YamlMember(Alias = "UseCounterSamples")]
             public bool UseCounterSamples { get; set; } = true;
 
+            [DefaultValue(true)]
             [YamlMember(Alias = "UseThreadInfo")]
             public bool UseThreadInfo { get; set; } = true;
 
+            [DefaultValue(true)]
             [YamlMember(Alias = "UseLogPolling")]
             public bool UseLogPolling { get; set; } = true;
 
+            [DefaultValue(true)]
             [YamlMember(Alias = "UseRepoPolling")]
             public bool UseRepoPolling { get; set; } = true;
 
@@ -157,6 +171,7 @@ namespace PaletteInsight
             /// <summary>
             /// The maximum lines to be parsed in a batch from a log file
             /// </summary>
+            [DefaultValue(10000)]
             [YamlMember(Alias = "LogLinesPerBatch")]
             public int LogLinesPerBatch { get; set; } = 10000;
 
