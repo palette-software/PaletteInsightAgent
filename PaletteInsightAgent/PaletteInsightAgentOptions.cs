@@ -73,8 +73,6 @@ namespace PaletteInsightAgent
         public bool UseRepoPolling { get; set; }
         public bool UseStreamingTables { get; set; }
 
-        public bool IsPrimaryNode { get; set; }
-
         public int LogLinesPerBatch { get; set; }
 
         #region Repo properties

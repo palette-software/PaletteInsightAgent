@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using PaletteInsightAgent.CounterConfig;
@@ -40,6 +41,7 @@ namespace PaletteInsightAgent
         private CounterSampler sampler;
         private ITableauRepoConn tableauRepo;
         private IOutput output;
+        private string tableauDataFolder;
         private readonly PaletteInsightAgentOptions options;
         private LicenseGuard licenseGuard;
         private bool disposed;
@@ -68,7 +70,12 @@ namespace PaletteInsightAgent
 
             // Load PaletteInsightAgentOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PaletteInsightAgentOptions.Instance;
-            PaletteInsight.Configuration.Loader.LoadConfigTo(Loader.LoadConfigFile("config/Config.yml"), options);
+
+            // Locate the Tableau data folder
+            tableauDataFolder = Loader.FindTableauDataFolder();
+
+            var configuration = Loader.LoadConfigFile("config/Config.yml");
+            Loader.LoadConfigTo(configuration, tableauDataFolder, options);
 
             tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
@@ -364,6 +371,12 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollFullTables(object stateInfo)
         {
+            if (!HasActiveTableauRepo())
+            {
+                Log.Info("Active Tableau repo is not located on this computer. Skip polling full tables.");
+                return;
+            }
+
             tryStartIndividualPoll(RepoPollAgent.FullTablesInProgressLock, PollWaitTimeout, () =>
             {
                 Log.Info("Polling Repostoriy tables");
@@ -377,6 +390,12 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollStreamingTables(object stateInfo)
         {
+            if (!HasActiveTableauRepo())
+            {
+                Log.Info("Active Tableau repo is not located on this computer. Skip polling streaming tables.");
+                return;
+            }
+
             tryStartIndividualPoll(RepoPollAgent.StreamingTablesInProgressLock, PollWaitTimeout, () =>
             {
                 Log.Info("Polling streaming tables");
@@ -384,6 +403,51 @@ namespace PaletteInsightAgent
             });
         }
 
+        /// <summary>
+        /// Checks whether the active Tableau repository resides on this node.
+        /// </summary>
+        /// <returns></returns>
+        private bool HasActiveTableauRepo()
+        {
+            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder);
+            if (repo == null)
+            {
+                Log.Error("Failed to retrieve Tableau repo credentials for polling!");
+                return false;
+            }
+
+            try
+            {
+                var repoHolder = Dns.GetHostEntry(repo.Connection.Host);
+                var localhost = Dns.GetHostEntry(Dns.GetHostName());
+
+                bool hasActiveRepo = false;
+                foreach (var repoAddress in repoHolder.AddressList)
+                {
+                    foreach (var localAddress in localhost.AddressList)
+                    {
+                        if (repoAddress.Equals(localAddress))
+                        {
+                            hasActiveRepo = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasActiveRepo)
+                {
+                    // Active Tableau Repository is not hosted on this agent. No need to poll here.
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to match repo holder with localhost! Exception: ");
+                return false;
+            }
+
+            return true;
+        }
 
         private void UploadData(object stateInfo)
         {
