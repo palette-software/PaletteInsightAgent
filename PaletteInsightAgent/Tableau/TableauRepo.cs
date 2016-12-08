@@ -91,7 +91,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             }
             catch (Exception ex)
             {
-                Log.Warn("Failed to open database connection! Exception message: {0}", ex.Message);
+                Log.Warn(ex, "Failed to open database connection! Exception: {0}", ex.GetType());
                 connection = null;
                 return;
             }

@@ -34,7 +34,7 @@ namespace PaletteInsight
             /// <param name="conf"></param>
             /// <param name="outConfig">the PaletteInsightAgentOptions instance to update, since its a singleton, we cannot
             /// call its constructor, hence we cannot return it.</param>
-            public static void LoadConfigTo(PaletteInsightConfiguration config, PaletteInsightAgent.PaletteInsightAgentOptions options)
+            public static void LoadConfigTo(PaletteInsightConfiguration config, string tableauRoot, PaletteInsightAgentOptions options)
             {
                 options.PollInterval = config.PollInterval;
                 options.LogPollInterval = config.LogPollInterval;
@@ -79,24 +79,24 @@ namespace PaletteInsight
                 options.RepositoryTables = LoadRepositoryTables();
 
                 // Add the log folders based on the Tableau Data path from the registry
-                var tableauRoot = FindTableauDataFolder();
-
                 AddLogFoldersToOptions(config, options, tableauRoot);
-                AddRepoToOptions(config, options, tableauRoot);
+                if (!AddRepoToOptions(config, options, tableauRoot))
+                {
+                    // Error message is already in the log
+                    Environment.Exit(-1);
+                }
 
                 // setup the polling options
                 options.UseCounterSamples = config.UseCounterSamples;
                 options.UseLogPolling = config.UseLogPolling;
                 options.UseThreadInfo = config.UseThreadInfo;
 
-                options.IsPrimaryNode = config.IsPrimaryNode;
-
                 // Polling of Tableau repo and streaming tables needs to be executed only on primary nodes.
                 // [...] for the legacy case UseRepoPolling is true by default and RepoTablesPollInterval is 0 to
                 // disable repo polling so this would mean different behaviour with the same config file.
-                options.UseRepoPolling = config.IsPrimaryNode && config.UseRepoPolling && config.RepoTablesPollInterval > 0;
+                options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
                 // and streaming tables is very similar and related to repo polling
-                options.UseStreamingTables = config.IsPrimaryNode && config.UseRepoPolling && config.StreamingTablesPollInterval > 0;
+                options.UseStreamingTables = config.UseRepoPolling && config.StreamingTablesPollInterval > 0;
 
                 // set the maximum log lines
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
@@ -135,55 +135,59 @@ namespace PaletteInsight
             /// <param name="config"></param>
             /// <param name="options"></param>
             /// <param name="tableauRoot"></param>
-            private static void AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
+            private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-                Workgroup repo = null;
+                Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot);
 
-                var configFilePath = "";
-                try
-                {
-                    configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
-                    using (var reader = File.OpenText(configFilePath))
-                    {
-                        repo = GetRepoFromWorkgroupYaml(tableauRoot);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Log.Warn("Error while trying to load and parse YAML config from {0} -- {1}", configFilePath, e);
-                }
-
-
-                // if the repository from the config is a null, then configure the repo from
-                // the config file.
                 if (repo == null)
                 {
-                    // load the tableau repo properties
-                    var repoProps = config.TableauRepo;
-                    options.RepositoryDatabase = new DbConnectionInfo
+                    Log.Warn("Trying Config.yml as a last resort for Tableau repo credentials...");
+                    try
                     {
-                        Server = repoProps.Host,
-                        Port = Convert.ToInt32(repoProps.Port),
-                        Username = repoProps.User,
-                        Password = repoProps.Password,
-                        DatabaseName = repoProps.Database
-                    };
+                        // load the tableau repo properties
+                        var repoProps = config.TableauRepo;
+                        options.RepositoryDatabase = new DbConnectionInfo
+                        {
+                            Server = repoProps.Host,
+                            Port = Convert.ToInt32(repoProps.Port),
+                            Username = repoProps.User,
+                            Password = repoProps.Password,
+                            DatabaseName = repoProps.Database
+                        };
+
+                        Log.Info("Found Tableau repo credentials in Config.yml.");
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Fatal(e, "Tableau repo credentials were not found in Config.yml either! Exception: ");
+                        return false;
+                    }
                 }
                 else
                 {
-                    if (config.TableauRepo != null)
+                    try
                     {
-                        Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                        if (config.TableauRepo != null)
+                        {
+                            Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                        }
+                        options.RepositoryDatabase = new DbConnectionInfo
+                        {
+                            Server = repo.Connection.Host,
+                            Port = repo.Connection.Port,
+                            Username = repo.Username,
+                            Password = repo.Password,
+                            DatabaseName = repo.Connection.DatabaseName
+                        };
                     }
-                    options.RepositoryDatabase = new DbConnectionInfo
+                    catch (Exception e)
                     {
-                        Server = repo.Connection.Host,
-                        Port = repo.Connection.Port,
-                        Username = repo.Username,
-                        Password = repo.Password,
-                        DatabaseName = repo.Connection.DatabaseName
-                    };
+                        Log.Fatal(e, "Failed to acquire Tableau repo credentials! Exception: ");
+                        return false;
+                    }
                 }
+
+                return true;
             }
 
             #region log folders
@@ -313,8 +317,10 @@ namespace PaletteInsight
             /// based on its installation folder or fallback and try the usual path.
             /// </summary>
             /// <returns></returns>
-            private static string FindTableauDataFolder()
+            public static string FindTableauDataFolder()
             {
+                // Primary nodes store the data folder location in the registry, except if
+                // Tableau Server is installed on C: drive
                 string dataFolderPath = SearchRegistryForTableauDataFolder();
                 if (dataFolderPath != null)
                 {
@@ -330,7 +336,8 @@ namespace PaletteInsight
                     return dataFolderPath;
                 }
 
-                // Try the usual path as a last resort
+                // Try the usual path as a last resort. The data folder is located here if you install
+                // Tableau Server on drive C: according to Tableau documentation
                 dataFolderPath = @"C:\ProgramData\Tableau\Tableau Server\data";
                 if (Directory.Exists(dataFolderPath))
                 {
@@ -421,7 +428,10 @@ namespace PaletteInsight
             /// <summary>
             /// Try to find the Tableau data folder in the Tableau Installation folder,
             /// which is calculated based on the path of the Tableau Server Application
-            /// Manager (tabsvc) service
+            /// Manager (tabsvc) service.
+            /// 
+            /// For worker nodes this is the way we can discover Tableau data folder, if
+            /// it is not located in the default directory.
             /// </summary>
             /// <returns></returns>
             private static string SearchDataFolderInInstallationFolder()
@@ -436,7 +446,6 @@ namespace PaletteInsight
                 string dataFolderPath = Path.Combine(tableauInstallFolder, "data");
                 if (!Directory.Exists(dataFolderPath))
                 {
-                    Log.Warn("No Tableau data folder found in installation folder! Expected data folder path: {0}", dataFolderPath);
                     return null;
                 }
 
@@ -530,33 +539,68 @@ namespace PaletteInsight
 
             private static bool IsValidRepoData(Workgroup workgroup)
             {
-                return workgroup.ReadonlyEnabled
-                    && workgroup.Username != null
-                    && workgroup.Password != null
-                    && workgroup.Connection.Host != null;
-            }
-
-            private static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot)
-            {
-                // Get basic info from workgroup yml. Everything else from connections.yml
-                var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
-
-                var configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
-                Workgroup workgroup = null;
-                using (var workgroupFile = File.OpenText(configFilePath))
+                if (!workgroup.ReadonlyEnabled)
                 {
-                    workgroup = deserializer.Deserialize<Workgroup>(workgroupFile);
-                    using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
-                    {
-                        workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
-                    }
-                    if (!IsValidRepoData(workgroup))
-                    {
-                        return null;
-                    }
+                    Log.Warn("Readonly user is not enabled! Repo credentials must be entered into Config.yml.");
+                    return false;
                 }
 
-                return workgroup;
+                if (workgroup.Username == null)
+                {
+                    Log.Error("Tableau repo username is null! Repo credentials must be entered into Config.yml.");
+                    return false;
+                }
+
+                if (workgroup.Password == null)
+                {
+                    Log.Error("Tableau repo password is null! Repo credentials must be entered into Config.yml.");
+                    return false;
+                }
+
+                if (workgroup.Connection.Host == null)
+                {
+                    Log.Error("Tableau repo hostname is null! Repo credentials must be entered into Config.yml.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot)
+            {
+                if (tableauRoot == null)
+                {
+                    Log.Error("Tableau data folder path must not be null while reading and YAML configs!");
+                    return null;
+                }
+                var configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
+
+                try
+                {
+                    // Get basic info from workgroup yml. Everything else from connections.yml
+                    var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
+
+                    Workgroup workgroup = null;
+                    using (var workgroupFile = File.OpenText(configFilePath))
+                    {
+                        workgroup = deserializer.Deserialize<Workgroup>(workgroupFile);
+                        using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
+                        {
+                            workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
+                        }
+                        if (!IsValidRepoData(workgroup))
+                        {
+                            return null;
+                        }
+                    }
+
+                    return workgroup;
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error while trying to load and parse YAML config from '{0}' Exception: ", configFilePath);
+                    return null;
+                }
             }
 
             #endregion

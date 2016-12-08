@@ -6,9 +6,9 @@
 #UseRepoPolling: true
 #UseThreadInfo: true
 
-IsPrimaryNode: true
 
-# The following key is only for testing, that the agent should ignore unexpected keys
+# The following keys are only for testing, that the agent should ignore unexpected keys
+IsPrimaryNode: true
 AllProcesses2: true
 
 # The following values are all given in seconds.
@@ -25,12 +25,5 @@ StorageLimit: 1				    # Given in megabytes. Default is 10 Gb.
 
 Webservice:
   Endpoint: http://localhost:9000
-
-TableauRepo: 
-  Host: localhost
-  Port: 5432
-  Database: workgroup
-  User: readonly
-  Password: onlyread
 
 #LicenseKey is added during the AppVeyor build, below here
