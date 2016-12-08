@@ -186,4 +186,4 @@ after_deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
