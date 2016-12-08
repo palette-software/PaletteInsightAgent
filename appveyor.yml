@@ -22,6 +22,10 @@ environment:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
         secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
+    palette_robot_ssh_priv_key:
+        secure: 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
+
+
 services:
   - postgresql93
 build_script:
@@ -86,13 +90,21 @@ test_script:
     # - psql -d palette -f create_tables_pg.sql
     # - echo "Postgres database setup completed"
 
+    # Setup SSH key to Github
+    - ps: $fileContent = "-----BEGIN RSA PRIVATE KEY-----`n"
+    - ps: $fileContent += $env:palette_robot_ssh_priv_key.Replace(' ', "`n")
+    - ps: $fileContent += "`n-----END RSA PRIVATE KEY-----`n"
+    - ps: Set-Content c:\users\appveyor\.ssh\id_rsa $fileContent
+
     # Make and run an Insight Server locally
     # First create a go workspace
     - SET GOPATH=c:\go-workspace
     - SET GOPAL=%GOPATH%\src\github.com\palette-software
     - md %GOPAL%
-    - git clone --depth 1 https://%GITHUB_TOKEN%@github.com/palette-software/insight-server.git %GOPAL%\insight-server
+    - git clone --depth 1 git@github.com:palette-software/insight-server.git %GOPAL%\insight-server
     - cd %GOPAL%\insight-server
+    # Make sure 'go get' use the SSH key for downloading private repos, instead of HTTPS
+    - git config --global url."git@github.com:".insteadOf "https://github.com/"
     - go get ./...
     - go install
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
@@ -131,6 +143,21 @@ test_script:
         md "$fake_tableau_data_folder\tabsvc\logs\vizqlserver" -Force;
         md "$fake_tableau_data_folder\tabsvc\logs\vizqlserver" -Force;
         md "$fake_tableau_data_folder\tabsvc\logs\dataengine" -Force;
+
+    # Create fake workgroup.yml and connections.yml
+    - ps: >-
+        md $fake_tableau_data_folder\tabsvc\config;
+        $fileContent = "---`n";
+        $fileContent += "pgsql.connections.yml: $fake_tableau_data_folder\tabsvc\config\connections.yml`n";
+        $fileContent += "pgsql.readonly.enabled: true`n";
+        $fileContent += "pgsql.readonly_password: onlyread`n";
+        $fileContent += "pgsql.readonly_username: readonly`n";
+        Set-Content $fake_tableau_data_folder\tabsvc\config\workgroup.yml $fileContent;
+
+        $fileContent = "---`n";
+        $fileContent += "pgsql.host: localhost`n";
+        $fileContent += "pgsql.port: 8060`n";
+        Set-Content $fake_tableau_data_folder\tabsvc\config\connections.yml $fileContent;
 
     # Acquire example serverlogs from our S3 'palette-insight-test' bucket
     - ps: (New-Object Net.WebClient).DownloadFile('https://s3.amazonaws.com/palette-insight-test/example_serverlogs.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
