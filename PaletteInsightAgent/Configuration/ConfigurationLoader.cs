@@ -80,7 +80,11 @@ namespace PaletteInsight
 
                 // Add the log folders based on the Tableau Data path from the registry
                 AddLogFoldersToOptions(config, options, tableauRoot);
-                AddRepoToOptions(config, options, tableauRoot);
+                if (!AddRepoToOptions(config, options, tableauRoot))
+                {
+                    // Error message is already in the log
+                    Environment.Exit(-1);
+                }
 
                 // setup the polling options
                 options.UseCounterSamples = config.UseCounterSamples;
@@ -131,7 +135,7 @@ namespace PaletteInsight
             /// <param name="config"></param>
             /// <param name="options"></param>
             /// <param name="tableauRoot"></param>
-            private static void AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
+            private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
                 Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot);
 
@@ -140,33 +144,52 @@ namespace PaletteInsight
                 if (repo == null)
                 {
                     Log.Warn("Trying Config.yml as a last resort for Tableau repo credentials...");
-
-                    // load the tableau repo properties
-                    var repoProps = config.TableauRepo;
-                    options.RepositoryDatabase = new DbConnectionInfo
+                    try
                     {
-                        Server = repoProps.Host,
-                        Port = Convert.ToInt32(repoProps.Port),
-                        Username = repoProps.User,
-                        Password = repoProps.Password,
-                        DatabaseName = repoProps.Database
-                    };
+                        // load the tableau repo properties
+                        var repoProps = config.TableauRepo;
+                        options.RepositoryDatabase = new DbConnectionInfo
+                        {
+                            Server = repoProps.Host,
+                            Port = Convert.ToInt32(repoProps.Port),
+                            Username = repoProps.User,
+                            Password = repoProps.Password,
+                            DatabaseName = repoProps.Database
+                        };
+
+                        Log.Info("Found Tableau repo credentials in Config.yml.");
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Fatal(e, "Tableau repo credentials were not found in Config.yml either! Exception: ");
+                        return false;
+                    }
                 }
                 else
                 {
-                    if (config.TableauRepo != null)
+                    try
                     {
-                        Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                        if (config.TableauRepo != null)
+                        {
+                            Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                        }
+                        options.RepositoryDatabase = new DbConnectionInfo
+                        {
+                            Server = repo.Connection.Host,
+                            Port = repo.Connection.Port,
+                            Username = repo.Username,
+                            Password = repo.Password,
+                            DatabaseName = repo.Connection.DatabaseName
+                        };
                     }
-                    options.RepositoryDatabase = new DbConnectionInfo
+                    catch (Exception e)
                     {
-                        Server = repo.Connection.Host,
-                        Port = repo.Connection.Port,
-                        Username = repo.Username,
-                        Password = repo.Password,
-                        DatabaseName = repo.Connection.DatabaseName
-                    };
+                        Log.Fatal(e, "Failed to acquire Tableau repo credentials! Exception: ");
+                        return false;
+                    }
                 }
+
+                return true;
             }
 
             #region log folders
@@ -549,6 +572,7 @@ namespace PaletteInsight
             {
                 if (tableauRoot == null)
                 {
+                    Log.Error("Tableau data folder path must not be null while reading and YAML configs!");
                     return null;
                 }
                 var configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
