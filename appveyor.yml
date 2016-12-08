@@ -103,10 +103,8 @@ test_script:
     - md %GOPAL%
     - git clone --depth 1 git@github.com:palette-software/insight-server.git %GOPAL%\insight-server
     - cd %GOPAL%\insight-server
-
-    # DEBUG HOOK!
-    - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
+    # Make sure 'go get' use the SSH key for downloading private repos, instead of HTTPS
+    - git config --global url."git@github.com:".insteadOf "https://github.com/"
     - go get ./...
     - go install
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
@@ -200,4 +198,4 @@ after_deploy:
 on_finish:
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
