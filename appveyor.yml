@@ -146,6 +146,7 @@ test_script:
 
     # Creare fake workgroup.yml and connections.yml
     - ps: >-
+        md $fake_tableau_data_folder\tabsvc\config;
         $fileContent = "---`n";
         $fileContent += "pgsql.connections.yml: $fake_tableau_data_folder\tabsvc\config\connections.yml`n";
         $fileContent += "pgsql.readonly.enabled: true`n";
