@@ -146,17 +146,17 @@ test_script:
 
     # Creare fake workgroup.yml and connections.yml
     - ps: >-
-      $fileContent = "---`n";
-      $fileContent += "pgsql.connections.yml: $fake_tableau_data_folder\tabsvc\config\connections.yml`n";
-      $fileContent += "pgsql.readonly.enabled: true`n";
-      $fileContent += "pgsql.readonly_password: onlyread`n";
-      $fileContent += "pgsql.readonly_username: readonly`n";
-      Set-Content $fake_tableau_data_folder\tabsvc\config\workgroup.yml $fileContent;
+        $fileContent = "---`n";
+        $fileContent += "pgsql.connections.yml: $fake_tableau_data_folder\tabsvc\config\connections.yml`n";
+        $fileContent += "pgsql.readonly.enabled: true`n";
+        $fileContent += "pgsql.readonly_password: onlyread`n";
+        $fileContent += "pgsql.readonly_username: readonly`n";
+        Set-Content $fake_tableau_data_folder\tabsvc\config\workgroup.yml $fileContent;
 
-      $fileContent = "---`n";
-      $fileContent += "pgsql.host: localhost`n";
-      $fileContent += "pgsql.port: 8060`n";
-      Set-Content $fake_tableau_data_folder\tabsvc\config\connections.yml $fileContent;
+        $fileContent = "---`n";
+        $fileContent += "pgsql.host: localhost`n";
+        $fileContent += "pgsql.port: 8060`n";
+        Set-Content $fake_tableau_data_folder\tabsvc\config\connections.yml $fileContent;
 
     # Acquire example serverlogs from our S3 'palette-insight-test' bucket
     - ps: (New-Object Net.WebClient).DownloadFile('https://s3.amazonaws.com/palette-insight-test/example_serverlogs.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
