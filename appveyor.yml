@@ -21,7 +21,7 @@ environment:
     pfx_pass:
         secure: pJPVYLKluEn4upLcw2OTgA==
     github_token:
-        secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
+        secure: fH3VyHRwhHuNlPwPsOwljTRqYqluyuddBTfcmUn98GBdAOMQbnjcRjjIcYH/Qp6Q
 services:
   - postgresql93
 build_script:
@@ -85,9 +85,6 @@ test_script:
     # - SET PGPASSWORD=password
     # - psql -d palette -f create_tables_pg.sql
     # - echo "Postgres database setup completed"
-
-    # DEBUG HOOK!
-    - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
     # Make and run an Insight Server locally
     # First create a go workspace
