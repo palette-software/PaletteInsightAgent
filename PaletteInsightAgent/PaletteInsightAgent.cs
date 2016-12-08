@@ -194,9 +194,8 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if (USE_TABLEAU_REPO || USE_STREAMING_TABLES)
+            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasActiveTableauRepo())
             {
-
                 // On start get the schema of the repository tables
                 var table = tableauRepo.GetSchemaTable();
 
@@ -209,7 +208,6 @@ namespace PaletteInsightAgent
                 // Do the same for index data
                 table = tableauRepo.GetIndices();
                 OutputSerializer.Write(table);
-
             }
 
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
