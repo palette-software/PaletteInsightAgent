@@ -139,8 +139,6 @@ namespace PaletteInsight
             {
                 Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot);
 
-                // if the repository from the config is a null, then configure the repo from
-                // the config file.
                 if (repo == null)
                 {
                     Log.Warn("Trying Config.yml as a last resort for Tableau repo credentials...");
