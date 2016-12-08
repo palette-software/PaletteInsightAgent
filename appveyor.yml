@@ -103,6 +103,10 @@ test_script:
     - md %GOPAL%
     - git clone --depth 1 git@github.com:palette-software/insight-server.git %GOPAL%\insight-server
     - cd %GOPAL%\insight-server
+
+    # DEBUG HOOK!
+    - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
     - go get ./...
     - go install
     - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
