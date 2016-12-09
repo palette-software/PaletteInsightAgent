@@ -424,7 +424,6 @@ namespace PaletteInsightAgent
                 var repoHolder = Dns.GetHostEntry(repo.Connection.Host);
                 var localhost = Dns.GetHostEntry(Dns.GetHostName());
 
-                bool hasActiveRepo = false;
                 foreach (var repoAddress in repoHolder.AddressList)
                 {
                     if (IPAddress.IsLoopback(repoAddress))
@@ -436,25 +435,17 @@ namespace PaletteInsightAgent
                     {
                         if (repoAddress.Equals(localAddress))
                         {
-                            hasActiveRepo = true;
-                            break;
+                            return true;
                         }
                     }
-                }
-
-                if (!hasActiveRepo)
-                {
-                    // Active Tableau Repository is not hosted on this agent. No need to poll here.
-                    return false;
                 }
             }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to match repo holder with localhost! Exception: ");
-                return false;
             }
 
-            return true;
+            return false;
         }
 
         private void UploadData(object stateInfo)
