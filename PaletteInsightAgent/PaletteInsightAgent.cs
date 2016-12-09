@@ -414,6 +414,11 @@ namespace PaletteInsightAgent
                 return false;
             }
 
+            if (repo.Connection.Host == "localhost")
+            {
+                return true;
+            }
+
             try
             {
                 var repoHolder = Dns.GetHostEntry(repo.Connection.Host);
@@ -422,6 +427,11 @@ namespace PaletteInsightAgent
                 bool hasActiveRepo = false;
                 foreach (var repoAddress in repoHolder.AddressList)
                 {
+                    if (IPAddress.IsLoopback(repoAddress))
+                    {
+                        return true;
+                    }
+
                     foreach (var localAddress in localhost.AddressList)
                     {
                         if (repoAddress.Equals(localAddress))
