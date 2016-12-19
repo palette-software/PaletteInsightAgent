@@ -18,6 +18,7 @@ namespace SplunkNLog
     public class SplunkMessage
     {
         public string Event { get; set; }
+        public string Host { get; set; }
     }
 
     [Target("SplunkNLog")]
@@ -26,6 +27,15 @@ namespace SplunkNLog
         public SplunkNLog()
         {
             isStopping = false;
+            try
+            {
+                machineName = System.Environment.MachineName;
+            }
+            catch (Exception)
+            {
+                // Failed to obtain machine name
+                machineName = "Unknown machine";
+            }
 
             messagesToSplunk = new ConcurrentQueue<string>();
 
@@ -64,6 +74,7 @@ namespace SplunkNLog
         public int MaxBatchSize { get; set; }
 
 
+        private string                  machineName;
         private ConcurrentQueue<string> messagesToSplunk;
         private EventWaitHandle         stopSign;
         private EventWaitHandle         hasMessageToLog;
@@ -109,6 +120,7 @@ namespace SplunkNLog
                             SplunkMessage spm = new SplunkMessage();
                             try
                             {
+                                spm.Host = machineName;
                                 spm.Event = messagesToSplunk.Dequeue();
                                 string jsonContent = JSON.ToJSON(spm, param);
                                 writer.WriteLine(jsonContent);
