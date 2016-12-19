@@ -87,6 +87,8 @@ namespace PaletteInsightAgent.Helpers
                     throw new InsightUnauthorizedException("Unauthorized access to Insight Server!");
                 case HttpStatusCode.BadGateway:
                     throw new TemporaryException("Bad gateway. Insight server is probably getting updated.");
+                case HttpStatusCode.GatewayTimeout:
+                    throw new TemporaryException("Gateway timeout. Insight Server is temporarily unavailable or connecition is poor.");
                 case HttpStatusCode.Forbidden:
                     throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
                 default:
