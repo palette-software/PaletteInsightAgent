@@ -232,8 +232,8 @@ namespace PaletteInsightAgent.Output
                     {
                         try
                         {
-                            output.Write(csvFile);
                             bool isStreaming = IsStreamingTable(csvFile);
+                            output.Write(csvFile);
                             // After successful upload, move the file to the processed folder
                             // NOTE: If the file really got uploaded, and there is a network outage at
                             // this point, the streaming table csv might be deleted before moving to 'processed'
