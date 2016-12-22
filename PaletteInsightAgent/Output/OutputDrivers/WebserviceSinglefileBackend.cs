@@ -36,22 +36,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
             return false;
         }
 
-        // prepare array for results operation
-        // this is needed so that we move the .maxid files as well as the csvs 
-        private string[] PrepareResultArray(string file, string maxId)
-        {
-            string[] results;
-            if (maxId != null)
-            {
-                results = new string[] { file, FileUploader.MaxIdFileName(file) };
-            }
-            else
-            {
-                results = new string[] { file };
-            }
-            return results;
-        }
-
         /// <summary>
         /// Tries to send a list of files (or a single file) to the webservice.
         /// </summary>
@@ -60,8 +44,6 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         /// <returns></returns>
         private void DoSendFile(string file, string maxId)
         {
-            var results = PrepareResultArray(file, maxId);
-
             // skip working if the file does not exist
             if (!File.Exists(file)) return; 
 
@@ -80,7 +62,7 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         #region IDisposable
         /// <summary>
         /// Since this output driver holds no resources that need to be released,
-        /// we dont do anything is Dispose()
+        /// we don't do anything in Dispose()
         /// </summary>
         public void Dispose()
         {
