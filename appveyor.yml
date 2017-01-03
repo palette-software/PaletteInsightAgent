@@ -117,7 +117,6 @@ test_script:
     - cd c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
-    - copy "c:\projects\blackboxrecorder\PaletteInsightAgent\debug.license" ".\palette.license"
     - msiexec.exe /qn /i %PALIN_MSI%
     - echo "Installed Palette Insight successfully"
     # Prepare the config.yml file

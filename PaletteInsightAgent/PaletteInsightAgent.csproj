@@ -130,7 +130,6 @@
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="Configuration\ConfigurationLoader.cs" />
     <Compile Include="License\LicenseGuard.cs" />
-    <Compile Include="LicensePublicKey.cs" />
     <Compile Include="Output\FileUploader.cs" />
     <Compile Include="Output\IWriter.cs" />
     <Compile Include="Output\OutputSerializer.cs" />
