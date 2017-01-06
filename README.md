@@ -8,9 +8,15 @@
 
 ## What is Palette Insight Agent?
 
-Palette Insight Agent is a performance monitoring agent that periodically samples target hosts for a set of Perfmon and MBean counters and writes out the results to a database in a Tableau-friendly format.  This information can then be used to monitor & analyze performance of a Tableau Server installation, in order to detect potential issues or assess scalabiliy & sizing.
+Palette Insight Agent does 4 major things:
+* collects and parses Tableau Server log files listed in [Config/LogFolders.yml](PaletteInsightAgent/Config/LogFolders.yml)
+* collects a set of Windows performance counters configured in [Config/Counters.yml](PaletteInsightAgent/Config/Counters.yml)
+* collects CPU consumption data about all the processes, moreover thread-level data for processes configured in [Config/Processes.yml](PaletteInsightAgent/Config/Processes.yml]
+* retrieves records from Tableau Server's built in Postgres tables configured in [Config/Repository.yml](PaletteInsightAgent/Config/Repository.yml)
 
-Palette Insight Agent can be run as both a console app and a Windows service.
+All the collected data is written into CSV files and the agent sends them to the [Insight Server](https://github.com/palette-software/insight-server).
+
+IMPORTANT NOTE: the Insight Server might not process all the uploaded CSV files. For details please see [LoadTables](https://github.com/palette-software/insight-gp-import), [Reporting](https://github.com/palette-software/insight-reporting-framework) and [Data Model](https://github.com/palette-software/insight-data-model) components.
 
 ## How do I set up Palette Insight Agent?
 
