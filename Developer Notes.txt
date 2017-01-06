@@ -15,7 +15,6 @@
 * PaletteInsightAgentService - A thin service wrapper around PaletteInsightAgent.  Uses TopShelf as a service harness.
 * PaletteInsightAgentServiceInstaller - Generates an MSI installer for PaletteInsightAgentService.
 * PaletteInsightAgentServiceInstallerBootstrapper - Generates the main EXE installer that bundles PaletteInsightAgentService along with Postgres and the PaletteInsightAgentServiceInstallerDBInitializer.
-* PaletteInsightAgentServiceInstallerDBInitializer - Generates an MSI installer that uses a powershell script to initialize & configure Postgres.  Required to support the Postgres silent installation.
 
 ----------------------------------------------
 	     Manual Service Installation
