@@ -31,8 +31,8 @@ Run the Palette Insight Agent installer. During the install you will have to ent
 
 #### Alternative configurations
 Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Config/Config.yml)
-* Proxy configuration
-* In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually.
+* Proxy configurations have to be placed under the `Webservice` key
+* In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually under the `TableauRepo` key
 
 ### Start the Agent
 Palette Insight Agent is zero configured and remotely updated.
