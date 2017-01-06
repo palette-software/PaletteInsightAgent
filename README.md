@@ -46,14 +46,14 @@ The current development requirements are:
 2. Visual Studio 2013 or later.
 3. WiX Toolset Visual Studio Extension - Required to build the installer projects.
   * Available at http://www.wixtoolset.org
-4. [Java SE Development Kit](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-5. [Our LogEntries fork](https://github.com/palette-software/le_dotnet)'s NuGet feed ([here](https://www.appveyor.com/docs/nuget#configuring-private-nuget-feed-in-visual-studio) is how you can add the NuGet feed as a source):  
-   https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
 
+See [Developer Notes.txt](PaletteInsightAgent/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
 
-See [Developer Notes.txt](https://github.com/palette-software/PaletteInsightAgent/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
+## How can I test-drive Palette Insight Agent?
+**TODO: Re-use commands and workflow described in `appveyor.yml`**
 
 ## Is Palette Insight Agent supported?
 
-Palette Insight Agent is made available AS-IS with licensed support. Any bugs discovered should be filed in the [Palette Insight Agent Git issue tracker](https://github.com/palette-software/PaletteInsightAgent/issues).
-
+Palette Insight Agent is licensed under GNU GPL. For professional support please contact developers@palettes-software.com
+**TODO: Clarify support part!**
+Any bugs discovered should be filed in the [Palette Insight Agent Git issue tracker](https://github.com/palette-software/PaletteInsightAgent/issues) or contribution is more than welcome.
