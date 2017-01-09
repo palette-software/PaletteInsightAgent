@@ -50,7 +50,9 @@ The current development requirements are:
 See [Developer Notes.txt](PaletteInsightAgent/blob/master/Developer%20Notes.txt) for additional developer-specific notes.
 
 ## How can I test-drive Palette Insight Agent?
-**TODO: Re-use commands and workflow described in `appveyor.yml`**
+Install Palette Insight Agent on all machines of your Tableau cluster. Make sure that there is some traffic on your Tableau Server by logging in and viewing and editing workbooks for example.
+
+Moreover you can find a smoke test run in [appveyor.yml](appveyor.yml), which runs on every build performed by the AppVeyor build environment. It can be useful to check it out in order to have a basic understanding about the data flow around Palette Insight Agent. It also contains some basic interoperability checks with the latest [Insight Server](https://github.com/palette-software/insight-server).
 
 ## Is Palette Insight Agent supported?
 
