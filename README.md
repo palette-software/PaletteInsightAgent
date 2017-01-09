@@ -56,6 +56,6 @@ Moreover you can find a smoke test run in [appveyor.yml](appveyor.yml), which ru
 
 ## Is Palette Insight Agent supported?
 
-Palette Insight Agent is licensed under GNU GPL. For professional support please contact developers@palettes-software.com
+Palette Insight Agent is licensed under GNU GPL. For professional support please contact developers@palette-software.com
 **TODO: Clarify support part!**
 Any bugs discovered should be filed in the [Palette Insight Agent Git issue tracker](https://github.com/palette-software/PaletteInsightAgent/issues) or contribution is more than welcome.
