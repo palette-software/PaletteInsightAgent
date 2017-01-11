@@ -107,7 +107,8 @@ test_script:
     - git config --global url."git@github.com:".insteadOf "https://github.com/"
     - go get ./...
     - go install
-    - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
+    ## Disabled licensing due to open-sourcing
+    # - echo license_key=%DEV_LICENSE_KEY% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
     # Start Insight Server in the background
     - ps: Start-Process insight-server.exe -ArgumentList "--config license.config"
@@ -122,9 +123,10 @@ test_script:
     # Prepare the config.yml file
     - SET CONFIG_YML_PATH="C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - copy /Y "c:\projects\blackboxrecorder\test\configs\Config_AppVeyor.yml" %CONFIG_YML_PATH%
-    # Add the license key into the Config.yml
-    - cmd: >-
-        echo LicenseKey: %DEV_LICENSE_KEY% >> %CONFIG_YML_PATH%
+    ## Disabled licensing due to open-sourcing
+    # # Add the license key into the Config.yml
+    # - cmd: >-
+    #     echo LicenseKey: %DEV_LICENSE_KEY% >> %CONFIG_YML_PATH%
 
     # Disable Splunk logging in the insight agent
     - ps: >-
