@@ -10,7 +10,7 @@
 # The following keys are only for testing, that the agent should ignore unexpected keys
 IsPrimaryNode: true
 AllProcesses2: true
-LicenseKey: any-string-might-be-here
+LicenseKey: 34e6a6cc-a5ab-4c36-8129-15fc0d61069f    # This is just an example GUID
 
 # The following values are all given in seconds.
 PollInterval: 5
@@ -26,3 +26,5 @@ StorageLimit: 1				    # Given in megabytes. Default is 10 Gb.
 
 Webservice:
   Endpoint: http://localhost:9000
+
+#InsightAuthToken is added during the AppVeyor build, below here
