@@ -15,8 +15,8 @@
                 <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
-                <!--<Control Id="InsightLicenseKeyLabel" Type="Text" X="20" Y="60" Width="290" Height="20" NoPrefix="yes" Text="Insight License Key" />
-                <Control Id="InsightLicenseKeyConfig" Type="Edit" X="20" Y="80" Width="320" Height="18" Property="WIXUI_INSIGHTLICENSEKEY" Indirect="no" />-->
+                <Control Id="InsightAuthTokenLabel" Type="Text" X="20" Y="60" Width="290" Height="20" NoPrefix="yes" Text="Insight Auth Token" />
+                <Control Id="InsightAuthTokenConfig" Type="Edit" X="20" Y="80" Width="320" Height="18" Property="WIXUI_INSIGHTAUTHTOKEN" Indirect="no" />
                 
                 <Control Id="ServerUrlLabel" Type="Text" X="20" Y="120" Width="290" Height="20" NoPrefix="yes" Text="Insight Server URL" />
                 <Control Id="ServerUrlConfig" Type="Edit" X="20" Y="140" Width="320" Height="18" Property="WIXUI_INSIGHTSERVERURL" Indirect="no" />

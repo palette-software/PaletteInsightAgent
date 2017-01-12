@@ -22,7 +22,8 @@ namespace PaletteInsightAgent.Output.OutputDrivers
         public string Endpoint;
 
         /// <summary>
-        /// The authentication token, which is the license key
+        /// The authentication token, which used to be same as the license key. But the licenses
+        /// are gone since this project became open-source.
         /// </summary>
         public string AuthToken;
 

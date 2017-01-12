@@ -135,11 +135,8 @@ namespace PaletteInsight
             [YamlMember(Alias = "AllProcesses")]
             public bool AllProcesses { get; set; } = true;
 
-            // Since Palette Insight Agent became open source, licensing has been disabled.
-            // LicenseKey may be an arbitrary string, but empty string.
-            [DefaultValue("no-license-key")]
-            [YamlMember(Alias = "LicenseKey")]
-            public string LicenseKey { get; set; } = "no-license-key";
+            [YamlMember(Alias = "InsightAuthToken")]
+            public string InsightAuthToken { get; set; }
 
             [YamlMember(Alias = "Webservice")]
             public Webservice Webservice { get; set; }
