@@ -415,6 +415,7 @@ namespace PaletteInsight
                             }
                         }
                     }
+                    tableauKey.Close();
 
                     if (tableauDataFolder == null)
                     {
