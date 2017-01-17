@@ -26,8 +26,8 @@ namespace PaletteInsightFillConfig
                 string insightServerUrl = session.CustomActionData["InsightServerUrl"];
                 session.Log("Insight Server URL: '{0}'", insightServerUrl);
 
-                string insightLicenseKey = session.CustomActionData["InsightLicenseKey"];
-                session.Log("License key: '{0}'", insightLicenseKey);
+                string insightAuthToken = session.CustomActionData["InsightAuthToken"];
+                session.Log("Insight Auth Token: '{0}'", insightAuthToken);
 
                 var agentConfig = Loader.LoadConfigFile(configFilePath);
                 if (agentConfig == null)
@@ -36,11 +36,11 @@ namespace PaletteInsightFillConfig
                     return ActionResult.Failure;
                 }
 
-                if (insightLicenseKey != "")
+                if (insightAuthToken != "")
                 {
-                    agentConfig.LicenseKey = insightLicenseKey;
+                    agentConfig.InsightAuthToken = insightAuthToken;
                     anyChangeOnUI = true;
-                    session.Log("Set LicenseKey to: {0}", insightLicenseKey);
+                    session.Log("Set InsightAuthToken to: {0}", insightAuthToken);
                 }
 
                 if (insightServerUrl != "" && insightServerUrl != "https://")

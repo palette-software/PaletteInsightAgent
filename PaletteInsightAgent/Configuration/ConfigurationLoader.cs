@@ -48,7 +48,7 @@ namespace PaletteInsight
 
                 options.AllProcesses = config.AllProcesses;
 
-                options.LicenseKey = config.LicenseKey;
+                options.AuthToken = config.InsightAuthToken;
 
                 if (config.Webservice != null)
                 {
@@ -126,7 +126,7 @@ namespace PaletteInsight
                 // skip if we arent using the webservice
                 if (options.WebserviceConfig == null) return;
 
-                options.WebserviceConfig.AuthToken = options.LicenseKey;
+                options.WebserviceConfig.AuthToken = options.AuthToken;
             }
 
             /// <summary>

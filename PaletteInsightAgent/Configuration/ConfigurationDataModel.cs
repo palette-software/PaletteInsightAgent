@@ -135,8 +135,8 @@ namespace PaletteInsight
             [YamlMember(Alias = "AllProcesses")]
             public bool AllProcesses { get; set; } = true;
 
-            [YamlMember(Alias = "LicenseKey")]
-            public string LicenseKey { get; set; }
+            [YamlMember(Alias = "InsightAuthToken")]
+            public string InsightAuthToken { get; set; }
 
             [YamlMember(Alias = "Webservice")]
             public Webservice Webservice { get; set; }
