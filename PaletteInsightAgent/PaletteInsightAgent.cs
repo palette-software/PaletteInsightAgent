@@ -28,7 +28,7 @@ namespace PaletteInsightAgent
     /// </summary>
     public class PaletteInsightAgent : IDisposable
     {
-        private Timer licenseCheckTimer;
+        //private Timer licenseCheckTimer;
         private Timer counterSampleTimer;
         private Timer logPollTimer;
         private Timer threadInfoTimer;
@@ -43,7 +43,7 @@ namespace PaletteInsightAgent
         private IOutput output;
         private string tableauDataFolder;
         private readonly PaletteInsightAgentOptions options;
-        private LicenseGuard licenseGuard;
+        //private LicenseGuard licenseGuard;
         private bool disposed;
         private const string PathToCountersYaml = @"Config\Counters.yml";
         private const int DBWriteLockAcquisitionTimeout = 10; // In seconds.
@@ -86,13 +86,14 @@ namespace PaletteInsightAgent
             // Add the webservice username/auth token from the license
             PaletteInsight.Configuration.Loader.UpdateWebserviceConfigFromLicense(options);
 
-            // check the license after the configuration has been loaded.
-            licenseGuard = new LicenseGuard();
-            if (!licenseGuard.CheckLicense(options.LicenseKey))
-            {
-                Log.Fatal("Invalid license! Exiting...");
-                Environment.Exit(-1);
-            }
+            // NOTE: License check disabled as this project became open-source
+            //// check the license after the configuration has been loaded.
+            //licenseGuard = new LicenseGuard();
+            //if (!licenseGuard.CheckLicense(options.LicenseKey))
+            //{
+            //    Log.Fatal("Invalid license! Exiting...");
+            //    Environment.Exit(-1);
+            //}
 
             // Showing the current version in the log
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -151,9 +152,10 @@ namespace PaletteInsightAgent
                 return;
             }
 
-            // Check the license every day
-            var oneDayInMs = 24 * 60 * 60 * 1000;
-            licenseCheckTimer = new Timer(callback: licenseGuard.PollLicense, state: options.LicenseKey, dueTime: oneDayInMs, period: oneDayInMs);
+            // NOTE: License check disabled as this project became open-source
+            //// Check the license every day
+            //var oneDayInMs = 24 * 60 * 60 * 1000;
+            //licenseCheckTimer = new Timer(callback: licenseGuard.PollLicense, state: options.LicenseKey, dueTime: oneDayInMs, period: oneDayInMs);
 
             // only start the JMX if we want to
             if (USE_COUNTERSAMPLES)
