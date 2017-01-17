@@ -176,7 +176,7 @@
     <!-- Pass necessary data for PaletteInsightFillConfig -->
     <CustomAction Id="FillConfigCustomActionData"
                   Property="PaletteInsightFillConfig"
-                  Value="InstallDir=[INSTALLFOLDER];InsightServerUrl=[WIXUI_INSIGHTSERVERURL];InsightLicenseKey=[WIXUI_INSIGHTLICENSEKEY]"
+                  Value="InstallDir=[INSTALLFOLDER];InsightServerUrl=[WIXUI_INSIGHTSERVERURL];InsightAuthToken=[WIXUI_INSIGHTAUTHTOKEN]"
                   />
     <!-- Fill in the details from installer dialog to Config.yml.
          Execute="deferred" and Impersonate="no" is required, so that the installer can

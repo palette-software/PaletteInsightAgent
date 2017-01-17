@@ -61,7 +61,7 @@ namespace PaletteInsightAgent
 
         public ICollection<LogFolderInfo> LogFolders { get; set; }
 
-        public string LicenseKey { get; set; }
+        public string AuthToken { get; set; }
 
         public WebserviceConfiguration WebserviceConfig { get; set; }
 
