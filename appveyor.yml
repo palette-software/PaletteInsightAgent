@@ -201,9 +201,9 @@ after_deploy:
 
 # notifications:
 # - provider: Slack
-#   incoming_webhook: https://hooks.slack.com/services/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
+#   incoming_webhook: <HOOK>
 #   auth_token:
-#     secure: YID5KzjUO9Nx2GlLOibJMA==
+#     secure: <TOKEN>
 #   channel: dev-robots
 #   on_build_success: true
 #   on_build_failure: true
