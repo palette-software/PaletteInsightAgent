@@ -24,7 +24,6 @@ All the collected data is written into CSV files and the agent sends them to the
 
 ### Prerequisites
 * Palette Insight Agent can only be installed with system adminsitrator privileges
-**(TODO: Check run as user)**
 * You need to make sure that the Insight Agent is able to query data from the Tableau repository. The easiest way to achive that is to enable `readonly` user in your Tableau Server, because in that case the the Insight Agent can automatically collect the `readonly` user's password from the `workgroup.yml` file of Tableau Server.
 
 ### Installation
