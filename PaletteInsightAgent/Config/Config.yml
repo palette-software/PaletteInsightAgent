@@ -23,6 +23,10 @@ InsightAuthToken: 34e6a6cc-a5ab-4c36-8129-15fc0d61069f    # This is just an exam
 
 Webservice:
  Endpoint: http://localhost:9000
+ # UseProxy: false
+ # ProxyAddress: http://proxy-example  # This is not the default value, just an example
+ # ProxyUsername: tom
+ # ProxyPassword: jerry
 
 # Log folders and Tableau settings are detected automatically since version 2.0.16
 # Logs:
@@ -32,7 +36,7 @@ Webservice:
 #   -
 #     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
 #     Filter: 'tabprotosrv*.txt'
-#   - 
+#   -
 #     Directory: 'c:\ProgramData\Tableau\Tableau Server\data\tabsvc\logs\vizqlserver\'
 #     Filter: 'tdeserver*.txt'
 #     Format: 'plain'
@@ -41,7 +45,7 @@ Webservice:
 #     Filter: 'tdeserver*.log'
 #     Format: 'plain'
 
-# TableauRepo: 
+# TableauRepo:
 #   Host: localhost
 #   Port: 8060
 #   Database: workgroup
