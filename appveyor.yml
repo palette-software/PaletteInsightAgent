@@ -191,7 +191,7 @@ deploy:
   tag: v$(appveyor_build_version)
   release: Palette Insight Agent v$(appveyor_build_version)
   auth_token:
-    secure: UvYLOFFqOkUpryJoSZDfDy8vWzvco/wLazWzLk13AAijtvzqsxDurvkIRbfk/f1J
+    secure: fH3VyHRwhHuNlPwPsOwljTRqYqluyuddBTfcmUn98GBdAOMQbnjcRjjIcYH/Qp6Q
   draft: false
   prerelease: false
   on:
