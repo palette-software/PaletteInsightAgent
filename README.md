@@ -1,5 +1,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/reub3y37h4hkw0ck/branch/master?svg=true)](https://ci.appveyor.com/project/palette-software/blackboxrecorder/branch/master)
 
+[![Build Status](https://travis-ci.org/palette-software/PaletteInsightAgent.svg?branch=master)](https://travis-ci.org/palette-software/PaletteInsightAgent)
+
 # Palette Insight Architecture
 
 ![Palette Insight Architecture](https://github.com/palette-software/palette-insight/blob/master/insight-system-diagram.png?raw=true)
