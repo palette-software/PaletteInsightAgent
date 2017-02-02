@@ -18,7 +18,7 @@ $TRAVIS_REQUEST_BODY = @{
 }
 $TRAVIS_REQUEST_BODY_JSON = (ConvertTo-Json -Compress -Depth 10 $TRAVIS_REQUEST_BODY)
 
-$TRAVIS_REQUEST_URI = "https://api.travis-ci.com/repo/palette-software%2FPaletteInsightAgent/requests"
+$TRAVIS_REQUEST_URI = "https://api.travis-ci.org/repo/palette-software%2FPaletteInsightAgent/requests"
 
 $TRAVIS_REQUEST_HEADER = @{
   "Content-Type"       = "application/json"
