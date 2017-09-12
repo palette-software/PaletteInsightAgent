@@ -103,5 +103,13 @@ namespace PaletteInsightAgentTests.Configuration
             Assert.IsNull(Loader.ExtractTableauInstallationFolder(@"E:\Program Files\Tableau\Tableau Server\worker.1\bin"));
             Assert.IsNull(Loader.ExtractTableauInstallationFolder(@"E:\Program Files\Tableau\Tableau Server\worker.1\bin\tabsvc.bat"));
         }
+
+        [TestMethod]
+        public void TestExtractTableauBinFolder_longformat_doublebackslash()
+        {
+            var expected = @"D:\\Tableau Server\\10.0\\bin\\";
+            var actual = Loader.ExtractTableauBinFolder(@"""D:\\Tableau Server\\10.0\\bin\\tabsvc.exe"" /SN:tabsvc");
+            Assert.AreEqual(expected, actual);
+        }
     }
 }
