@@ -41,8 +41,7 @@ namespace PaletteInsightAgent.LogPoller
             }
             catch (Exception e)
             {
-                Log.Fatal(e, "Error while adding to server logs. {0}", e);
-                throw;
+                Log.Error(e, "Error while adding to server logs. Excpetion: ");
             }
         }
 
