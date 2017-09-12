@@ -42,7 +42,6 @@ build_script:
   # Use github downloader to get latest palette-updater release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
-  - set
   - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\dl-github-release.exe palette-software palette-updater %GITHUB_TOKEN%
   - copy *.zip %INSTALLER_DIR%
 
@@ -158,7 +157,7 @@ test_script:
         Set-Content $fake_tableau_data_folder\tabsvc\config\connections.yml $fileContent;
 
     # Acquire example serverlogs from our S3 'palette-insight-test' bucket
-    - ps: (New-Object Net.WebClient).DownloadFile('https://s3.amazonaws.com/palette-insight-test/example_serverlogs.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
+    - ps: (New-Object Net.WebClient).DownloadFile('https://palette-rpm.brilliant-data.net/test/example_serverlogs.zip', 'c:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
     - echo "Downloaded example_serverlogs.zip"
     # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
     - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
