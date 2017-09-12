@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using YamlDotNet.Serialization;
 
-namespace PaletteInsight
+namespace PaletteInsightAgent
 {
 
     #region PaletteInsight.Conf description
@@ -17,17 +17,21 @@ namespace PaletteInsight
 
         public class DatabaseConfig
         {
+            [DefaultValue("workgroup")]
             [YamlMember(Alias = "Database")]
-            public string Database { get; set; }
+            public string Database { get; set; } = "workgroup";
 
+            [DefaultValue("localhost")]
             [YamlMember(Alias = "Host")]
-            public string Host { get; set; }
+            public string Host { get; set; } = "localhost";
 
+            [DefaultValue(8060)]
             [YamlMember(Alias = "Port")]
-            public int Port { get; set; }
+            public int Port { get; set; } = 8060;
 
+            [DefaultValue("readonly")]
             [YamlMember(Alias = "User")]
-            public string User { get; set; }
+            public string User { get; set; } = "readonly";
 
             [YamlMember(Alias = "Password")]
             public string Password { get; set; }

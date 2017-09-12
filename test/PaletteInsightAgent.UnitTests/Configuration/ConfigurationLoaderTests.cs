@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 
 namespace PaletteInsightAgentTests.Configuration
 {
@@ -102,6 +102,26 @@ namespace PaletteInsightAgentTests.Configuration
         {
             Assert.IsNull(Loader.ExtractTableauInstallationFolder(@"E:\Program Files\Tableau\Tableau Server\worker.1\bin"));
             Assert.IsNull(Loader.ExtractTableauInstallationFolder(@"E:\Program Files\Tableau\Tableau Server\worker.1\bin\tabsvc.bat"));
+        }
+
+        [TestMethod]
+        public void TestExtractTableauBinFolder_longformat_doublebackslash()
+        {
+            var expected = @"D:\\Tableau Server\\10.0\\bin\\";
+            var actual = Loader.ExtractTableauBinFolder(@"""D:\\Tableau Server\\10.0\\bin\\tabsvc.exe"" /SN:tabsvc");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void TestIsEncrypted()
+        {
+            Assert.IsTrue(Loader.IsEncrypted("ENC(jdkv8d8fsdkfjs8dfu)"));
+        }
+
+        [TestMethod]
+        public void TestIsEncrypted_not()
+        {
+            Assert.IsFalse(Loader.IsEncrypted("onlyread"));
         }
     }
 }

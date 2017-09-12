@@ -143,6 +143,7 @@
     <Compile Include="PaletteInsightAgent.cs" />
     <Compile Include="PaletteInsightAgentOptions.cs" />
     <Compile Include="Tableau\RepoPollAgent.cs" />
+    <Compile Include="Tableau\Tableau.cs" />
     <Compile Include="Tableau\TableauRepo.cs" />
     <Compile Include="ThreadInfoPoller\ThreadInfoAgent.cs" />
     <Compile Include="ThreadInfoPoller\ThreadTables.cs" />

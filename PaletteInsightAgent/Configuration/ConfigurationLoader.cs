@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using PaletteInsightAgent;
 using PaletteInsightAgent.Output;
 using System.Configuration;
 using Microsoft.Win32;
@@ -12,7 +11,7 @@ using PaletteInsightAgent.Output.OutputDrivers;
 using System.Text.RegularExpressions;
 using System.Management;
 
-namespace PaletteInsight
+namespace PaletteInsightAgent
 {
     namespace Configuration
     {
@@ -25,6 +24,7 @@ namespace PaletteInsight
             private const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
             private const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
             private const string REPOSITORY_TABLES_FILE = "Config/Repository.yml";
+            private const string TABLEAU_SERVER_APPLICATION_SERVICE_NAME = "tabsvc";
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
 
@@ -121,7 +121,7 @@ namespace PaletteInsight
                 }
             }
 
-            public static void UpdateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options)
+            public static void UpdateWebserviceConfigFromLicense(PaletteInsightAgentOptions options)
             {
                 // skip if we arent using the webservice
                 if (options.WebserviceConfig == null) return;
@@ -138,38 +138,14 @@ namespace PaletteInsight
             private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
                 Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot);
-
-                if (repo == null)
-                {
-                    Log.Warn("Trying Config.yml as a last resort for Tableau repo credentials...");
-                    try
-                    {
-                        // load the tableau repo properties
-                        var repoProps = config.TableauRepo;
-                        options.RepositoryDatabase = new DbConnectionInfo
-                        {
-                            Server = repoProps.Host,
-                            Port = Convert.ToInt32(repoProps.Port),
-                            Username = repoProps.User,
-                            Password = repoProps.Password,
-                            DatabaseName = repoProps.Database
-                        };
-
-                        Log.Info("Found Tableau repo credentials in Config.yml.");
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Fatal(e, "Tableau repo credentials were not found in Config.yml either! Exception: ");
-                        return false;
-                    }
-                }
-                else
+                if (repo != null)
                 {
                     try
                     {
-                        if (config.TableauRepo != null)
+                        if (IsEncrypted(repo.Password))
                         {
-                            Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                            Log.Info("Encrypted readonly password found in workgroup.yml. Getting password with tabadmin command.");
+                            repo.Password = Tableau.tabadminRun("get pgsql.readonly_password");
                         }
                         options.RepositoryDatabase = new DbConnectionInfo
                         {
@@ -179,12 +155,39 @@ namespace PaletteInsight
                             Password = repo.Password,
                             DatabaseName = repo.Connection.DatabaseName
                         };
+
+                        if (config.TableauRepo != null)
+                        {
+                            Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                        }
+                        return true;
                     }
                     catch (Exception e)
                     {
-                        Log.Fatal(e, "Failed to acquire Tableau repo credentials! Exception: ");
-                        return false;
+                        Log.Error(e, "Failed to acquire Tableau repo credentials! Exception: ");
                     }
+                }
+
+                Log.Warn("Trying Config.yml as a last resort for Tableau repo credentials...");
+                try
+                {
+                    // load the tableau repo properties
+                    var repoProps = config.TableauRepo;
+                    options.RepositoryDatabase = new DbConnectionInfo
+                    {
+                        Server = repoProps.Host,
+                        Port = Convert.ToInt32(repoProps.Port),
+                        Username = repoProps.User,
+                        Password = repoProps.Password,
+                        DatabaseName = repoProps.Database
+                    };
+
+                    Log.Info("Found Tableau repo credentials in Config.yml.");
+                }
+                catch (Exception e)
+                {
+                    Log.Fatal(e, "Tableau repo credentials were not found in Config.yml either! Exception: ");
+                    return false;
                 }
 
                 return true;
@@ -280,6 +283,14 @@ namespace PaletteInsight
                     var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
+            }
+
+
+            internal static bool IsEncrypted(string text)
+            {
+                var pattern = new Regex(@"^ENC\(.*\)$");
+                var matched = pattern.Match(text);
+                return matched.Success;
             }
 
             #endregion
@@ -455,8 +466,14 @@ namespace PaletteInsight
 
             private static string RetrieveTableauInstallationFolder()
             {
-                string tabsvcPath = GetPathOfService("tabsvc");
+                string tabsvcPath = GetPathOfService(TABLEAU_SERVER_APPLICATION_SERVICE_NAME);
                 return ExtractTableauInstallationFolder(tabsvcPath);
+            }
+
+            public static string RetrieveTableauBinFolder()
+            {
+                string tabsvcPath = GetPathOfService(TABLEAU_SERVER_APPLICATION_SERVICE_NAME);
+                return ExtractTableauBinFolder(tabsvcPath);
             }
 
             // This function is created only for unit testing, since it is pretty difficult
@@ -477,6 +494,30 @@ namespace PaletteInsight
                 if (groups.Count < 2)
                 {
                     Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
+                    return null;
+                }
+
+                return groups[1].Value;
+            }
+
+            // This function is created only for unit testing, since it is pretty difficult
+            // to mock static functions in C#
+            internal static string ExtractTableauBinFolder(string tabsvcPath)
+            {
+                if (tabsvcPath == null)
+                {
+                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    return null;
+                }
+
+                // Extract the installation folder out of the tabsvc path. We are going to
+                // chop tabsvc.exe  from the end of the tabsvc path.
+                var pattern = new Regex(@"""?(.*[\\\/]+bin[\\\/]+?)tabsvc.exe.*");
+                var groups = pattern.Match(tabsvcPath).Groups;
+                // groups[0] is the entire match, thus we expect at least 2
+                if (groups.Count < 2)
+                {
+                    Log.Warn("Failed to extract Tableau bin folder from 'tabsvc' path: '{0}'", tabsvcPath);
                     return null;
                 }
 
