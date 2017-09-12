@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output;
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 using PaletteInsightAgent.Output.OutputDrivers;
 using System.IO;
 

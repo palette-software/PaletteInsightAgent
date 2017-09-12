@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using System.Diagnostics;
 using PaletteInsightAgent.CounterConfig;
 using PaletteInsightAgent.Counters;
 using PaletteInsightAgent.Sampler;
@@ -13,8 +14,7 @@ using PaletteInsightAgent.License;
 using PaletteInsightAgent.LogPoller;
 using PaletteInsightAgent.ThreadInfoPoller;
 using PaletteInsightAgent.Output;
-using System.Diagnostics;
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
 using PaletteInsightAgent.Helpers;
@@ -84,7 +84,7 @@ namespace PaletteInsightAgent
             APIClient.Init(options.WebserviceConfig);
 
             // Add the webservice username/auth token from the license
-            PaletteInsight.Configuration.Loader.UpdateWebserviceConfigFromLicense(options);
+            Configuration.Loader.UpdateWebserviceConfigFromLicense(options);
 
             // NOTE: License check disabled as this project became open-source
             //// check the license after the configuration has been loaded.

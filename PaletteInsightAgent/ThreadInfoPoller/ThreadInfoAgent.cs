@@ -5,7 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Net;
 using PaletteInsightAgent.Output;
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 using System.Threading;
 
 namespace PaletteInsightAgent.ThreadInfoPoller

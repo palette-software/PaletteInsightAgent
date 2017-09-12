@@ -1,5 +1,5 @@
 ﻿using NLog;
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output;
 using System;

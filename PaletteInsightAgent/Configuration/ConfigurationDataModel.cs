@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using YamlDotNet.Serialization;
 
-namespace PaletteInsight
+namespace PaletteInsightAgent
 {
 
     #region PaletteInsight.Conf description

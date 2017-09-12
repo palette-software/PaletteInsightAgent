@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 
 namespace PaletteInsightAgentTests.Configuration
 {

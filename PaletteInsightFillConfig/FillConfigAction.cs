@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.Deployment.WindowsInstaller;
 using YamlDotNet.Serialization;
 
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 
 
 namespace PaletteInsightFillConfig

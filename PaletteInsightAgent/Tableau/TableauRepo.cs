@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.Common;
+using System.Runtime.Serialization;
 using Npgsql;
 using NLog;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.IO;
 using PaletteInsightAgent.Output;
-using System.Net.Sockets;
-using PaletteInsight.Configuration;
+using PaletteInsightAgent.Configuration;
 
 namespace PaletteInsightAgent.RepoTablesPoller
 {

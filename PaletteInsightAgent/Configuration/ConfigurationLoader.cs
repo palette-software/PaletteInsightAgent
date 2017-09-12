@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using PaletteInsightAgent;
 using PaletteInsightAgent.Output;
 using System.Configuration;
 using Microsoft.Win32;
@@ -12,7 +11,7 @@ using PaletteInsightAgent.Output.OutputDrivers;
 using System.Text.RegularExpressions;
 using System.Management;
 
-namespace PaletteInsight
+namespace PaletteInsightAgent
 {
     namespace Configuration
     {
@@ -121,7 +120,7 @@ namespace PaletteInsight
                 }
             }
 
-            public static void UpdateWebserviceConfigFromLicense(PaletteInsightAgent.PaletteInsightAgentOptions options)
+            public static void UpdateWebserviceConfigFromLicense(PaletteInsightAgentOptions options)
             {
                 // skip if we arent using the webservice
                 if (options.WebserviceConfig == null) return;
