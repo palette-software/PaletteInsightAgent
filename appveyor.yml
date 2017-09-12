@@ -42,6 +42,7 @@ build_script:
   # Use github downloader to get latest palette-updater release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release
   - dir C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
+  - set
   - C:\projects\blackboxrecorder\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\dl-github-release.exe palette-software palette-updater %GITHUB_TOKEN%
   - copy *.zip %INSTALLER_DIR%
 
