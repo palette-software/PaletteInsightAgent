@@ -142,10 +142,7 @@ namespace PaletteInsightAgent
                 {
                     try
                     {
-                        var pattern = new Regex(@"^ENC\(.*\)$");
-                        var groups = pattern.Match(repo.Password).Groups;
-                        // groups[0] is the entire match
-                        if (groups.Count > 0)
+                        if (IsEncrypted(repo.Password))
                         {
                             Log.Info("Encrypted readonly password found in workgroup.yml. Getting password with tabadmin command.");
                             repo.Password = Tableau.tabadminRun("get pgsql.readonly_password");
@@ -286,6 +283,14 @@ namespace PaletteInsightAgent
                     var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
+            }
+
+
+            internal static bool IsEncrypted(string text)
+            {
+                var pattern = new Regex(@"^ENC\(.*\)$");
+                var matched = pattern.Match(text);
+                return matched.Success;
             }
 
             #endregion

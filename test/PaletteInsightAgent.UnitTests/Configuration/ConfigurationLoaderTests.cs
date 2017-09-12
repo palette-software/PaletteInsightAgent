@@ -111,5 +111,17 @@ namespace PaletteInsightAgentTests.Configuration
             var actual = Loader.ExtractTableauBinFolder(@"""D:\\Tableau Server\\10.0\\bin\\tabsvc.exe"" /SN:tabsvc");
             Assert.AreEqual(expected, actual);
         }
+
+        [TestMethod]
+        public void TestIsEncrypted()
+        {
+            Assert.IsTrue(Loader.IsEncrypted("ENC(jdkv8d8fsdkfjs8dfu)"));
+        }
+
+        [TestMethod]
+        public void TestIsEncrypted_not()
+        {
+            Assert.IsFalse(Loader.IsEncrypted("onlyread"));
+        }
     }
 }
