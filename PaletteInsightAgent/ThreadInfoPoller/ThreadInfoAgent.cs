@@ -62,7 +62,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
 
             if (threadInfoTableCount > 0)
             {
-                OutputSerializer.Write(threadInfoTable);
+                OutputSerializer.Write(threadInfoTable, false);
             }
         }
 
