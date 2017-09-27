@@ -26,7 +26,7 @@ namespace PaletteInsightAgent.Output
         /// The maximum file size per part in bytes (this is a lower limit, the actual files will be
         /// ~ this size + one line + the quotation and separator overhead).
         /// </summary>
-        public static int MaxFileSize = 50 * 1024 * 1024;
+        public static long MaxFileSize = 50 * 1024 * 1024;
 
         public string Extension { get { return StaticExtension; } }
 
@@ -35,7 +35,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="table"></param>
-        public void WriteDataFile(string fileName, DataTable table)
+        public void WriteDataFile(string fileName, DataTable table, bool isFullTable)
         {
             // skip empty tables
             if (table.Rows.Count == 0) return;
@@ -69,8 +69,9 @@ namespace PaletteInsightAgent.Output
                         WriteCSVHeader(table, csvWriter);
                     }
 
-                    // update the last output
-                    lastRow = WriteCSVBody(table, csvWriter, lastRow, MaxFileSize);
+                    // files for full table must never be chunked to parts
+                    long maxSize = isFullTable ? long.MaxValue : MaxFileSize;
+                    lastRow = WriteCSVBody(table, csvWriter, lastRow, maxSize);
                 }
 
                 // After writing the file, move it to its final destination, and 
@@ -79,6 +80,12 @@ namespace PaletteInsightAgent.Output
                 Log.Info("[CSV] written final part '{0}' -- {1}/{2} rows", Path.GetFileName(filePathWithPart), lastRow, table.Rows.Count);
                 // if the last row is -1, the write function has finished the whole table
                 if (lastRow == -1) return;
+
+                if (isFullTable)
+                {
+                    Log.Error("Splitting full table CSV file: '{0}'! Full table files are always expected to be sent in one piece",
+                        Path.GetFileName(filePathWithPart));
+                }
 
                 // increment the part idx
                 filePartIdx++;
@@ -130,7 +137,7 @@ namespace PaletteInsightAgent.Output
         ///     We have seen log lines of up to 5Mb in length, so using 15 here should almost guarantee us a request size of under 20Mb.
         /// </param>
         /// <returns>The index of the last written row, or -1 if the whole table has been written out</returns>
-        public static int WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter, int startRowIdx, Int64 maxSize)
+        public static int WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter, int startRowIdx, long maxSize)
         {
             var columnCount = queue.Columns.Count;
             var byteCount = 0;

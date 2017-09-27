@@ -5,6 +5,6 @@ namespace PaletteInsightAgent.Output
     interface IWriter
     {
         string Extension { get; }
-        void WriteDataFile(string fileName, DataTable table);
+        void WriteDataFile(string fileName, DataTable table, bool isFullTable);
     }
 }

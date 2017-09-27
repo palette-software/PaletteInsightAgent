@@ -205,11 +205,11 @@ namespace PaletteInsightAgent
                 DataTableUtils.AddAgentMetadata(table);
 
                 // Serialize schema table so that it gets uploaded with all other tables
-                OutputSerializer.Write(table);
+                OutputSerializer.Write(table, true);
 
                 // Do the same for index data
                 table = tableauRepo.GetIndices();
-                OutputSerializer.Write(table);
+                OutputSerializer.Write(table, true);
             }
 
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
@@ -335,7 +335,7 @@ namespace PaletteInsightAgent
             tryStartIndividualPoll(CounterSampler.InProgressLock, PollWaitTimeout, () =>
             {
                 var sampleResults = sampler.SampleAll();
-                OutputSerializer.Write(sampleResults);
+                OutputSerializer.Write(sampleResults, false);
             });
         }
 

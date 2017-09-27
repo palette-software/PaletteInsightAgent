@@ -29,7 +29,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     try
                     {
                         DataTable table = connection.GetTable(t);
-                        OutputSerializer.Write(table);
+                        OutputSerializer.Write(table, true);
                     }
                     catch (InvalidOperationException ioe)
                     {
@@ -76,7 +76,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         DataTable dataTable = connection.GetStreamingTable(tableName, table, maxId, out newMax);
                         if (dataTable != null)
                         {
-                            OutputSerializer.Write(dataTable, newMax);
+                            OutputSerializer.Write(dataTable, false, newMax);
                         }
                     }
                     catch (AggregateException ae)

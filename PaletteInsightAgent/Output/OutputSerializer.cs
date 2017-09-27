@@ -24,7 +24,7 @@ namespace PaletteInsightAgent.Output
             }
         }
 
-        public static void Write(DataTable table, string maxId = null)
+        public static void Write(DataTable table, bool isFullTable, string maxId = null)
         {
             // skip writing if no data
             var rowCount = table.Rows.Count;
@@ -39,7 +39,7 @@ namespace PaletteInsightAgent.Output
 
             try
             {
-                Writer.WriteDataFile(dataFileName, table);
+                Writer.WriteDataFile(dataFileName, table, isFullTable);
 
                 // remove any rows from the csv queue
                 table.Rows.Clear();

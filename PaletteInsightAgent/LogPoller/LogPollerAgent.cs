@@ -123,7 +123,7 @@ namespace PaletteInsightAgent.LogPoller
 
             if (serverLogsTableCount > 0)
             {
-                OutputSerializer.Write(serverLogsTable);
+                OutputSerializer.Write(serverLogsTable, false);
             }
 
             Log.Info("Sent off {0}", statusLine);
