@@ -169,10 +169,10 @@
 
     <!-- Custom Actions -->
     <!-- Install/uninstall as a Windows service --> 
-    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe install"/>
-    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe remove"/>
-    <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
-    <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="ignore" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
+    <CustomAction Id="RunWatchdogServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="check" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe install"/>
+    <CustomAction Id="RunWatchdogServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="check" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightWatchdog.exe remove"/>
+    <CustomAction Id="RunTopShelfServiceInstall" Directory="INSTALLFOLDER" Execute="deferred" Return="check" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe install"/>
+    <CustomAction Id="RunTopShelfServiceUninstall" Directory="INSTALLFOLDER" Execute="deferred" Return="check" Impersonate="no" ExeCommand="[INSTALLFOLDER]PaletteInsightAgent.exe uninstall"/>
     <!-- Pass necessary data for PaletteInsightFillConfig -->
     <CustomAction Id="FillConfigCustomActionData"
                   Property="PaletteInsightFillConfig"
