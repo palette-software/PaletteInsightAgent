@@ -35,7 +35,7 @@ The Palette Insight Agent Windows installer (.msi) can be downloaded from the Pa
 [http://your-insight-server-url/control]
 and you will be shown a page like this
 
-<img src="https://github.com/palette-software/PaletteInsightAgent/blob/install-guide/docs/resources/insight-server-control-page.png" alt="Insight Server Control Page" width="400" >
+<img src="https://github.com/palette-software/PaletteInsightAgent/blob/master/docs/resources/insight-server-control-page.png" alt="Insight Server Control Page" width="400" >
 
 In the Agents section you can click on the green button which is showing the agent’s version number. This will initiate the download of the Palette Insight Agent .msi.
 
@@ -49,7 +49,7 @@ During the installation you will need two things:
 
 And you will have to enter them into this install dialog:
 <p align="center">
-  <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/install-guide/docs/resources/insight-install-dialog.png" alt="Insight Agent Install Dialog" width="500" >
+  <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/master/docs/resources/insight-install-dialog.png" alt="Insight Agent Install Dialog" width="500" >
 </p>
 
 If you leave the fields in this installer dialog as is (i.e. blank field for Insight License Key and `https://` for Insight Server URL), then the values entered into this fields of previous installations will remain in place. You can check these values in `<Palette_Insight_Agent_install_dir>\Config\Config.yml` file.
@@ -93,7 +93,7 @@ The specified service has been marked for deletion.
 ```
 it means that the given service got in Disabled state. You can verify that in Services console, for example you could see in there something like this:
 <p align="center">
-  <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/install-guide/docs/resources/disabled-service.png" alt="disabled Palette Insight Watchdog service" width="800">
+  <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/master/docs/resources/disabled-service.png" alt="disabled Palette Insight Watchdog service" width="800">
 </p>
 
 To remedy this situation you need to close those applications which can prevent Windows services to be uninstalled (listed [here](#update-obstacles)).
