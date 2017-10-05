@@ -34,7 +34,10 @@ All the collected data is written into CSV files and the agent sends them to the
 The Palette Insight Agent Windows installer (.msi) can be downloaded from the Palette Insight Server. All you have to do for that is to open your browser and navigate to
 [http://your-insight-server-url/control]
 and you will be shown a page like this
-![Insight Server Control Page](https://github.com/palette-software/PaletteInsightAgent/blob/install-guide/docs/resources/insight-server-control-page.png | width=500)
+<p align="center">
+  <img src="https://github.com/palette-software/PaletteInsightAgent/blob/install-guide/docs/resources/insight-server-control-page.png" alt="Insight Server Control Page" width="500" align="center" >
+</p>
+
 In the Agents section you can click on the green button which is showing the agent’s version number. This will initiate the download of the Palette Insight Agent .msi.
 
 Another way to obtain the .msi is from this repo's [Releases](https://github.com/palette-software/PaletteInsightAgent/releases) section.
