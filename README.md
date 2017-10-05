@@ -23,7 +23,7 @@ All the collected data is written into CSV files and the agent sends them to the
 
 **IMPORTANT NOTE**: the [Insight Server] might not process all the uploaded CSV files. For details please see [LoadTables](https://github.com/palette-software/insight-gp-import), [Reporting](https://github.com/palette-software/insight-reporting-framework) and [Data Model](https://github.com/palette-software/insight-data-model) components.
 
-## How do I set up Palette Insight Agent?
+## How do I install Palette Insight Agent?
 
 ### Prerequisites
 
@@ -31,10 +31,28 @@ All the collected data is written into CSV files and the agent sends them to the
 * You need to make sure that the Insight Agent is able to query data from the Tableau repository. The easiest way to achieve that is to enable `readonly` user in your Tableau Server, because in that case the the Insight Agent can automatically collect the `readonly` user's password from the `workgroup.yml` file of Tableau Server.
 
 ### Installation
+The Palette Insight Agent Windows installer (.msi) can be downloaded from the Palette Insight Server. All you have to do for that is to open your browser and navigate to
+[http://your-insight-server-url/control]
+and you will be shown a page like this
 
-Run the Palette Insight Agent installer. During the install you will have to enter your [Insight Server]'s URL.
+<img src="https://github.com/palette-software/PaletteInsightAgent/blob/master/docs/resources/insight-server-control-page.png" alt="Insight Server Control Page" width="400" >
 
-The installation package contains a [Palette Insight Watchdog](https://github.com/palette-software/palette-updater) service as well, which is responsible for acquiring and applying the available Insight Agent updates from the [Insight Server] and to make sure that the Insight Agent service is running all the time.
+In the Agents section you can click on the green button which is showing the agent’s version number. This will initiate the download of the Palette Insight Agent .msi.
+
+Another way to obtain the .msi is from this repo's [Releases](https://github.com/palette-software/PaletteInsightAgent/releases) section.
+
+The installation package contains the `Palette Insight Agent` service and also a [Palette Insight Watchdog](https://github.com/palette-software/palette-updater) service, which is responsible for acquiring and applying the available Insight Agent updates from the [Insight Server] and to make sure that the `Palette Insight Agent` service is running all the time.
+
+During the installation you will need two things:
+1. The Insight License Key which was entered to Insight Server’s config file (`/etc/palette-insight-server/server.config`) as the `license_key` value.
+1. The IP address or the name of the Insight Server machine (`https://` prefix is required)
+
+And you will have to enter them into this install dialog:
+<p align="center">
+  <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/master/docs/resources/insight-install-dialog.png" alt="Insight Agent Install Dialog" width="500" >
+</p>
+
+If you leave the fields in this installer dialog as is (i.e. blank field for Insight License Key and `https://` for Insight Server URL), then the values entered into this fields of previous installations will remain in place. You can check these values in `<Palette_Insight_Agent_install_dir>\Config\Config.yml` file.
 
 #### Alternative configurations
 
@@ -43,10 +61,54 @@ Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Confi
 * Proxy configurations have to be placed under the `Webservice` key
 * In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually under the `TableauRepo` key
 
-### Start the Agent
+
+## How do I update Palette Insight Agent?
+
+Palette Insight Agent is updated automatically once a newer version of the .msi is available on the Insight Server to which the agent is connected. On the Insight Server the `palette-insight-agent` RPM package contains the .msi, so that must be installed on the Insight Server and after then the connected Palette Insight Agents will pick up the update in 3-5 minutes.
+
+#### Troubleshooting
+Auto-update may fail, if any of the following circumstances applies on the Tableau Server machine while the auto-update is being performed:
+<a name="update-obstacles"></a>
+* SysInternals’ Process Explorer is running (this one is the most likely to prevent the service to be removed, and putting it into a Disabled state)
+* Task Manager is opened.
+* Microsoft Management Console (MMC) is opened. To ensure all instances are closed, run taskkill /F /IM mmc.exe.
+* Services console is opened. This is the same as the previous point, since Services console is hosted by MMC.
+* Event Viewer is opened. Again, this is the same as the first point.
+* In the registry, any of the following keys exists:
+  * `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PaletteInsightAgent`
+  * `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PaletteInsightWatchdog`
+* Someone else is logged into the server and has one of the previously mentioned applications opened.
+* An instance of Visual Studio used to debug the service is open.
+
+In case when the auto-update fails, Palette Insight Agent might end up in a situation where it’s executables and binary files are removed, but its services (`Palette Insight Agent` and `Palette Insight Watchdog`) in the Services console still exist. In such cases Palette Insight Agent needs to be updated manually.
+
+First try to remove them with opening up a Command Prompt with Administrator privileges and run the following commands:
+```
+sc delete PaletteInsightAgent
+sc delete PaletteInsightWatchdog
+```
+If any of the above commands results in a message like this
+```
+The specified service has been marked for deletion.
+```
+it means that the given service got in Disabled state. You can verify that in Services console, for example you could see in there something like this:
+<p align="center">
+  <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/master/docs/resources/disabled-service.png" alt="disabled Palette Insight Watchdog service" width="800">
+</p>
+
+To remedy this situation you need to close those applications which can prevent Windows services to be uninstalled (listed [here](#update-obstacles)).
+
+If you check and refresh the Services console again, the disabled services should have been disappeared, once you have closed those applications listed [above](#update-obstacles).
+
+In very rare cases, if any of `Palette Insight Agent` or `Palette Insight Watchdog` services still remains in Disabled state, you need to restart your machine to have those services disappear from the Services console.
+
+Until Palette Insight Agent or Palette Insight Watchdog services are still displayed in the Services console, you cannot manually re-install Palette Insight Agent.
+
+
+## Starting the Agent
 
 Palette Insight Agent is zero configured and remotely updated.
-After installing Palette Insight Agent it will attempt to start automatically within 3 minutes, but you can start it manually from Windows Services panel.
+After installing Palette Insight Agent it will attempt to start automatically within 3 minutes, but you can start it manually from Services console.
 
 ## What do I need to build Palette Insight Agent from source?
 
