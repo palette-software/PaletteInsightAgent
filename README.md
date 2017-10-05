@@ -54,6 +54,14 @@ And you will have to enter them into this install dialog:
 
 If you leave the fields in this installer dialog as is (i.e. blank field for Insight License Key and `https://` for Insight Server URL), then the values entered into this fields of previous installations will remain in place. You can check these values in `<Palette_Insight_Agent_install_dir>\Config\Config.yml` file.
 
+#### Alternative configurations
+
+Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Config/Config.yml)
+
+* Proxy configurations have to be placed under the `Webservice` key
+* In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually under the `TableauRepo` key
+
+
 ## How do I update Palette Insight Agent?
 
 Palette Insight Agent is updated automatically once a newer version of the .msi is available on the Insight Server to which the agent is connected. On the Insight Server the `palette-insight-agent` RPM package contains the .msi, so that must be installed on the Insight Server and after then the connected Palette Insight Agents will pick up the update in 3-5 minutes.
@@ -96,12 +104,6 @@ In very rare cases, if any of `Palette Insight Agent` or `Palette Insight Watchd
 
 Until Palette Insight Agent or Palette Insight Watchdog services are still displayed in the Services console, you cannot manually re-install Palette Insight Agent.
 
-#### Alternative configurations
-
-Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Config/Config.yml)
-
-* Proxy configurations have to be placed under the `Webservice` key
-* In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually under the `TableauRepo` key
 
 ### Start the Agent
 
