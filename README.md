@@ -105,10 +105,10 @@ In very rare cases, if any of `Palette Insight Agent` or `Palette Insight Watchd
 Until Palette Insight Agent or Palette Insight Watchdog services are still displayed in the Services console, you cannot manually re-install Palette Insight Agent.
 
 
-### Start the Agent
+## Starting the Agent
 
 Palette Insight Agent is zero configured and remotely updated.
-After installing Palette Insight Agent it will attempt to start automatically within 3 minutes, but you can start it manually from Windows Services panel.
+After installing Palette Insight Agent it will attempt to start automatically within 3 minutes, but you can start it manually from Services console.
 
 ## What do I need to build Palette Insight Agent from source?
 
