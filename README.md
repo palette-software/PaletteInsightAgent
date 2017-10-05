@@ -2,13 +2,18 @@
 
 [![Build Status](https://travis-ci.org/palette-software/PaletteInsightAgent.svg?branch=master)](https://travis-ci.org/palette-software/PaletteInsightAgent)
 
+# Palette Insight Agent
+
+Palette Insight Agent: Tableau Server monitoring component for collecting data about Tableau Server utilization
+
+For help with installation or configuration of this product contact info@brilliant-data.com or go to www.brilliant-data.com.
+
 # Palette Insight Architecture
 
 ![Palette Insight Architecture](https://github.com/palette-software/palette-insight/blob/master/insight-system-diagram.png?raw=true)
 
 [Insight Server]: https://github.com/palette-software/insight-server
 
-# Palette Insight Agent
 
 ## What is Palette Insight Agent?
 
