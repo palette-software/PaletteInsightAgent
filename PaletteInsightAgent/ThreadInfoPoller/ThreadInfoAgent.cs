@@ -139,7 +139,9 @@ namespace PaletteInsightAgent.ThreadInfoPoller
                 {
                     int error_code = Marshal.GetLastWin32Error();
                     if (error_code != 0) {
-                        throw new Win32Exception(error_code);
+                        // In theory this should only happen when the process already exited
+                        // and we leave the IO counters 0 for this measurement here as it would throw an exception later
+                        // when getting the TotalProcessorTime for the process so nothing to do here.
                     }
                 }
 
