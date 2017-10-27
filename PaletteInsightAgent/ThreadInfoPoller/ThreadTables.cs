@@ -27,6 +27,12 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             TableHelper.addColumn(table, "thread_count", "System.Int32");
             TableHelper.addColumn(table, "working_set", "System.Int64");
             TableHelper.addColumn(table, "thread_level", "System.Boolean");
+            TableHelper.addColumn(table, "read_operation_count", "System.Int64");
+            TableHelper.addColumn(table, "write_operation_count", "System.Int64");
+            TableHelper.addColumn(table, "other_operation_count", "System.Int64");
+            TableHelper.addColumn(table, "read_transfer_count", "System.Int64");
+            TableHelper.addColumn(table, "write_transfer_count", "System.Int64");
+            TableHelper.addColumn(table, "other_transfer_count", "System.Int64");
 
             return table;
         }
@@ -45,6 +51,12 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             row["thread_count"] = item.threadCount;
             row["working_set"] = item.workingSet;
             row["thread_level"] = item.threadLevel;
+            row["read_operation_count"] = item.readOperationCount;
+            row["write_operation_count"] = item.writeOperationCount;
+            row["other_operation_count"] = item.otherOperationCount;
+            row["read_transfer_count"] = item.readTransferCount;
+            row["write_transfer_count"] = item.writeTransferCount;
+            row["other_transfer_count"] = item.otherTransferCount;
 
             table.Rows.Add(row);
         }

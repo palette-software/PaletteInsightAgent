@@ -7,6 +7,8 @@ using System.Net;
 using PaletteInsightAgent.Output;
 using PaletteInsightAgent.Configuration;
 using System.Threading;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
 
 namespace PaletteInsightAgent.ThreadInfoPoller
 {
@@ -23,10 +25,30 @@ namespace PaletteInsightAgent.ThreadInfoPoller
         public DateTime pollCycleTimeStamp;
         public DateTime startTimeStamp;
         public bool threadLevel;
+        public ulong readOperationCount;
+        public ulong writeOperationCount;
+        public ulong otherOperationCount;
+        public ulong readTransferCount;
+        public ulong writeTransferCount;
+        public ulong otherTransferCount;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct IO_COUNTERS
+    {
+        public UInt64 ReadOperationCount;
+        public UInt64 WriteOperationCount;
+        public UInt64 OtherOperationCount;
+        public UInt64 ReadTransferCount;
+        public UInt64 WriteTransferCount;
+        public UInt64 OtherTransferCount;
+    };
 
     class ThreadInfoAgent
     {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool GetProcessIoCounters(IntPtr hProcess, out IO_COUNTERS lpIoCounters);
+
         public static readonly string InProgressLock = "Thread Info";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string HostName = Dns.GetHostName();
@@ -78,7 +100,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
         }
 
         protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks, DateTime pollCycleTimeStamp, 
-                                        DateTime startTimeStamp, bool threadLevel)
+                                        DateTime startTimeStamp, bool threadLevel, IO_COUNTERS ioCounters)
         {
             ThreadInfo threadInfo = new ThreadInfo();
             threadInfo.processId = process.Id;
@@ -91,6 +113,13 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             threadInfo.threadLevel = threadLevel;
             threadInfo.process = process.ProcessName;
 
+            threadInfo.readOperationCount = ioCounters.ReadOperationCount;
+            threadInfo.writeOperationCount = ioCounters.WriteOperationCount;
+            threadInfo.otherOperationCount = ioCounters.OtherOperationCount;
+            threadInfo.readTransferCount = ioCounters.ReadTransferCount;
+            threadInfo.writeTransferCount = ioCounters.WriteTransferCount;
+            threadInfo.otherTransferCount = ioCounters.OtherTransferCount;
+
             // When on process level add threadCount as well
             if (threadId == -1)
             {
@@ -100,12 +129,24 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             ThreadTables.addToTable(table, threadInfo);
         }
 
+
         protected void pollThreadCountersOfProcess(Process process, bool threadLevel, DataTable table, ref long threadInfoTableCount, DateTime pollCycleTimeStamp)
         {
             try
             {
+                IO_COUNTERS ioCounters;
+                if (GetProcessIoCounters(process.Handle, out ioCounters) == false)
+                {
+                    int error_code = Marshal.GetLastWin32Error();
+                    if (error_code != 0) {
+                        // In theory this should only happen when the process already exited
+                        // and we leave the IO counters 0 for this measurement here as it would throw an exception later
+                        // when getting the TotalProcessorTime for the process so nothing to do here.
+                    }
+                }
+
                 // Store the total processor time of the whole process so that we can do sanity checks on the sum of thread cpu times
-                addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime(), threadLevel);
+                addInfoToTable(process, table, -1, process.TotalProcessorTime.Ticks, pollCycleTimeStamp, process.StartTime.ToUniversalTime(), threadLevel, ioCounters);
                 threadInfoTableCount++;
 
                 if (threadLevel)
@@ -114,7 +155,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
                     {
                         try
                         {
-                            addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime(), threadLevel);
+                            addInfoToTable(process, table, thread.Id, thread.TotalProcessorTime.Ticks, pollCycleTimeStamp, thread.StartTime.ToUniversalTime(), threadLevel, new IO_COUNTERS());
                             threadInfoTableCount++;
                         }
                         catch (InvalidOperationException)
