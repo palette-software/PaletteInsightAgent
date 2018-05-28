@@ -564,6 +564,18 @@ namespace PaletteInsightAgent
                 [YamlMember(Alias = "pgsql.connections.yml")]
                 public string ConnectionsFile { get; set; }
 
+                [YamlMember(Alias = "pgsql0.host")]
+                public string PgHost0 { get; set; }
+
+                [YamlMember(Alias = "pgsql0.port")]
+                public int PgPort0 { get; set; }
+
+                [YamlMember(Alias = "pgsql1.host")]
+                public string PgHost1 { get; set; }
+
+                [YamlMember(Alias = "pgsql1.port")]
+                public int PgPort1 { get; set; }
+
                 public TableauConnectionInfo Connection { get; set; }
             }
 
@@ -629,6 +641,22 @@ namespace PaletteInsightAgent
                         using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
                         {
                             workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
+                            // workgroup.Connection.Host always contains the active repo
+                            if (workgroup.PgHost0 != null && workgroup.PgHost1 != null)
+                            {
+                                // Use passive repo if possible/exists
+                                if (workgroup.Connection.Host != workgroup.PgHost0)
+                                {
+                                    workgroup.Connection.Host = workgroup.PgHost0;
+                                    workgroup.Connection.Port = workgroup.PgPort0;
+                                }
+                                else
+                                {
+                                    workgroup.Connection.Host = workgroup.PgHost1;
+                                    workgroup.Connection.Port = workgroup.PgPort1;
+                                }
+                                Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
+                            }
                         }
                         if (!IsValidRepoData(workgroup))
                         {

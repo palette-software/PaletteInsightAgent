@@ -196,7 +196,7 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasActiveTableauRepo())
+            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasTargetTableauRepo())
             {
                 // On start get the schema of the repository tables
                 var table = tableauRepo.GetSchemaTable();
@@ -371,7 +371,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollFullTables(object stateInfo)
         {
-            if (!HasActiveTableauRepo())
+            if (!HasTargetTableauRepo())
             {
                 Log.Info("Active Tableau repo is not located on this computer. Skip polling full tables.");
                 return;
@@ -390,7 +390,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollStreamingTables(object stateInfo)
         {
-            if (!HasActiveTableauRepo())
+            if (!HasTargetTableauRepo())
             {
                 Log.Info("Active Tableau repo is not located on this computer. Skip polling streaming tables.");
                 return;
@@ -407,7 +407,7 @@ namespace PaletteInsightAgent
         /// Checks whether the active Tableau repository resides on this node.
         /// </summary>
         /// <returns></returns>
-        private bool HasActiveTableauRepo()
+        private bool HasTargetTableauRepo()
         {
             Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder);
             if (repo == null)
