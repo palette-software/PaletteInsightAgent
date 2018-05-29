@@ -137,7 +137,9 @@ namespace PaletteInsightAgent
             /// <param name="tableauRoot"></param>
             private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-                Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot);
+                options.PreferPassiveRepo = config.TableauRepo.PreferPassiveRepository;
+
+                Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot, options.PreferPassiveRepo);
                 if (repo != null)
                 {
                     try
@@ -620,7 +622,7 @@ namespace PaletteInsightAgent
                 return true;
             }
 
-            public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot)
+            public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot, bool preferPassiveRepo)
             {
                 if (tableauRoot == null)
                 {
@@ -642,7 +644,7 @@ namespace PaletteInsightAgent
                         {
                             workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
                             // workgroup.Connection.Host always contains the active repo
-                            if (workgroup.PgHost0 != null && workgroup.PgHost1 != null)
+                            if (preferPassiveRepo && workgroup.PgHost0 != null && workgroup.PgHost1 != null)
                             {
                                 // Use passive repo if possible/exists
                                 if (workgroup.Connection.Host != workgroup.PgHost0)

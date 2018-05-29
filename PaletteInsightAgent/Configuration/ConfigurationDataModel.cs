@@ -39,8 +39,8 @@ namespace PaletteInsightAgent
             [YamlMember(Alias = "CommandTimeout")]
             public int CommandTimeout { get; set; }
 
-            [YamlMember(Alias = "PreferredPassiveRepository")]
-            public bool PreferredPassiveRepository { get; set; }
+            [YamlMember(Alias = "PreferPassiveRepository")]
+            public bool PreferPassiveRepository { get; set; } = true;
 
         }
 

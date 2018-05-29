@@ -76,6 +76,7 @@ namespace PaletteInsightAgent
 
         #region Repo properties
 
+        public bool PreferPassiveRepo { get; set; }
         public DbConnectionInfo RepositoryDatabase { get; set; }
 
         #endregion Repo properties

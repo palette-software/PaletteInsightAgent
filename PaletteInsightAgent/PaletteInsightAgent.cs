@@ -409,7 +409,7 @@ namespace PaletteInsightAgent
         /// <returns></returns>
         private bool HasTargetTableauRepo()
         {
-            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder);
+            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder, options.PreferPassiveRepo);
             if (repo == null)
             {
                 Log.Error("Failed to retrieve Tableau repo credentials for polling!");
