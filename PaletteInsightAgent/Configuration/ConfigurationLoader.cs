@@ -137,7 +137,7 @@ namespace PaletteInsightAgent
             /// <param name="tableauRoot"></param>
             private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-                options.PreferPassiveRepo = config.TableauRepo.PreferPassiveRepository;
+                options.PreferPassiveRepo = config.PreferPassiveRepository;
 
                 Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot, options.PreferPassiveRepo);
                 if (repo != null)

@@ -38,10 +38,6 @@ namespace PaletteInsightAgent
 
             [YamlMember(Alias = "CommandTimeout")]
             public int CommandTimeout { get; set; }
-
-            [DefaultValue(true)]
-            [YamlMember(Alias = "PreferPassiveRepository")]
-            public bool PreferPassiveRepository { get; set; } = true;
         }
 
         public class LogFolder
@@ -127,6 +123,10 @@ namespace PaletteInsightAgent
             [DefaultValue(600)]
             [YamlMember(Alias = "StreamingTablesPollInterval")]
             public int StreamingTablesPollInterval { get; set; } = 600; // 10 minutes
+
+            [DefaultValue(true)]
+            [YamlMember(Alias = "PreferPassiveRepository")]
+            public bool PreferPassiveRepository { get; set; } = true;   // Poll passive Tableau repository if it exists by default
 
             [YamlMember(Alias = "ProcessedFilesTTL")]
             public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
