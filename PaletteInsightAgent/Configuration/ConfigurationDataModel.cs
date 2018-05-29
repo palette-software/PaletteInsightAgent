@@ -39,9 +39,9 @@ namespace PaletteInsightAgent
             [YamlMember(Alias = "CommandTimeout")]
             public int CommandTimeout { get; set; }
 
+            [DefaultValue(true)]
             [YamlMember(Alias = "PreferPassiveRepository")]
             public bool PreferPassiveRepository { get; set; } = true;
-
         }
 
         public class LogFolder
