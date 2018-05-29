@@ -124,6 +124,10 @@ namespace PaletteInsightAgent
             [YamlMember(Alias = "StreamingTablesPollInterval")]
             public int StreamingTablesPollInterval { get; set; } = 600; // 10 minutes
 
+            [DefaultValue(true)]
+            [YamlMember(Alias = "PreferPassiveRepository")]
+            public bool PreferPassiveRepository { get; set; } = true;   // Poll passive Tableau repository if it exists by default
+
             [YamlMember(Alias = "ProcessedFilesTTL")]
             public int ProcessedFilesTTL { get; set; } = 0; // Default is delete immediately
 

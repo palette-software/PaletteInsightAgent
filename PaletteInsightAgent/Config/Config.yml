@@ -12,6 +12,7 @@
 #LogPollInterval: 300
 #RepoTablesPollInterval: 3600		# This value effects only on primary nodes.
 #StreamingTablesPollInterval: 600	# This value effects only on primary nodes.
+#PreferPassiveRepo: true            # By default poll Tableau's passive repository if it exists
 #ProcessedFilesTTL: 0				# Default is not to keep processed files.
 
 #StorageLimit: 10240				# Given in megabytes. Default is 10 GB.
