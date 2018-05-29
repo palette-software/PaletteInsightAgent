@@ -373,7 +373,7 @@ namespace PaletteInsightAgent
         {
             if (!HasTargetTableauRepo())
             {
-                Log.Info("Active Tableau repo is not located on this computer. Skip polling full tables.");
+                Log.Info("Target Tableau repo is not located on this computer. Skip polling full tables.");
                 return;
             }
 
@@ -392,7 +392,7 @@ namespace PaletteInsightAgent
         {
             if (!HasTargetTableauRepo())
             {
-                Log.Info("Active Tableau repo is not located on this computer. Skip polling streaming tables.");
+                Log.Info("Target Tableau repo is not located on this computer. Skip polling streaming tables.");
                 return;
             }
 
@@ -404,7 +404,7 @@ namespace PaletteInsightAgent
         }
 
         /// <summary>
-        /// Checks whether the active Tableau repository resides on this node.
+        /// Checks whether the target Tableau repository resides on this node.
         /// </summary>
         /// <returns></returns>
         private bool HasTargetTableauRepo()

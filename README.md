@@ -22,7 +22,7 @@ Palette Insight Agent does 4 major things:
 * collects and parses Tableau Server log files listed in [Config/LogFolders.yml](PaletteInsightAgent/Config/LogFolders.yml)
 * collects a set of Windows performance counters configured in [Config/Counters.yml](PaletteInsightAgent/Config/Counters.yml)
 * collects CPU consumption data about all the processes, moreover thread-level data for processes configured in [Config/Processes.yml](PaletteInsightAgent/Config/Processes.yml)
-* retrieves records from Tableau Server's built in Postgres tables configured in [Config/Repository.yml](PaletteInsightAgent/Config/Repository.yml). **IMPORTANT:** this kind of data collection is only performed on that specific Tableau node where the active Tableau repository can be found.
+* retrieves records from Tableau Server's built in Postgres tables configured in [Config/Repository.yml](PaletteInsightAgent/Config/Repository.yml). **IMPORTANT:** this kind of data collection is only performed on that specific Tableau node where the target Tableau repository can be found (passive repository by default).
 
 All the collected data is written into CSV files and the agent sends them to the [Insight Server].
 
