@@ -105,10 +105,8 @@ test_script:
     # Make sure 'go get' use the SSH key for downloading private repos, instead of HTTPS
     - git config --global url."git@github.com:".insteadOf "https://github.com/"
     # Build the test Insight Server
-    - cmd: >-
-        %GOEXEC% get ./...
-        %GOEXEC% install
-
+    - '%GOEXEC% get ./...'
+    - '%GOEXEC% install'
     - echo license_key=%INSIGHT_AUTH_TOKEN% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
     # Start Insight Server in the background
