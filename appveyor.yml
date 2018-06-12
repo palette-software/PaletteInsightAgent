@@ -95,14 +95,20 @@ test_script:
     # Make and run an Insight Server locally
     # First create a go workspace
     - SET GOPATH=c:\go-workspace
+    # Make sure that we use golang version 1.6, since Insight Server rpm package is currently built with golang 1.6.3
+    - SET GOROOT=c:\go16
+    - SET GOEXEC=%GOROOT%\bin\go
     - SET GOPAL=%GOPATH%\src\github.com\palette-software
     - md %GOPAL%
     - git clone --depth 1 git@github.com:palette-software/insight-server.git %GOPAL%\insight-server
     - cd %GOPAL%\insight-server
     # Make sure 'go get' use the SSH key for downloading private repos, instead of HTTPS
     - git config --global url."git@github.com:".insteadOf "https://github.com/"
-    - go get ./...
-    - go install
+    # Build the test Insight Server
+    - cmd: >-
+        %GOEXEC% get ./...
+        %GOEXEC% install
+
     - echo license_key=%INSIGHT_AUTH_TOKEN% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
     # Start Insight Server in the background
