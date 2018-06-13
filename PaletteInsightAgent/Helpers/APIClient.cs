@@ -208,9 +208,7 @@ namespace PaletteInsightAgent.Helpers
 
             // add to the fields
             form.Add(new ByteArrayContent(fileContent), "_file", fileBaseName);
-            // we encode the md5 as a base64 value, so we dont have to do tricks on
-            // go's side to get this value
-            form.Add(new StringContent(Convert.ToBase64String(fileHash)), "_md5");
+            form.Add(new ByteArrayContent(fileHash), "_md5", "md5");
             return form;
         }
     }
