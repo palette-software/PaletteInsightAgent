@@ -18,7 +18,7 @@ namespace PaletteInsightAgent.Output
         private static readonly CsvConfiguration CsvConfig = new CsvHelper.Configuration.CsvConfiguration
         {
             CultureInfo = CultureInfo.InvariantCulture,
-            Delimiter = "\v",
+            Delimiter = ",",
             QuoteNoFields = true
         };
 
