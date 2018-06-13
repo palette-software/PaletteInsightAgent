@@ -30,5 +30,10 @@ namespace PaletteInsightAgent.LogPoller
 
             return table;
         }
+
+        public static bool isServerLogsTable(DataTable table)
+        {
+            return table.TableName.EndsWith(SERVERLOGS_TABLE_NAME);
+        }
     };
 }

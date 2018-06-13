@@ -39,7 +39,7 @@ namespace PaletteInsightAgent.Output
 
             try
             {
-                Writer.WriteDataFile(dataFileName, table, isFullTable);
+                Writer.WriteDataFile(dataFileName, table, isFullTable, false);
 
                 // remove any rows from the csv queue
                 table.Rows.Clear();
