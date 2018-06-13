@@ -46,24 +46,5 @@ namespace PaletteInsightAgent.Output
                     return "text";
             }
         }
-
-        private static void AddMetadata(DataTable result, DataTable table)
-        {
-            var index = 0;
-            foreach (DataColumn column in table.Columns)
-            {
-                index++;
-                AddColumnInfo(result, table.TableName, column.ColumnName, index, GetDBType(column.DataType.ToString()));
-            }
-
-        }
-
-        public static void AddAgentMetadata(DataTable table)
-        {
-            AddMetadata(table, LogTables.makeServerLogsTable("json"));
-            AddMetadata(table, LogTables.makeServerLogsTable("plain"));
-            AddMetadata(table, ThreadTables.makeThreadInfoTable());
-            AddMetadata(table, CounterSampler.makeCounterSamplesTable());
-        }
     }
 }

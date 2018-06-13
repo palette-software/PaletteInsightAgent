@@ -205,19 +205,31 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
         public DataTable GetSchemaTable()
         {
-            var query = @"
-                    SELECT n.nspname as schemaname, c.relname as tablename,
-                    a.attname as columnname,
-                    format_type(a.atttypid, a.atttypmod),
-                    a.attnum
+            var query = @"                    
+                    SELECT
+                         n.nspname as schemaname
+                        ,c.relname as tablename
+                        ,a.attname as columnname
+                        ,format_type(a.atttypid, a.atttypmod)
+                        ,a.attnum
                     FROM pg_namespace n
                       JOIN pg_class c ON (n.oid = c.relnamespace)
                       JOIN pg_attribute a ON (c.oid = a.attrelid)
                       JOIN pg_type t ON (a.atttypid = t.oid)
                     WHERE 1 = 1
-                    AND   nspname = 'public'
-                    AND a.attnum > 0 /*filter out the internal columns*/
-                    ORDER BY n.nspname,c.relname,a.attnum ASC";
+                        AND n.nspname = 'public'
+                        AND a.attnum > 0 /*filter out the internal columns*/
+
+                    union all
+
+                    select 'public' as schemaname, tablename as tablename, 'file_name' as colulmname, 'text' as datatype, 0 as attnum from pg_tables where 1 = 1 and schemaname='public'
+
+                    ORDER BY schemaname, tablename, attnum ASC";
+
+           
+
+
+
             var table = runQuery(query);
             table.TableName = "metadata";
             return table;
