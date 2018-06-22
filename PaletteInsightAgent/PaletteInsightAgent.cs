@@ -201,12 +201,15 @@ namespace PaletteInsightAgent
                 // On start get the schema of the repository tables
                 var table = tableauRepo.GetSchemaTable();
 
+                // Add the metadata of the agent table to the schema table
+                DataTableUtils.AddAgentMetadata(table);
+
                 // Serialize schema table so that it gets uploaded with all other tables
                 OutputSerializer.Write(table, true);
 
                 // Do the same for index data
-                table = tableauRepo.GetIndices();
-                OutputSerializer.Write(table, true);
+                //table = tableauRepo.GetIndices();
+                //OutputSerializer.Write(table, true);
             }
 
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
