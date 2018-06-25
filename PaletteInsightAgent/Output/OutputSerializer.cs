@@ -24,7 +24,7 @@ namespace PaletteInsightAgent.Output
             }
         }
 
-        public static void Write(DataTable table, bool isFullTable, string maxId = null)
+        public static void Write(DataTable table, bool isFullTable, string maxId = null, string originalFileName="")
         {
             // skip writing if no data
             var rowCount = table.Rows.Count;
@@ -35,7 +35,7 @@ namespace PaletteInsightAgent.Output
             }
 
             // get the filename here (should not throw), so we can log on failiures
-            var dataFileName = GetDataFile(table.TableName);
+            var dataFileName = GetDataFile(table.TableName, originalFileName);
 
             try
             {
@@ -75,12 +75,22 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         /// <param name="fileBaseName"></param>am>
         /// <returns></returns>
-        private static string GetDataFile(string fileBaseName)
+        private static string GetDataFile(string fileBaseName, string originalFileName="")
         {
             var dateString = DateTime.UtcNow.ToString(FILENAME_DATETIME_FORMAT);
+            const string SERVERLOGS = "serverlogs";
             // get a new filename
-            var fileName = String.Format("{0}{1}-{2}{3}", DATA_FOLDER, fileBaseName, dateString, Writer.Extension);
+            string fileName;
+            switch (fileBaseName) {
+                case SERVERLOGS:
+                    fileName = String.Format("{0}{1}-{2}{3}", Path.Combine(DATA_FOLDER, SERVERLOGS) + Path.DirectorySeparatorChar, originalFileName, dateString, Writer.Extension);
+                    break;
+                default:
+                    fileName = String.Format("{0}{1}-{2}{3}", DATA_FOLDER, fileBaseName, dateString, Writer.Extension);
+                    break;
 
+            }
+            
             // try to create the directory of the output
             try
             {

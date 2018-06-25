@@ -92,7 +92,7 @@ namespace PaletteInsightAgent.LogPoller
                     logsToDbConverter.processServerLogLines(fullPath, lines, serverLogsTable);
 
                     // write the current batch out
-                    WriteOutServerlogRows(serverLogsTable);
+                    WriteOutServerlogRows(serverLogsTable, Path.GetFileName(fullPath));
                 }, () =>
                 {
                     // if no change, just flush if needed
@@ -106,7 +106,7 @@ namespace PaletteInsightAgent.LogPoller
         /// Helper that writes a serverlogs table to disk as a CSV
         /// </summary>
         /// <param name="serverLogsTable"></param>
-        private static void WriteOutServerlogRows(System.Data.DataTable serverLogsTable)
+        private static void WriteOutServerlogRows(System.Data.DataTable serverLogsTable, string originalFileName)
         {
             var serverLogsTableCount = serverLogsTable.Rows.Count;
 
@@ -123,7 +123,7 @@ namespace PaletteInsightAgent.LogPoller
 
             if (serverLogsTableCount > 0)
             {
-                OutputSerializer.Write(serverLogsTable, false);
+                OutputSerializer.Write(serverLogsTable, false, null, originalFileName);
             }
 
             Log.Info("Sent off {0}", statusLine);

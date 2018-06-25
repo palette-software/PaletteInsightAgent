@@ -24,6 +24,7 @@ namespace PaletteInsightAgent.LogPoller
             var tableName = format + SERVERLOGS_TABLE_NAME;
             var table = new DataTable(tableName);
 
+            TableHelper.addColumn(table, "filename");
             TableHelper.addColumn(table, "host_name");
             TableHelper.addColumn(table, "line");
 
