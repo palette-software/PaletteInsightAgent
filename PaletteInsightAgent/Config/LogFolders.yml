@@ -9,6 +9,6 @@
 - Directory: 'tabsvc\logs\vizqlserver'
   Filter: 'tdeserver*.txt'
   Format: 'plain'
-- Directory: 'tabsvc\logs\dataengine'
-  Filter: 'tdeserver*.log'
+- Directory: 'tabsvc\logs\hyper'
+  Filter: 'hyper*.log'
   Format: 'plain'

@@ -19,11 +19,11 @@ namespace PaletteInsightAgent.Output
         /// <summary>
         /// The directory we store the succesfully uploaded files
         /// </summary>
-        private const string PROCESSED_PREFIX = @"processed/";
+        private const string PROCESSED_PREFIX = @"processed\";
         /// <summary>
         /// The directory where the files that have errors (invalid names, etc.)
         /// </summary>
-        private const string ERROR_PREFIX = @"errors/";
+        private const string ERROR_PREFIX = @"errors\";
 
         public static string DataFilePattern
         {
@@ -194,11 +194,13 @@ namespace PaletteInsightAgent.Output
             try
             {
                 return Directory.EnumerateFiles(from)
+                    .Union(Directory.EnumerateFiles(from + @"\serverlogs"))
                     .Select(f => new FileInfo(f).Name)
                     .Where(fileName => fileName.Contains('-'))
                     .Select(fileName => fileName.Split('-')[0])
                     .Where(tableName => tableName.Length > 0)
                     .Distinct()
+                    .OrderBy(file => file)
                     .ToList();
             }
             catch (DirectoryNotFoundException dnfe)
@@ -322,7 +324,9 @@ namespace PaletteInsightAgent.Output
         {
             // Remove those files that are still being written.
             return Directory.GetFiles(dataPath, table + "-" + DataFilePattern)
+                            .Union(Directory.GetFiles(dataPath + "serverlogs", table + DataFilePattern))                            
                             .Where(fileName => !fileName.Contains(OutputSerializer.IN_PROGRESS_FILE_POSTFIX))
+                            .OrderBy(fileName => fileName)
                             .ToList();
         }
 
@@ -364,7 +368,7 @@ namespace PaletteInsightAgent.Output
 
         public static string GetFileName(string fullFileName)
         {
-            var tokens = fullFileName.Split('/');
+            var tokens = fullFileName.Split('\\');
             if (tokens.Length == 0)
             {
                 return "";           

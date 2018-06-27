@@ -10,7 +10,7 @@ namespace PaletteInsightAgent.Output
 {
     class OutputSerializer
     {
-        public const string DATA_FOLDER = "data/";
+        public const string DATA_FOLDER = @"data\";
         private const string FILENAME_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss";
         public const string IN_PROGRESS_FILE_POSTFIX = ".writing";
         public const string MAX_ID_PREFIX = "maxid";
@@ -36,6 +36,11 @@ namespace PaletteInsightAgent.Output
 
             // get the filename here (should not throw), so we can log on failiures
             var dataFileName = GetDataFile(table.TableName, originalFileName);
+            if (dataFileName == null)
+            {
+                Log.Warn("Missing original filename for serverlogs. Skipping file write.");
+                return;
+            }
 
             try
             {
@@ -83,6 +88,11 @@ namespace PaletteInsightAgent.Output
             string fileName;
             switch (fileBaseName) {
                 case SERVERLOGS:
+                    if (originalFileName == "")
+                    {
+                        Log.Error("Original filename is empty for serverlogs. File base name: {0}", fileBaseName);
+                        return null;
+                    }
                     fileName = String.Format("{0}{1}-{2}{3}", Path.Combine(DATA_FOLDER, SERVERLOGS) + Path.DirectorySeparatorChar, originalFileName, dateString, Writer.Extension);
                     break;
                 default:

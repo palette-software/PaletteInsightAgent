@@ -148,7 +148,7 @@ namespace PaletteInsightAgent.Helpers
         {
             using (var apiClient = new APIClient())
             {
-                var uploadUrl = UploadUrl(maxId);
+                var uploadUrl = UploadUrl(maxId, file);
                 using (var response = await apiClient.PostAsync(uploadUrl, CreateRequestContents(file)))
                 {
                     VerifyStatusCode(response.StatusCode, () =>
@@ -161,13 +161,16 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
-        private static string UploadUrl(string maxId)
+        private static string UploadUrl(string maxId, string file)
         {
             // Get the timezone on each send, so that if the server clock timezone is
             // changed while the agent is running, we are keeping up with the changes
             var timezoneName = DateTimeConverter.WindowsToIana( TimeZoneInfo.Local.Id );
-            var url = String.Format("{0}/upload?host={1}&tz={2}",
+
+            var url = String.Format("{0}/upload{1}?host={2}&tz={3}",
                 config.Endpoint,
+                //Todo: proper check for serverlog instead of IndexOf...
+                file.IndexOf("serverlogs") > 0 ? "/serverlogs" : "/csv",
                 Uri.EscapeUriString(HostName),
                 Uri.EscapeUriString(timezoneName));
 
