@@ -39,7 +39,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         DataTable GetTable(string tableName);
         DataTable GetStreamingTable(string tableName, RepoTable table, string from, out string newMax);
         //DataTable GetIndices();
-        DataTable GetSchemaTable();
+        DataTable GetSchemaTable(string tableList);
         int getCoreCount();
     }
 
@@ -203,9 +203,9 @@ namespace PaletteInsightAgent.RepoTablesPoller
             }
         }
 
-        public DataTable GetSchemaTable()
+        public DataTable GetSchemaTable(string tableList)
         {
-            var query = @"                    
+            var query = String.Format(@"                    
                     SELECT
                          n.nspname as schemaname
                         ,c.relname as tablename
@@ -219,15 +219,13 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     WHERE 1 = 1
                         AND n.nspname = 'public'
                         AND a.attnum > 0 /*filter out the internal columns*/
+                        AND c.relname in ({0})
 
                     union all
 
-                    select 'public' as schemaname, tablename as tablename, 'file_name' as colulmname, 'text' as datatype, 0 as attnum from pg_tables where 1 = 1 and schemaname='public'
+                    select 'public' as schemaname, tablename as tablename, 'p_file_name' as colulmname, 'text' as datatype, 0 as attnum from pg_tables where 1 = 1 and schemaname='public' and tablename in ({0})
 
-                    ORDER BY schemaname, tablename, attnum ASC";
-
-           
-
+                    ORDER BY schemaname, tablename, attnum ASC", tableList);
 
 
             var table = runQuery(query);
