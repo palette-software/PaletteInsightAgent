@@ -35,16 +35,11 @@ namespace PaletteInsightAgent.Output
             }
 
             // get the filename here (should not throw), so we can log on failiures
-            var dataFileName = GetDataFile(table.TableName, originalFileName);
-            if (dataFileName == null)
-            {
-                Log.Warn("Missing original filename for serverlogs. Skipping file write.");
-                return;
-            }
+            var dataFileName = GetDataFile(table.TableName);
 
             try
             {
-                Writer.WriteDataFile(dataFileName, table, isFullTable, false);
+                Writer.WriteDataFile(dataFileName, table, isFullTable, false, originalFileName);
 
                 // remove any rows from the csv queue
                 table.Rows.Clear();
@@ -80,26 +75,14 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         /// <param name="fileBaseName"></param>am>
         /// <returns></returns>
-        private static string GetDataFile(string fileBaseName, string originalFileName="")
+        private static string GetDataFile(string fileBaseName)
         {
             var dateString = DateTime.UtcNow.ToString(FILENAME_DATETIME_FORMAT);
             const string SERVERLOGS = "serverlogs";
-            // get a new filename
-            string fileName;
-            switch (fileBaseName) {
-                case SERVERLOGS:
-                    if (originalFileName == "")
-                    {
-                        Log.Error("Original filename is empty for serverlogs. File base name: {0}", fileBaseName);
-                        return null;
-                    }
-                    fileName = String.Format("{0}{1}-{2}{3}", Path.Combine(DATA_FOLDER, SERVERLOGS) + Path.DirectorySeparatorChar, originalFileName, dateString, Writer.Extension);
-                    break;
-                default:
-                    fileName = String.Format("{0}{1}-{2}{3}", DATA_FOLDER, fileBaseName, dateString, Writer.Extension);
-                    break;
 
-            }
+            // get a new filename
+            var folder = (fileBaseName == SERVERLOGS) ? Path.Combine(DATA_FOLDER, SERVERLOGS) + Path.DirectorySeparatorChar : DATA_FOLDER;
+            var fileName = String.Format("{0}{1}-{2}{3}", folder, fileBaseName, dateString, Writer.Extension);
             
             // try to create the directory of the output
             try

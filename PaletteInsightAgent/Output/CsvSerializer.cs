@@ -36,7 +36,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="table"></param>
-        public void WriteDataFile(string fileName, DataTable table, bool isFullTable, bool writeHeader)
+        public void WriteDataFile(string fileName, DataTable table, bool isFullTable, bool writeHeader, string originalFileName="")
         {
             // skip empty tables
             if (table.Rows.Count == 0) return;
@@ -44,6 +44,13 @@ namespace PaletteInsightAgent.Output
             // the index of the last row we have written out
             var lastRow = 0;
             var filePartIdx = 0;
+
+            bool isServerLogsTable = LogTables.isServerLogsTable(table);
+            if (isServerLogsTable && originalFileName == "")
+            {
+                Log.Warn("Missing original filename for serverlogs file: '{0}'. Skipping file write.", fileName);
+                return;
+            }
 
 
             // The directory where we put the CSV files
@@ -62,9 +69,9 @@ namespace PaletteInsightAgent.Output
                 using (var gzipStream = new GZipStream(fileStream, CompressionLevel.Optimal))
                 using (var streamWriter = new StreamWriter(gzipStream))
                 {
-                    if (LogTables.isServerLogsTable(table))
+                    if (isServerLogsTable)
                     {
-                        lastRow = useFileWriter(table, streamWriter, fileExists, filePathWithPart);
+                        lastRow = useFileWriter(table, streamWriter, fileExists, filePathWithPart, originalFileName);
                     }
                     else
                     {
@@ -108,10 +115,14 @@ namespace PaletteInsightAgent.Output
             return lastRow;
         }
 
-        private int useFileWriter(DataTable table, StreamWriter streamWriter, bool fileExists, string filePathWithPart)
+        private int useFileWriter(DataTable table, StreamWriter streamWriter, bool fileExists,
+                                  string filePathWithPart, string originalFileName)
         {
             int lastRow = 0;
             var byteCount = 0;
+
+            streamWriter.WriteLine(originalFileName);
+            byteCount += originalFileName.Length;
 
             // the maximum row index we are willing to touch
             var maxRowIdx = table.Rows.Count;

@@ -189,7 +189,7 @@ namespace PaletteInsightAgent.Output
             return new List<FileInfo>();
         }
 
-        private static IList<string> GetPendingTables(string from)
+        private static IList<string> GetFilesToUpload(string from)
         {
             try
             {
@@ -225,12 +225,12 @@ namespace PaletteInsightAgent.Output
         {
             // For all tables we want to upload the csv files for that data table and move the csv after the upload
             // to the appropriate folder. (Processed on success Errors on failure)
-            var tableNames = GetPendingTables(dataPath);
-            foreach (var table in tableNames)
+            var fileNames = GetFilesToUpload(dataPath);
+            foreach (var file in fileNames)
             {
                 try
                 {
-                    foreach (var csvFile in GetFilesOfTable(dataPath, table))
+                    foreach (var csvFile in GetFilesOfTable(dataPath, file))
                     {
                         try
                         {
@@ -305,11 +305,11 @@ namespace PaletteInsightAgent.Output
                 catch (TemporaryException e)
                 {
                     // Nothing to do here. Leave this filetype as is, we will upload in the next iteration
-                    Log.Warn("Temporarily unable to upload files for table {0}. Message: {1}", table, e.Message);
+                    Log.Warn("Temporarily unable to upload files for table {0}. Message: {1}", file, e.Message);
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Error while uploading files for table {0}", table);
+                    Log.Error(e, "Error while uploading files for table {0}", file);
                 }
             }
         }
