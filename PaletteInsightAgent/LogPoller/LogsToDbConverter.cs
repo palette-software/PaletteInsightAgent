@@ -52,17 +52,15 @@ namespace PaletteInsightAgent.LogPoller
             // log that we have started
             foreach (var logLine in logLines)
             {
-                insertIntoServerLogsTable(filename, serverLogsTable, logLine);
+                insertIntoServerLogsTable(serverLogsTable, logLine);
             }
         }
 
-        private void insertIntoServerLogsTable(string filename, DataTable serverLogsTable, string logLine)
+        private void insertIntoServerLogsTable(DataTable serverLogsTable, string logLine)
         {
             // Add the new row to the table
             var row = serverLogsTable.NewRow();
 
-            row["filename"] = filename;
-            row["host_name"] = HostName;
             row["line"] = logLine;
             serverLogsTable.Rows.Add(row);
         }

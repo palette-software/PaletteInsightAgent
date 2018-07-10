@@ -47,7 +47,7 @@ namespace PaletteInsightAgent.LogPoller
             foreach (var folderInfo in foldersToWatch)
             {
                 Log.Info("Starting LogFileWatcher in " + folderInfo.FolderToWatch + " with file mask:" + folderInfo.DirectoryFilter);
-                watchers.Add(new LogFileWatcher(folderInfo.FolderToWatch, folderInfo.DirectoryFilter, logLinesPerBatch, folderInfo.LogFormat));
+                watchers.Add(new LogFileWatcher(folderInfo.FolderToWatch, folderInfo.DirectoryFilter, logLinesPerBatch, folderInfo.ProcessName));
             }
         }
 
@@ -84,7 +84,7 @@ namespace PaletteInsightAgent.LogPoller
                     alreadySubmittedFiles.Add(fileId);
 
                     // create a new output table for the file
-                    var serverLogsTable = LogTables.makeServerLogsTable(watcher.logFormat);
+                    var serverLogsTable = LogTables.makeServerLogsTable(watcher.ProcessName);
 
                     Log.Info("Got new {0} lines from {1}.", lines.Length, fullPath);
 
@@ -92,7 +92,7 @@ namespace PaletteInsightAgent.LogPoller
                     logsToDbConverter.processServerLogLines(fullPath, lines, serverLogsTable);
 
                     // write the current batch out
-                    WriteOutServerlogRows(serverLogsTable);
+                    WriteOutServerlogRows(serverLogsTable, Path.GetFileName(fullPath));
                 }, () =>
                 {
                     // if no change, just flush if needed
@@ -106,7 +106,7 @@ namespace PaletteInsightAgent.LogPoller
         /// Helper that writes a serverlogs table to disk as a CSV
         /// </summary>
         /// <param name="serverLogsTable"></param>
-        private static void WriteOutServerlogRows(System.Data.DataTable serverLogsTable)
+        private static void WriteOutServerlogRows(System.Data.DataTable serverLogsTable, string originalFileName)
         {
             var serverLogsTableCount = serverLogsTable.Rows.Count;
 
@@ -123,7 +123,7 @@ namespace PaletteInsightAgent.LogPoller
 
             if (serverLogsTableCount > 0)
             {
-                OutputSerializer.Write(serverLogsTable, false);
+                OutputSerializer.Write(serverLogsTable, false, null, originalFileName);
             }
 
             Log.Info("Sent off {0}", statusLine);

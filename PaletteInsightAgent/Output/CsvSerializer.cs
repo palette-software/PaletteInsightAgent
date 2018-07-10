@@ -2,6 +2,7 @@
 using CsvHelper.Configuration;
 using NLog;
 using PaletteInsightAgent.Helpers;
+using PaletteInsightAgent.LogPoller;
 using System;
 using System.Data;
 using System.Globalization;
@@ -18,7 +19,7 @@ namespace PaletteInsightAgent.Output
         private static readonly CsvConfiguration CsvConfig = new CsvHelper.Configuration.CsvConfiguration
         {
             CultureInfo = CultureInfo.InvariantCulture,
-            Delimiter = "\v",
+            Delimiter = ",",
             QuoteNoFields = true
         };
 
@@ -35,7 +36,7 @@ namespace PaletteInsightAgent.Output
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="table"></param>
-        public void WriteDataFile(string fileName, DataTable table, bool isFullTable)
+        public void WriteDataFile(string fileName, DataTable table, bool isFullTable, bool writeHeader, string originalFileName="")
         {
             // skip empty tables
             if (table.Rows.Count == 0) return;
@@ -43,6 +44,13 @@ namespace PaletteInsightAgent.Output
             // the index of the last row we have written out
             var lastRow = 0;
             var filePartIdx = 0;
+
+            bool isServerLogsTable = LogTables.isServerLogsTable(table.TableName);
+            if (isServerLogsTable && originalFileName == "")
+            {
+                Log.Warn("Missing original filename for serverlogs file: '{0}'. Skipping file write.", fileName);
+                return;
+            }
 
 
             // The directory where we put the CSV files
@@ -55,25 +63,21 @@ namespace PaletteInsightAgent.Output
                 // First create the file name with a postfix, so that the bulk copy
                 // loader won't touch this file, until it is being written.
                 var inProgressFileName = String.Format("{0}{1}", filePathWithPart, OutputSerializer.IN_PROGRESS_FILE_POSTFIX);
-
-
                 var fileExists = File.Exists(inProgressFileName);
+
                 using (var fileStream = new FileStream(inProgressFileName, FileMode.Append))
                 using (var gzipStream = new GZipStream(fileStream, CompressionLevel.Optimal))
                 using (var streamWriter = new StreamWriter(gzipStream))
-                using (var csvWriter = new CsvWriter(streamWriter, CsvConfig))
                 {
-                    // only write the header if the file does not exists
-                    if (!fileExists)
+                    if (isServerLogsTable)
                     {
-                        WriteCSVHeader(table, csvWriter);
+                        lastRow = useFileWriter(table, streamWriter, fileExists, filePathWithPart, originalFileName);
                     }
-
-                    // files for full table must never be chunked to parts
-                    long maxSize = isFullTable ? long.MaxValue : MaxFileSize;
-                    lastRow = WriteCSVBody(table, csvWriter, lastRow, maxSize);
+                    else
+                    {
+                        lastRow = useCsvWriter(table, streamWriter, writeHeader, isFullTable, fileExists, filePathWithPart);
+                    }
                 }
-
                 // After writing the file, move it to its final destination, and 
                 // remove the postfix to signal that the file write is done.
                 File.Move(inProgressFileName, filePathWithPart);
@@ -92,6 +96,65 @@ namespace PaletteInsightAgent.Output
             }
         }
 
+        private int useCsvWriter(DataTable table, StreamWriter streamWriter, bool writeHeader, bool isFullTable, bool fileExists, string filePathWithPart)
+        {
+            int lastRow = 0;
+            using (var csvWriter = new CsvWriter(streamWriter, CsvConfig))
+            {
+                // Header should be the first line
+                if (writeHeader && !fileExists)
+                {
+                    WriteCSVHeader(table, csvWriter);
+                }
+
+                // files for full table must never be chunked to parts
+                long maxSize = isFullTable ? long.MaxValue : MaxFileSize;
+                string fileNameForCSV = LogTables.isServerLogsTable(table.TableName) ? null : Path.GetFileName(filePathWithPart);
+                lastRow = WriteCSVBody(table, csvWriter, lastRow, maxSize, fileNameForCSV);
+            }
+            return lastRow;
+        }
+
+        private int useFileWriter(DataTable table, StreamWriter streamWriter, bool fileExists,
+                                  string filePathWithPart, string originalFileName)
+        {
+            int lastRow = 0;
+            var byteCount = 0;
+
+            streamWriter.WriteLine(originalFileName);
+            byteCount += originalFileName.Length;
+
+            // the maximum row index we are willing to touch
+            var maxRowIdx = table.Rows.Count;
+
+            for (var rowIdx = lastRow; rowIdx < maxRowIdx; rowIdx++)
+            {
+                // try to write the row out
+                try
+                {
+                    // update the byte count at the end of the row write so that if any exceptions happen, the bytescount
+                    // wont contain the bytes of the not written lines
+                    string line = table.Rows[rowIdx][0].ToString();
+                    byteCount += line.Length;
+                    streamWriter.WriteLine(line);
+
+                    // compare the current byte count with the maximum and stop after this line if we are over
+                    // and as we have already written one more file let's just return rowIndex plus 1 instead of rowIndex
+                    // otherwise we could end up with an infinite loop when there is a row that is bigger than our max file size
+                    if (byteCount > MaxFileSize)
+                    {
+                        return rowIdx + 1;
+                    }
+                }
+                catch (CsvWriterException ex)
+                {
+                    Log.Error(ex, "Error writing record to non-csv file.");
+                    // if we didnt write this line out then we dont increment the row byte count
+                }
+            }
+
+            return -1;
+        }
         /// <summary>
         /// Tries to find the next available output filename for a CSV file
         /// </summary>
@@ -137,7 +200,7 @@ namespace PaletteInsightAgent.Output
         ///     We have seen log lines of up to 5Mb in length, so using 15 here should almost guarantee us a request size of under 20Mb.
         /// </param>
         /// <returns>The index of the last written row, or -1 if the whole table has been written out</returns>
-        public static int WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter, int startRowIdx, long maxSize)
+        public static int WriteCSVBody(DataTable queue, CsvHelper.CsvWriter csvWriter, int startRowIdx, long maxSize, string fileName)
         {
             var columnCount = queue.Columns.Count;
             var byteCount = 0;
@@ -153,7 +216,7 @@ namespace PaletteInsightAgent.Output
                 {
                     // update the byte count at the end of the row write so that if any exceptions happen, the bytescount
                     // wont contain the bytes of the not written lines
-                    byteCount += WriteCsvLine(csvWriter, columnCount, queue.Rows[rowIdx]);
+                    byteCount += WriteCsvLine(csvWriter, columnCount, queue.Rows[rowIdx], fileName);
                     // compare the current byte count with the maximum and stop after this line if we are over
                     // and as we have already written one more file let's just return rowIndex plus 1 instead of rowIndex
                     // otherwise we could end up with an infinite loop when there is a row that is bigger than our max file size
@@ -180,9 +243,18 @@ namespace PaletteInsightAgent.Output
         /// <param name="columnCount"></param>
         /// <param name="row"></param>
         /// <returns></returns>
-        private static int WriteCsvLine(CsvWriter csvWriter, int columnCount, DataRow row)
+        private static int WriteCsvLine(CsvWriter csvWriter, int columnCount, DataRow row, string withFileName = null)
         {
             var rowByteCount = 0;
+
+            if (withFileName != null)
+            {
+                // update the total byte count
+                rowByteCount += withFileName.Length;
+                // Write the current field
+                csvWriter.WriteField(withFileName);
+            }
+
             for (var i = 0; i < columnCount; i++)
             {
                 object fieldValue;

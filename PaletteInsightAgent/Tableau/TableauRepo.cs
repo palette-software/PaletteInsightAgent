@@ -38,8 +38,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
     {
         DataTable GetTable(string tableName);
         DataTable GetStreamingTable(string tableName, RepoTable table, string from, out string newMax);
-        DataTable GetIndices();
-        DataTable GetSchemaTable();
+        //DataTable GetIndices();
+        DataTable GetSchemaTable(string tableList);
         int getCoreCount();
     }
 
@@ -203,57 +203,67 @@ namespace PaletteInsightAgent.RepoTablesPoller
             }
         }
 
-        public DataTable GetSchemaTable()
+        public DataTable GetSchemaTable(string tableList)
         {
-            var query = @"
-                    SELECT n.nspname as schemaname, c.relname as tablename,
-                    a.attname as columnname,
-                    format_type(a.atttypid, a.atttypmod),
-                    a.attnum
+            var query = String.Format(@"                    
+                    SELECT
+                         n.nspname as schemaname
+                        ,c.relname as tablename
+                        ,a.attname as columnname
+                        ,format_type(a.atttypid, a.atttypmod)
+                        ,a.attnum
                     FROM pg_namespace n
                       JOIN pg_class c ON (n.oid = c.relnamespace)
                       JOIN pg_attribute a ON (c.oid = a.attrelid)
                       JOIN pg_type t ON (a.atttypid = t.oid)
                     WHERE 1 = 1
-                    AND   nspname = 'public'
-                    AND a.attnum > 0 /*filter out the internal columns*/
-                    ORDER BY n.nspname,c.relname,a.attnum ASC";
+                        AND n.nspname = 'public'
+                        AND a.attnum > 0 /*filter out the internal columns*/
+                        AND c.relname in ({0})
+
+                    union all
+
+                    select 'public' as schemaname, tablename as tablename, 'p_file_name' as colulmname, 'text' as datatype, 0 as attnum from pg_tables where 1 = 1 and schemaname='public' and tablename in ({0})
+
+                    ORDER BY schemaname, tablename, attnum ASC", tableList);
+
+
             var table = runQuery(query);
             table.TableName = "metadata";
             return table;
         }
 
-        public DataTable GetIndices()
-        {
-            var query = @"
-                select
-                   n.nspname as schema_name,
-                   t.relname as table_name,
-                   i.relname as index_name,
-                   a.attname as column_name,
-                  pg_get_indexdef(ix.indexrelid)
-                from
-                   pg_class t,
-                   pg_class i,
-                   pg_index ix,
-                   pg_attribute a,
-                   pg_namespace n
-                where
-                   t.oid = ix.indrelid
-                   and i.oid = ix.indexrelid
-                   and a.attrelid = t.oid
-                   and a.attnum = ANY(ix.indkey)
-                   and t.relkind = 'r'
-                   and t.relnamespace = n.oid
-                   and n.nspname = 'public'
-                order by
-                   t.relname,
-                   i.relname
-                ";
-            var table = runQuery(query);
-            table.TableName = "index";
-            return table;
-        }
+        //public DataTable GetIndices()
+        //{
+        //    var query = @"
+        //        select
+        //           n.nspname as schema_name,
+        //           t.relname as table_name,
+        //           i.relname as index_name,
+        //           a.attname as column_name,
+        //          pg_get_indexdef(ix.indexrelid)
+        //        from
+        //           pg_class t,
+        //           pg_class i,
+        //           pg_index ix,
+        //           pg_attribute a,
+        //           pg_namespace n
+        //        where
+        //           t.oid = ix.indrelid
+        //           and i.oid = ix.indexrelid
+        //           and a.attrelid = t.oid
+        //           and a.attnum = ANY(ix.indkey)
+        //           and t.relkind = 'r'
+        //           and t.relnamespace = n.oid
+        //           and n.nspname = 'public'
+        //        order by
+        //           t.relname,
+        //           i.relname
+        //        ";
+        //    var table = runQuery(query);
+        //    table.TableName = "index";
+        //    return table;
+        //}
 
         public DataTable GetTable(string tableName)
         {

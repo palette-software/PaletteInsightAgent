@@ -19,11 +19,11 @@ namespace PaletteInsightAgent.Output
         /// <summary>
         /// The directory we store the succesfully uploaded files
         /// </summary>
-        private const string PROCESSED_PREFIX = @"processed/";
+        private const string PROCESSED_PREFIX = @"processed\";
         /// <summary>
         /// The directory where the files that have errors (invalid names, etc.)
         /// </summary>
-        private const string ERROR_PREFIX = @"errors/";
+        private const string ERROR_PREFIX = @"errors\";
 
         public static string DataFilePattern
         {
@@ -189,16 +189,18 @@ namespace PaletteInsightAgent.Output
             return new List<FileInfo>();
         }
 
-        private static IList<string> GetPendingTables(string from)
+        private static IList<string> GetFilesToUpload(string from)
         {
             try
             {
                 return Directory.EnumerateFiles(from)
+                    .Union(Directory.EnumerateFiles(from + @"\serverlogs"))
                     .Select(f => new FileInfo(f).Name)
                     .Where(fileName => fileName.Contains('-'))
                     .Select(fileName => fileName.Split('-')[0])
                     .Where(tableName => tableName.Length > 0)
                     .Distinct()
+                    .OrderBy(file => file)
                     .ToList();
             }
             catch (DirectoryNotFoundException dnfe)
@@ -223,12 +225,12 @@ namespace PaletteInsightAgent.Output
         {
             // For all tables we want to upload the csv files for that data table and move the csv after the upload
             // to the appropriate folder. (Processed on success Errors on failure)
-            var tableNames = GetPendingTables(dataPath);
-            foreach (var table in tableNames)
+            var fileNames = GetFilesToUpload(dataPath);
+            foreach (var file in fileNames)
             {
                 try
                 {
-                    foreach (var csvFile in GetFilesOfTable(dataPath, table))
+                    foreach (var csvFile in GetFilesOfTable(dataPath, file))
                     {
                         try
                         {
@@ -303,11 +305,11 @@ namespace PaletteInsightAgent.Output
                 catch (TemporaryException e)
                 {
                     // Nothing to do here. Leave this filetype as is, we will upload in the next iteration
-                    Log.Warn("Temporarily unable to upload files for table {0}. Message: {1}", table, e.Message);
+                    Log.Warn("Temporarily unable to upload files for table {0}. Message: {1}", file, e.Message);
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Error while uploading files for table {0}", table);
+                    Log.Error(e, "Error while uploading files for table {0}", file);
                 }
             }
         }
@@ -322,7 +324,9 @@ namespace PaletteInsightAgent.Output
         {
             // Remove those files that are still being written.
             return Directory.GetFiles(dataPath, table + "-" + DataFilePattern)
+                            .Union(Directory.GetFiles(dataPath + "serverlogs", table + DataFilePattern))                            
                             .Where(fileName => !fileName.Contains(OutputSerializer.IN_PROGRESS_FILE_POSTFIX))
+                            .OrderBy(fileName => fileName)
                             .ToList();
         }
 
@@ -364,7 +368,7 @@ namespace PaletteInsightAgent.Output
 
         public static string GetFileName(string fullFileName)
         {
-            var tokens = fullFileName.Split('/');
+            var tokens = fullFileName.Split('\\');
             if (tokens.Length == 0)
             {
                 return "";           

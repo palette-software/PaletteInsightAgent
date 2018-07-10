@@ -49,7 +49,9 @@ namespace PaletteInsightAgent.Output
 
         private static void AddMetadata(DataTable result, DataTable table)
         {
-            var index = 0;
+
+            AddColumnInfo(result, table.TableName, "p_file_name", 0, "text");
+            var index = 1;
             foreach (DataColumn column in table.Columns)
             {
                 index++;
@@ -60,10 +62,10 @@ namespace PaletteInsightAgent.Output
 
         public static void AddAgentMetadata(DataTable table)
         {
-            AddMetadata(table, LogTables.makeServerLogsTable("json"));
-            AddMetadata(table, LogTables.makeServerLogsTable("plain"));
-            AddMetadata(table, ThreadTables.makeThreadInfoTable());
-            AddMetadata(table, CounterSampler.makeCounterSamplesTable());
+            //AddMetadata(table, LogTables.makeServerLogsTable("json"));
+            //AddMetadata(table, LogTables.makeServerLogsTable("plain"));
+            //AddMetadata(table, ThreadTables.makeThreadInfoTable());
+            //AddMetadata(table, CounterSampler.makeCounterSamplesTable());
         }
     }
 }

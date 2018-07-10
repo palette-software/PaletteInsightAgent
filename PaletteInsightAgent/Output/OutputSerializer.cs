@@ -5,12 +5,13 @@ using NLog;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
+using PaletteInsightAgent.LogPoller;
 
 namespace PaletteInsightAgent.Output
 {
     class OutputSerializer
     {
-        public const string DATA_FOLDER = "data/";
+        public const string DATA_FOLDER = @"data\";
         private const string FILENAME_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss";
         public const string IN_PROGRESS_FILE_POSTFIX = ".writing";
         public const string MAX_ID_PREFIX = "maxid";
@@ -24,7 +25,7 @@ namespace PaletteInsightAgent.Output
             }
         }
 
-        public static void Write(DataTable table, bool isFullTable, string maxId = null)
+        public static void Write(DataTable table, bool isFullTable, string maxId = null, string originalFileName="")
         {
             // skip writing if no data
             var rowCount = table.Rows.Count;
@@ -39,7 +40,7 @@ namespace PaletteInsightAgent.Output
 
             try
             {
-                Writer.WriteDataFile(dataFileName, table, isFullTable);
+                Writer.WriteDataFile(dataFileName, table, isFullTable, false, originalFileName);
 
                 // remove any rows from the csv queue
                 table.Rows.Clear();
@@ -78,9 +79,11 @@ namespace PaletteInsightAgent.Output
         private static string GetDataFile(string fileBaseName)
         {
             var dateString = DateTime.UtcNow.ToString(FILENAME_DATETIME_FORMAT);
+            const string SERVERLOGS = "serverlogs";
             // get a new filename
-            var fileName = String.Format("{0}{1}-{2}{3}", DATA_FOLDER, fileBaseName, dateString, Writer.Extension);
-
+            var folder = (LogTables.isServerLogsTable(fileBaseName)) ? Path.Combine(DATA_FOLDER, SERVERLOGS) + Path.DirectorySeparatorChar : DATA_FOLDER;
+            var fileName = String.Format("{0}{1}-{2}{3}", folder, fileBaseName, dateString, Writer.Extension);
+            
             // try to create the directory of the output
             try
             {

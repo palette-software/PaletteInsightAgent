@@ -18,6 +18,7 @@ using PaletteInsightAgent.Configuration;
 using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
 using PaletteInsightAgent.Helpers;
+using System.Linq;
 
 [assembly: CLSCompliant(true)]
 
@@ -198,8 +199,10 @@ namespace PaletteInsightAgent
             // send the metadata if there is a tableau repo behind us
             if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasTargetTableauRepo())
             {
-                // On start get the schema of the repository tables
-                var table = tableauRepo.GetSchemaTable();
+                // On start get the schema of the repository tables                
+
+                List<string> tableNames = options.RepositoryTables.Select(t => t.Name).ToList();
+                var table = tableauRepo.GetSchemaTable(String.Format("'{0}'", string.Join("','", tableNames)));
 
                 // Add the metadata of the agent table to the schema table
                 DataTableUtils.AddAgentMetadata(table);
@@ -208,8 +211,8 @@ namespace PaletteInsightAgent
                 OutputSerializer.Write(table, true);
 
                 // Do the same for index data
-                table = tableauRepo.GetIndices();
-                OutputSerializer.Write(table, true);
+                //table = tableauRepo.GetIndices();
+                //OutputSerializer.Write(table, true);
             }
 
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
