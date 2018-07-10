@@ -5,6 +5,7 @@ using NLog;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
+using PaletteInsightAgent.LogPoller;
 
 namespace PaletteInsightAgent.Output
 {
@@ -79,9 +80,8 @@ namespace PaletteInsightAgent.Output
         {
             var dateString = DateTime.UtcNow.ToString(FILENAME_DATETIME_FORMAT);
             const string SERVERLOGS = "serverlogs";
-
             // get a new filename
-            var folder = (fileBaseName == SERVERLOGS) ? Path.Combine(DATA_FOLDER, SERVERLOGS) + Path.DirectorySeparatorChar : DATA_FOLDER;
+            var folder = (LogTables.isServerLogsTable(fileBaseName)) ? Path.Combine(DATA_FOLDER, SERVERLOGS) + Path.DirectorySeparatorChar : DATA_FOLDER;
             var fileName = String.Format("{0}{1}-{2}{3}", folder, fileBaseName, dateString, Writer.Extension);
             
             // try to create the directory of the output

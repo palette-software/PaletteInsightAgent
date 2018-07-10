@@ -19,9 +19,9 @@ namespace PaletteInsightAgent.LogPoller
         //  host_name text,
         //  line text
         //)
-        public static DataTable makeServerLogsTable(string format)
+        public static DataTable makeServerLogsTable(string processName)
         {
-            var tableName = format + SERVERLOGS_TABLE_NAME;
+            var tableName = processName + "_" + SERVERLOGS_TABLE_NAME;
             var table = new DataTable(tableName);
             
             TableHelper.addColumn(table, "line");
@@ -29,9 +29,9 @@ namespace PaletteInsightAgent.LogPoller
             return table;
         }
 
-        public static bool isServerLogsTable(DataTable table)
+        public static bool isServerLogsTable(string tableName)
         {
-            return table.TableName.EndsWith(SERVERLOGS_TABLE_NAME);
+            return tableName.EndsWith(SERVERLOGS_TABLE_NAME);
         }
     };
 }

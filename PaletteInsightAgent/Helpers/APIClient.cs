@@ -161,7 +161,20 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
-        private static string UploadUrl(string maxId, string file)
+        private static string GetEndpoint(string filePath)
+        {
+            if (filePath.IndexOf("serverlogs") > 0)
+            {
+                string fileName = Path.GetFileName(filePath);
+                return "/" + fileName.Substring(0, fileName.IndexOf("-"));
+            }
+            else
+            {
+                return "/csv";
+            }
+        }
+
+        private static string UploadUrl(string maxId, string filePath)
         {
             // Get the timezone on each send, so that if the server clock timezone is
             // changed while the agent is running, we are keeping up with the changes
@@ -170,7 +183,7 @@ namespace PaletteInsightAgent.Helpers
             var url = String.Format("{0}/upload{1}?host={2}&tz={3}",
                 config.Endpoint,
                 //Todo: proper check for serverlog instead of IndexOf...
-                file.IndexOf("serverlogs") > 0 ? "/serverlogs" : "/csv",
+                GetEndpoint(filePath),
                 Uri.EscapeUriString(HostName),
                 Uri.EscapeUriString(timezoneName));
 

@@ -226,7 +226,7 @@ namespace PaletteInsightAgent
 
                 // If no matches found, add to the list of dirs
                 logFolders.Add(folder);
-                Log.Info("Watching folder: {0} with filter: {1} with format: {2}", folder.FolderToWatch, folder.DirectoryFilter, folder.LogFormat);
+                Log.Info("Watching folder: {0} with filter: {1} with format: {2}", folder.FolderToWatch, folder.DirectoryFilter, folder.ProcessName);
                 return true;
             }
 
@@ -246,7 +246,7 @@ namespace PaletteInsightAgent
                     foreach (LogFolder logFolder in config.Logs)
                     {
                         AddFolderToWatched(options.LogFolders, 
-                            PaletteInsightAgentOptions.LogFolderInfo.Create( logFolder.Directory, logFolder.Filter, logFolder.Format ));
+                            PaletteInsightAgentOptions.LogFolderInfo.Create( logFolder.Directory, logFolder.Filter, logFolder.ProcessName ));
                     }
                 }
 
@@ -264,7 +264,7 @@ namespace PaletteInsightAgent
                         }
                         
                         AddFolderToWatched(options.LogFolders,
-                            PaletteInsightAgentOptions.LogFolderInfo.Create(fullPath, logFolder.Filter, logFolder.Format));
+                            PaletteInsightAgentOptions.LogFolderInfo.Create(fullPath, logFolder.Filter, logFolder.ProcessName));
                     }
                 }
             }

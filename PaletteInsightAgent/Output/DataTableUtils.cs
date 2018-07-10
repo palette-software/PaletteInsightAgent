@@ -62,9 +62,9 @@ namespace PaletteInsightAgent.Output
 
         public static void AddAgentMetadata(DataTable table)
         {
-            AddMetadata(table, LogTables.makeServerLogsTable("json"));
-            AddMetadata(table, LogTables.makeServerLogsTable("plain"));
-            AddMetadata(table, ThreadTables.makeThreadInfoTable());
+            //AddMetadata(table, LogTables.makeServerLogsTable("json"));
+            //AddMetadata(table, LogTables.makeServerLogsTable("plain"));
+            //AddMetadata(table, ThreadTables.makeThreadInfoTable());
             //AddMetadata(table, CounterSampler.makeCounterSamplesTable());
         }
     }

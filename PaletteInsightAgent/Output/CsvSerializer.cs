@@ -45,7 +45,7 @@ namespace PaletteInsightAgent.Output
             var lastRow = 0;
             var filePartIdx = 0;
 
-            bool isServerLogsTable = LogTables.isServerLogsTable(table);
+            bool isServerLogsTable = LogTables.isServerLogsTable(table.TableName);
             if (isServerLogsTable && originalFileName == "")
             {
                 Log.Warn("Missing original filename for serverlogs file: '{0}'. Skipping file write.", fileName);
@@ -109,7 +109,7 @@ namespace PaletteInsightAgent.Output
 
                 // files for full table must never be chunked to parts
                 long maxSize = isFullTable ? long.MaxValue : MaxFileSize;
-                string fileNameForCSV = LogTables.isServerLogsTable(table) ? null : Path.GetFileName(filePathWithPart);
+                string fileNameForCSV = LogTables.isServerLogsTable(table.TableName) ? null : Path.GetFileName(filePathWithPart);
                 lastRow = WriteCSVBody(table, csvWriter, lastRow, maxSize, fileNameForCSV);
             }
             return lastRow;
