@@ -180,8 +180,9 @@ namespace PaletteInsightAgent.Helpers
             // changed while the agent is running, we are keeping up with the changes
             var timezoneName = DateTimeConverter.WindowsToIana( TimeZoneInfo.Local.Id );
 
-            var url = String.Format("{0}/upload{1}?host={2}&tz={3}",
+            var url = String.Format("{0}/api/{1}/upload{2}?host={3}&tz={4}",
                 config.Endpoint,
+                API_VERSION,
                 //Todo: proper check for serverlog instead of IndexOf...
                 GetEndpoint(filePath),
                 Uri.EscapeUriString(HostName),
@@ -196,7 +197,7 @@ namespace PaletteInsightAgent.Helpers
 
         private static string GetMaxIdUrl(string tableName)
         {
-            return String.Format("{0}/maxid?table={1}", config.Endpoint, tableName);
+            return String.Format("{0}/api/{1}/maxid?table={2}", config.Endpoint, API_VERSION, tableName);
         }
 
         private static string GetLicenseCheckUrl()
