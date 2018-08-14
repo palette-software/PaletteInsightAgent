@@ -91,6 +91,8 @@ namespace PaletteInsightAgent.Helpers
                     throw new TemporaryException("Gateway timeout. Insight Server is temporarily unavailable or connecition is poor.");
                 case HttpStatusCode.Forbidden:
                     throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
+                case HttpStatusCode.Conflict:
+                    throw new TemporaryException("Conflict. This is probably due to malformed content during upload.");
                 default:
                     errorDelegate();
                     return;
