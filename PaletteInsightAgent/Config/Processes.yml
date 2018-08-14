@@ -1,4 +1,2 @@
 - Name: vizqlserver
-  Granularity: Thread
 - Name: dataserver
-  Granularity: Thread
