@@ -416,7 +416,8 @@ namespace PaletteInsightAgent
         private bool IsTargetTableauRepoResident()
         {
             string node = null;
-            if (options != null && options.RepositoryDatabase != null) {
+            if (options != null && options.RepositoryDatabase != null)
+            {
                 node = options.RepositoryDatabase.Server;
             }
 
@@ -426,7 +427,8 @@ namespace PaletteInsightAgent
                 node = repo.Connection.Host;
             }
 
-            if (node == null) {
+            if (node == null)
+            {
                 Log.Error("Failed to retrieve Tableau repo credentials for telling whether this machine is the target repository node!");
                 return false;
             }
@@ -465,7 +467,8 @@ namespace PaletteInsightAgent
             return false;
         }
 
-        private bool IsConnectionToTableauRepoRequired() {
+        private bool IsConnectionToTableauRepoRequired()
+        {
             return (USE_TABLEAU_REPO || USE_STREAMING_TABLES) && IsTargetTableauRepoResident();
         }
 

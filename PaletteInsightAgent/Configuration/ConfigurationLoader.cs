@@ -100,13 +100,15 @@ namespace PaletteInsightAgent
 
             private static void LoadRepositoryFromConfig(PaletteInsightConfiguration config, PaletteInsightAgentOptions options)
             {
-                if (!options.UseRepoPolling && !options.UseStreamingTables) {
+                if (!options.UseRepoPolling && !options.UseStreamingTables)
+                {
                     return;
                 }
 
                 // load the tableau repo properties
                 var repoProps = config.TableauRepo;
-                if (repoProps == null) {
+                if (repoProps == null)
+                {
                     // Repository credentials are not filled in Config.yml
                     return;
                 }
