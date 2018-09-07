@@ -77,8 +77,6 @@ namespace PaletteInsightAgent
             var configuration = Loader.LoadConfigFile("config/Config.yml");
             Loader.LoadConfigTo(configuration, tableauDataFolder, options);
 
-            tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
-
             // Make sure that our HTTP client is initialized, because Splunk logger might be enabled
             // and it is using HTTP to send log messages to Splunk.
             APIClient.Init(options.WebserviceConfig);
@@ -125,8 +123,16 @@ namespace PaletteInsightAgent
                 threadInfoAgent = new ThreadInfoAgent(options.ThreadInfoPollInterval);
             }
 
-            if (USE_TABLEAU_REPO || USE_STREAMING_TABLES)
+            if (IsConnectionToTableauRepoRequired())
             {
+                Loader.AddRepoFromWorkgroupYaml(configuration, tableauDataFolder, options);
+
+                if (options.RepositoryDatabase == null)
+                {
+                    Log.Fatal("Could not found Tableau Repository credentials! Exiting.");
+                    Environment.Exit(-1);
+                }
+                tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
                 repoPollAgent = new RepoPollAgent();
             }
         }
@@ -196,7 +202,7 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasTargetTableauRepo())
+            if (this.IsConnectionToTableauRepoRequired())
             {
                 // On start get the schema of the repository tables
                 var table = tableauRepo.GetSchemaTable();
@@ -371,7 +377,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollFullTables(object stateInfo)
         {
-            if (!HasTargetTableauRepo())
+            if (!IsTargetTableauRepoResident())
             {
                 Log.Info("Target Tableau repo is not located on this computer. Skip polling full tables.");
                 return;
@@ -390,7 +396,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollStreamingTables(object stateInfo)
         {
-            if (!HasTargetTableauRepo())
+            if (!IsTargetTableauRepoResident())
             {
                 Log.Info("Target Tableau repo is not located on this computer. Skip polling streaming tables.");
                 return;
@@ -407,23 +413,32 @@ namespace PaletteInsightAgent
         /// Checks whether the target Tableau repository resides on this node.
         /// </summary>
         /// <returns></returns>
-        private bool HasTargetTableauRepo()
+        private bool IsTargetTableauRepoResident()
         {
+            string node = null;
+            if (options != null && options.RepositoryDatabase != null) {
+                node = options.RepositoryDatabase.Server;
+            }
+
             Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder, options.PreferPassiveRepo);
-            if (repo == null)
+            if (repo != null)
             {
-                Log.Error("Failed to retrieve Tableau repo credentials for polling!");
+                node = repo.Connection.Host;
+            }
+
+            if (node == null) {
+                Log.Error("Failed to retrieve Tableau repo credentials for telling whether this machine is the target repository node!");
                 return false;
             }
 
-            if (repo.Connection.Host == "localhost")
+            if (node == "localhost")
             {
                 return true;
             }
 
             try
             {
-                var repoHolder = Dns.GetHostEntry(repo.Connection.Host);
+                var repoHolder = Dns.GetHostEntry(node);
                 var localhost = Dns.GetHostEntry(Dns.GetHostName());
 
                 foreach (var repoAddress in repoHolder.AddressList)
@@ -448,6 +463,10 @@ namespace PaletteInsightAgent
             }
 
             return false;
+        }
+
+        private bool IsConnectionToTableauRepoRequired() {
+            return (USE_TABLEAU_REPO || USE_STREAMING_TABLES) && IsTargetTableauRepoResident();
         }
 
         private void UploadData(object stateInfo)
