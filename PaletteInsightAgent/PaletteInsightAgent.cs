@@ -421,7 +421,8 @@ namespace PaletteInsightAgent
                 node = options.RepositoryDatabase.Server;
             }
 
-            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder, options.PreferPassiveRepo);
+            string workgroupYmlPath = Loader.GetWorkgroupYmlPath();
+            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepo);
             if (repo != null)
             {
                 node = repo.Connection.Host;
