@@ -95,8 +95,13 @@ test_script:
     # Make and run an Insight Server locally
     # First create a go workspace
     - SET GOPATH=c:\go-workspace
-    # Make sure that we use golang version 1.6, since Insight Server rpm package is currently built with golang 1.6.3
-    - SET GOROOT=c:\go16
+    # Insight Server rpm package is currently built with golang 1.6.3
+    # The 1.6 version of go on appveyor build agent fails with error message:
+    #   package context: unrecognized import path "context" (import path does not begin with hostname)
+    # The 1.10 version of go handles the file upload requests differently
+    # for details: https://github.com/golang/go/issues/24041#issuecomment-394008950
+    # Try to use go 1.11
+    - SET GOROOT=c:\go111
     - SET GOEXEC=%GOROOT%\bin\go
     - SET GOPAL=%GOPATH%\src\github.com\palette-software
     - md %GOPAL%
@@ -213,4 +218,3 @@ on_finish:
     # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  

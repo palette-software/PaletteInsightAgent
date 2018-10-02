@@ -98,6 +98,14 @@ namespace PaletteInsightAgentTests.Configuration
         }
 
         [TestMethod]
+        public void TestExtractTableauInstallationFolder_20182()
+        {
+            var expected = @"C:\ProgramData\Tableau\Tableau Server";
+            var actual = Loader.ExtractTableauInstallationFolder(@"""C:\ProgramData\Tableau\Tableau Server\data\tabsvc\services\tabsvc_0.20182.18.0627.2230\tabsvc\tabsvc.exe"" run");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
         public void TestExtractTableauInstallationFolder_nonmatching()
         {
             Assert.IsNull(Loader.ExtractTableauInstallationFolder(@"E:\Program Files\Tableau\Tableau Server\worker.1\bin"));

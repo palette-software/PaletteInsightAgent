@@ -20,6 +20,12 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
         public void PollFullTables(ITableauRepoConn connection, ICollection<RepoTable> tables)
         {
+            if (connection == null)
+            {
+                Log.Error("Missing Tableau Repo connection while polling full tables!");
+                return;
+            }
+
             Log.Info("Polling Tableau repository tables.");
             tables.Where(t => t.Full)
                 .Select(t => t.Name)
@@ -48,6 +54,12 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
         public void PollStreamingTables(ITableauRepoConn connection, ICollection<RepoTable> tables, IOutput output)
         {
+            if (connection == null)
+            {
+                Log.Error("Missing Tableau Repo connection while polling streaming tables!");
+                return;
+            }
+
             Log.Info("Polling Tableau Streaming tables.");
             tables.Where(table => !table.Full)
                 .ToList()
