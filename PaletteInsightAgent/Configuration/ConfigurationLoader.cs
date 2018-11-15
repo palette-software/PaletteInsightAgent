@@ -7,6 +7,7 @@ using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NLog;
+using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output.OutputDrivers;
 using System.Text.RegularExpressions;
 using System.Management;
@@ -139,7 +140,7 @@ namespace PaletteInsightAgent
                     // deserialize the config
                     using (var reader = File.OpenText(filename))
                     {
-                        var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
+                        Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                         var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
                         return config;
                     }
@@ -292,7 +293,7 @@ namespace PaletteInsightAgent
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(LOGFOLDER_DEFAULTS_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
+                    Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
             }
@@ -690,7 +691,7 @@ namespace PaletteInsightAgent
                 try
                 {
                     // Get basic info from workgroup yml. Everything else from connections.yml
-                    var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
+                    Deserializer deserializer = YamlDeserializer.Create(new PascalCaseNamingConvention());
 
                     Workgroup workgroup = null;
                     using (var workgroupFile = File.OpenText(workgroupYmlPath))
@@ -748,7 +749,7 @@ namespace PaletteInsightAgent
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
+                    Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                     return deserializer.Deserialize<List<ProcessData>>(reader);
                 }
             }
@@ -757,7 +758,7 @@ namespace PaletteInsightAgent
             {
                 using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new NullNamingConvention(), ignoreUnmatched: true);
+                    Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                     return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }
