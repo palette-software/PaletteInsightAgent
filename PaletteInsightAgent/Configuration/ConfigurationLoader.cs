@@ -758,7 +758,7 @@ namespace PaletteInsightAgent
             {
                 using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
                 {
-                    Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                    Deserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
                     return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }
