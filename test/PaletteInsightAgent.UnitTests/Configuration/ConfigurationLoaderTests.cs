@@ -1,5 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.IO;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using PaletteInsightAgent.Configuration;
+
 
 namespace PaletteInsightAgentTests.Configuration
 {
@@ -130,6 +134,21 @@ namespace PaletteInsightAgentTests.Configuration
         public void TestIsEncrypted_not()
         {
             Assert.IsFalse(Loader.IsEncrypted("onlyread"));
+        }
+
+        [TestMethod]
+        public void TestLoadProcessData()
+        {
+            using (var reader = File.OpenText(Loader.PROCESSES_DEFAULT_FILE))
+            {
+                List<ProcessData> processList = Loader.LoadProcessData();
+                Assert.IsNotNull(processList);
+                Assert.AreEqual(2, processList.Count);
+                Assert.AreEqual("Thread", processList[0].Granularity);
+                Assert.AreEqual("vizqlserver", processList[0].Name);
+                Assert.AreEqual("Thread", processList[1].Granularity);
+                Assert.AreEqual("dataserver", processList[1].Name);
+            }
         }
     }
 }
