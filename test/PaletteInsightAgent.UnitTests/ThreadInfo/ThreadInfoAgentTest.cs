@@ -1,92 +1,53 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using PaletteInsightAgent.ThreadInfoPoller;
 namespace PaletteInsightAgentTests.ThreadInfo
 {
     /// <summary>
     /// Summary description for ThreadInfoAgentTest
     /// </summary>
     [TestClass]
-    public class ThreadInfoAgentTest
+    public class ThreadInfoAgentTest 
     {
-        public ThreadInfoAgentTest()
-        {
-            //
-            // TODO: Add constructor logic here
-            //
-        }
-
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///Gets or sets the test context which provides
-        ///information about and functionality for the current test run.
-        ///</summary>
-        public TestContext TestContext
-        {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
-        }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext)
-        // {
-        // }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        [TestInitialize()]
-        public void MyTestInitialize()
+        public void ThreadInfoTest()
         {
         }
 
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
+        [TestMethod]
+        public void StripProcessNameStartWith()
+        {
+            var processName1 = "control-tabadmincontroller";
+            var processName2 = "run-filestore";
+            var result = ThreadInfoAgent.StripTableauProcessName(processName1);
+            var result2 = ThreadInfoAgent.StripTableauProcessName(processName2);
+            Assert.AreEqual("tabadmincontroller", result);
+            Assert.AreEqual("filestore", result2);
+        }
 
-        //[TestMethod, Isolated]
-        //public void ShouldInsertValueForProcess()
-        //{
-        //    var process = Isolate.Fake.AllInstances<Process>();
-        //    Isolate.WhenCalled(() => process.TotalProcessorTime).WillReturn(new TimeSpan(15600));
-        //    Isolate.WhenCalled(() => process.StartTime).WillReturn(System.DateTime.Now);
-        //    var table = ThreadTables.makeThreadInfoTable();
-        //    IBox<long> count = Args.Ref<long>(0);
+        [TestMethod]
+        public void StripProcessNamePatternInString()
+        {
+            var processName1 = "control-tabadmincontrol-controller";
+            var processName2 = "run-filrun-estore";
+            var result = ThreadInfoAgent.StripTableauProcessName(processName1);
+            var result2 = ThreadInfoAgent.StripTableauProcessName(processName2);
+            Assert.AreEqual("tabadmincontrol-controller", result);
+            Assert.AreEqual("filrun-estore", result2);
+        }
 
-        //    var agent = new ThreadInfoAgent(15);
-        //    Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
-        //    Assert.AreEqual(count.Value, 1);
-        //}
+        [TestMethod]
+        public void StripProcessEmptyString()
+        {
+            var processName1 = "";
+            var result = ThreadInfoAgent.StripTableauProcessName(processName1);
+            Assert.AreEqual("", result);
+        }
 
-        //[TestMethod, Isolated]
-        //public void ShouldNotThrowWhenProcessExits()
-        //{
-        //    var process = Isolate.Fake.AllInstances<Process>();
-        //    var FakeLogger = Isolate.Fake.Instance<Logger>();
-        //    ObjectState state = new ObjectState(typeof(ThreadInfoAgent));
-        //    state.SetField("Log", FakeLogger);
-        //    Isolate.WhenCalled(() => process.TotalProcessorTime).WillThrow(new InvalidOperationException());
-        //    var table = ThreadTables.makeThreadInfoTable();
-        //    IBox<long> count = Args.Ref<long>(0);
-
-        //    var agent = new ThreadInfoAgent(15);
-        //    Isolate.Invoke.Method(agent, "pollThreadCountersOfProcess", new Process(), false, table, count);
-        //    Isolate.Verify.WasNotCalled(() => FakeLogger.Error("Failed to poll thread info for process {0}! Exception message: {1}", "", ""));
-        //}
+        [TestMethod]
+        public void StripProcessDoubleStart()
+        {
+            var processName1 = "run-control-admin";
+            var result = ThreadInfoAgent.StripTableauProcessName(processName1);
+            Assert.AreEqual("control-admin", result);
+        }
     }
 }

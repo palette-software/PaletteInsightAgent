@@ -9,6 +9,7 @@ using PaletteInsightAgent.Configuration;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace PaletteInsightAgent.ThreadInfoPoller
 {
@@ -97,6 +98,16 @@ namespace PaletteInsightAgent.ThreadInfoPoller
                 var threadLevel = processData.ContainsKey(process.ProcessName) && processData[process.ProcessName].Granularity == "Thread";
                 pollThreadCountersOfProcess(process, threadLevel, threadInfoTable, ref threadInfoTableCount, pollCycleTimeStamp);
             }
+        }
+
+        internal static string StripTableauProcessName(string processName)
+        {
+            string pattern = "^(control-|run-)";
+            string replacement = "";
+            Regex rgx = new Regex(pattern);
+
+            string result = rgx.Replace(processName, replacement, 1);
+            return result;
         }
 
         protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks, DateTime pollCycleTimeStamp, 
