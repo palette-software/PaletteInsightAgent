@@ -743,7 +743,7 @@ namespace PaletteInsightAgent
             ///  method throws its errors
             /// </summary>
             /// <returns></returns>
-            private static List<ProcessData> LoadProcessData()
+            internal static List<ProcessData> LoadProcessData()
             {
                 // since PaletteInsightAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
