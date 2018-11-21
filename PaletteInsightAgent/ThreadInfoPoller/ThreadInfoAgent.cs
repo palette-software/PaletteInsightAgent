@@ -10,6 +10,8 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using PaletteInsightAgent.Helpers;
+
 
 namespace PaletteInsightAgent.ThreadInfoPoller
 {
@@ -100,16 +102,6 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             }
         }
 
-        internal static string StripTableauProcessName(string processName)
-        {
-            string pattern = "^(control-|run-)";
-            string replacement = "";
-            Regex rgx = new Regex(pattern);
-
-            string result = rgx.Replace(processName, replacement, 1);
-            return result;
-        }
-
         protected void addInfoToTable(Process process, DataTable table, int threadId, long ticks, DateTime pollCycleTimeStamp, 
                                         DateTime startTimeStamp, bool threadLevel, IO_COUNTERS ioCounters)
         {
@@ -122,7 +114,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
             threadInfo.threadLevel = threadLevel;
-            threadInfo.process = process.ProcessName;
+            threadInfo.process = StringUtil.ReplaceSubString(process.ProcessName, "^(control-|run-)");
 
             threadInfo.readOperationCount = ioCounters.ReadOperationCount;
             threadInfo.writeOperationCount = ioCounters.WriteOperationCount;
