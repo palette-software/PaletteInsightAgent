@@ -127,6 +127,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\APIClient.cs" />
     <Compile Include="Helpers\GreenplumCsvEscaper.cs" />
+    <Compile Include="Helpers\StringUtil.cs" />
     <Compile Include="Helpers\TableHelper.cs" />
     <Compile Include="Configuration\ConfigurationLoader.cs" />
     <Compile Include="License\LicenseGuard.cs" />

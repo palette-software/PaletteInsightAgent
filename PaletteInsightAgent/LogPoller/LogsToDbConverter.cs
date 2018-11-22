@@ -7,6 +7,7 @@ using System.Net;
 
 using PaletteInsightAgent.Output;
 using System.IO;
+using PaletteInsightAgent.Helpers;
 
 namespace PaletteInsightAgent.LogPoller
 {
@@ -61,7 +62,7 @@ namespace PaletteInsightAgent.LogPoller
             // Add the new row to the table
             var row = serverLogsTable.NewRow();
 
-            row["filename"] = filename;
+            row["filename"] = StringUtil.ReplaceSubString(filename,"^nativeapi_");
             row["host_name"] = HostName;
             row["line"] = logLine;
             serverLogsTable.Rows.Add(row);

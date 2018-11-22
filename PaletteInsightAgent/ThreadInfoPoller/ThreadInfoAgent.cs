@@ -9,6 +9,9 @@ using PaletteInsightAgent.Configuration;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
+using PaletteInsightAgent.Helpers;
+
 
 namespace PaletteInsightAgent.ThreadInfoPoller
 {
@@ -111,7 +114,7 @@ namespace PaletteInsightAgent.ThreadInfoPoller
             threadInfo.startTimeStamp = startTimeStamp;
             threadInfo.host = HostName;
             threadInfo.threadLevel = threadLevel;
-            threadInfo.process = process.ProcessName;
+            threadInfo.process = StringUtil.ReplaceSubString(process.ProcessName, "^(control-|run-)");
 
             threadInfo.readOperationCount = ioCounters.ReadOperationCount;
             threadInfo.writeOperationCount = ioCounters.WriteOperationCount;
