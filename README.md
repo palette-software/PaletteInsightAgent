@@ -1,6 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/reub3y37h4hkw0ck/branch/master?svg=true)](https://ci.appveyor.com/project/palette-software/blackboxrecorder/branch/master)
-
-[![Build Status](https://travis-ci.org/palette-software/PaletteInsightAgent.svg?branch=master)](https://travis-ci.org/palette-software/PaletteInsightAgent)
+[![Build status](https://ci.appveyor.com/api/projects/status/2c59eg4vobeaiuo1?svg=true)](https://ci.appveyor.com/project/palette-software/paletteinsightagent)
 
 # Palette Insight Agent
 
