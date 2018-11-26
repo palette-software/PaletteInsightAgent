@@ -88,10 +88,10 @@ test_script:
     # - echo "Postgres database setup completed"
 
     # Setup SSH key to Github
-    - ps: $fileContent = "-----BEGIN RSA PRIVATE KEY-----`n"
-    - ps: $fileContent += $env:palette_robot_ssh_priv_key.Replace(' ', "`n")
-    - ps: $fileContent += "`n-----END RSA PRIVATE KEY-----`n"
-    - ps: Set-Content c:\users\appveyor\.ssh\id_rsa $fileContent
+    # - ps: $fileContent = "-----BEGIN RSA PRIVATE KEY-----`n"
+    # - ps: $fileContent += $env:palette_robot_ssh_priv_key.Replace(' ', "`n")
+    # - ps: $fileContent += "`n-----END RSA PRIVATE KEY-----`n"
+    # - ps: Set-Content c:\users\appveyor\.ssh\id_rsa $fileContent
 
     # Make and run an Insight Server locally
     # First create a go workspace
