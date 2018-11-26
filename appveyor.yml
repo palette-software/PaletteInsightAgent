@@ -15,6 +15,13 @@ assembly_info:
   assembly_version: '{version}'
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
+environment:
+  GITHUB_TOKEN:
+    secure: fH3VyHRwhHuNlPwPsOwljTRqYqluyuddBTfcmUn98GBdAOMQbnjcRjjIcYH/Qp6Q
+  PFX_PASS:
+    secure: vBmvQvyUnm1RWuPGGVa5itux+U8h2zqekSLhjHTsyss=
+  INSIGHT_AUTH_TOKEN:
+    secure: 4dmHeZzRVawtsknbaRphtf13xolVrCxAtZLtDA6Jl6xmN3p9BfdNt5fNO6vR2IcY
 
 services:
   - postgresql101
