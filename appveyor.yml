@@ -24,7 +24,7 @@ environment:
 
 
 services:
-  - postgresql93
+  - postgresql101
 build_script:
   - nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
   - nuget.exe restore
@@ -68,7 +68,7 @@ test_script:
     # Setup Postgres 9.3 on the worker
     - SET PGUSER=postgres
     - SET PGPASSWORD=Password12!
-    - PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+    - PATH=C:\Program Files\PostgreSQL\10\bin\;%PATH%
     - createdb workgroup
     # Setup target database
     - createdb palette
@@ -210,4 +210,4 @@ on_finish:
     # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - echo "Contents of the PaletteInsightAgent log"
   - type "C:\Program Files (x86)\Palette Insight Agent\Logs\PaletteInsightAgent.nlog.txt"
-  
+
