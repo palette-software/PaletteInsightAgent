@@ -1,7 +1,7 @@
 ﻿# Default values are commented out, so that they can be more easily updated with newer releases.
 # Simply uncomment those ones where you need different values.
 
-#UseCounterSamples: true
+UseCounterSamples: false
 #UseLogPolling: true
 #UseRepoPolling: true
 #UseThreadInfo: true
