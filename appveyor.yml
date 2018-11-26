@@ -153,7 +153,7 @@ test_script:
 
         $fileContent = "---`n";
         $fileContent += "pgsql.host: localhost`n";
-        $fileContent += "pgsql.port: 8060`n";
+        $fileContent += "pgsql.port: 5432`n";
         Set-Content $fake_tableau_data_folder\tabsvc\config\connections.yml $fileContent;
 
     # Acquire example serverlogs from our S3 'palette-insight-test' bucket
