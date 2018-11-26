@@ -96,18 +96,19 @@ test_script:
     # Make and run an Insight Server locally
     # First create a go workspace
     - SET GOPATH=c:\go-workspace
-    - SET GOPAL=%GOPATH%\src\github.com\palette-software
+    - SET GOPAL=%GOPATH%\src\gitlab.com\brilliant-data
     - md %GOPAL%
-    - git clone --depth 1 git@github.com:palette-software/insight-server.git %GOPAL%\insight-server
-    - cd %GOPAL%\insight-server
+    - git clone --depth 1 git@gitlab.com:brilliant-data/palette-insight-next.git %GOPAL%\palette-insight-next
+    - cd %GOPAL%\palette-insight-next\server
+    - SET SERVER_GO_PATH=gitlab.com\brilliant-data\palette-insight-next\server
     # Make sure 'go get' use the SSH key for downloading private repos, instead of HTTPS
-    - git config --global url."git@github.com:".insteadOf "https://github.com/"
-    - go get ./...
-    - go install
+    # - git config --global url."git@github.com:".insteadOf "https://github.com/"
+    - go get %SERVER_GO_PATH%
+    - go install %SERVER_GO_PATH%
     - echo license_key=%INSIGHT_AUTH_TOKEN% > %GOPATH%\bin\license.config
     - cd %GOPATH%\bin
     # Start Insight Server in the background
-    - ps: Start-Process insight-server.exe -ArgumentList "--config license.config"
+    - ps: Start-Process server.exe -ArgumentList "--config license.config"
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
