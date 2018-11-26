@@ -3,9 +3,7 @@ pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
-  - appveyor
-#   - master
-#   - production
+  - master
 # Do not build on tags (GitHub and BitBucket)
 skip_tags: true
 os: Visual Studio 2015
@@ -173,18 +171,18 @@ test_script:
 artifacts:
 - path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
   name: Next Agent v$(appveyor_build_version)
-deploy:
-- provider: GitHub
-  tag: v$(appveyor_build_version)
-  release: Palette Insight Agent v$(appveyor_build_version)
-  auth_token:
-    secure: fH3VyHRwhHuNlPwPsOwljTRqYqluyuddBTfcmUn98GBdAOMQbnjcRjjIcYH/Qp6Q
-  draft: false
-  prerelease: false
-  on:
-    branch: master
-after_deploy:
-- ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION $env:APPVEYOR_REPO_BRANCH $env:PALETTE_ROBOT_TRAVIS_TOKEN"
+# deploy:
+# - provider: GitHub
+#   tag: v$(appveyor_build_version)
+#   release: Palette Insight Agent v$(appveyor_build_version)
+#   auth_token:
+#     secure: fH3VyHRwhHuNlPwPsOwljTRqYqluyuddBTfcmUn98GBdAOMQbnjcRjjIcYH/Qp6Q
+#   draft: false
+#   prerelease: false
+#   on:
+#     branch: master
+# after_deploy:
+# - ps: iex "$env:APPVEYOR_BUILD_FOLDER\trigger-travis.ps1 $env:APPVEYOR_BUILD_VERSION $env:APPVEYOR_REPO_BRANCH $env:PALETTE_ROBOT_TRAVIS_TOKEN"
 
 # notifications:
 # - provider: Slack
