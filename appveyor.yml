@@ -33,7 +33,7 @@ build_script:
   - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/dl-github-release/releases/download/v1.0.1/windows_amd64.zip', $env:INSTALLER_DIR+'\windows_amd64.zip')
   - ps: dir $env:INSTALLER_DIR
   - echo "Downloaded Github Private Release Downloader"
-  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\windows_amd64.zip', '%APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release');
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\windows_amd64.zip', $env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release');
   - echo "Unzipped Github Private Release Downloader"
   - del %INSTALLER_DIR%\windows_amd64.zip
 
@@ -47,7 +47,7 @@ build_script:
   - mkdir %APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentService\bin\Release
   - ps: $env:UPDATER_ZIP = get-childitem $env:installer_dir | where {$_.extension -eq ".zip"}
   - ps: $env:UPDATER_ZIP = $env:INSTALLER_DIR + '\' + $env:UPDATER_ZIP
-  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:UPDATER_ZIP, '%APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentService\bin\Release');
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:UPDATER_ZIP, $env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentService\bin\Release');
   - dir %APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentService\bin\Release
 
   # Actually build Palette Insight Agent
@@ -155,14 +155,14 @@ test_script:
         Set-Content $fake_tableau_data_folder\tabsvc\config\connections.yml $fileContent;
 
     # Acquire example serverlogs from our S3 'palette-insight-test' bucket
-    - ps: (New-Object Net.WebClient).DownloadFile('https://palette-rpm.brilliant-data.net/test/example_serverlogs.zip', '%APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
+    - ps: (New-Object Net.WebClient).DownloadFile('https://palette-rpm.brilliant-data.net/test/example_serverlogs.zip', $env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
     - echo "Downloaded example_serverlogs.zip"
     # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
     - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
     - ps: Start-Service -Name PaletteInsightAgent
     - echo "Started PaletteInsightAgent service"
     - sleep 4
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('%APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder);
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder);
     - sleep 13
     - echo "Sleeping for 17 seconds"
     - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
@@ -173,7 +173,7 @@ test_script:
           exit 1
         }
     # - echo "Checking DB contents"
-    # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', '%APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
+    # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', $env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
     # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
