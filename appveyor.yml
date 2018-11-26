@@ -24,7 +24,8 @@ environment:
 services:
   - postgresql101
 build_script:
-  - set INSTALLER_DIR=%APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release
+  - set INSTALLER_RELATIVE_PATH=PaletteInsightAgentServiceInstaller\bin\Release
+  - set INSTALLER_DIR=%APPVEYOR_BUILD_FOLDER%\%INSTALLER_RELATIVE_PATH%
   - nuget.exe sources Add -Name LeDotNetProjectFeed -Source https://ci.appveyor.com/nuget/le-dotnet-hslfeubjh9oe
   - nuget.exe restore
 
@@ -33,14 +34,14 @@ build_script:
   - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/dl-github-release/releases/download/v1.0.1/windows_amd64.zip', $env:INSTALLER_DIR+'\windows_amd64.zip')
   - ps: dir $env:INSTALLER_DIR
   - echo "Downloaded Github Private Release Downloader"
-  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\windows_amd64.zip', $env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release');
+  - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\windows_amd64.zip', $env:INSTALLER_DIR);
   - echo "Unzipped Github Private Release Downloader"
   - del %INSTALLER_DIR%\windows_amd64.zip
 
   # Use github downloader to get latest palette-updater release
-  - dir %APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release
-  - dir %APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64
-  - %APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\dl-github-release.exe palette-software palette-updater %GITHUB_TOKEN%
+  - dir %INSTALLER_DIR%
+  - dir %INSTALLER_DIR%\windows_amd64
+  - PaletteInsightAgentServiceInstaller\bin\Release\windows_amd64\dl-github-release.exe palette-software palette-updater %GITHUB_TOKEN%
   - copy *.zip %INSTALLER_DIR%
 
   # Unzip palette-updater to the appropriate place
@@ -56,9 +57,9 @@ build_script:
   - '"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
 
   ## Sign the installer
-  - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "starschema.pfx" /p %PFX_PASS% "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
+  - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "starschema.pfx" /p %PFX_PASS% "%INSTALLER_RELATIVE_PATH%\PaletteInsightAgent.msi"'
 
-  - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+  - move %INSTALLER_RELATIVE_PATH%\PaletteInsightAgent.msi %INSTALLER_RELATIVE_PATH%\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
     # Run the unit tests first
@@ -110,7 +111,7 @@ test_script:
 
     # Make a sample run of Palette Insight Agent
     - echo "Try a Palette Insight install and uninstall"
-    - cd %APPVEYOR_BUILD_FOLDER%\PaletteInsightAgentServiceInstaller\bin\Release\
+    - cd %INSTALLER_DIR%
     - set PALIN_MSI=Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
     # Prepare the license file for the installer to use
     - msiexec.exe /qn /i %PALIN_MSI%
@@ -155,14 +156,14 @@ test_script:
         Set-Content $fake_tableau_data_folder\tabsvc\config\connections.yml $fileContent;
 
     # Acquire example serverlogs from our S3 'palette-insight-test' bucket
-    - ps: (New-Object Net.WebClient).DownloadFile('https://palette-rpm.brilliant-data.net/test/example_serverlogs.zip', $env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip')
+    - ps: (New-Object Net.WebClient).DownloadFile('https://palette-rpm.brilliant-data.net/test/example_serverlogs.zip', $env:INSTALLER_DIR+'\example_serverlogs.zip')
     - echo "Downloaded example_serverlogs.zip"
     # Stop the watchdog service, so that we can avoid unwanted agent updates during smoke test run
     - ps: Stop-Service -Name PaletteInsightWatchdog -ErrorAction SilentlyContinue
     - ps: Start-Service -Name PaletteInsightAgent
     - echo "Started PaletteInsightAgent service"
     - sleep 4
-    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release\example_serverlogs.zip', $watched_folder);
+    - ps: Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory($env:INSTALLER_DIR+'\example_serverlogs.zip', $watched_folder);
     - sleep 13
     - echo "Sleeping for 17 seconds"
     - ps: Stop-Service -Name PaletteInsightAgent -ErrorAction SilentlyContinue
@@ -173,7 +174,7 @@ test_script:
           exit 1
         }
     # - echo "Checking DB contents"
-    # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', $env:APPVEYOR_BUILD_FOLDER+'\PaletteInsightAgentServiceInstaller\bin\Release\appveyor_tests.json')
+    # - ps: (New-Object Net.WebClient).DownloadFile('https://github.com/palette-software/insight-tester/raw/master/appveyor_tests.json', $env:INSTALLER_DIR+'\appveyor_tests.json')
     # - windows_amd64\dbcheck.exe appveyor_tests.json "C:\Program Files (x86)\Palette Insight Agent\Config\Config.yml"
     - msiexec.exe /qn /x %PALIN_MSI%
     - echo "Uninstalled Palette Insight successfully"
