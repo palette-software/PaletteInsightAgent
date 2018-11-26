@@ -172,7 +172,7 @@ test_script:
     - echo "Uninstalled Palette Insight successfully"
 artifacts:
 - path: PaletteInsightAgentServiceInstaller\bin\Release\*.msi
-  name: Github
+  name: Next Agent v$(appveyor_build_version)
 deploy:
 - provider: GitHub
   tag: v$(appveyor_build_version)
