@@ -120,7 +120,7 @@ namespace PaletteInsightAgent
 
             [DefaultValue(600)]
             [YamlMember(Alias = "StreamingTablesPollInterval")]
-            public int StreamingTablesPollInterval { get; set; } = 600; // 10 minutes
+            public int StreamingTablesPollInterval { get; set; } = 300; // 5 minutes
 
             [DefaultValue(true)]
             [YamlMember(Alias = "PreferPassiveRepository")]
