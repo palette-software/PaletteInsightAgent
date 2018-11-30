@@ -14,3 +14,8 @@
     Name: http_requests
     Full: false
     Field: id 
+-
+    Name: background_jobs
+    Full: false
+    Field: updated_at
+    Filter: 'progress = 100'
