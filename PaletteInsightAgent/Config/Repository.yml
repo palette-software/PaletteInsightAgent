@@ -17,5 +17,5 @@
 -
     Name: background_jobs
     Full: false
-    Field: updated_at
+    Field: updated_at::timestamp(0)
     Filter: 'progress = 100'
