@@ -294,10 +294,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         {
             if (max is DateTime)
             {
-                // "u" means Universal sortable date/time pattern. This way we can
-                // avoid problems with different date/time patterns for example like
-                // dd/mm/yyyy and mm/dd/yyyy, which can result ambigous or invalid dates.
-                return ((DateTime)max).ToString("u");
+                return ((DateTime)max).ToString("yyyy-MM-dd HH:mm:ss.fff");
             }
             return max.ToString();
         }
