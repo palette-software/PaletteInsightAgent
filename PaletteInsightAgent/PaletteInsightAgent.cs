@@ -78,7 +78,6 @@ namespace PaletteInsightAgent
             var configuration = Loader.LoadConfigFile("config/Config.yml");
             Loader.LoadConfigTo(configuration, tableauDataFolder, options);
 
-            tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
             // Make sure that our HTTP client is initialized, because Splunk logger might be enabled
             // and it is using HTTP to send log messages to Splunk.
@@ -200,6 +199,7 @@ namespace PaletteInsightAgent
             if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasTargetTableauRepo())
             {
                 // On start get the schema of the repository tables                
+                tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
                 List<string> tableNames = options.RepositoryTables.Select(t => t.Name).ToList();
                 var table = tableauRepo.GetSchemaTable(String.Format("'{0}'", string.Join("','", tableNames)));

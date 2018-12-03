@@ -80,11 +80,7 @@ namespace PaletteInsightAgent
 
                 // Add the log folders based on the Tableau Data path from the registry
                 AddLogFoldersToOptions(config, options, tableauRoot);
-                if (!AddRepoToOptions(config, options, tableauRoot))
-                {
-                    // Error message is already in the log
-                    Environment.Exit(-1);
-                }
+                AddRepoToOptions(config, options, tableauRoot);
 
                 // setup the polling options
                 options.UseCounterSamples = config.UseCounterSamples;
