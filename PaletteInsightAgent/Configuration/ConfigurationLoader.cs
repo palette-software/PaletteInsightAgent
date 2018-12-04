@@ -478,24 +478,14 @@ namespace PaletteInsightAgent
             // to mock static functions in C#
             internal static string ExtractTableauInstallationFolder(string tabsvcPath)
             {
-                if (tabsvcPath == null)
+                var matchGroups = ParseTabsvcPath(tabsvcPath);
+                if (matchGroups == null)
                 {
-                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    Log.Warn("Failed to extract Tableau installation folder from: {0}", tabsvcPath);
                     return null;
                 }
 
-                // Extract the installation folder out of the tabsvc path. We are going to
-                // chop <one_folder>/bin/tabsvc.exe from the end of the tabsvc path.
-                var pattern = new Regex(@"""?(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe.*");
-                var groups = pattern.Match(tabsvcPath).Groups;
-                // groups[0] is the entire match, thus we expect at least 2
-                if (groups.Count < 2)
-                {
-                    Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
-                    return null;
-                }
-
-                return groups[1].Value;
+                return matchGroups[1].Value;
             }
 
             // This function is created only for unit testing, since it is pretty difficult
@@ -618,15 +608,48 @@ namespace PaletteInsightAgent
                 return true;
             }
 
-            public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot, bool preferPassiveRepo)
+            private static string GetConfigFilePath(string tableauRoot)
             {
                 if (tableauRoot == null)
                 {
                     Log.Error("Tableau data folder path must not be null while reading and YAML configs!");
                     return null;
                 }
+                //Up to Tableau 2018.1
                 var configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
 
+                //From Tabaleau 2018.2
+                if (!File.Exists(configFilePath))
+                {
+                    try
+                    {
+                        string[] configFilePaths = Directory.GetFiles(Path.Combine(tableauRoot, "tabsvc", "config"), "workgroup.yml", SearchOption.AllDirectories);
+                        foreach (string configPath in configFilePaths)
+                        {
+                            string pattern = @".*pgsql_.*";
+                            Match m = Regex.Match(configPath, pattern);
+                            if (m.Success)
+                            {
+                                configFilePath = configPath;
+                                Log.Info("Config file path: {0}", configFilePath);
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "Cannot find workgroup.yml file");
+                        return null;
+                    }
+
+                }
+                return configFilePath;
+            }
+
+            public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot, bool preferPassiveRepo)
+            {
+
+                var configFilePath = GetConfigFilePath(tableauRoot);
                 try
                 {
                     // Get basic info from workgroup yml. Everything else from connections.yml
@@ -669,6 +692,36 @@ namespace PaletteInsightAgent
                     Log.Error(e, "Error while trying to load and parse YAML config from '{0}' Exception: ", configFilePath);
                     return null;
                 }
+            }
+
+            internal static GroupCollection ParseTabsvcPath(string tabsvcPath)
+            {
+                if (tabsvcPath == null)
+                {
+                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    return null;
+                }
+
+                // Extract the installation folder out of the tabsvc path. We are going to
+                // chop <one_folder>\bin\tabsvc.exe from the end of the tabsvc path.
+                var pattern = new Regex(@"""?(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe.*");
+                var groups = pattern.Match(tabsvcPath).Groups;
+                // groups[0] is the entire match, thus we expect at least 2
+                if (groups.Count < 2)
+                {
+                    // Onwards Tableau Server 2018.2 the tabsvc.exe location is slightly different. In this case
+                    // we are going to chop data\tabsvc\services\<tabsvc_version_folder>\tabsvc\tabsvc.exe from the
+                    // end of the tabsvc path.
+                    pattern = new Regex(@"""?(.*?)[\\\/]+data[\\\/]+tabsvc[\\\/]+services[\\\/]+([^\\\/]+)[\\\/]+tabsvc[\\\/]+tabsvc.exe.*");
+                    groups = pattern.Match(tabsvcPath).Groups;
+                    if (groups.Count < 3)
+                    {
+                        Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
+                        return null;
+                    }
+                }
+
+                return groups;
             }
 
             #endregion
