@@ -469,7 +469,7 @@ namespace PaletteInsightAgent.Output
             return File.Exists(MaxIdFileName(fileName));
         }
 
-        private static IEnumerable<string> GetServerlogFileList(string from, string searchPattern = null)
+        private static IEnumerable<string> GetServerlogFileList(string from, string searchPattern = "*")
         {
             IEnumerable<string> serverlogFiles = new List<string>();
             try
