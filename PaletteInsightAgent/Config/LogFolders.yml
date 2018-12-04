@@ -1,3 +1,4 @@
+# Up to Tableau 2018.1
 - Directory: 'tabsvc\vizqlserver\Logs'
   Filter: 'vizqlserver*.txt'
   ProcessName: 'vizqlserver'
@@ -6,4 +7,12 @@
   ProcessName: 'hyper'
 - Directory: 'tabsvc\vizqlserver\Logs'
   Filter: 'backgrounder*.txt'
+  ProcessName: 'backgrounder'
+
+# Tableau 2018.2+
+- Directory: 'tabsvc\logs\vizqlserver'
+  Filter: 'nativeapi_vizqlserver*.txt'
+  ProcessName: 'vizqlserver'
+- Directory: 'tabsvc\logs\backgrounder'
+  Filter: 'nativeapi_backgrounder*.txt'
   ProcessName: 'backgrounder'
