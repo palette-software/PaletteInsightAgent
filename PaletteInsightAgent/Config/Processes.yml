@@ -2,3 +2,11 @@
   Granularity: Thread
 - Name: dataserver
   Granularity: Thread
+- Name: control-vizqlserver
+  Granularity: Thread
+- Name: control-dataserver
+  Granularity: Thread
+- Name: run-vizqlserver
+  Granularity: Thread
+- Name: run-dataserver
+  Granularity: Thread
