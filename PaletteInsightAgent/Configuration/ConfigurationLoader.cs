@@ -749,7 +749,7 @@ namespace PaletteInsightAgent
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
-                    IDeserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
                     return deserializer.Deserialize<List<ProcessData>>(reader);
                 }
             }

@@ -62,7 +62,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationLoaderTests.cs" />
-    <Compile Include="Helpers\YamlDeserializerTests.cs" />
     <Compile Include="Helpers\StringUtilTest.cs" />
     <Compile Include="Output\CsvSerializerTests.cs" />
     <Compile Include="Output\FileUploaderTests.cs" />
