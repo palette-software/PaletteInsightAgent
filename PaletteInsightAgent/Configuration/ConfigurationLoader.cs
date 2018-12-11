@@ -22,7 +22,7 @@ namespace PaletteInsightAgent
         /// </summary>
         public class Loader
         {
-            private const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
+            internal const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
             internal const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
             private const string REPOSITORY_TABLES_FILE = "Config/Repository.yml";
             private const string TABLEAU_SERVER_APPLICATION_SERVICE_NAME = "tabsvc";
@@ -286,14 +286,14 @@ namespace PaletteInsightAgent
             ///  method throws its errors
             /// </summary>
             /// <returns></returns>
-            private static List<LogFolder> LoadDefaultLogFolders()
+            internal static List<LogFolder> LoadDefaultLogFolders()
             {
                 // load the defaults from the application
                 // since PaletteInsightAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(LOGFOLDER_DEFAULTS_FILE))
                 {
-                    IDeserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
             }

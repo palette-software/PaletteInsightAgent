@@ -139,16 +139,22 @@ namespace PaletteInsightAgentTests.Configuration
         [TestMethod]
         public void TestLoadProcessData()
         {
-            using (var reader = File.OpenText(Loader.PROCESSES_DEFAULT_FILE))
-            {
-                List<ProcessData> processList = Loader.LoadProcessData();
-                Assert.IsNotNull(processList);
-                Assert.AreEqual(6, processList.Count);
-                Assert.AreEqual("Thread", processList[0].Granularity);
-                Assert.AreEqual("vizqlserver", processList[0].Name);
-                Assert.AreEqual("Thread", processList[1].Granularity);
-                Assert.AreEqual("dataserver", processList[1].Name);
-            }
+            List<ProcessData> processList = Loader.LoadProcessData();
+            Assert.IsNotNull(processList);
+            Assert.AreEqual(6, processList.Count);
+            Assert.AreEqual("Thread", processList[0].Granularity);
+            Assert.AreEqual("vizqlserver", processList[0].Name);
+            Assert.AreEqual("Thread", processList[1].Granularity);
+            Assert.AreEqual("dataserver", processList[1].Name);
+        }
+
+        [TestMethod]
+        public void TestLoadDefaultLogFolders()
+        {
+            List<LogFolder> folderList = Loader.LoadDefaultLogFolders();
+            Assert.AreEqual(7, folderList.Count);
+            Assert.AreEqual(@"tabsvc\vizqlserver\Logs", folderList[0].Directory);
+            Assert.AreEqual("*.txt", folderList[0].Filter);
         }
     }
 }
