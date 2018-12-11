@@ -143,7 +143,7 @@ namespace PaletteInsightAgentTests.Configuration
             {
                 List<ProcessData> processList = Loader.LoadProcessData();
                 Assert.IsNotNull(processList);
-                Assert.AreEqual(2, processList.Count);
+                Assert.AreEqual(6, processList.Count);
                 Assert.AreEqual("Thread", processList[0].Granularity);
                 Assert.AreEqual("vizqlserver", processList[0].Name);
                 Assert.AreEqual("Thread", processList[1].Granularity);

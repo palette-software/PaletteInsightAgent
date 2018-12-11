@@ -18,10 +18,10 @@ namespace PaletteInsightAgentTests.Helpers
         {
             using (var reader = File.OpenText(Loader.PROCESSES_DEFAULT_FILE))
             {
-                Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                IDeserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                 List<ProcessData> processList = deserializer.Deserialize<List<ProcessData>>(reader);
                 Assert.IsNotNull(processList);
-                Assert.AreEqual(2, processList.Count);
+                Assert.AreEqual(6, processList.Count);
                 Assert.AreEqual("Thread", processList[0].Granularity);
                 Assert.AreEqual("vizqlserver", processList[0].Name);
                 Assert.AreEqual("Thread", processList[1].Granularity);

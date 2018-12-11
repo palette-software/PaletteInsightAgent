@@ -23,7 +23,7 @@ namespace PaletteInsightAgent
         public class Loader
         {
             private const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
-            private const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
+            internal const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
             private const string REPOSITORY_TABLES_FILE = "Config/Repository.yml";
             private const string TABLEAU_SERVER_APPLICATION_SERVICE_NAME = "tabsvc";
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -140,7 +140,7 @@ namespace PaletteInsightAgent
                     // deserialize the config
                     using (var reader = File.OpenText(filename))
                     {
-                        Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                        IDeserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                         var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
                         return config;
                     }
@@ -293,7 +293,7 @@ namespace PaletteInsightAgent
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(LOGFOLDER_DEFAULTS_FILE))
                 {
-                    Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
             }
@@ -691,7 +691,7 @@ namespace PaletteInsightAgent
                 try
                 {
                     // Get basic info from workgroup yml. Everything else from connections.yml
-                    Deserializer deserializer = YamlDeserializer.Create(new PascalCaseNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create(new PascalCaseNamingConvention());
 
                     Workgroup workgroup = null;
                     using (var workgroupFile = File.OpenText(workgroupYmlPath))
@@ -749,7 +749,7 @@ namespace PaletteInsightAgent
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
-                    Deserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
                     return deserializer.Deserialize<List<ProcessData>>(reader);
                 }
             }
@@ -758,7 +758,7 @@ namespace PaletteInsightAgent
             {
                 using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
                 {
-                    Deserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
                     return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }

@@ -4,7 +4,7 @@ using YamlDotNet.Serialization;
 namespace PaletteInsightAgent.Helpers
 {
     class YamlDeserializer {
-        public static Deserializer Create(INamingConvention namingConvention) {
+        public static IDeserializer Create(INamingConvention namingConvention) {
             return new DeserializerBuilder()
                         .WithNamingConvention(namingConvention)
                         .IgnoreUnmatchedProperties()
