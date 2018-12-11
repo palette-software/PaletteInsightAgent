@@ -1,3 +1,4 @@
+# Up to Tableau 2018.1
 - Directory: 'tabsvc\vizqlserver\Logs'
   Filter: '*.txt'
   # Format: 'json'
@@ -12,3 +13,18 @@
 - Directory: 'tabsvc\logs\dataengine'
   Filter: 'tdeserver*.log'
   Format: 'plain'
+
+# Tableau 2018.2+
+- Directory: 'tabsvc\logs\vizqlserver'
+  Filter: 'nativeapi_vizqlserver*.txt'
+  # Format: 'json'
+  Format: 'server'	# Until Talend expects serverlogs table, the format should remain "server"
+- Directory: 'tabsvc\logs\dataserver'
+  Filter: 'nativeapi_dataserver*.txt'
+  # Format: 'json'
+  Format: 'server'	# Until Talend expects serverlogs table, the format should remain "server"
+- Directory: 'tabsvc\logs\vizportal'
+  Filter: 'nativeapi_vizportal*.txt'
+  # Format: 'json'
+  Format: 'server'	# Until Talend expects serverlogs table, the format should remain "server"
+  
