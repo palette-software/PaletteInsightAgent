@@ -443,7 +443,8 @@ namespace PaletteInsightAgent
             {
                 Log.Info("Target Tableau repo node: {0}", node);
                 var repoHolder = Dns.GetHostEntry(node);
-                var localhost = Dns.GetHostEntry(Dns.GetHostName());
+                var localNode = Dns.GetHostName();
+                var localhost = Dns.GetHostEntry(localNode);
 
                 foreach (var repoAddress in repoHolder.AddressList)
                 {
@@ -461,13 +462,14 @@ namespace PaletteInsightAgent
                         }
                     }
                 }
+
+                Log.Info("Local node: '{0}' is not the target Tableau repo node", localNode);
             }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to match repo holder with localhost! Exception: ");
             }
 
-            Log.Info("Node: '{0}' is not the target Tableau repo node", node);
             return false;
         }
 

@@ -724,7 +724,7 @@ namespace PaletteInsightAgent
                             }
                             else
                             {
-                                Log.Info("Active Tableau repo is the target repo");
+                                Log.Info("Active Tableau repo is configured to be the target repo");
                             }
                         }
                         if (!IsValidRepoData(workgroup))
