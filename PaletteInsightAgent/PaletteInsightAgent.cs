@@ -450,6 +450,7 @@ namespace PaletteInsightAgent
                 {
                     if (IPAddress.IsLoopback(repoAddress))
                     {
+                        Log.Info("This is the target Tableau repo node. Repo address is the loopback address of this machine.");
                         return true;
                     }
 
@@ -458,6 +459,7 @@ namespace PaletteInsightAgent
                         Log.Info("Check for target Tableau repo address: '{0}' -- local address: '{1}'", repoAddress, localAddress);
                         if (repoAddress.Equals(localAddress))
                         {
+                            Log.Info("This is the target Tableau repo node.");
                             return true;
                         }
                     }
