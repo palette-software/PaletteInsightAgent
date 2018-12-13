@@ -422,7 +422,7 @@ namespace PaletteInsightAgent
             }
 
             string workgroupYmlPath = Loader.GetWorkgroupYmlPath();
-            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepo);
+            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
             if (repo != null)
             {
                 node = repo.Connection.Host;
@@ -441,24 +441,31 @@ namespace PaletteInsightAgent
 
             try
             {
+                Log.Info("Target Tableau repo node: {0}", node);
                 var repoHolder = Dns.GetHostEntry(node);
-                var localhost = Dns.GetHostEntry(Dns.GetHostName());
+                var localNode = Dns.GetHostName();
+                var localhost = Dns.GetHostEntry(localNode);
 
                 foreach (var repoAddress in repoHolder.AddressList)
                 {
                     if (IPAddress.IsLoopback(repoAddress))
                     {
+                        Log.Info("This is the target Tableau repo node. Repo address is the loopback address of this machine.");
                         return true;
                     }
 
                     foreach (var localAddress in localhost.AddressList)
                     {
+                        Log.Info("Check for target Tableau repo address: '{0}' -- local address: '{1}'", repoAddress, localAddress);
                         if (repoAddress.Equals(localAddress))
                         {
+                            Log.Info("This is the target Tableau repo node.");
                             return true;
                         }
                     }
                 }
+
+                Log.Info("Local node: '{0}' is not the target Tableau repo node", localNode);
             }
             catch (Exception e)
             {

@@ -48,6 +48,7 @@ namespace PaletteInsightAgent
                 options.StorageLimit = config.StorageLimit;
 
                 options.AllProcesses = config.AllProcesses;
+                options.PreferPassiveRepository = config.PreferPassiveRepository;
 
                 options.AuthToken = config.InsightAuthToken;
 
@@ -168,9 +169,7 @@ namespace PaletteInsightAgent
             /// <param name="tableauRoot"></param>
             public static bool AddRepoFromWorkgroupYaml(PaletteInsightConfiguration config, string tableauRoot, PaletteInsightAgentOptions options)
             {
-                options.PreferPassiveRepo = config.PreferPassiveRepository;
-
-                Workgroup repo = GetRepoFromWorkgroupYaml(GetWorkgroupYmlPath(), options.PreferPassiveRepo);
+                Workgroup repo = GetRepoFromWorkgroupYaml(GetWorkgroupYmlPath(), options.PreferPassiveRepository);
                 if (repo == null)
                 {
                     return false;
@@ -701,20 +700,31 @@ namespace PaletteInsightAgent
                         {
                             workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
                             // workgroup.Connection.Host always contains the active repo
-                            if (preferPassiveRepo && workgroup.PgHost0 != null && workgroup.PgHost1 != null)
+                            if (preferPassiveRepo)
                             {
-                                // Use passive repo if possible/exists
-                                if (workgroup.Connection.Host != workgroup.PgHost0)
+                                if (workgroup.PgHost0 != null && workgroup.PgHost1 != null)
                                 {
-                                    workgroup.Connection.Host = workgroup.PgHost0;
-                                    workgroup.Connection.Port = workgroup.PgPort0;
+                                    // Use passive repo if possible/exists
+                                    if (workgroup.Connection.Host != workgroup.PgHost0)
+                                    {
+                                        workgroup.Connection.Host = workgroup.PgHost0;
+                                        workgroup.Connection.Port = workgroup.PgPort0;
+                                    }
+                                    else
+                                    {
+                                        workgroup.Connection.Host = workgroup.PgHost1;
+                                        workgroup.Connection.Port = workgroup.PgPort1;
+                                    }
+                                    Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
                                 }
                                 else
                                 {
-                                    workgroup.Connection.Host = workgroup.PgHost1;
-                                    workgroup.Connection.Port = workgroup.PgPort1;
+                                    Log.Info("Passive repo is preferred as target Tableau repo, but '{0}' does not contain passive repo node information", workgroupYmlPath);
                                 }
-                                Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
+                            }
+                            else
+                            {
+                                Log.Info("Active Tableau repo is configured to be the target repo");
                             }
                         }
                         if (!IsValidRepoData(workgroup))
