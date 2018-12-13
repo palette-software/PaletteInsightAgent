@@ -47,6 +47,7 @@ namespace PaletteInsightAgent
                 options.StorageLimit = config.StorageLimit;
 
                 options.AllProcesses = config.AllProcesses;
+                options.PreferPassiveRepository = config.PreferPassiveRepository;
 
                 options.AuthToken = config.InsightAuthToken;
 
@@ -167,9 +168,7 @@ namespace PaletteInsightAgent
             /// <param name="tableauRoot"></param>
             public static bool AddRepoFromWorkgroupYaml(PaletteInsightConfiguration config, string tableauRoot, PaletteInsightAgentOptions options)
             {
-                options.PreferPassiveRepo = config.PreferPassiveRepository;
-
-                Workgroup repo = GetRepoFromWorkgroupYaml(GetWorkgroupYmlPath(), options.PreferPassiveRepo);
+                Workgroup repo = GetRepoFromWorkgroupYaml(GetWorkgroupYmlPath(), options.PreferPassiveRepository);
                 if (repo == null)
                 {
                     return false;
