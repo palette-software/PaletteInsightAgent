@@ -156,5 +156,13 @@ namespace PaletteInsightAgentTests.Configuration
             Assert.AreEqual(@"tabsvc\vizqlserver\Logs", folderList[0].Directory);
             Assert.AreEqual("*.txt", folderList[0].Filter);
         }
+
+        [TestMethod]
+        public void TestLoadConfigFile()
+        {
+            PaletteInsightConfiguration config = Loader.LoadConfigFile("config/Config.yml");
+            Assert.AreEqual(true, config.UseRepoPolling);
+            Assert.AreEqual("http://localhost:9000", config.Webservice.Endpoint);
+        }
     }
 }

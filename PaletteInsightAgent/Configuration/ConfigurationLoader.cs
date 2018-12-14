@@ -141,7 +141,7 @@ namespace PaletteInsightAgent
                     // deserialize the config
                     using (var reader = File.OpenText(filename))
                     {
-                        IDeserializer deserializer = YamlDeserializer.Create(new UnderscoredNamingConvention());
+                        IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
                         var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
                         return config;
                     }
