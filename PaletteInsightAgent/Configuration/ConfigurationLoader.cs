@@ -5,7 +5,6 @@ using System.Configuration;
 using Microsoft.Win32;
 using System.IO;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using NLog;
 using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output.OutputDrivers;
@@ -141,7 +140,7 @@ namespace PaletteInsightAgent
                     // deserialize the config
                     using (var reader = File.OpenText(filename))
                     {
-                        IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
+                        IDeserializer deserializer = YamlDeserializer.Create();
                         var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
                         return config;
                     }
@@ -292,7 +291,7 @@ namespace PaletteInsightAgent
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(LOGFOLDER_DEFAULTS_FILE))
                 {
-                    IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create();
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
             }
@@ -690,7 +689,7 @@ namespace PaletteInsightAgent
                 try
                 {
                     // Get basic info from workgroup yml. Everything else from connections.yml
-                    IDeserializer deserializer = YamlDeserializer.Create(new PascalCaseNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create();
 
                     Workgroup workgroup = null;
                     using (var workgroupFile = File.OpenText(workgroupYmlPath))
@@ -759,7 +758,7 @@ namespace PaletteInsightAgent
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
-                    IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create();
                     return deserializer.Deserialize<List<ProcessData>>(reader);
                 }
             }
@@ -768,7 +767,7 @@ namespace PaletteInsightAgent
             {
                 using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
                 {
-                    IDeserializer deserializer = YamlDeserializer.Create(new NullNamingConvention());
+                    IDeserializer deserializer = YamlDeserializer.Create();
                     return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }
