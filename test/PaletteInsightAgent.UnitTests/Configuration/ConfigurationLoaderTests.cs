@@ -141,7 +141,7 @@ namespace PaletteInsightAgentTests.Configuration
         {
             List<ProcessData> processList = Loader.LoadProcessData();
             Assert.IsNotNull(processList);
-            Assert.AreEqual(6, processList.Count);
+            Assert.AreEqual(2, processList.Count);
             Assert.AreEqual("Thread", processList[0].Granularity);
             Assert.AreEqual("vizqlserver", processList[0].Name);
             Assert.AreEqual("Thread", processList[1].Granularity);
@@ -152,7 +152,7 @@ namespace PaletteInsightAgentTests.Configuration
         public void TestLoadDefaultLogFolders()
         {
             List<LogFolder> folderList = Loader.LoadDefaultLogFolders();
-            Assert.AreEqual(7, folderList.Count);
+            Assert.AreEqual(5, folderList.Count);
             Assert.AreEqual(@"tabsvc\vizqlserver\Logs", folderList[0].Directory);
             Assert.AreEqual("*.txt", folderList[0].Filter);
         }
