@@ -1,9 +1,10 @@
 ﻿using NLog;
 using System.Collections.Generic;
 using System.IO;
+using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Counters;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+
 
 namespace PaletteInsightAgent.CounterConfig
 {
@@ -21,7 +22,7 @@ namespace PaletteInsightAgent.CounterConfig
             // we should always be in the correct folder for this to work
             using (var reader = File.OpenText(pathToConfig))
             {
-                var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
+                IDeserializer deserializer = YamlDeserializer.Create();
                 var counterConfig = deserializer.Deserialize<List<Counters.Config>>(reader);
                 return Counters.Config.ToICounterList(counterConfig);
             }
