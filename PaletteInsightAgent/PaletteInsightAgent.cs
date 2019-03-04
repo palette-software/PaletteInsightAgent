@@ -204,7 +204,7 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && IsTargetTableauRepoResident())
+            if (IsConnectionToTableauRepoRequired())
             {
                 try
                 {
@@ -430,15 +430,16 @@ namespace PaletteInsightAgent
                 node = options.RepositoryDatabase.Server;
             }
 
-            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder, options.PreferPassiveRepository);
+            var workgroupYmlPath = Loader.GetWorkgroupYmlPath(tableauDataFolder);
+            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
             if (repo != null)
             {
                 node = repo.Connection.Host;
             }
 
-            if (repo == null)
+            if (node == null)
             {
-                Log.Error("Failed to retrieve Tableau repo credentials for polling!");
+                Log.Error("Failed to retrieve Tableau repo credentials for telling whether this machine is the target repository node!");
                 return false;
             }
 
@@ -479,7 +480,6 @@ namespace PaletteInsightAgent
                 Log.Error(e, "Failed to match repo holder with localhost! Exception: ");
             }
 
-            Log.Info("Node: '{0}' is not the target Tableau repo node", node);
             return false;
         }
 

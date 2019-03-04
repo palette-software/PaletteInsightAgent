@@ -168,7 +168,8 @@ namespace PaletteInsightAgent
             /// <param name="tableauRoot"></param>
             public static bool AddRepoFromWorkgroupYaml(PaletteInsightConfiguration config, string tableauRoot, PaletteInsightAgentOptions options)
             {
-                Workgroup repo = GetRepoFromWorkgroupYaml(GetWorkgroupYmlPath(tableauRoot), options.PreferPassiveRepository);
+                var workgroupYmlPath = GetWorkgroupYmlPath(tableauRoot);
+                Workgroup repo = GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
                 if (repo == null)
                 {
                     return false;
@@ -507,7 +508,7 @@ namespace PaletteInsightAgent
             {
                 if (tabsvcPath == null)
                 {
-                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    Log.Warn("Failed to extract Tableau bin folder as the path to 'tabsvc' service is null!");
                     return null;
                 }
 
@@ -622,7 +623,7 @@ namespace PaletteInsightAgent
             }
 
 
-            private static string GetWorkgroupYmlPath(string tableauRoot)
+            public static string GetWorkgroupYmlPath(string tableauRoot)
             {
                 if (tableauRoot == null)
                 {
@@ -660,10 +661,15 @@ namespace PaletteInsightAgent
                 return workgroupYmlPath;
             }
 
-            public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot, bool preferPassiveRepo)
+            public static Workgroup GetRepoFromWorkgroupYaml(string workgroupYmlPath, bool preferPassiveRepo)
             {
 
-                var workgroupYmlPath = GetWorkgroupYmlPath(tableauRoot);
+                if (workgroupYmlPath == null)
+                {
+                    Log.Error("Path for workgroup.yml must not be null while reading configs!");
+                    return null;
+                }
+
                 try
                 {
                     // Get basic info from workgroup yml. Everything else from connections.yml
@@ -701,7 +707,7 @@ namespace PaletteInsightAgent
                             }
                             else
                             {
-                                Log.Info("Active Tableau repo is the target repo");
+                                Log.Info("Active Tableau repo is configured to be the target repo");
                             }
                         }
                         if (!IsValidRepoData(workgroup))
