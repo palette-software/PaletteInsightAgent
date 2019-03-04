@@ -125,8 +125,16 @@ namespace PaletteInsightAgent
                 threadInfoAgent = new ThreadInfoAgent(options.ThreadInfoPollInterval);
             }
 
-            if (USE_TABLEAU_REPO || USE_STREAMING_TABLES)
+            if (IsConnectionToTableauRepoRequired())
             {
+                Loader.AddRepoFromWorkgroupYaml(configuration, tableauDataFolder, options);
+
+                if (options.RepositoryDatabase == null)
+                {
+                    Log.Fatal("Could not found Tableau Repository credentials! Exiting.");
+                    Environment.Exit(-1);
+                }
+                tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
                 repoPollAgent = new RepoPollAgent();
             }
         }
@@ -474,6 +482,12 @@ namespace PaletteInsightAgent
             Log.Info("Node: '{0}' is not the target Tableau repo node", node);
             return false;
         }
+
+        private bool IsConnectionToTableauRepoRequired()
+        {
+            return (USE_TABLEAU_REPO || USE_STREAMING_TABLES) && IsTargetTableauRepoResident();
+        }
+
 
         private void UploadData(object stateInfo)
         {

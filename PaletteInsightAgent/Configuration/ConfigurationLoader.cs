@@ -47,6 +47,7 @@ namespace PaletteInsightAgent
                 options.StorageLimit = config.StorageLimit;
 
                 options.AllProcesses = config.AllProcesses;
+                options.PreferPassiveRepository = config.PreferPassiveRepository;
 
                 options.AuthToken = config.InsightAuthToken;
 
@@ -80,7 +81,7 @@ namespace PaletteInsightAgent
 
                 // Add the log folders based on the Tableau Data path from the registry
                 AddLogFoldersToOptions(config, options, tableauRoot);
-                AddRepoToOptions(config, options, tableauRoot);
+                AddRepoFromWorkgroupYaml(config, tableauRoot, options);
 
                 // setup the polling options
                 options.UseCounterSamples = config.UseCounterSamples;
@@ -131,64 +132,42 @@ namespace PaletteInsightAgent
             /// <param name="config"></param>
             /// <param name="options"></param>
             /// <param name="tableauRoot"></param>
-            private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
+            public static bool AddRepoFromWorkgroupYaml(PaletteInsightConfiguration config, string tableauRoot, PaletteInsightAgentOptions options)
             {
-                options.PreferPassiveRepository = config.PreferPassiveRepository;
-
-                Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot, options.PreferPassiveRepository);
-                if (repo != null)
+                Workgroup repo = GetRepoFromWorkgroupYaml(GetWorkgroupYmlPath(tableauRoot), options.PreferPassiveRepository);
+                if (repo == null)
                 {
-                    try
-                    {
-                        if (IsEncrypted(repo.Password))
-                        {
-                            Log.Info("Encrypted readonly password found in workgroup.yml. Getting password with tabadmin command.");
-                            repo.Password = Tableau.tabadminRun("get pgsql.readonly_password");
-                        }
-                        options.RepositoryDatabase = new DbConnectionInfo
-                        {
-                            Server = repo.Connection.Host,
-                            Port = repo.Connection.Port,
-                            Username = repo.Username,
-                            Password = repo.Password,
-                            DatabaseName = repo.Connection.DatabaseName
-                        };
-
-                        if (config.TableauRepo != null)
-                        {
-                            Log.Warn("Ignoring Tableau repo settings from config.yml.");
-                        }
-                        return true;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, "Failed to acquire Tableau repo credentials! Exception: ");
-                    }
-                }
-
-                Log.Warn("Trying Config.yml as a last resort for Tableau repo credentials...");
-                try
-                {
-                    // load the tableau repo properties
-                    var repoProps = config.TableauRepo;
-                    options.RepositoryDatabase = new DbConnectionInfo
-                    {
-                        Server = repoProps.Host,
-                        Port = Convert.ToInt32(repoProps.Port),
-                        Username = repoProps.User,
-                        Password = repoProps.Password,
-                        DatabaseName = repoProps.Database
-                    };
-
-                    Log.Info("Found Tableau repo credentials in Config.yml.");
-                }
-                catch (Exception e)
-                {
-                    Log.Fatal(e, "Tableau repo credentials were not found in Config.yml either! Exception: ");
                     return false;
                 }
 
-                return true;
+                try
+                {
+                    if (IsEncrypted(repo.Password))
+                    {
+                        Log.Info("Encrypted readonly password found in workgroup.yml. Getting password with tabadmin command.");
+                        repo.Password = Tableau.tabadminRun("get pgsql.readonly_password");
+                    }
+                    options.RepositoryDatabase = new DbConnectionInfo
+                    {
+                        Server = repo.Connection.Host,
+                        Port = repo.Connection.Port,
+                        Username = repo.Username,
+                        Password = repo.Password,
+                        DatabaseName = repo.Connection.DatabaseName
+                    };
+
+                    if (config.TableauRepo != null)
+                    {
+                        Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                    }
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to acquire Tableau repo credentials! Exception: ");
+                }
+
+                return false;
             }
 
             #region log folders
