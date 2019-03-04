@@ -144,7 +144,7 @@ namespace PaletteInsightAgentTests.Configuration
             Assert.AreEqual(2, processList.Count);
             Assert.AreEqual("Process", processList[0].Granularity);
             Assert.AreEqual("vizqlserver", processList[0].Name);
-            Assert.AreEqual("Thread", processList[1].Granularity);
+            Assert.AreEqual("Process", processList[1].Granularity);
             Assert.AreEqual("dataserver", processList[1].Name);
         }
 
