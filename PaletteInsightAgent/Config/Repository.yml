@@ -8,8 +8,12 @@
     Name: workbooks
 -
     Name: views
-- 
+-
     Name: system_users
+-
+    Name: data_connections
+-
+    Name: datasources
 -
     Name: http_requests
     Full: false
