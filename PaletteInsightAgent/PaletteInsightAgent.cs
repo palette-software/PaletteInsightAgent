@@ -196,7 +196,7 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasTargetTableauRepo())
+            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && IsTargetTableauRepoResident())
             {
                 try
                 {
@@ -378,7 +378,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollFullTables(object stateInfo)
         {
-            if (!HasTargetTableauRepo())
+            if (!IsTargetTableauRepoResident())
             {
                 Log.Info("Target Tableau repo is not located on this computer. Skip polling full tables.");
                 return;
@@ -397,7 +397,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollStreamingTables(object stateInfo)
         {
-            if (!HasTargetTableauRepo())
+            if (!IsTargetTableauRepoResident())
             {
                 Log.Info("Target Tableau repo is not located on this computer. Skip polling streaming tables.");
                 return;
@@ -414,46 +414,64 @@ namespace PaletteInsightAgent
         /// Checks whether the target Tableau repository resides on this node.
         /// </summary>
         /// <returns></returns>
-        private bool HasTargetTableauRepo()
+        private bool IsTargetTableauRepoResident()
         {
-            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder, options.PreferPassiveRepo);
+            string node = null;
+            if (options != null && options.RepositoryDatabase != null)
+            {
+                node = options.RepositoryDatabase.Server;
+            }
+
+            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder, options.PreferPassiveRepository);
+            if (repo != null)
+            {
+                node = repo.Connection.Host;
+            }
+
             if (repo == null)
             {
                 Log.Error("Failed to retrieve Tableau repo credentials for polling!");
                 return false;
             }
 
-            if (repo.Connection.Host == "localhost")
+            if (node == "localhost")
             {
                 return true;
             }
 
             try
             {
-                var repoHolder = Dns.GetHostEntry(repo.Connection.Host);
-                var localhost = Dns.GetHostEntry(Dns.GetHostName());
+                Log.Info("Target Tableau repo node: {0}", node);
+                var repoHolder = Dns.GetHostEntry(node);
+                var localNode = Dns.GetHostName();
+                var localhost = Dns.GetHostEntry(localNode);
 
                 foreach (var repoAddress in repoHolder.AddressList)
                 {
                     if (IPAddress.IsLoopback(repoAddress))
                     {
+                        Log.Info("This is the target Tableau repo node. Repo address is the loopback address of this machine.");
                         return true;
                     }
 
                     foreach (var localAddress in localhost.AddressList)
                     {
+                        Log.Info("Check for target Tableau repo address: '{0}' -- local address: '{1}'", repoAddress, localAddress);
                         if (repoAddress.Equals(localAddress))
                         {
+                            Log.Info("This is the target Tableau repo node.");
                             return true;
                         }
                     }
                 }
+                Log.Info("Local node: '{0}' is not the target Tableau repo node", localNode);
             }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to match repo holder with localhost! Exception: ");
             }
 
+            Log.Info("Node: '{0}' is not the target Tableau repo node", node);
             return false;
         }
 

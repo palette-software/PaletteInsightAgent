@@ -133,9 +133,9 @@ namespace PaletteInsightAgent
             /// <param name="tableauRoot"></param>
             private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
             {
-                options.PreferPassiveRepo = config.PreferPassiveRepository;
+                options.PreferPassiveRepository = config.PreferPassiveRepository;
 
-                Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot, options.PreferPassiveRepo);
+                Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot, options.PreferPassiveRepository);
                 if (repo != null)
                 {
                     try
@@ -608,7 +608,8 @@ namespace PaletteInsightAgent
                 return true;
             }
 
-            private static string GetConfigFilePath(string tableauRoot)
+
+            private static string GetWorkgroupYmlPath(string tableauRoot)
             {
                 if (tableauRoot == null)
                 {
@@ -616,10 +617,10 @@ namespace PaletteInsightAgent
                     return null;
                 }
                 //Up to Tableau 2018.1
-                var configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
+                var workgroupYmlPath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
 
                 //From Tabaleau 2018.2
-                if (!File.Exists(configFilePath))
+                if (!File.Exists(workgroupYmlPath))
                 {
                     try
                     {
@@ -630,8 +631,8 @@ namespace PaletteInsightAgent
                             Match m = Regex.Match(configPath, pattern);
                             if (m.Success)
                             {
-                                configFilePath = configPath;
-                                Log.Info("Config file path: {0}", configFilePath);
+                                workgroupYmlPath = configPath;
+                                Log.Info("Config file path: {0}", workgroupYmlPath);
                                 break;
                             }
                         }
@@ -643,40 +644,51 @@ namespace PaletteInsightAgent
                     }
 
                 }
-                return configFilePath;
+                return workgroupYmlPath;
             }
 
             public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot, bool preferPassiveRepo)
             {
 
-                var configFilePath = GetConfigFilePath(tableauRoot);
+                var workgroupYmlPath = GetWorkgroupYmlPath(tableauRoot);
                 try
                 {
                     // Get basic info from workgroup yml. Everything else from connections.yml
                     IDeserializer deserializer = YamlDeserializer.Create();
 
                     Workgroup workgroup = null;
-                    using (var workgroupFile = File.OpenText(configFilePath))
+                    using (var workgroupFile = File.OpenText(workgroupYmlPath))
                     {
                         workgroup = deserializer.Deserialize<Workgroup>(workgroupFile);
                         using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
                         {
                             workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
                             // workgroup.Connection.Host always contains the active repo
-                            if (preferPassiveRepo && workgroup.PgHost0 != null && workgroup.PgHost1 != null)
+                            if (preferPassiveRepo)
                             {
-                                // Use passive repo if possible/exists
-                                if (workgroup.Connection.Host != workgroup.PgHost0)
+                                if (workgroup.PgHost0 != null && workgroup.PgHost1 != null)
                                 {
-                                    workgroup.Connection.Host = workgroup.PgHost0;
-                                    workgroup.Connection.Port = workgroup.PgPort0;
+                                    // Use passive repo if possible/exists
+                                    if (workgroup.Connection.Host != workgroup.PgHost0)
+                                    {
+                                        workgroup.Connection.Host = workgroup.PgHost0;
+                                        workgroup.Connection.Port = workgroup.PgPort0;
+                                    }
+                                    else
+                                    {
+                                        workgroup.Connection.Host = workgroup.PgHost1;
+                                        workgroup.Connection.Port = workgroup.PgPort1;
+                                    }
+                                    Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
                                 }
                                 else
                                 {
-                                    workgroup.Connection.Host = workgroup.PgHost1;
-                                    workgroup.Connection.Port = workgroup.PgPort1;
+                                    Log.Info("Passive repo is preferred as target Tableau repo, but '{0}' does not contain passive repo node information", workgroupYmlPath);
                                 }
-                                Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
+                            }
+                            else
+                            {
+                                Log.Info("Active Tableau repo is the target repo");
                             }
                         }
                         if (!IsValidRepoData(workgroup))
@@ -689,7 +701,7 @@ namespace PaletteInsightAgent
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Error while trying to load and parse YAML config from '{0}' Exception: ", configFilePath);
+                    Log.Error(e, "Error while trying to load and parse YAML config from '{0}' Exception: ", workgroupYmlPath);
                     return null;
                 }
             }
