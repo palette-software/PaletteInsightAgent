@@ -81,7 +81,6 @@ namespace PaletteInsightAgent
 
                 // Add the log folders based on the Tableau Data path from the registry
                 AddLogFoldersToOptions(config, options, tableauRoot);
-                AddRepoFromWorkgroupYaml(config, tableauRoot, options);
 
                 // setup the polling options
                 options.UseCounterSamples = config.UseCounterSamples;
@@ -94,9 +93,44 @@ namespace PaletteInsightAgent
                 options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
                 // and streaming tables is very similar and related to repo polling
                 options.UseStreamingTables = config.UseRepoPolling && config.StreamingTablesPollInterval > 0;
+                LoadRepositoryFromConfig(config, options);
 
                 // set the maximum log lines
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
+            }
+
+            private static void LoadRepositoryFromConfig(PaletteInsightConfiguration config, PaletteInsightAgentOptions options)
+            {
+                if (!options.UseRepoPolling && !options.UseStreamingTables)
+                {
+                    return;
+                }
+
+                // load the tableau repo properties
+                var repoProps = config.TableauRepo;
+                if (repoProps == null)
+                {
+                    // Repository credentials are not filled in Config.yml
+                    return;
+                }
+
+                try
+                {
+                    options.RepositoryDatabase = new DbConnectionInfo
+                    {
+                        Server = repoProps.Host,
+                        Port = Convert.ToInt32(repoProps.Port),
+                        Username = repoProps.User,
+                        Password = repoProps.Password,
+                        DatabaseName = repoProps.Database
+                    };
+
+                    Log.Info("Found Tableau repo credentials in Config.yml.");
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to parse Tableau repository configs! Error:");
+                }
             }
 
             public static PaletteInsightConfiguration LoadConfigFile(string filename)
@@ -496,7 +530,7 @@ namespace PaletteInsightAgent
             // (with a bit of more careful object disposal)
             public static string GetPathOfService(string serviceName)
             {
-                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name = '{0}'", serviceName));
+                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name like '{0}%'", serviceName));
                 using (ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(wqlObjectQuery))
                 using (ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get())
                 {
