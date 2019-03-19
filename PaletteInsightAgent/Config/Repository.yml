@@ -15,6 +15,10 @@
 -
     Name: datasources
 -
+    Name: schedules
+-
+    Name: tasks
+-
     Name: http_requests
     Full: false
     Field: id 

@@ -16,3 +16,5 @@ PaletteInsightAgent.v12.suo
 
 *.ncrunchsolution
 *.ncrunchproject
+
+.idea/
