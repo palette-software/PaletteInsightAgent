@@ -31,10 +31,19 @@ All the collected data is written into CSV files and the agent sends them to the
 ### Prerequisites
 
 * Palette Insight Agent can only be installed with system administrator privileges
-* You need to make sure that the Insight Agent is able to query data from the Tableau repository. The easiest way to achieve that is to enable `readonly` user in your Tableau Server, because in that case the the Insight Agent can automatically collect the `readonly` user's password from the `workgroup.yml` file of Tableau Server. Here you can find the Tableau guide [how to enable the readonly user](https://onlinehelp.tableau.com/current/server/en-us/tabadmin_cmd.htm#dbpass). At the time of writing this document, the necessary `tabadmin` command would look like this:
-```bash
-tabadmin dbpass --username readonly p@ssword
-```
+* You need to make sure that the Insight Agent is able to query data from the Tableau repository. The easiest way to achieve that is to enable `readonly` user in your Tableau Server, because in that case the the Insight Agent can automatically collect the `readonly` user's password from the `workgroup.yml` file of Tableau Server. Here you can find the Tableau guide [how to enable the readonly user](https://onlinehelp.tableau.com/current/server/en-us/tabadmin_cmd.htm#dbpass).
+
+  The necessary `tabadmin` command is:
+
+  ```bash
+  tabadmin dbpass --username readonly p@ssword
+  ```
+
+  In case of Tableau 2018.2 or latter versions the necessary `tsm` command is:
+
+  ```bash
+  tsm data-access repository-access enable --repository-username readonly --repository-password p@ssword
+  ```
 
 ### Installation
 The Palette Insight Agent Windows installer (.msi) can be downloaded from the Palette Insight Server. All you have to do for that is to open your browser and navigate to
@@ -66,6 +75,7 @@ Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Confi
 
 * Proxy configurations have to be placed under the `Webservice` key
 * In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually under the `TableauRepo` key
+* In case of Tableau 2018.2 or latter versions, you need to provide Tableau repo credentials manually under the `TableauRepo` key, even if the `readonly` user is enabled.
 
 
 ## How do I update Palette Insight Agent?
