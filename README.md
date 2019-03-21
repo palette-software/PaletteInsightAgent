@@ -75,8 +75,18 @@ Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Confi
 
 * Proxy configurations have to be placed under the `Webservice` key
 * In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually under the `TableauRepo` key
-* In case of Tableau 2018.2 or latter versions, you need to provide Tableau repo credentials manually under the `TableauRepo` key, even if the `readonly` user is enabled.
+* In case of Tableau 2018.2 or latter versions, you need to provide Tableau repo credentials manually under the `TableauRepo` key, even if the `readonly` user is enabled. This should be done on those machines where the active and passive Tableau Repositories are.
 
+  Example:
+
+  ```bash
+  TableauRepo:
+   Host: localhost
+   Port: 8060
+   Database: workgroup
+   User: readonly
+   Password: <password>
+  ```
 
 ## How do I update Palette Insight Agent?
 
