@@ -51,8 +51,12 @@ namespace PaletteInsightAgent.RepoTablesPoller
         private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();
 
-        public Tableau9RepoConn(DbConnectionInfo db)
+        private int streamingTablesPollLimit;
+
+        public Tableau9RepoConn(DbConnectionInfo db, int streamingTablesPollLimit)
         {
+            this.streamingTablesPollLimit = streamingTablesPollLimit;
+
             connectionStringBuilder =
                 new NpgsqlConnectionStringBuilder()
                 {
@@ -110,7 +114,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         /// <returns></returns>
         bool IsConnectionOpen()
         {
-            return connection != null && 
+            return connection != null &&
                    connection.State == ConnectionState.Open;
         }
 
@@ -271,6 +275,9 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 query = String.Format("{0} where {1}", query, filter);
             }
 
+            // Limit result to prevent System.OutOfMemoryException in Agent
+            query = String.Format("{0} order by {1} asc limit {2}", query, field, this.streamingTablesPollLimit);
+
             var table = runQuery(query);
             // This query should return one field
             if (table.Rows.Count == 1 && table.Columns.Count == 1)
@@ -297,7 +304,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             // At first determine the max until we can query
             newMax = GetMax(tableName, table.Field, table.Filter);
 
-            // If we don't quit here we risk data being created before 
+            // If we don't quit here we risk data being created before
             // actually asking for it and not having maxId set correctly
             if (newMax == null || newMax == "")
             {
