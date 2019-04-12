@@ -51,8 +51,12 @@ namespace PaletteInsightAgent.RepoTablesPoller
         private readonly NpgsqlConnectionStringBuilder connectionStringBuilder;
         private object readLock = new object();
 
-        public Tableau9RepoConn(DbConnectionInfo db)
+        private int streamingTablesPollLimit;
+
+        public Tableau9RepoConn(DbConnectionInfo db, int streamingTablesPollLimit)
         {
+            this.streamingTablesPollLimit = streamingTablesPollLimit;
+
             connectionStringBuilder =
                 new NpgsqlConnectionStringBuilder()
                 {
@@ -110,7 +114,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         /// <returns></returns>
         bool IsConnectionOpen()
         {
-            return connection != null && 
+            return connection != null &&
                    connection.State == ConnectionState.Open;
         }
 
@@ -147,7 +151,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         {
             // If server got restarted we get IOException for the first time and there is no
             // other way to detect this but sending the query. This is why we have the for loop
-            for (int i= 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 if (!IsConnectionOpen())
                 {
@@ -174,7 +178,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
         {
             lock (readLock)
             {
-                return (DataTable)queryWithReconnect(() => {
+                return (DataTable)queryWithReconnect(() =>
+                {
                     using (var adapter = new NpgsqlDataAdapter(query, connection))
                     {
                         DataTable table = new DataTable();
@@ -275,11 +280,20 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
         private string GetMax(string tableName, string field, string filter)
         {
-            var query = String.Format("select max({0}) from {1}", field, tableName);
-            if (filter != null)
-            {
-                query = String.Format("{0} where {1}", query, filter);
-            }
+            var whereClause = filter != null ? $"where {filter}" : "";
+
+            // Limit result to prevent System.OutOfMemoryException in Agent
+            var query = $@"
+                select max({field})
+                from
+                    (
+                    select {field}
+                    from {tableName}
+                    {whereClause}
+                    order by {field} asc
+                    limit {this.streamingTablesPollLimit}
+                    ) as iq
+                ;";
 
             var table = runQuery(query);
             // This query should return one field
@@ -304,7 +318,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             // At first determine the max until we can query
             newMax = GetMax(tableName, table.Field, table.Filter);
 
-            // If we don't quit here we risk data being created before 
+            // If we don't quit here we risk data being created before
             // actually asking for it and not having maxId set correctly
             if (newMax == null || newMax == "")
             {

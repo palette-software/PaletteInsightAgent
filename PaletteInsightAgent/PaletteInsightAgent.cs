@@ -134,7 +134,7 @@ namespace PaletteInsightAgent
                     Log.Fatal("Could not found Tableau Repository credentials! Exiting.");
                     Environment.Exit(-1);
                 }
-                tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
+                tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase, options.StreamingTablesPollLimit);
                 repoPollAgent = new RepoPollAgent();
             }
         }
@@ -368,7 +368,7 @@ namespace PaletteInsightAgent
         }
 
         /// <summary>
-        /// Reads thread information from jmx and inserts them to the database 
+        /// Reads thread information from jmx and inserts them to the database
         /// </summary>
         /// <param name="stateInfo"></param>
         private void PollThreadInfo(object stateInfo)
