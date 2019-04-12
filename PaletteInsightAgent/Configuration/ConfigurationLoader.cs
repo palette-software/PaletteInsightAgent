@@ -97,6 +97,8 @@ namespace PaletteInsightAgent
 
                 // set the maximum log lines
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
+
+                options.StreamingTablesPollLimit = config.StreamingTablesPollLimit;
             }
 
             private static void LoadRepositoryFromConfig(PaletteInsightConfiguration config, PaletteInsightAgentOptions options)
@@ -255,7 +257,7 @@ namespace PaletteInsightAgent
                 {
                     foreach (LogFolder logFolder in config.Logs)
                     {
-                        AddFolderToWatched(options.LogFolders, 
+                        AddFolderToWatched(options.LogFolders,
                             PaletteInsightAgentOptions.LogFolderInfo.Create( logFolder.Directory, logFolder.Filter, logFolder.ProcessName ));
                     }
                 }
@@ -272,7 +274,7 @@ namespace PaletteInsightAgent
                             Log.Error("Log folder not found: {0}", fullPath);
                             continue;
                         }
-                        
+
                         AddFolderToWatched(options.LogFolders,
                             PaletteInsightAgentOptions.LogFolderInfo.Create(fullPath, logFolder.Filter, logFolder.ProcessName));
                     }
@@ -308,7 +310,7 @@ namespace PaletteInsightAgent
             #endregion
 
             /// <summary>
-            /// Helper to create a database configuration 
+            /// Helper to create a database configuration
             /// </summary>
             /// <param name="databaseConfig"></param>
             /// <returns></returns>
@@ -348,7 +350,7 @@ namespace PaletteInsightAgent
                 if (dataFolderPath != null)
                 {
                     Log.Info("Found Tableau Data folder in registry: {0}", dataFolderPath);
-                    return dataFolderPath;   
+                    return dataFolderPath;
                 }
 
                 // Look for it in the Tableau installation folder
@@ -453,7 +455,7 @@ namespace PaletteInsightAgent
             /// Try to find the Tableau data folder in the Tableau Installation folder,
             /// which is calculated based on the path of the Tableau Server Application
             /// Manager (tabsvc) service.
-            /// 
+            ///
             /// For worker nodes this is the way we can discover Tableau data folder, if
             /// it is not located in the default directory.
             /// </summary>
@@ -542,7 +544,7 @@ namespace PaletteInsightAgent
                 }
 
                 return null;
-            }           
+            }
             #endregion
 
 

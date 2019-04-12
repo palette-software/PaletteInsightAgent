@@ -79,6 +79,8 @@ namespace PaletteInsightAgent
         public bool PreferPassiveRepository { get; set; }
         public DbConnectionInfo RepositoryDatabase { get; set; }
 
+        public int StreamingTablesPollLimit { get; set; }
+
         #endregion Repo properties
 
         #region Singleton Constructor/Accessor
