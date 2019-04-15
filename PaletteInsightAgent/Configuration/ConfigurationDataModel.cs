@@ -183,9 +183,9 @@ namespace PaletteInsightAgent
             /// <summary>
             /// The maximum records to be read in a batch from a streaming table
             /// </summary>
-            [DefaultValue(1000000)]
+            [DefaultValue(100000)]
             [YamlMember(Alias = "StreamingTablesPollLimit")]
-            public int StreamingTablesPollLimit { get; set; } = 1000000;
+            public int StreamingTablesPollLimit { get; set; } = 100000;
         }
 
         #endregion

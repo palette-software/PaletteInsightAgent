@@ -21,7 +21,7 @@
 #LogLinesPerBatch: 10000
 
 # The maximum number of records that will be read and uploaded in a single batch
-#StreamingTablesPollLimit: 1000000
+#StreamingTablesPollLimit: 100000
 
 InsightAuthToken: 34e6a6cc-a5ab-4c36-8129-15fc0d61069f    # This is just an example GUID, this is not a valid license
 
