@@ -151,7 +151,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         {
             // If server got restarted we get IOException for the first time and there is no
             // other way to detect this but sending the query. This is why we have the for loop
-            for (int i= 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 if (!IsConnectionOpen())
                 {
@@ -178,7 +178,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
         {
             lock (readLock)
             {
-                return (DataTable)queryWithReconnect(() => {
+                return (DataTable)queryWithReconnect(() =>
+                {
                     using (var adapter = new NpgsqlDataAdapter(query, connection))
                     {
                         DataTable table = new DataTable();
@@ -269,14 +270,20 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
         private string GetMax(string tableName, string field, string filter)
         {
-            var query = String.Format("select max({0}) from {1}", field, tableName);
-            if (filter != null)
-            {
-                query = String.Format("{0} where {1}", query, filter);
-            }
+            var whereClause = filter != null ? $"where {filter}" : "";
 
             // Limit result to prevent System.OutOfMemoryException in Agent
-            query = String.Format("{0} order by {1} asc limit {2}", query, field, this.streamingTablesPollLimit);
+            var query = $@"
+                select max({field})
+                from
+                    (
+                    select {field}
+                    from {tableName}
+                    {whereClause}
+                    order by {field} asc
+                    limit {this.streamingTablesPollLimit}
+                    ) as iq
+                ;";
 
             var table = runQuery(query);
             // This query should return one field
