@@ -290,7 +290,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
             // This query should return one field
             if (table.Rows.Count == 1 && table.Columns.Count == 1)
             {
-                return StringifyMax(table.Rows[0][0]);
+                // TrimEnd removes trailing newline ( + whitespaces )
+                return StringifyMax(table.Rows[0][0]).TrimEnd();
             }
             return null;
         }

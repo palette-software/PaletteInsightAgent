@@ -81,7 +81,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         // Ask web service what is the max id
                         var maxIdPromise = APIClient.GetMaxId(tableName);
                         maxIdPromise.Wait();
-                        var maxId = maxIdPromise.Result;
+                        // TrimEnd removes trailing newline ( + whitespaces )
+                        var maxId = maxIdPromise.Result.TrimEnd();
 
                         // Get data from that max id
                         string newMax;
