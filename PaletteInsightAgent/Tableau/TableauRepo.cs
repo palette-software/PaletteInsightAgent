@@ -268,9 +268,9 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return table;
         }
 
-        private string GetMax(string tableName, string field, string filter)
+        private string GetMax(string tableName, string field, string filter, string prevMax)
         {
-            var whereClause = filter != null ? $"where {filter}" : "";
+            var filterClause = filter != null ? $"and {filter}" : "";
 
             // Limit result to prevent System.OutOfMemoryException in Agent
             var query = $@"
@@ -279,7 +279,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     (
                     select {field}
                     from {tableName}
-                    {whereClause}
+                    where {field} > '{prevMax}'
+                    {filterClause}
                     order by {field} asc
                     limit {this.streamingTablesPollLimit}
                     ) as iq
@@ -309,7 +310,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         public DataTable GetStreamingTable(string tableName, RepoTable table, string from, out string newMax)
         {
             // At first determine the max until we can query
-            newMax = GetMax(tableName, table.Field, table.Filter);
+            newMax = GetMax(tableName, table.Field, table.Filter, from);
 
             // If we don't quit here we risk data being created before
             // actually asking for it and not having maxId set correctly
