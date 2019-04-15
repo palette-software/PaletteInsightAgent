@@ -209,7 +209,7 @@ namespace PaletteInsightAgent
                 try
                 {
                     // On start get the schema of the repository tables                
-                    tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
+                    tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase, options.StreamingTablesPollLimit);
 
                     List<string> tableNames = options.RepositoryTables.Select(t => t.Name).ToList();
                     var table = tableauRepo.GetSchemaTable(String.Format("'{0}'", string.Join("','", tableNames)));
