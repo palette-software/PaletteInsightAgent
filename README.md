@@ -92,7 +92,8 @@ Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Confi
 
 Palette Insight Agent is updated automatically once a newer version of the .msi is available on the Insight Server to which the agent is connected. On the Insight Server the `palette-insight-agent` RPM package contains the .msi, so that must be installed on the Insight Server and after then the connected Palette Insight Agents will pick up the update in 3-5 minutes.
 
-#### Troubleshooting
+## Troubleshooting
+
 Auto-update may fail, if any of the following circumstances applies on the Tableau Server machine while the auto-update is being performed:
 <a name="update-obstacles"></a>
 * SysInternals’ Process Explorer is running (this one is the most likely to prevent the service to be removed, and putting it into a Disabled state)
@@ -109,14 +110,18 @@ Auto-update may fail, if any of the following circumstances applies on the Table
 In case when the auto-update fails, Palette Insight Agent might end up in a situation where it’s executables and binary files are removed, but its services (`Palette Insight Agent` and `Palette Insight Watchdog`) in the Services console still exist. In such cases Palette Insight Agent needs to be updated manually.
 
 First try to remove them with opening up a Command Prompt with Administrator privileges and run the following commands:
+
 ```
 sc delete PaletteInsightAgent
 sc delete PaletteInsightWatchdog
 ```
+
 If any of the above commands results in a message like this
+
 ```
 The specified service has been marked for deletion.
 ```
+
 it means that the given service got in Disabled state. You can verify that in Services console, for example you could see in there something like this:
 <p align="center">
   <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/master/docs/resources/disabled-service.png" alt="disabled Palette Insight Watchdog service" width="800">
@@ -129,7 +134,6 @@ If you check and refresh the Services console again, the disabled services shoul
 In very rare cases, if any of `Palette Insight Agent` or `Palette Insight Watchdog` services still remains in Disabled state, you need to restart your machine to have those services disappear from the Services console.
 
 Until Palette Insight Agent or Palette Insight Watchdog services are still displayed in the Services console, you cannot manually re-install Palette Insight Agent.
-
 
 ## Starting the Agent
 
