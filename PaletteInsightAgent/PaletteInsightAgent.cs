@@ -78,7 +78,6 @@ namespace PaletteInsightAgent
             var configuration = Loader.LoadConfigFile("config/Config.yml");
             Loader.LoadConfigTo(configuration, tableauDataFolder, options);
 
-            tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
             // Make sure that our HTTP client is initialized, because Splunk logger might be enabled
             // and it is using HTTP to send log messages to Splunk.
@@ -126,8 +125,16 @@ namespace PaletteInsightAgent
                 threadInfoAgent = new ThreadInfoAgent(options.ThreadInfoPollInterval);
             }
 
-            if (USE_TABLEAU_REPO || USE_STREAMING_TABLES)
+            if (IsConnectionToTableauRepoRequired())
             {
+                Loader.AddRepoFromWorkgroupYaml(configuration, tableauDataFolder, options);
+
+                if (options.RepositoryDatabase == null)
+                {
+                    Log.Fatal("Could not found Tableau Repository credentials! Exiting.");
+                    Environment.Exit(-1);
+                }
+                tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
                 repoPollAgent = new RepoPollAgent();
             }
         }
@@ -197,22 +204,27 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if ((USE_TABLEAU_REPO || USE_STREAMING_TABLES) && HasTargetTableauRepo())
+            if (IsConnectionToTableauRepoRequired())
             {
-                // On start get the schema of the repository tables                
+                try
+                {
+                    // On start get the schema of the repository tables                
+                    tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase);
 
-                List<string> tableNames = options.RepositoryTables.Select(t => t.Name).ToList();
-                var table = tableauRepo.GetSchemaTable(String.Format("'{0}'", string.Join("','", tableNames)));
+                    List<string> tableNames = options.RepositoryTables.Select(t => t.Name).ToList();
+                    var table = tableauRepo.GetSchemaTable(String.Format("'{0}'", string.Join("','", tableNames)));
 
-                // Add the metadata of the agent table to the schema table
-                DataTableUtils.AddAgentMetadata(table);
+                    // Add the metadata of the agent table to the schema table
+                    DataTableUtils.AddAgentMetadata(table);
 
-                // Serialize schema table so that it gets uploaded with all other tables
-                OutputSerializer.Write(table, true);
+                    // Serialize schema table so that it gets uploaded with all other tables
+                    OutputSerializer.Write(table, true);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to initialize tableauRepo. Exception: ");
+                }
 
-                // Do the same for index data
-                //table = tableauRepo.GetIndices();
-                //OutputSerializer.Write(table, true);
             }
 
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
@@ -374,7 +386,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollFullTables(object stateInfo)
         {
-            if (!HasTargetTableauRepo())
+            if (!IsTargetTableauRepoResident())
             {
                 Log.Info("Target Tableau repo is not located on this computer. Skip polling full tables.");
                 return;
@@ -393,7 +405,7 @@ namespace PaletteInsightAgent
         /// <param name="stateInfo"></param>
         private void PollStreamingTables(object stateInfo)
         {
-            if (!HasTargetTableauRepo())
+            if (!IsTargetTableauRepoResident())
             {
                 Log.Info("Target Tableau repo is not located on this computer. Skip polling streaming tables.");
                 return;
@@ -410,40 +422,58 @@ namespace PaletteInsightAgent
         /// Checks whether the target Tableau repository resides on this node.
         /// </summary>
         /// <returns></returns>
-        private bool HasTargetTableauRepo()
+        private bool IsTargetTableauRepoResident()
         {
-            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(tableauDataFolder, options.PreferPassiveRepo);
-            if (repo == null)
+            string node = null;
+            if (options != null && options.RepositoryDatabase != null)
             {
-                Log.Error("Failed to retrieve Tableau repo credentials for polling!");
+                node = options.RepositoryDatabase.Server;
+            }
+
+            var workgroupYmlPath = Loader.GetWorkgroupYmlPath(tableauDataFolder);
+            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
+            if (repo != null)
+            {
+                node = repo.Connection.Host;
+            }
+
+            if (node == null)
+            {
+                Log.Error("Failed to retrieve Tableau repo credentials for telling whether this machine is the target repository node!");
                 return false;
             }
 
-            if (repo.Connection.Host == "localhost")
+            if (node == "localhost")
             {
                 return true;
             }
 
             try
             {
-                var repoHolder = Dns.GetHostEntry(repo.Connection.Host);
-                var localhost = Dns.GetHostEntry(Dns.GetHostName());
+                Log.Info("Target Tableau repo node: {0}", node);
+                var repoHolder = Dns.GetHostEntry(node);
+                var localNode = Dns.GetHostName();
+                var localhost = Dns.GetHostEntry(localNode);
 
                 foreach (var repoAddress in repoHolder.AddressList)
                 {
                     if (IPAddress.IsLoopback(repoAddress))
                     {
+                        Log.Info("This is the target Tableau repo node. Repo address is the loopback address of this machine.");
                         return true;
                     }
 
                     foreach (var localAddress in localhost.AddressList)
                     {
+                        Log.Info("Check for target Tableau repo address: '{0}' -- local address: '{1}'", repoAddress, localAddress);
                         if (repoAddress.Equals(localAddress))
                         {
+                            Log.Info("This is the target Tableau repo node.");
                             return true;
                         }
                     }
                 }
+                Log.Info("Local node: '{0}' is not the target Tableau repo node", localNode);
             }
             catch (Exception e)
             {
@@ -452,6 +482,12 @@ namespace PaletteInsightAgent
 
             return false;
         }
+
+        private bool IsConnectionToTableauRepoRequired()
+        {
+            return (USE_TABLEAU_REPO || USE_STREAMING_TABLES) && IsTargetTableauRepoResident();
+        }
+
 
         private void UploadData(object stateInfo)
         {

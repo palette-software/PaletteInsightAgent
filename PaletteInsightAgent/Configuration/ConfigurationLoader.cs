@@ -5,8 +5,8 @@ using System.Configuration;
 using Microsoft.Win32;
 using System.IO;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using NLog;
+using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output.OutputDrivers;
 using System.Text.RegularExpressions;
 using System.Management;
@@ -21,8 +21,8 @@ namespace PaletteInsightAgent
         /// </summary>
         public class Loader
         {
-            private const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
-            private const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
+            internal const string LOGFOLDER_DEFAULTS_FILE = "Config/LogFolders.yml";
+            internal const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
             private const string REPOSITORY_TABLES_FILE = "Config/Repository.yml";
             private const string TABLEAU_SERVER_APPLICATION_SERVICE_NAME = "tabsvc";
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -47,6 +47,7 @@ namespace PaletteInsightAgent
                 options.StorageLimit = config.StorageLimit;
 
                 options.AllProcesses = config.AllProcesses;
+                options.PreferPassiveRepository = config.PreferPassiveRepository;
 
                 options.AuthToken = config.InsightAuthToken;
 
@@ -80,11 +81,6 @@ namespace PaletteInsightAgent
 
                 // Add the log folders based on the Tableau Data path from the registry
                 AddLogFoldersToOptions(config, options, tableauRoot);
-                if (!AddRepoToOptions(config, options, tableauRoot))
-                {
-                    // Error message is already in the log
-                    Environment.Exit(-1);
-                }
 
                 // setup the polling options
                 options.UseCounterSamples = config.UseCounterSamples;
@@ -97,9 +93,44 @@ namespace PaletteInsightAgent
                 options.UseRepoPolling = config.UseRepoPolling && config.RepoTablesPollInterval > 0;
                 // and streaming tables is very similar and related to repo polling
                 options.UseStreamingTables = config.UseRepoPolling && config.StreamingTablesPollInterval > 0;
+                LoadRepositoryFromConfig(config, options);
 
                 // set the maximum log lines
                 options.LogLinesPerBatch = config.LogLinesPerBatch;
+            }
+
+            private static void LoadRepositoryFromConfig(PaletteInsightConfiguration config, PaletteInsightAgentOptions options)
+            {
+                if (!options.UseRepoPolling && !options.UseStreamingTables)
+                {
+                    return;
+                }
+
+                // load the tableau repo properties
+                var repoProps = config.TableauRepo;
+                if (repoProps == null)
+                {
+                    // Repository credentials are not filled in Config.yml
+                    return;
+                }
+
+                try
+                {
+                    options.RepositoryDatabase = new DbConnectionInfo
+                    {
+                        Server = repoProps.Host,
+                        Port = Convert.ToInt32(repoProps.Port),
+                        Username = repoProps.User,
+                        Password = repoProps.Password,
+                        DatabaseName = repoProps.Database
+                    };
+
+                    Log.Info("Found Tableau repo credentials in Config.yml.");
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to parse Tableau repository configs! Error:");
+                }
             }
 
             public static PaletteInsightConfiguration LoadConfigFile(string filename)
@@ -109,7 +140,7 @@ namespace PaletteInsightAgent
                     // deserialize the config
                     using (var reader = File.OpenText(filename))
                     {
-                        var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
+                        IDeserializer deserializer = YamlDeserializer.Create();
                         var config = deserializer.Deserialize<PaletteInsightConfiguration>(reader);
                         return config;
                     }
@@ -135,64 +166,43 @@ namespace PaletteInsightAgent
             /// <param name="config"></param>
             /// <param name="options"></param>
             /// <param name="tableauRoot"></param>
-            private static bool AddRepoToOptions(PaletteInsightConfiguration config, PaletteInsightAgentOptions options, string tableauRoot)
+            public static bool AddRepoFromWorkgroupYaml(PaletteInsightConfiguration config, string tableauRoot, PaletteInsightAgentOptions options)
             {
-                options.PreferPassiveRepo = config.PreferPassiveRepository;
-
-                Workgroup repo = GetRepoFromWorkgroupYaml(tableauRoot, options.PreferPassiveRepo);
-                if (repo != null)
+                var workgroupYmlPath = GetWorkgroupYmlPath(tableauRoot);
+                Workgroup repo = GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
+                if (repo == null)
                 {
-                    try
-                    {
-                        if (IsEncrypted(repo.Password))
-                        {
-                            Log.Info("Encrypted readonly password found in workgroup.yml. Getting password with tabadmin command.");
-                            repo.Password = Tableau.tabadminRun("get pgsql.readonly_password");
-                        }
-                        options.RepositoryDatabase = new DbConnectionInfo
-                        {
-                            Server = repo.Connection.Host,
-                            Port = repo.Connection.Port,
-                            Username = repo.Username,
-                            Password = repo.Password,
-                            DatabaseName = repo.Connection.DatabaseName
-                        };
-
-                        if (config.TableauRepo != null)
-                        {
-                            Log.Warn("Ignoring Tableau repo settings from config.yml.");
-                        }
-                        return true;
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, "Failed to acquire Tableau repo credentials! Exception: ");
-                    }
-                }
-
-                Log.Warn("Trying Config.yml as a last resort for Tableau repo credentials...");
-                try
-                {
-                    // load the tableau repo properties
-                    var repoProps = config.TableauRepo;
-                    options.RepositoryDatabase = new DbConnectionInfo
-                    {
-                        Server = repoProps.Host,
-                        Port = Convert.ToInt32(repoProps.Port),
-                        Username = repoProps.User,
-                        Password = repoProps.Password,
-                        DatabaseName = repoProps.Database
-                    };
-
-                    Log.Info("Found Tableau repo credentials in Config.yml.");
-                }
-                catch (Exception e)
-                {
-                    Log.Fatal(e, "Tableau repo credentials were not found in Config.yml either! Exception: ");
                     return false;
                 }
 
-                return true;
+                try
+                {
+                    if (IsEncrypted(repo.Password))
+                    {
+                        Log.Info("Encrypted readonly password found in workgroup.yml. Getting password with tabadmin command.");
+                        repo.Password = Tableau.tabadminRun("get pgsql.readonly_password");
+                    }
+                    options.RepositoryDatabase = new DbConnectionInfo
+                    {
+                        Server = repo.Connection.Host,
+                        Port = repo.Connection.Port,
+                        Username = repo.Username,
+                        Password = repo.Password,
+                        DatabaseName = repo.Connection.DatabaseName
+                    };
+
+                    if (config.TableauRepo != null)
+                    {
+                        Log.Warn("Ignoring Tableau repo settings from config.yml.");
+                    }
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to acquire Tableau repo credentials! Exception: ");
+                }
+
+                return false;
             }
 
             #region log folders
@@ -275,14 +285,14 @@ namespace PaletteInsightAgent
             ///  method throws its errors
             /// </summary>
             /// <returns></returns>
-            private static List<LogFolder> LoadDefaultLogFolders()
+            internal static List<LogFolder> LoadDefaultLogFolders()
             {
                 // load the defaults from the application
                 // since PaletteInsightAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(LOGFOLDER_DEFAULTS_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
+                    IDeserializer deserializer = YamlDeserializer.Create();
                     return deserializer.Deserialize<List<LogFolder>>(reader);
                 }
             }
@@ -482,24 +492,14 @@ namespace PaletteInsightAgent
             // to mock static functions in C#
             internal static string ExtractTableauInstallationFolder(string tabsvcPath)
             {
-                if (tabsvcPath == null)
+                var matchGroups = ParseTabsvcPath(tabsvcPath);
+                if (matchGroups == null)
                 {
-                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    Log.Warn("Failed to extract Tableau installation folder from: {0}", tabsvcPath);
                     return null;
                 }
 
-                // Extract the installation folder out of the tabsvc path. We are going to
-                // chop <one_folder>/bin/tabsvc.exe from the end of the tabsvc path.
-                var pattern = new Regex(@"""?(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe.*");
-                var groups = pattern.Match(tabsvcPath).Groups;
-                // groups[0] is the entire match, thus we expect at least 2
-                if (groups.Count < 2)
-                {
-                    Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
-                    return null;
-                }
-
-                return groups[1].Value;
+                return matchGroups[1].Value;
             }
 
             // This function is created only for unit testing, since it is pretty difficult
@@ -508,7 +508,7 @@ namespace PaletteInsightAgent
             {
                 if (tabsvcPath == null)
                 {
-                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    Log.Warn("Failed to extract Tableau bin folder as the path to 'tabsvc' service is null!");
                     return null;
                 }
 
@@ -531,7 +531,7 @@ namespace PaletteInsightAgent
             // (with a bit of more careful object disposal)
             public static string GetPathOfService(string serviceName)
             {
-                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name = '{0}'", serviceName));
+                WqlObjectQuery wqlObjectQuery = new WqlObjectQuery(string.Format("SELECT * FROM Win32_Service WHERE Name like '{0}%'", serviceName));
                 using (ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(wqlObjectQuery))
                 using (ManagementObjectCollection managementObjectCollection = managementObjectSearcher.Get())
                 {
@@ -622,42 +622,92 @@ namespace PaletteInsightAgent
                 return true;
             }
 
-            public static Workgroup GetRepoFromWorkgroupYaml(string tableauRoot, bool preferPassiveRepo)
+
+            public static string GetWorkgroupYmlPath(string tableauRoot)
             {
                 if (tableauRoot == null)
                 {
                     Log.Error("Tableau data folder path must not be null while reading and YAML configs!");
                     return null;
                 }
-                var configFilePath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
+                //Up to Tableau 2018.1
+                var workgroupYmlPath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
+
+                //From Tabaleau 2018.2
+                if (!File.Exists(workgroupYmlPath))
+                {
+                    try
+                    {
+                        string[] configFilePaths = Directory.GetFiles(Path.Combine(tableauRoot, "tabsvc", "config"), "workgroup.yml", SearchOption.AllDirectories);
+                        foreach (string configPath in configFilePaths)
+                        {
+                            string pattern = @".*pgsql_.*";
+                            Match m = Regex.Match(configPath, pattern);
+                            if (m.Success)
+                            {
+                                workgroupYmlPath = configPath;
+                                Log.Info("Config file path: {0}", workgroupYmlPath);
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "Cannot find workgroup.yml file");
+                        return null;
+                    }
+
+                }
+                return workgroupYmlPath;
+            }
+
+            public static Workgroup GetRepoFromWorkgroupYaml(string workgroupYmlPath, bool preferPassiveRepo)
+            {
+
+                if (workgroupYmlPath == null)
+                {
+                    Log.Error("Path for workgroup.yml must not be null while reading configs!");
+                    return null;
+                }
 
                 try
                 {
                     // Get basic info from workgroup yml. Everything else from connections.yml
-                    var deserializer = new Deserializer(namingConvention: new PascalCaseNamingConvention(), ignoreUnmatched: true);
+                    IDeserializer deserializer = YamlDeserializer.Create();
 
                     Workgroup workgroup = null;
-                    using (var workgroupFile = File.OpenText(configFilePath))
+                    using (var workgroupFile = File.OpenText(workgroupYmlPath))
                     {
                         workgroup = deserializer.Deserialize<Workgroup>(workgroupFile);
                         using (var connectionsFile = File.OpenText(workgroup.ConnectionsFile))
                         {
                             workgroup.Connection = deserializer.Deserialize<TableauConnectionInfo>(connectionsFile);
                             // workgroup.Connection.Host always contains the active repo
-                            if (preferPassiveRepo && workgroup.PgHost0 != null && workgroup.PgHost1 != null)
+                            if (preferPassiveRepo)
                             {
-                                // Use passive repo if possible/exists
-                                if (workgroup.Connection.Host != workgroup.PgHost0)
+                                if (workgroup.PgHost0 != null && workgroup.PgHost1 != null)
                                 {
-                                    workgroup.Connection.Host = workgroup.PgHost0;
-                                    workgroup.Connection.Port = workgroup.PgPort0;
+                                    // Use passive repo if possible/exists
+                                    if (workgroup.Connection.Host != workgroup.PgHost0)
+                                    {
+                                        workgroup.Connection.Host = workgroup.PgHost0;
+                                        workgroup.Connection.Port = workgroup.PgPort0;
+                                    }
+                                    else
+                                    {
+                                        workgroup.Connection.Host = workgroup.PgHost1;
+                                        workgroup.Connection.Port = workgroup.PgPort1;
+                                    }
+                                    Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
                                 }
                                 else
                                 {
-                                    workgroup.Connection.Host = workgroup.PgHost1;
-                                    workgroup.Connection.Port = workgroup.PgPort1;
+                                    Log.Info("Passive repo is preferred as target Tableau repo, but '{0}' does not contain passive repo node information", workgroupYmlPath);
                                 }
-                                Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
+                            }
+                            else
+                            {
+                                Log.Info("Active Tableau repo is configured to be the target repo");
                             }
                         }
                         if (!IsValidRepoData(workgroup))
@@ -670,9 +720,39 @@ namespace PaletteInsightAgent
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Error while trying to load and parse YAML config from '{0}' Exception: ", configFilePath);
+                    Log.Error(e, "Error while trying to load and parse YAML config from '{0}' Exception: ", workgroupYmlPath);
                     return null;
                 }
+            }
+
+            internal static GroupCollection ParseTabsvcPath(string tabsvcPath)
+            {
+                if (tabsvcPath == null)
+                {
+                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    return null;
+                }
+
+                // Extract the installation folder out of the tabsvc path. We are going to
+                // chop <one_folder>\bin\tabsvc.exe from the end of the tabsvc path.
+                var pattern = new Regex(@"""?(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe.*");
+                var groups = pattern.Match(tabsvcPath).Groups;
+                // groups[0] is the entire match, thus we expect at least 2
+                if (groups.Count < 2)
+                {
+                    // Onwards Tableau Server 2018.2 the tabsvc.exe location is slightly different. In this case
+                    // we are going to chop data\tabsvc\services\<tabsvc_version_folder>\tabsvc\tabsvc.exe from the
+                    // end of the tabsvc path.
+                    pattern = new Regex(@"""?(.*?)[\\\/]+data[\\\/]+tabsvc[\\\/]+services[\\\/]+([^\\\/]+)[\\\/]+tabsvc[\\\/]+tabsvc.exe.*");
+                    groups = pattern.Match(tabsvcPath).Groups;
+                    if (groups.Count < 3)
+                    {
+                        Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
+                        return null;
+                    }
+                }
+
+                return groups;
             }
 
             #endregion
@@ -686,13 +766,13 @@ namespace PaletteInsightAgent
             ///  method throws its errors
             /// </summary>
             /// <returns></returns>
-            private static List<ProcessData> LoadProcessData()
+            internal static List<ProcessData> LoadProcessData()
             {
                 // since PaletteInsightAgent always sets the current directory to its location,
                 // we should always be in the correct folder for this to work
                 using (var reader = File.OpenText(PROCESSES_DEFAULT_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new UnderscoredNamingConvention(), ignoreUnmatched: true);
+                    IDeserializer deserializer = YamlDeserializer.Create();
                     return deserializer.Deserialize<List<ProcessData>>(reader);
                 }
             }
@@ -701,7 +781,7 @@ namespace PaletteInsightAgent
             {
                 using (var reader = File.OpenText(REPOSITORY_TABLES_FILE))
                 {
-                    var deserializer = new Deserializer(namingConvention: new NullNamingConvention(), ignoreUnmatched: true);
+                    IDeserializer deserializer = YamlDeserializer.Create();
                     return deserializer.Deserialize<List<RepoTable>>(reader);
                 }
             }

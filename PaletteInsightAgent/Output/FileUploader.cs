@@ -194,7 +194,7 @@ namespace PaletteInsightAgent.Output
             try
             {
                 return Directory.EnumerateFiles(from)
-                    .Union(Directory.EnumerateFiles(from + @"\serverlogs"))
+                    .Union(GetServerlogFileList(from))
                     .Select(f => new FileInfo(f).Name)
                     .Where(fileName => fileName.Contains('-'))
                     .Select(fileName => fileName.Split('-')[0])
@@ -323,8 +323,8 @@ namespace PaletteInsightAgent.Output
         private static IList<string> GetFilesOfTable(string dataPath, string table)
         {
             // Remove those files that are still being written.
-            return Directory.GetFiles(dataPath, table + "-" + DataFilePattern)
-                            .Union(Directory.GetFiles(dataPath + "serverlogs", table + DataFilePattern))                            
+            return Directory.EnumerateFiles(dataPath, table + "-" + DataFilePattern)
+                            .Union(GetServerlogFileList(dataPath, table + DataFilePattern))
                             .Where(fileName => !fileName.Contains(OutputSerializer.IN_PROGRESS_FILE_POSTFIX))
                             .OrderBy(fileName => fileName)
                             .ToList();
@@ -467,6 +467,20 @@ namespace PaletteInsightAgent.Output
         public static bool IsStreamingTable(string fileName)
         {
             return File.Exists(MaxIdFileName(fileName));
+        }
+
+        private static IEnumerable<string> GetServerlogFileList(string from, string searchPattern = "*")
+        {
+            IEnumerable<string> serverlogFiles = new List<string>();
+            try
+            {
+                serverlogFiles = Directory.EnumerateFiles(from + @"\serverlogs", searchPattern);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                //That is valid becuase polling serverlog tables is not as frequent as e.g. threadinfo
+            }
+            return serverlogFiles;
         }
     }
 }

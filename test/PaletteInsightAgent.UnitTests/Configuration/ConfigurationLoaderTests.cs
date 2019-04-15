@@ -1,5 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.IO;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using PaletteInsightAgent.Configuration;
+
 
 namespace PaletteInsightAgentTests.Configuration
 {
@@ -98,6 +102,14 @@ namespace PaletteInsightAgentTests.Configuration
         }
 
         [TestMethod]
+        public void TestExtractTableauInstallationFolder_20182()
+        {
+            var expected = @"C:\ProgramData\Tableau\Tableau Server";
+            var actual = Loader.ExtractTableauInstallationFolder(@"""C:\ProgramData\Tableau\Tableau Server\data\tabsvc\services\tabsvc_0.20182.18.0627.2230\tabsvc\tabsvc.exe"" run");
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
         public void TestExtractTableauInstallationFolder_nonmatching()
         {
             Assert.IsNull(Loader.ExtractTableauInstallationFolder(@"E:\Program Files\Tableau\Tableau Server\worker.1\bin"));
@@ -122,6 +134,35 @@ namespace PaletteInsightAgentTests.Configuration
         public void TestIsEncrypted_not()
         {
             Assert.IsFalse(Loader.IsEncrypted("onlyread"));
+        }
+
+        [TestMethod]
+        public void TestLoadProcessData()
+        {
+            List<ProcessData> processList = Loader.LoadProcessData();
+            Assert.IsNotNull(processList);
+            Assert.AreEqual(2, processList.Count);
+            Assert.AreEqual("Process", processList[0].Granularity);
+            Assert.AreEqual("vizqlserver", processList[0].Name);
+            Assert.AreEqual("Process", processList[1].Granularity);
+            Assert.AreEqual("dataserver", processList[1].Name);
+        }
+
+        [TestMethod]
+        public void TestLoadDefaultLogFolders()
+        {
+            List<LogFolder> folderList = Loader.LoadDefaultLogFolders();
+            Assert.AreEqual(5, folderList.Count);
+            Assert.AreEqual(@"tabsvc\vizqlserver\Logs", folderList[0].Directory);
+            Assert.AreEqual("vizqlserver*.txt", folderList[0].Filter);
+        }
+
+        [TestMethod]
+        public void TestLoadConfigFile()
+        {
+            PaletteInsightConfiguration config = Loader.LoadConfigFile("config/Config.yml");
+            Assert.AreEqual(true, config.UseRepoPolling);
+            Assert.AreEqual("http://localhost:9000", config.Webservice.Endpoint);
         }
     }
 }
