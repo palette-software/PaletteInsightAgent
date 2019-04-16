@@ -81,11 +81,13 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         // Ask web service what is the max id
                         var maxIdPromise = APIClient.GetMaxId(tableName);
                         maxIdPromise.Wait();
-                        var maxId = maxIdPromise.Result;
+                        // TrimEnd removes trailing newline ( + whitespaces )
+                        var maxId = maxIdPromise.Result.TrimEnd();
 
                         // Get data from that max id
                         string newMax;
                         DataTable dataTable = connection.GetStreamingTable(tableName, table, maxId, out newMax);
+                        Log.Info("Polled records of streaming table {0} from {1} to {2}", tableName, maxId, newMax);
                         if (dataTable != null)
                         {
                             OutputSerializer.Write(dataTable, false, newMax);
