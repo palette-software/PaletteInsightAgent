@@ -180,6 +180,12 @@ namespace PaletteInsightAgent
             [YamlMember(Alias = "LogLinesPerBatch")]
             public int LogLinesPerBatch { get; set; } = 10000;
 
+            /// <summary>
+            /// The maximum records to be read in a batch from a streaming table
+            /// </summary>
+            [DefaultValue(100000)]
+            [YamlMember(Alias = "StreamingTablesPollLimit")]
+            public int StreamingTablesPollLimit { get; set; } = 100000;
         }
 
         #endregion
