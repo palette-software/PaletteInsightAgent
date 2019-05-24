@@ -280,7 +280,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
         private string GetMax(string tableName, string field, string filter, string prevMax)
         {
-            var filterClause = filter != null ? $"and {filter}" : "";
+            var maxFilterClause = prevMax != null ? $"and {field} > '{prevMax}'" : "";
+            var filterClause    = filter  != null ? $"and {filter}"              : "";
 
             // Limit result to prevent System.OutOfMemoryException in Agent
             var query = $@"
@@ -289,7 +290,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     (
                     select {field}
                     from {tableName}
-                    where {field} > '{prevMax}'
+                    where 1 = 1
+                    {maxFilterClause}
                     {filterClause}
                     order by {field} asc
                     limit {this.streamingTablesPollLimit}
