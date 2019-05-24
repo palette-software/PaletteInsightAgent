@@ -52,6 +52,24 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 });
         }
 
+        private string GetMaxId(string tableName)
+        {
+            try
+            {
+                // Ask web service what is the max id
+                var maxIdPromise = APIClient.GetMaxId(tableName);
+                maxIdPromise.Wait();
+                // TrimEnd removes trailing newline ( + whitespaces )
+                var maxId = maxIdPromise.Result.TrimEnd();
+                return maxId;
+            }
+            catch (HttpRequestException hre)
+            {
+                // Request to the server failed. Used the last known maxId
+                return RepoPollAgent.lastMaxId[tableName];
+            }
+        }
+
         public void PollStreamingTables(ITableauRepoConn connection, ICollection<RepoTable> tables, IOutput output)
         {
             if (connection == null)
@@ -78,11 +96,8 @@ namespace PaletteInsightAgent.RepoTablesPoller
                             return;
                         }
 
-                        // Ask web service what is the max id
-                        var maxIdPromise = APIClient.GetMaxId(tableName);
-                        maxIdPromise.Wait();
-                        // TrimEnd removes trailing newline ( + whitespaces )
-                        var maxId = maxIdPromise.Result.TrimEnd();
+                        // Get maxid from remote server
+                        var maxId = this.GetMaxId(tableName);
 
                         // Get data from that max id
                         string newMax;
@@ -90,6 +105,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         Log.Info("Polled records of streaming table {0} from {1} to {2}", tableName, maxId, newMax);
                         if (dataTable != null)
                         {
+                            RepoPollAgent.lastMaxId[tableName] = newMax;
                             OutputSerializer.Write(dataTable, false, newMax);
                         }
                     }
