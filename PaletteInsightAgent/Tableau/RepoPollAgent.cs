@@ -66,7 +66,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
             catch (HttpRequestException hre)
             {
                 // Request to the server failed. Used the last known maxId
-                return this.lastMaxId[tableName];
+                return RepoPollAgent.lastMaxId[tableName];
             }
         }
 
@@ -97,7 +97,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         }
 
                         // Get maxid from remote server
-                        var maxId = this.GetMaxId();
+                        var maxId = this.GetMaxId(tableName);
 
                         // Get data from that max id
                         string newMax;
@@ -105,7 +105,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         Log.Info("Polled records of streaming table {0} from {1} to {2}", tableName, maxId, newMax);
                         if (dataTable != null)
                         {
-                            this.lastMaxId[tableName] = newMax;
+                            RepoPollAgent.lastMaxId[tableName] = newMax;
                             OutputSerializer.Write(dataTable, false, newMax);
                         }
                     }
