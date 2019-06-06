@@ -70,7 +70,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     TrustServerCertificate = true
                 };
 
-            Log.Info("Connecting to Tableau Repo PostgreSQL:" + db.Server);
+            Log.Info("Connecting to Tableau Repo PostgreSQL: " + db.Server);
             OpenConnection();
 
         }
