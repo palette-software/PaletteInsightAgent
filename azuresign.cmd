@@ -1,5 +1,4 @@
 @echo off
-dotnet tool install --global AzureSignTool
 azuresigntool sign --description-url "https://starschema.com" ^
     --file-digest sha256 --azure-key-vault-url https://billiant-keyvault.vault.azure.net ^
     --azure-key-vault-client-id %AZURE_KEY_VAULT_CLIENT_ID% ^
