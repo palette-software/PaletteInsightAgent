@@ -42,6 +42,7 @@ build_script:
   # Use github downloader to get latest palette-updater release
   - dir %INSTALLER_DIR%
   - dir %INSTALLER_DIR%\windows_amd64
+  # Cmd cannot start with %
   - cmd: >-
       %INSTALLER_DIR%\windows_amd64\dl-github-release.exe palette-software palette-updater %GITHUB_TOKEN%
   - copy *.zip %INSTALLER_DIR%
@@ -64,7 +65,7 @@ build_script:
   - ps: Invoke-WebRequest $CertDownloaderZipUrl -OutFile $CertDownloaderZipPath
   - ps: Expand-Archive $CertDownloaderZipPath -DestinationPath $env:INSTALLER_DIR
   - dotnet %INSTALLER_DIR%\certdownloader.dll -u https://billiant-keyvault.vault.azure.net/ -i %AZURE_KEY_VAULT_CLIENT_ID% -s %AZURE_KEY_VAULT_CLIENT_SECRET% -c StarschemaCodeSigning -o certificate.pfx -p %PFX_PASS%
-  - cmd: '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /f "certificate.pfx" /p %PFX_PASS% /fd sha256 "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
+  - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /f "certificate.pfx" /p %PFX_PASS% /fd sha256 "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
   - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
