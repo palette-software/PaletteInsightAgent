@@ -59,9 +59,15 @@ build_script:
   - '"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "PaletteInsightAgent.sln" /verbosity:minimal /p:Configuration=Release /p:Platform="Mixed Platforms"  /t:Build /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"'
 
   ## Sign the installer
-  - dotnet tool install --global AzureSignTool
-  - azuresign.cmd "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"
-  - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
+  - ps: >-
+      $CertDownloaderZipUrl = "https://brilliantstorage.blob.core.windows.net/public/certdownloader.zip"
+      $CertDownloaderZipPath = Join-Path $env:INSTALLER_DIR "certdownloader.zip"
+      Invoke-WebRequest $CertDownloaderZipUrl -OutFile $CertDownloaderZipPath
+      Expand-Archive $CertDownloaderZipPath -DestinationPath $env:INSTALLER_DIR
+  - cmd: >-
+      dotnet %INSTALLER_DIR%\certdownloader.dll -u https://billiant-keyvault.vault.azure.net/ -i %AZURE_KEY_VAULT_CLIENT_ID% -s %AZURE_KEY_VAULT_CLIENT_SECRET% -c StarschemaCodeSigning -o certificate.pfx
+      '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "certificate.pfx" "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
+      move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
     # Run the unit tests first
