@@ -63,8 +63,8 @@ build_script:
   - ps: $CertDownloaderZipPath = Join-Path $env:INSTALLER_DIR "certdownloader.zip"
   - ps: Invoke-WebRequest $CertDownloaderZipUrl -OutFile $CertDownloaderZipPath
   - ps: Expand-Archive $CertDownloaderZipPath -DestinationPath $env:INSTALLER_DIR
-  - dotnet %INSTALLER_DIR%\certdownloader.dll -u https://billiant-keyvault.vault.azure.net/ -i %AZURE_KEY_VAULT_CLIENT_ID% -s %AZURE_KEY_VAULT_CLIENT_SECRET% -c StarschemaCodeSigning -o certificate.pfx
-  - '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /t http://timestamp.digicert.com /f "certificate.pfx" "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
+  - dotnet %INSTALLER_DIR%\certdownloader.dll -u https://billiant-keyvault.vault.azure.net/ -i %AZURE_KEY_VAULT_CLIENT_ID% -s %AZURE_KEY_VAULT_CLIENT_SECRET% -c StarschemaCodeSigning -o certificate.pfx -p %PFX_PASS%
+  - cmd: '"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /f "certificate.pfx" /p %PFX_PASS% /fd sha256 "PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi"'
   - move PaletteInsightAgentServiceInstaller\bin\Release\PaletteInsightAgent.msi PaletteInsightAgentServiceInstaller\bin\Release\Palette-Insight-v%APPVEYOR_BUILD_VERSION%-installer.msi
 
 test_script:
