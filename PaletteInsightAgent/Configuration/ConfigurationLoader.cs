@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using PaletteInsightAgent.Output;
 using System.Configuration;
@@ -25,6 +25,7 @@ namespace PaletteInsightAgent
             internal const string PROCESSES_DEFAULT_FILE = "Config/Processes.yml";
             private const string REPOSITORY_TABLES_FILE = "Config/Repository.yml";
             private const string TABLEAU_SERVER_APPLICATION_SERVICE_NAME = "tabsvc";
+            private const int TABLEAU_VERSION_2018_2 = 20182;
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
 
@@ -180,7 +181,14 @@ namespace PaletteInsightAgent
                 {
                     if (IsEncrypted(repo.Password))
                     {
-                        Log.Info("Encrypted readonly password found in workgroup.yml. Getting password with tabadmin command.");
+                        Log.Info("Encrypted readonly password found in workgroup.yml.");
+                        // if (Tableau.getVersionNumber() >= TABLEAU_VERSION_2018_2)
+                        // {
+                        //     Log.Warn("Palette Insight cannot decrypt readonly user's password on Tableau Server 2018.2+! Credentials must be provided in Config.yml!");
+                        //     return false;
+                        // }
+
+                        Log.Info("Getting readonly password with tabadmin command.");
                         repo.Password = Tableau.tabadminRun("get pgsql.readonly_password");
                     }
                     options.RepositoryDatabase = new DbConnectionInfo
@@ -200,7 +208,7 @@ namespace PaletteInsightAgent
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Failed to acquire Tableau repo credentials! Exception: ");
+                    Log.Error(e, "Failed to acquire Tableau repo connection details! Exception: ");
                 }
 
                 return false;
@@ -489,33 +497,6 @@ namespace PaletteInsightAgent
                 return ExtractTableauBinFolder(tabsvcPath);
             }
 
-            public static string GetWorkgroupYmlPath()
-            {
-                string tabsvcPath = GetPathOfService(TABLEAU_SERVER_APPLICATION_SERVICE_NAME);
-                var matchGroups = ParseTabsvcPath(tabsvcPath);
-                if (matchGroups == null)
-                {
-                    Log.Warn("Failed to get workgroup.yml path from: {0}", tabsvcPath);
-                    return null;
-                }
-
-                string tableauInstallFolder = matchGroups[1].Value;
-                string workgroupYmlPath = Path.Combine(tableauInstallFolder, "data", "tabsvc", "config");
-                if (matchGroups.Count == 3)
-                {
-                    string tabsvcVersionFolder = matchGroups[2].Value;
-                    workgroupYmlPath = Path.Combine(workgroupYmlPath, tabsvcVersionFolder);
-                }
-                workgroupYmlPath = Path.Combine(workgroupYmlPath, "workgroup.yml");
-
-                if (!File.Exists(workgroupYmlPath)) {
-                    Log.Error("Failed to find workgroup.yml file at at '{0}'!", workgroupYmlPath);
-                    return null;
-                }
-
-                return workgroupYmlPath;
-            }
-
             // This function is created only for unit testing, since it is pretty difficult
             // to mock static functions in C#
             internal static string ExtractTableauInstallationFolder(string tabsvcPath)
@@ -530,39 +511,9 @@ namespace PaletteInsightAgent
                 return matchGroups[1].Value;
             }
 
-            internal static GroupCollection ParseTabsvcPath(string tabsvcPath)
-            {
-                if (tabsvcPath == null)
-                {
-                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
-                    return null;
-                }
-
-                // Extract the installation folder out of the tabsvc path. We are going to
-                // chop <one_folder>\bin\tabsvc.exe from the end of the tabsvc path.
-                var pattern = new Regex(@"""?(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe.*");
-                var groups = pattern.Match(tabsvcPath).Groups;
-                // groups[0] is the entire match, thus we expect at least 2
-                if (groups.Count < 2)
-                {
-                    // Onwards Tableau Server 2018.2 the tabsvc.exe location is slightly different. In this case
-                    // we are going to chop data\tabsvc\services\<tabsvc_version_folder>\tabsvc\tabsvc.exe from the
-                    // end of the tabsvc path.
-                    pattern = new Regex(@"""?(.*?)[\\\/]+data[\\\/]+tabsvc[\\\/]+services[\\\/]+([^\\\/]+)[\\\/]+tabsvc[\\\/]+tabsvc.exe.*");
-                    groups = pattern.Match(tabsvcPath).Groups;
-                    if (groups.Count < 3)
-                    {
-                        Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
-                        return null;
-                    }
-                }
-
-                return groups;
-            }
-
-           // This function is created only for unit testing, since it is pretty difficult
-           // to mock static functions in C#
-           internal static string ExtractTableauBinFolder(string tabsvcPath)
+            // This function is created only for unit testing, since it is pretty difficult
+            // to mock static functions in C#
+            internal static string ExtractTableauBinFolder(string tabsvcPath)
             {
                 if (tabsvcPath == null)
                 {
@@ -680,6 +631,48 @@ namespace PaletteInsightAgent
                 return true;
             }
 
+
+            public static string GetWorkgroupYmlPath(string tableauRoot)
+            {
+                if (tableauRoot == null)
+                {
+                    Log.Error("Tableau data folder path must not be null while reading and YAML configs!");
+                    return null;
+                }
+                //Up to Tableau 2018.1
+                var workgroupYmlPath = Path.Combine(tableauRoot, "tabsvc", "config", "workgroup.yml");
+
+                //From Tabaleau 2018.2
+                if (!File.Exists(workgroupYmlPath))
+                {
+                    try
+                    {
+                        string[] configFilePaths = Directory.GetFiles(Path.Combine(tableauRoot, "tabsvc", "config"), "workgroup.yml", SearchOption.AllDirectories);
+                        foreach (string configPath in configFilePaths)
+                        {
+                            // The workgroup.yml files are stored in sub-folders of the tabsvc/data/config folder.
+                            // We found that the clustercontroller_* folder exists on every node. Previously we used the
+                            // pgsql_* folders, but they exist only on the repository nodes.
+                            string pattern = @".*clustercontroller_.*";
+                            Match m = Regex.Match(configPath, pattern);
+                            if (m.Success)
+                            {
+                                workgroupYmlPath = configPath;
+                                Log.Info("Config file path: {0}", workgroupYmlPath);
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "Cannot find workgroup.yml file");
+                        return null;
+                    }
+
+                }
+                return workgroupYmlPath;
+            }
+
             public static Workgroup GetRepoFromWorkgroupYaml(string workgroupYmlPath, bool preferPassiveRepo)
             {
                 if (workgroupYmlPath == null)
@@ -716,7 +709,7 @@ namespace PaletteInsightAgent
                                         workgroup.Connection.Host = workgroup.PgHost1;
                                         workgroup.Connection.Port = workgroup.PgPort1;
                                     }
-                                    Log.Info("Using passive repository Host: '{0}' Port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
+                                    Log.Info("Based on workgroup.yml, passive repository host is: '{0}' with port: '{1}'", workgroup.Connection.Host, workgroup.Connection.Port);
                                 }
                                 else
                                 {
@@ -739,8 +732,8 @@ namespace PaletteInsightAgent
                 catch (Exception e)
                 {
                     Log.Error(e, "Error while trying to load and parse YAML config from '{0}' Exception: ", workgroupYmlPath);
-                    return null;
                 }
+                return null;
             }
 
             #endregion

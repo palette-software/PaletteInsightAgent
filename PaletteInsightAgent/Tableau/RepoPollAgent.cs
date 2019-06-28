@@ -83,7 +83,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     return false;
                 });
             }
-            catch (HttpRequestException hre)
+            catch (HttpRequestException)
             {
                 // Request to the server failed. Just pass back the local max ID
             }
