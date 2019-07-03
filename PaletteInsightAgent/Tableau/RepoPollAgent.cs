@@ -60,13 +60,17 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 // Ask web service what is the max id
                 var maxIdPromise = APIClient.GetMaxId(tableName);
                 maxIdPromise.Wait();
-                // TrimEnd removes trailing newline ( + whitespaces )
-                string maxIdFromServer = maxIdPromise.Result.TrimEnd();
-                if (RepoPollAgent.CompareMaxIds(localMax, maxIdFromServer) < 0)
+                string maxIdResult = maxIdPromise.Result;
+                if (maxIdResult != null)
                 {
-                    // Max ID coming from the Insight Server is bigger, than the local one, so use that because it means
-                    // that the server has already processed this table up to the max ID coming from the server
-                    return maxIdFromServer;
+                    // TrimEnd removes trailing newline ( + whitespaces )
+                    string maxIdFromServer = maxIdResult.TrimEnd();
+                    if (RepoPollAgent.CompareMaxIds(localMax, maxIdFromServer) <= 0)
+                    {
+                        // Max ID coming from the Insight Server is greater or equal than the local one, so use that because it means
+                        // that the server has already processed this table up to the max ID coming from the server
+                        return maxIdFromServer;
+                    }
                 }
             }
             catch (AggregateException ae)
