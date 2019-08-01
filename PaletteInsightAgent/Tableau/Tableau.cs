@@ -47,7 +47,7 @@ namespace PaletteInsightAgent
                 throw new Exception("tabadmin failed: " + arguments + ", ExitCode=" + Convert.ToString(process.ExitCode) + "\n" + stdout);
             }
 
-            Log.Info("Output of tabadmin {0} command: '{1}'", arguments, stdout);
+            // Log.Info("Output of tabadmin {0} command: '{1}'", arguments, stdout);
             return stdout;
         }
 

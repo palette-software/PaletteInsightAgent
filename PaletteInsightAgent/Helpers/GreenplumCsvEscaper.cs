@@ -25,9 +25,9 @@ namespace PaletteInsightAgent.Helpers
                 {
                     // check if its a special character
                     case '\\': output.Append("\\\\"); break;
-                    case '\v': output.Append("\\013"); break;
-                    case '\r': output.Append("\\015"); break;
-                    case '\n': output.Append("\\012"); break;
+                    case ',': output.Append("\\,"); break;
+                    case '\r': output.Append("\\r"); break;
+                    case '\n': output.Append("\\n"); break;
                     case '\0': break;
                     // if not, simply append it
                     default: output.Append(ch); break;

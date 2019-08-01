@@ -91,6 +91,8 @@ namespace PaletteInsightAgent.Helpers
                     throw new TemporaryException("Gateway timeout. Insight Server is temporarily unavailable or connecition is poor.");
                 case HttpStatusCode.Forbidden:
                     throw new TemporaryException("Forbidden. This is probably due to temporary networking issues.");
+                case HttpStatusCode.Conflict:
+                    throw new TemporaryException("Conflict. This is probably due to malformed content during upload.");
                 default:
                     errorDelegate();
                     return;
@@ -148,7 +150,7 @@ namespace PaletteInsightAgent.Helpers
         {
             using (var apiClient = new APIClient())
             {
-                var uploadUrl = UploadUrl("public", maxId);
+                var uploadUrl = UploadUrl(maxId, file);
                 using (var response = await apiClient.PostAsync(uploadUrl, CreateRequestContents(file)))
                 {
                     VerifyStatusCode(response.StatusCode, () =>
@@ -161,14 +163,30 @@ namespace PaletteInsightAgent.Helpers
             }
         }
 
-        private static string UploadUrl(string package, string maxId)
+        private static string GetEndpoint(string filePath)
+        {
+            if (filePath.IndexOf("serverlogs") > 0)
+            {
+                string fileName = Path.GetFileName(filePath);
+                return "/" + fileName.Substring(0, fileName.IndexOf("-"));
+            }
+            else
+            {
+                return "/csv";
+            }
+        }
+
+        private static string UploadUrl(string maxId, string filePath)
         {
             // Get the timezone on each send, so that if the server clock timezone is
             // changed while the agent is running, we are keeping up with the changes
             var timezoneName = DateTimeConverter.WindowsToIana( TimeZoneInfo.Local.Id );
-            var url = String.Format("{0}/upload?pkg={1}&host={2}&tz={3}&compression=gzip",
-                config.Endpoint, 
-                Uri.EscapeUriString(package), 
+
+            var url = String.Format("{0}/api/{1}/upload{2}?host={3}&tz={4}",
+                config.Endpoint,
+                API_VERSION,
+                //Todo: proper check for serverlog instead of IndexOf...
+                GetEndpoint(filePath),
                 Uri.EscapeUriString(HostName),
                 Uri.EscapeUriString(timezoneName));
 
@@ -181,7 +199,7 @@ namespace PaletteInsightAgent.Helpers
 
         private static string GetMaxIdUrl(string tableName)
         {
-            return String.Format("{0}/maxid?table={1}", config.Endpoint, tableName);
+            return String.Format("{0}/api/{1}/maxid?table={2}", config.Endpoint, API_VERSION, tableName);
         }
 
         private static string GetLicenseCheckUrl()
@@ -208,9 +226,7 @@ namespace PaletteInsightAgent.Helpers
 
             // add to the fields
             form.Add(new ByteArrayContent(fileContent), "_file", fileBaseName);
-            // we encode the md5 as a base64 value, so we dont have to do tricks on
-            // go's side to get this value
-            form.Add(new StringContent(Convert.ToBase64String(fileHash)), "_md5");
+            form.Add(new ByteArrayContent(fileHash), "_md5", "md5");
             return form;
         }
     }

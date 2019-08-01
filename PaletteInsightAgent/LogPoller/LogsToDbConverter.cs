@@ -1,4 +1,4 @@
-﻿using NLog;
+using NLog;
 using System.Reflection;
 using System;
 using System.Data;

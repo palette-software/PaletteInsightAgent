@@ -1,7 +1,7 @@
-﻿# Default values are commented out, so that they can be more easily updated with newer releases.
+# Default values are commented out, so that they can be more easily updated with newer releases.
 # Simply uncomment those ones where you need different values.
 
-#UseCounterSamples: true
+UseCounterSamples: false
 #UseLogPolling: true
 #UseRepoPolling: true
 #UseThreadInfo: true
@@ -10,8 +10,8 @@
 #PollInterval: 30
 #ThreadInfoPollInterval: 15
 #LogPollInterval: 300
-#RepoTablesPollInterval: 3600		    # This value effects only on primary nodes.
-#StreamingTablesPollInterval: 600	  # This value effects only on primary nodes.
+#RepoTablesPollInterval: 3600		# This value has effect only on Tableau repository nodes.
+#StreamingTablesPollInterval: 300	# This value has effect only on Tableau repository nodes.
 #PreferPassiveRepository: true      # By default poll Tableau's passive repository if it exists
 #ProcessedFilesTTL: 0				        # Default is not to keep processed files.
 

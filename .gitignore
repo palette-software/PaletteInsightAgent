@@ -1,4 +1,5 @@
 .vs
+.vscode
 /packages/
 !packages/repositories.config
 
@@ -15,3 +16,5 @@ PaletteInsightAgent.v12.suo
 
 *.ncrunchsolution
 *.ncrunchproject
+
+.idea/

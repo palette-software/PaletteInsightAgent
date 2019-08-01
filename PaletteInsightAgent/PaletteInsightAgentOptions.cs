@@ -16,9 +16,9 @@ namespace PaletteInsightAgent
         {
             public string FolderToWatch { get; set; }
             public string DirectoryFilter { get; set; }
-            public string LogFormat { get; set; }
+            public string ProcessName { get; set; }
 
-            public static LogFolderInfo Create(string path, string filter, string logFormat)
+            public static LogFolderInfo Create(string path, string filter, string processName)
             {
                 // get a full path without the end separators
                 var fullPath = Path.GetFullPath(path)
@@ -30,7 +30,7 @@ namespace PaletteInsightAgent
                 {
                     FolderToWatch = fullPath.ToLower(),
                     DirectoryFilter = filter.ToLower(),
-                    LogFormat = logFormat.ToLower(),
+                    ProcessName = processName.ToLower(),
                 };
             }
 
@@ -41,7 +41,7 @@ namespace PaletteInsightAgent
             /// <returns></returns>
             public string ToValueString()
             {
-                return String.Format("{0}|||{1}|||{2}", FolderToWatch, DirectoryFilter, LogFormat);
+                return String.Format("{0}|||{1}|||{2}", FolderToWatch, DirectoryFilter, ProcessName);
             }
         }
         public int PollInterval { get; set; }

@@ -1,4 +1,4 @@
-﻿using NLog;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,6 +18,7 @@ using PaletteInsightAgent.Configuration;
 using PaletteInsightAgent.Output.OutputDrivers;
 using PaletteInsightAgent.RepoTablesPoller;
 using PaletteInsightAgent.Helpers;
+using System.Linq;
 
 [assembly: CLSCompliant(true)]
 
@@ -202,20 +203,27 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if (this.IsConnectionToTableauRepoRequired())
+            if (IsConnectionToTableauRepoRequired())
             {
-                // On start get the schema of the repository tables
-                var table = tableauRepo.GetSchemaTable();
+                try
+                {
+                    // On start get the schema of the repository tables                
+                    tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase, options.StreamingTablesPollLimit);
 
-                // Add the metadata of the agent table to the schema table
-                DataTableUtils.AddAgentMetadata(table);
+                    List<string> tableNames = options.RepositoryTables.Select(t => t.Name).ToList();
+                    var table = tableauRepo.GetSchemaTable(String.Format("'{0}'", string.Join("','", tableNames)));
 
-                // Serialize schema table so that it gets uploaded with all other tables
-                OutputSerializer.Write(table, true);
+                    // Add the metadata of the agent table to the schema table
+                    DataTableUtils.AddAgentMetadata(table);
 
-                // Do the same for index data
-                table = tableauRepo.GetIndices();
-                OutputSerializer.Write(table, true);
+                    // Serialize schema table so that it gets uploaded with all other tables
+                    OutputSerializer.Write(table, true);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to initialize tableauRepo. Exception: ");
+                }
+
             }
 
             output = WebserviceOutput.MakeWebservice(options.WebserviceConfig);
@@ -421,7 +429,7 @@ namespace PaletteInsightAgent
                 node = options.RepositoryDatabase.Server;
             }
 
-            string workgroupYmlPath = Loader.GetWorkgroupYmlPath();
+            var workgroupYmlPath = Loader.GetWorkgroupYmlPath(tableauDataFolder);
             Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
             if (repo != null)
             {
@@ -479,6 +487,7 @@ namespace PaletteInsightAgent
         {
             return (USE_TABLEAU_REPO || USE_STREAMING_TABLES) && IsTargetTableauRepoResident();
         }
+
 
         private void UploadData(object stateInfo)
         {

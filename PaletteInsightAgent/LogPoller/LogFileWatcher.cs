@@ -19,7 +19,7 @@ namespace PaletteInsightAgent.LogPoller
 
         public string watchedFolderPath { get; protected set; }
         public string filter { get; protected set; }
-        public string logFormat { get; protected set; }
+        public string ProcessName { get; protected set; }
 
         /// <summary>
         /// The limit of lines per batch (so we dont get OOM for large files)
@@ -27,13 +27,13 @@ namespace PaletteInsightAgent.LogPoller
         private int linesPerBatch;
 
         Dictionary<string, long> stateOfFiles; //contains filename and actual number of lines in the file
-        public LogFileWatcher(string folderpath, string filter, int linesPerBatch, string logFormat)
+        public LogFileWatcher(string folderpath, string filter, int linesPerBatch, string processName)
         {
             stateOfFiles = new Dictionary<string, long>();
             watchedFolderPath = folderpath;
             this.linesPerBatch = linesPerBatch;
             this.filter = filter;
-            this.logFormat = logFormat;
+            this.ProcessName = processName;
             initFileState();
         }
 

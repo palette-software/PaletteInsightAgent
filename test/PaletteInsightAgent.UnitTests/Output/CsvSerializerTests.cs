@@ -16,7 +16,7 @@ namespace PaletteInsightAgentTests.Output
             Assert.AreEqual(expected, actual);
 
             // replace new lines
-            expected = "fiel\\015\\012d";
+            expected = "fiel\\r\\nd";
             source = "fiel\r\nd";
             actual = GreenplumCsvEscaper.EscapeField(source);
             Assert.AreEqual(expected, actual);
@@ -28,9 +28,18 @@ namespace PaletteInsightAgentTests.Output
             Assert.AreEqual(expected, actual);
 
             // replace new lines
-            expected = "\\\\vertical\\013";
+            expected = "\\\\vertical\v";
             source = "\\vertical\v";
             actual = GreenplumCsvEscaper.EscapeField(source);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void EscapeForCsv_Comma()
+        {
+            var expected = "multi\\,\\, comma\\, in field";
+            var source = "multi,, comma, in field";
+            var actual = GreenplumCsvEscaper.EscapeField(source);
             Assert.AreEqual(expected, actual);
         }
 
