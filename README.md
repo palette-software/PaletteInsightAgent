@@ -35,7 +35,7 @@ You need to copy the MSI installation package to the Tableau Server nodes, execu
 
 ## How do I update Palette Insight Agent?
 
-Palette Insight Agent is updated automatically once a newer version of the .msi is available on the Insight Server to which the agent is connected. On the Insight Server the `palette-insight-agent` RPM package contains the .msi, so that must be installed on the Insight Server and after then the connected Palette Insight Agents will pick up the update in 3-5 minutes.
+You just need to use a newer version of MSI installer package and leave the fields on the setup wizard screen blank to keep the previous configuration.
 
 ### Avoid Tableau restart
 
