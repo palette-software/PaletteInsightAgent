@@ -736,6 +736,36 @@ namespace PaletteInsightAgent
                 return null;
             }
 
+            internal static GroupCollection ParseTabsvcPath(string tabsvcPath)
+            {
+                if (tabsvcPath == null)
+                {
+                    Log.Warn("Failed to extract Tableau Installation folder as the path to 'tabsvc' service is null!");
+                    return null;
+                }
+
+                // Extract the installation folder out of the tabsvc path. We are going to
+                // chop <one_folder>\bin\tabsvc.exe from the end of the tabsvc path.
+                var pattern = new Regex(@"""?(.*?)[\\\/]+[^\\\/]+[\\\/]+bin[\\\/]+tabsvc.exe.*");
+                var groups = pattern.Match(tabsvcPath).Groups;
+                // groups[0] is the entire match, thus we expect at least 2
+                if (groups.Count < 2)
+                {
+                    // Onwards Tableau Server 2018.2 the tabsvc.exe location is slightly different. In this case
+                    // we are going to chop data\tabsvc\services\<tabsvc_version_folder>\tabsvc\tabsvc.exe from the
+                    // end of the tabsvc path.
+                    pattern = new Regex(@"""?(.*?)[\\\/]+data[\\\/]+tabsvc[\\\/]+services[\\\/]+([^\\\/]+)[\\\/]+tabsvc[\\\/]+tabsvc.exe.*");
+                    groups = pattern.Match(tabsvcPath).Groups;
+                    if (groups.Count < 3)
+                    {
+                        Log.Warn("Failed to extract Tableau Installation folder from 'tabsvc' path: '{0}'", tabsvcPath);
+                        return null;
+                    }
+                }
+
+                return groups;
+            }
+
             #endregion
 
             #region process defaults
