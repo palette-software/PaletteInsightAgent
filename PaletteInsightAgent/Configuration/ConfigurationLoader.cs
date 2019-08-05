@@ -171,7 +171,8 @@ namespace PaletteInsightAgent
             /// <param name="tableauRoot"></param>
             public static bool AddRepoFromWorkgroupYaml(PaletteInsightConfiguration config, string tableauRoot, PaletteInsightAgentOptions options)
             {
-                Workgroup repo = GetRepoFromWorkgroupYaml(GetWorkgroupYmlPath(), options.PreferPassiveRepository);
+                var workgroupYmlPath = GetWorkgroupYmlPath(tableauRoot);
+                Workgroup repo = GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
                 if (repo == null)
                 {
                     return false;
