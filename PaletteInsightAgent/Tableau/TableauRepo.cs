@@ -41,6 +41,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         DataTable GetIndices();
         DataTable GetSchemaTable();
         int getCoreCount();
+        bool isInRecoveryMode();
     }
 
     public class Tableau9RepoConn : ITableauRepoConn
@@ -55,12 +56,20 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
         public Tableau9RepoConn(DbConnectionInfo db, int streamingTablesPollLimit)
         {
+            if (db == null)
+            {
+                Log.Error("DB connection info is NULL while making Tableau repo connection!");
+                return;
+            }
+
             this.streamingTablesPollLimit = streamingTablesPollLimit;
 
             connectionStringBuilder =
                 new NpgsqlConnectionStringBuilder()
                 {
-                    Host = db.Server,
+                    // Always try to connect to the Tableau repository from the machine where the target
+                    // Tableau repository resides
+                    Host = "localhost",
                     Port = db.Port,
                     Username = db.Username,
                     Password = db.Password,
@@ -69,10 +78,6 @@ namespace PaletteInsightAgent.RepoTablesPoller
                     // Trust invalid certificates as well
                     TrustServerCertificate = true
                 };
-
-            Log.Info("Connecting to Tableau Repo PostgreSQL:" + db.Server);
-            OpenConnection();
-
         }
 
         /// <summary>
@@ -142,9 +147,17 @@ namespace PaletteInsightAgent.RepoTablesPoller
         public int getCoreCount()
         {
             var query = "SELECT coalesce(sum(allocated_cores),0) FROM core_licenses;";
-            long coreCount = runScalarQuery(query);
+            long coreCount = runScalarQuery<long>(query);
             Log.Info("Tableau total allocated cores: {0}", coreCount);
             return (int)coreCount;
+        }
+
+        public bool isInRecoveryMode()
+        {
+            var query = "SELECT pg_is_in_recovery();";
+            bool isInRecovery = runScalarQuery<bool>(query);
+            Log.Info("Tableau is {0}in recovery mode", isInRecovery ? "" : "not ");
+            return isInRecovery;
         }
 
         private object queryWithReconnect(Func<object> query, object def, string sqlStatement)
@@ -190,18 +203,18 @@ namespace PaletteInsightAgent.RepoTablesPoller
             }
         }
 
-        private long runScalarQuery(string query)
+        private T runScalarQuery<T>(string query)
         {
             lock (readLock)
             {
-                return (long)queryWithReconnect(() =>
+                return (T)queryWithReconnect(() =>
                 {
                     using (var cmd = new NpgsqlCommand())
                     {
                         cmd.Connection = connection;
                         // Insert some data
                         cmd.CommandText = query;
-                        long max = (long)cmd.ExecuteScalar();
+                        T max = (T)cmd.ExecuteScalar();
                         return max;
                     };
                 }, 0, query);
@@ -268,26 +281,36 @@ namespace PaletteInsightAgent.RepoTablesPoller
             return table;
         }
 
-        private string GetMax(string tableName, string field, string filter, string prevMax)
+        internal string GetMaxQuery(string tableName, string field, string filter, string prevMax)
         {
             var maxFilterClause = prevMax != null ? $"and {field} > '{prevMax}'" : "";
             var filterClause    = filter  != null ? $"and {filter}"              : "";
 
-            // Limit result to prevent System.OutOfMemoryException in Agent
-            var query = $@"
+            // Limit result to prevent System.OutOfMemoryException in Agent. But..
+            // if there is no 'prevMax', let's select the max record from the table. We need to skip
+            // this limit in that case. If 'prevMax' is missing, it means that the agent is starting up
+            // (this is why local max ID is missing) and the agent has no connection to the Insight
+            // Server (this is why max ID coming from the Server is missing).
+            var limitClause     = maxFilterClause != "" ? $"limit {this.streamingTablesPollLimit}" : "";
+
+            return $@"
                 select max({field})
                 from
                     (
                     select {field}
                     from {tableName}
-                    where 1 = 1
-                    {maxFilterClause}
-                    {filterClause}
-                    order by {field} asc
-                    limit {this.streamingTablesPollLimit}
+                        where 1 = 1
+                        {maxFilterClause}
+                        {filterClause}
+                        order by {field} asc
+                        {limitClause}
                     ) as iq
                 ;";
+        }
 
+        private string GetMax(string tableName, string field, string filter, string prevMax)
+        {
+            var query = GetMaxQuery(tableName, field, filter, prevMax);
             var table = runQuery(query);
             // This query should return one field
             if (table.Rows.Count == 1 && table.Columns.Count == 1)

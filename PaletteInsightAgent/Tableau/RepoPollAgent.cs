@@ -16,7 +16,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         public static readonly string FullTablesInProgressLock = "Repository Tables";
         public static readonly string StreamingTablesInProgressLock = "Streaming Tables";
-        private static IDictionary<string, string> lastMaxId = new Dictionary<string, string>();
+        private static IDictionary<string, string> localMaxId = new Dictionary<string, string>();
 
         public void PollFullTables(ITableauRepoConn connection, ICollection<RepoTable> tables)
         {
@@ -52,6 +52,85 @@ namespace PaletteInsightAgent.RepoTablesPoller
                 });
         }
 
+        private string GetMaxId(string tableName)
+        {
+            string localMax = this.GetLocalMaxId(tableName);
+            try
+            {
+                // Ask web service what is the max id
+                var maxIdPromise = APIClient.GetMaxId(tableName);
+                maxIdPromise.Wait();
+                string maxIdResult = maxIdPromise.Result;
+                if (maxIdResult != null)
+                {
+                    // TrimEnd removes trailing newline ( + whitespaces )
+                    string maxIdFromServer = maxIdResult.TrimEnd();
+                    if (RepoPollAgent.CompareMaxIds(localMax, maxIdFromServer) <= 0)
+                    {
+                        // Max ID coming from the Insight Server is greater or equal than the local one, so use that because it means
+                        // that the server has already processed this table up to the max ID coming from the server
+                        return maxIdFromServer;
+                    }
+                }
+            }
+            catch (AggregateException ae)
+            {
+                ae.Handle((x) =>
+                {
+                    if (x is HttpRequestException || x is TaskCanceledException || x is TemporaryException)
+                    {
+                        // HttpRequestException is expected on network errors. TaskCanceledException is thrown if the async task (HTTP request) timed out.
+                        return true;
+                    }
+
+                    Log.Warn(x, "Async exception caught while getting max ID for table: {0}! Exception: ", tableName);
+                    return false;
+                });
+            }
+            catch (HttpRequestException)
+            {
+                // Request to the server failed. Just pass back the local max ID
+            }
+
+            Log.Warn("Using local max ID: '{0}' for table: '{1}'", localMax, tableName);
+            return localMax;
+        }
+
+        private string GetLocalMaxId(string tableName)
+        {
+            string maxId;
+            if (RepoPollAgent.localMaxId.TryGetValue(tableName, out maxId))
+            {
+                return maxId;
+            }
+
+            return null;
+        }
+
+        internal static int CompareMaxIds(string maxIdA, string maxIdB)
+        {
+            long numIdA, numIdB;
+            if (Int64.TryParse(maxIdA, out numIdA) && Int64.TryParse(maxIdB, out numIdB))
+            {
+                if (numIdA > numIdB)
+                {
+                    return 1;
+                }
+                else if (numIdB > numIdA)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return String.Compare(maxIdA, maxIdB);
+            }
+        }
+
         public void PollStreamingTables(ITableauRepoConn connection, ICollection<RepoTable> tables, IOutput output)
         {
             if (connection == null)
@@ -69,20 +148,14 @@ namespace PaletteInsightAgent.RepoTablesPoller
 
                     try
                     {
-                        // Delete all pending files for that streaming table
-                        OutputSerializer.Delete(tableName);
-
                         // If we have a pending request for this table, then just skip this iteration
                         if (output.IsInProgress(tableName))
                         {
                             return;
                         }
 
-                        // Ask web service what is the max id
-                        var maxIdPromise = APIClient.GetMaxId(tableName);
-                        maxIdPromise.Wait();
-                        // TrimEnd removes trailing newline ( + whitespaces )
-                        var maxId = maxIdPromise.Result.TrimEnd();
+                        // Get maxid from remote server
+                        var maxId = this.GetMaxId(tableName);
 
                         // Get data from that max id
                         string newMax;
@@ -90,6 +163,7 @@ namespace PaletteInsightAgent.RepoTablesPoller
                         Log.Info("Polled records of streaming table {0} from {1} to {2}", tableName, maxId, newMax);
                         if (dataTable != null)
                         {
+                            RepoPollAgent.localMaxId[tableName] = newMax;
                             OutputSerializer.Write(dataTable, false, newMax);
                         }
                     }

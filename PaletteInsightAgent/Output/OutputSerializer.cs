@@ -13,7 +13,7 @@ namespace PaletteInsightAgent.Output
         public const string DATA_FOLDER = "data/";
         private const string FILENAME_DATETIME_FORMAT = "yyyy-MM-dd--HH-mm-ss";
         public const string IN_PROGRESS_FILE_POSTFIX = ".writing";
-        public const string MAX_ID_PREFIX = "maxid";
+        public const string MAX_ID_POSTFIX = "maxid";
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static IWriter Writer = new CsvSerializer();
         public static string Extension
@@ -47,7 +47,7 @@ namespace PaletteInsightAgent.Output
                 // write the maxid file if it is not null
                 if (maxId != null)
                 {
-                    var maxIdFileName = dataFileName + MAX_ID_PREFIX;
+                    var maxIdFileName = dataFileName + MAX_ID_POSTFIX;
                     File.AppendAllText(maxIdFileName, maxId);
                 }
             }
@@ -55,18 +55,6 @@ namespace PaletteInsightAgent.Output
             {
                 Log.Error(e, "Failed to write {0} table contents to CSV file '{1}'! Exception: ", table.TableName, dataFileName);
             }
-        }
-
-        public static void Delete(string tableName)
-        {
-            Directory.EnumerateFiles(DATA_FOLDER, tableName + "*.csv*")
-                .Select(f => new FileInfo(f))
-                .ToList()
-                .ForEach(f =>
-                {
-                    f.Delete();
-                    Log.Warn("Deleted pending streaming table file: {0}. Pending files can exist due to network issues of earlier upload attempts.", f.Name);
-                });
         }
 
         /// <summary>

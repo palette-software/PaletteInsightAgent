@@ -1,4 +1,4 @@
-﻿using NLog;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -123,18 +123,9 @@ namespace PaletteInsightAgent
                 threadInfoAgent = new ThreadInfoAgent(options.ThreadInfoPollInterval);
             }
 
-            if (IsConnectionToTableauRepoRequired())
-            {
-                Loader.AddRepoFromWorkgroupYaml(configuration, tableauDataFolder, options);
-
-                if (options.RepositoryDatabase == null)
-                {
-                    Log.Fatal("Could not found Tableau Repository credentials! Exiting.");
-                    Environment.Exit(-1);
-                }
-                tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase, options.StreamingTablesPollLimit);
-                repoPollAgent = new RepoPollAgent();
-            }
+            Loader.AddRepoFromWorkgroupYaml(configuration, tableauDataFolder, options);
+            tableauRepo = new Tableau9RepoConn(options.RepositoryDatabase, options.StreamingTablesPollLimit);
+            repoPollAgent = new RepoPollAgent();
         }
 
         ~PaletteInsightAgent()
@@ -202,7 +193,7 @@ namespace PaletteInsightAgent
             }
 
             // send the metadata if there is a tableau repo behind us
-            if (this.IsConnectionToTableauRepoRequired())
+            if (IsConnectionToTableauRepoRequired())
             {
                 // On start get the schema of the repository tables
                 var table = tableauRepo.GetSchemaTable();
@@ -385,7 +376,7 @@ namespace PaletteInsightAgent
 
             tryStartIndividualPoll(RepoPollAgent.FullTablesInProgressLock, PollWaitTimeout, () =>
             {
-                Log.Info("Polling Repostoriy tables");
+                Log.Info("Polling Repository tables");
                 repoPollAgent.PollFullTables(tableauRepo, options.RepositoryTables);
             });
         }
@@ -409,69 +400,123 @@ namespace PaletteInsightAgent
             });
         }
 
+        private List<string> GetTableauRepoNodes()
+        {
+            List<string> repoNodes = new List<string>();
+
+            var workgroupYmlPath = Loader.GetWorkgroupYmlPath(tableauDataFolder);
+            Loader.Workgroup workgroup = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
+            if (workgroup == null)
+            {
+                Log.Error("Failed to get Tableau repository nodes, because parsed workgroup is NULL!");
+                return repoNodes;
+            }
+
+            if (workgroup.PgHost0 != null)
+            {
+                repoNodes.Add(workgroup.PgHost0);
+            }
+            if (workgroup.PgHost1 != null)
+            {
+                repoNodes.Add(workgroup.PgHost1);
+            }
+            if (repoNodes.Count == 0 && workgroup.Connection.Host != null)
+            {
+                repoNodes.Add(workgroup.Connection.Host);
+            }
+
+            Log.Info("Tableau repository node(s): {0}", string.Join(",", repoNodes.ToArray()));
+            return repoNodes;
+        }
+
+        private bool IsTableauRepoNode(List<string> repoNodes)
+        {
+            if (repoNodes == null || repoNodes.Count == 0)
+            {
+                Log.Error("No repository node list was provided to check if this machine is a repository node or not!");
+                return false;
+            }
+
+            // Only log an error if this node is meant to be a repo node at all
+            foreach (var node in repoNodes)
+            {
+                try
+                {
+                    var repoHolder = Dns.GetHostEntry(node);
+                    var localNode = Dns.GetHostName();
+                    var localhost = Dns.GetHostEntry(localNode);
+
+                    foreach (var repoAddress in repoHolder.AddressList)
+                    {
+                        if (IPAddress.IsLoopback(repoAddress))
+                        {
+                            Log.Info("This is a Tableau repo node. Repo address is the loopback address of this machine.");
+                            return true;
+                        }
+
+                        foreach (var localAddress in localhost.AddressList)
+                        {
+                            Log.Info("Check for Tableau repo node: '{0}' -- local address: '{1}'", repoAddress, localAddress);
+                            if (repoAddress.Equals(localAddress))
+                            {
+                                // This is a repo node
+                                return true;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to match repo holder: '{0}' with localhost! Exception: ", node);
+                }
+            }
+
+            Log.Info("This machine is not a Tableau repository node");
+            return false;
+        }
+
         /// <summary>
         /// Checks whether the target Tableau repository resides on this node.
         /// </summary>
         /// <returns></returns>
         private bool IsTargetTableauRepoResident()
         {
-            string node = null;
-            if (options != null && options.RepositoryDatabase != null)
+            List<string> repoNodes = GetTableauRepoNodes();
+            if (!IsTableauRepoNode(repoNodes))
             {
-                node = options.RepositoryDatabase.Server;
-            }
-
-            string workgroupYmlPath = Loader.GetWorkgroupYmlPath();
-            Loader.Workgroup repo = Loader.GetRepoFromWorkgroupYaml(workgroupYmlPath, options.PreferPassiveRepository);
-            if (repo != null)
-            {
-                node = repo.Connection.Host;
-            }
-
-            if (node == null)
-            {
-                Log.Error("Failed to retrieve Tableau repo credentials for telling whether this machine is the target repository node!");
                 return false;
-            }
-
-            if (node == "localhost")
-            {
-                return true;
             }
 
             try
             {
-                Log.Info("Target Tableau repo node: {0}", node);
-                var repoHolder = Dns.GetHostEntry(node);
-                var localNode = Dns.GetHostName();
-                var localhost = Dns.GetHostEntry(localNode);
-
-                foreach (var repoAddress in repoHolder.AddressList)
+                var isPassive = tableauRepo.isInRecoveryMode();
+                if (isPassive && options.PreferPassiveRepository)
                 {
-                    if (IPAddress.IsLoopback(repoAddress))
+                    Log.Info("This machine is the target Tableau repo node. Passive repo is preferred and this is the passive repo node.");
+                    return true;
+                }
+
+                if (!isPassive)
+                {
+                    if (!options.PreferPassiveRepository)
                     {
-                        Log.Info("This is the target Tableau repo node. Repo address is the loopback address of this machine.");
+                        Log.Info("This machine is the target Tableau repo node. Active repo is preferred and this is the active repo node.");
                         return true;
                     }
 
-                    foreach (var localAddress in localhost.AddressList)
-                    {
-                        Log.Info("Check for target Tableau repo address: '{0}' -- local address: '{1}'", repoAddress, localAddress);
-                        if (repoAddress.Equals(localAddress))
-                        {
-                            Log.Info("This is the target Tableau repo node.");
-                            return true;
-                        }
+                    if (repoNodes.Count < 2) {
+                        Log.Info("This machine is the target Tableau repo node. Passive is preferred, but this is the only repo node.");
+                        return true;
                     }
                 }
-
-                Log.Info("Local node: '{0}' is not the target Tableau repo node", localNode);
             }
-            catch (Exception e)
+            catch (Exception pgEx)
             {
-                Log.Error(e, "Failed to match repo holder with localhost! Exception: ");
+                Log.Error(pgEx, "Failed to detect whether it is the target Tableau repo node!");
+                return false;
             }
 
+            Log.Info("This machine is not the target Tableau repo node");
             return false;
         }
 

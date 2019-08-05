@@ -30,49 +30,18 @@ All the collected data is written into CSV files and the agent sends them to the
 
 ## How do I install Palette Insight Agent?
 
-### Prerequisites
-
-* Palette Insight Agent can only be installed with system administrator privileges
-* You need to make sure that the Insight Agent is able to query data from the Tableau repository. The easiest way to achieve that is to enable `readonly` user in your Tableau Server, because in that case the the Insight Agent can automatically collect the `readonly` user's password from the `workgroup.yml` file of Tableau Server. Here you can find the Tableau guide [how to enable the readonly user](https://onlinehelp.tableau.com/current/server/en-us/tabadmin_cmd.htm#dbpass). At the time of writing this document, the necessary `tabadmin` command would look like this:
-```bash
-tabadmin dbpass --username readonly p@ssword
-```
-
-### Installation
-The Palette Insight Agent Windows installer (.msi) can be downloaded from the Palette Insight Server. All you have to do for that is to open your browser and navigate to
-[http://your-insight-server-url/control]
-and you will be shown a page like this
-
-<img src="https://github.com/palette-software/PaletteInsightAgent/blob/master/docs/resources/insight-server-control-page.png" alt="Insight Server Control Page" width="400" >
-
-In the Agents section you can click on the green button which is showing the agent’s version number. This will initiate the download of the Palette Insight Agent .msi.
-
-Another way to obtain the .msi is from this repo's [Releases](https://github.com/palette-software/PaletteInsightAgent/releases) section.
-
-The installation package contains the `Palette Insight Agent` service and also a [Palette Insight Watchdog](https://github.com/palette-software/palette-updater) service, which is responsible for acquiring and applying the available Insight Agent updates from the [Insight Server] and to make sure that the `Palette Insight Agent` service is running all the time.
-
-During the installation you will need two things:
-1. The Insight License Key which was entered to Insight Server’s config file (`/etc/palette-insight-server/server.config`) as the `license_key` value.
-1. The IP address or the name of the Insight Server machine (`https://` prefix is required)
-
-And you will have to enter them into this install dialog:
-<p align="center">
-  <img src="https://raw.githubusercontent.com/palette-software/PaletteInsightAgent/master/docs/resources/insight-install-dialog.png" alt="Insight Agent Install Dialog" width="500" >
-</p>
-
-If you leave the fields in this installer dialog as is (i.e. blank field for Insight License Key and `https://` for Insight Server URL), then the values entered into this fields of previous installations will remain in place. You can check these values in `<Palette_Insight_Agent_install_dir>\Config\Config.yml` file.
-
-#### Alternative configurations
-
-Settings can be manually edited in [Config/Config.yml](PaletteInsightAgent/Config/Config.yml)
-
-* Proxy configurations have to be placed under the `Webservice` key
-* In case `readonly` user is not enabled in your Tableau Server, you need to provide Tableau repo credentials manually under the `TableauRepo` key
+You need to copy the MSI installation package to the Tableau Server nodes, execute them and follow the installation wizard. For details please see the [INSTALL.md](INSTALL.md).
 
 
 ## How do I update Palette Insight Agent?
 
-Palette Insight Agent is updated automatically once a newer version of the .msi is available on the Insight Server to which the agent is connected. On the Insight Server the `palette-insight-agent` RPM package contains the .msi, so that must be installed on the Insight Server and after then the connected Palette Insight Agents will pick up the update in 3-5 minutes.
+You just need to use a newer version of MSI installer package and leave the fields on the setup wizard screen blank to keep the previous configuration.
+
+### Avoid Tableau restart
+
+Because of the way MSI installer works it is adviced to stop both the  `PaletteInsightAgent` and the `PaletteInsightWatchdog` services before installing the new version. Otherwise the installer might suggest restarting the machine for the changes to be applied.
+
+Neither the Tableau Server node nor the Tableau Server service should ever be restarted when you make changes to the Palette Insight Agent.
 
 ## Troubleshooting
 

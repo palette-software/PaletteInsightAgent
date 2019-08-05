@@ -67,5 +67,32 @@ namespace PaletteInsightAgent
                 return false;
             }
         }
+
+        public static int getVersionNumber()
+        {
+            var tableauVersionStr = Environment.GetEnvironmentVariable("TABLEAU_SERVER_DATA_DIR_VERSION");
+            Log.Info("Tableau version: '{0}'", tableauVersionStr);
+            return getMajorVersion(tableauVersionStr);
+        }
+
+        private static int getMajorVersion(string versionStr)
+        {
+            if (versionStr == null || versionStr == "")
+            {
+                return 0;
+            }
+
+            try
+            {
+                Version ver = Version.Parse(versionStr);
+                return ver.Major;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to parse Tableau version string: {0}! Exception:", versionStr);
+            }
+
+            return 0;
+        }
     }
 }
