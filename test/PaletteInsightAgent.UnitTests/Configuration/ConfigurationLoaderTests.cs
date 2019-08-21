@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Text;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using PaletteInsightAgent.Configuration;
@@ -163,6 +165,17 @@ namespace PaletteInsightAgentTests.Configuration
             PaletteInsightConfiguration config = Loader.LoadConfigFile("config/Config.yml");
             Assert.AreEqual(true, config.UseRepoPolling);
             Assert.AreEqual("http://localhost:9000", config.Webservice.Endpoint);
+        }
+
+        // This test would pass if we used Encoding.UTF8 instead of Encoding.ASCII.
+        [TestMethod]
+        public void TestUnicodeBase64Convert()
+        {
+            string utfUserName = "Sébastien";
+            var additionalEntropy = Encoding.ASCII.GetBytes("c4a1c275-42a3-4cc5-91e0-b55cad0be835");
+            var protectedName = Convert.ToBase64String(ProtectedData.Protect(Encoding.ASCII.GetBytes(utfUserName), additionalEntropy, DataProtectionScope.LocalMachine));
+            var unprotectedName = Encoding.ASCII.GetString(ProtectedData.Unprotect(Convert.FromBase64String(protectedName), additionalEntropy, DataProtectionScope.LocalMachine));
+            Assert.AreEqual(utfUserName, unprotectedName);
         }
     }
 }
