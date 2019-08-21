@@ -177,5 +177,16 @@ namespace PaletteInsightAgentTests.Configuration
             var unprotectedName = Encoding.ASCII.GetString(ProtectedData.Unprotect(Convert.FromBase64String(protectedName), additionalEntropy, DataProtectionScope.LocalMachine));
             Assert.AreEqual(utfUserName, unprotectedName);
         }
+
+        [TestMethod]
+        public void TestCheckForBase64Encoding()
+        {
+            // The base64 representation of "peter" looks like this: "cGV0ZXI=". So it does not end with "==".
+            string username = "peter";
+            byte[] userBytes = Encoding.ASCII.GetBytes(username);
+            string userBase64 = Convert.ToBase64String(userBytes);
+            Assert.IsTrue(userBase64.EndsWith("==") == true);
+            Assert.IsTrue((userBase64.Length % 4) == 0);
+        }
     }
 }
