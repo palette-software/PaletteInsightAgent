@@ -68,6 +68,9 @@ namespace PaletteInsightAgent
 
             APIClient.SetTrustSSL();
 
+            // Use TLS 1.2 to connect to the Insight Server
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             // Load PaletteInsightAgentOptions.  In certain use cases we may not want to load options from the config, but provide them another way (such as via a UI).
             options = PaletteInsightAgentOptions.Instance;
 
