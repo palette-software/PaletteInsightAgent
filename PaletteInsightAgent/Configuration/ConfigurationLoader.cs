@@ -10,6 +10,8 @@ using PaletteInsightAgent.Helpers;
 using PaletteInsightAgent.Output.OutputDrivers;
 using System.Text.RegularExpressions;
 using System.Management;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace PaletteInsightAgent
 {
@@ -27,7 +29,8 @@ namespace PaletteInsightAgent
             private const string TABLEAU_SERVER_APPLICATION_SERVICE_NAME = "tabsvc";
             private const int TABLEAU_VERSION_2018_2 = 20182;
             private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
+            private static string protected_data = null;
+            private static byte[] s_additionalEntropy = { 0 };
 
             /// <summary>
             /// Do the conversion of config types
@@ -102,6 +105,35 @@ namespace PaletteInsightAgent
                 options.StreamingTablesPollLimit = config.StreamingTablesPollLimit;
             }
 
+            private static string Convert2Base64WriteConfig(string data)
+            {
+                // Log.Info("Readonly user is not protected in Config.yml.", e.ToString());
+                //protectdata + converting to base64 string to be able to write it as a string in Config.yml
+                try
+                {
+                    protected_data = Convert.ToBase64String(ProtectedData.Protect(Encoding.ASCII.GetBytes(data), s_additionalEntropy, DataProtectionScope.LocalMachine));
+
+                    var text = new StringBuilder();
+
+                    foreach (string s in File.ReadAllLines(@"config\\Config.yml"))
+                    {
+                        text.AppendLine(s.Replace(data, protected_data));
+                    }
+                    using (var file = new StreamWriter(File.Create(@"config\\Config.yml")))
+                    {
+                        file.Write(text.ToString());
+                    }
+                    Log.Info("Encrypted data has been written to Config.yml.");
+                    //Log.Info("Encrypted data is: " + protected_data);
+                    return protected_data;
+                }
+                catch (CryptographicException e)
+                {
+                    Log.Error("Data was not encrypted. An error occurred." + e.ToString());
+                    return null;
+                }
+            }
+
             private static void LoadRepositoryFromConfig(PaletteInsightConfiguration config, PaletteInsightAgentOptions options)
             {
                 if (!options.UseRepoPolling && !options.UseStreamingTables)
@@ -110,11 +142,64 @@ namespace PaletteInsightAgent
                 }
 
                 // load the tableau repo properties
+
                 var repoProps = config.TableauRepo;
                 if (repoProps == null)
                 {
                     // Repository credentials are not filled in Config.yml
                     return;
+                }
+                else
+                {
+                    //if token is present, set the additional encryption key to the insight auth token making it customer/installation specific
+                    if (config.InsightAuthToken != null)
+                    {
+                        Log.Info("Found a valid Insight Authtoken, using it as additional encryption key.");
+                        Log.Info("If parameter InsightAuthToken changes, TableauRepo credentials must be reentered.");
+                        s_additionalEntropy = Encoding.ASCII.GetBytes(config.InsightAuthToken);
+                    }
+                    else
+                    {
+                        Log.Info("No valid auth token found. Not using additional key.");
+                        Log.Info("If parameter InsightAuthToken changes, TableauRepo credentials must be reentered.");
+                    }
+
+                    //check if the user and password is already encrypted and converted to base64
+                    try
+                    {
+                        if (repoProps.User.EndsWith("==") == true && (repoProps.User.Length % 4) == 0)
+                        {
+                            Convert.FromBase64String(repoProps.User);
+                        }
+                        else
+                        {
+                            Log.Info("Readonly users's user is not protected in Config.yml.");
+                            repoProps.User = Convert2Base64WriteConfig(repoProps.User);
+                        }
+                    }
+                    catch (FormatException e)
+                    {
+                        Log.Info("Readonly user is not protected in Config.yml.", e.ToString());
+                        repoProps.User = Convert2Base64WriteConfig(repoProps.User);
+                    }
+
+                    try
+                    {
+                        if (repoProps.Password.EndsWith("==") == true && (repoProps.Password.Length % 4) == 0)
+                        {
+                            Convert.FromBase64String(repoProps.Password);
+                        }
+                        else
+                        {
+                            Log.Info("Readonly users's password is not protected in Config.yml.");
+                            repoProps.Password = Convert2Base64WriteConfig(repoProps.Password);
+                        }
+                    }
+                    catch (FormatException e)
+                    {
+                        Log.Info("Readonly user's password is not protected in Config.yml.", e.ToString());
+                        repoProps.Password = Convert2Base64WriteConfig(repoProps.Password);
+                    }
                 }
 
                 try
@@ -123,11 +208,14 @@ namespace PaletteInsightAgent
                     {
                         Server = repoProps.Host,
                         Port = Convert.ToInt32(repoProps.Port),
-                        Username = repoProps.User,
-                        Password = repoProps.Password,
+                        Username = Encoding.ASCII.GetString(ProtectedData.Unprotect(Convert.FromBase64String(repoProps.User), s_additionalEntropy, DataProtectionScope.LocalMachine)),
+                        Password = Encoding.ASCII.GetString(ProtectedData.Unprotect(Convert.FromBase64String(repoProps.Password), s_additionalEntropy, DataProtectionScope.LocalMachine)),
                         DatabaseName = repoProps.Database
                     };
 
+                    /* Only when you are debugging
+                    Log.Info("User: " + options.RepositoryDatabase.Username + " Password: " + options.RepositoryDatabase.Password);
+                    */
                     Log.Info("Found Tableau repo credentials in Config.yml.");
                 }
                 catch (Exception e)
